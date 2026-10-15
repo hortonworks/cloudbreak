@@ -5,20 +5,24 @@ import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_NEWER_FAILED;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
 @Service
 public class TargetImageAwareMixedPackageVersionService {
@@ -38,40 +42,50 @@ public class TargetImageAwareMixedPackageVersionService {
     private MixedPackageNotificationService mixedPackageNotificationService;
 
     public void examinePackageVersionsWithTargetImage(Long stackId, Image targetImage, String activeCmVersion, Set<ParcelInfo> activeParcels) {
-        LOGGER.debug("Comparing active package versions {} and active CM version {} with target image {}", activeParcels, activeCmVersion, targetImage);
-        Map<String, String> targetProducts = getProductsFromImage(targetImage);
-        if (areAllComponentVersionsMatchImageVersions(targetImage, targetProducts, activeCmVersion, activeParcels)) {
-            LOGGER.debug("The parcel versions {} and CM {} are the same as the versions on the target image {}", activeParcels, activeCmVersion, targetImage);
+        examinePackageVersions(stackId, getProductsFromImage(targetImage), getCmVersion(targetImage.getPackageVersions()), activeCmVersion, activeParcels);
+    }
+
+    public void examinePackageVersionsWithTargetProperties(Long stackId, ClusterUpgradeProperties properties, String activeCmVersion,
+            Set<ParcelInfo> activeParcels) {
+        if (properties.targetImage().clouderaManagerRepo() == null) {
+            LOGGER.warn("Cannot compare package versions because the target CM repository is missing.");
+            return;
+        }
+        Map<String, String> targetProducts = new HashMap<>();
+        for (ClouderaManagerProduct product : properties.targetImage().getAllProducts()) {
+            if (StringUtils.isBlank(product.getName()) || StringUtils.isBlank(product.getVersion())) {
+                LOGGER.warn("Cannot compare package versions because a target parcel name or version is missing.");
+                return;
+            }
+            String previousVersion = targetProducts.putIfAbsent(product.getName(), product.getVersion());
+            if (previousVersion != null && !previousVersion.equals(product.getVersion())) {
+                LOGGER.warn("Cannot compare package versions because target parcel {} has conflicting versions {} and {}.",
+                        product.getName(), previousVersion, product.getVersion());
+                return;
+            }
+        }
+        examinePackageVersions(stackId, targetProducts, properties.targetImage().clouderaManagerRepo().getFullVersion(), activeCmVersion, activeParcels);
+    }
+
+    private void examinePackageVersions(Long stackId, Map<String, String> targetProducts, String targetCmVersion, String activeCmVersion,
+            Set<ParcelInfo> activeParcels) {
+        LOGGER.debug("Comparing active parcels {} and CM {} with target parcels {} and CM {}", activeParcels, activeCmVersion, targetProducts, targetCmVersion);
+        if (mixedPackageVersionComparator.areAllComponentVersionsMatchingWithImage(targetCmVersion, targetProducts, activeCmVersion, activeParcels)) {
+            LOGGER.debug("The parcel versions {} and CM {} match the target components", activeParcels, activeCmVersion);
         } else {
-            Map<String, String> newerComponents = getComponentsWithNewerVersionThenTheTarget(targetProducts, targetImage, activeParcels, activeCmVersion);
+            Map<String, String> newerComponents = mixedPackageVersionComparator.getComponentsWithNewerVersionThanTheTarget(
+                    targetProducts, targetCmVersion, activeParcels, activeCmVersion);
             String activeParcelsMessage = createActiveParcelsMessage(activeParcels);
             if (newerComponents.isEmpty()) {
                 sendNotification(stackId, STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED,
-                        List.of(activeCmVersion, activeParcelsMessage, createSuggestedVersionsMessage(targetImage, activeParcels, targetProducts)));
+                        List.of(activeCmVersion, activeParcelsMessage,
+                                mixedPackageMessageProvider.createSuggestedVersionsMessage(targetProducts, activeParcels, targetCmVersion)));
             } else {
                 sendNotification(stackId, STACK_CM_MIXED_PACKAGE_VERSIONS_NEWER_FAILED, List.of(activeCmVersion, activeParcelsMessage,
-                        createMessageFromMap(newerComponents),
-                        createMessageFromMap(filterTargetPackageVersionsByNewerPackageVersions(targetProducts, targetImage, newerComponents))));
+                        createMessageFromMap(newerComponents), createMessageFromMap(mixedPackageVersionComparator
+                                .filterTargetPackageVersionsByNewerPackageVersions(targetProducts, targetCmVersion, newerComponents))));
             }
         }
-    }
-
-    private boolean areAllComponentVersionsMatchImageVersions(Image image, Map<String, String> productsFromImage, String currentCmVersion,
-            Set<ParcelInfo> activeParcels) {
-        String cmVersionFomImage = getCmVersion(image.getPackageVersions());
-        return mixedPackageVersionComparator.areAllComponentVersionsMatchingWithImage(cmVersionFomImage, productsFromImage, currentCmVersion, activeParcels);
-    }
-
-    private Map<String, String> getComponentsWithNewerVersionThenTheTarget(Map<String, String> targetProducts, Image targetImage,
-            Set<ParcelInfo> activeParcels, String activeCmVersion) {
-        String targetCmVersion = getCmVersion(targetImage.getPackageVersions());
-        return mixedPackageVersionComparator.getComponentsWithNewerVersionThanTheTarget(targetProducts, targetCmVersion, activeParcels, activeCmVersion);
-    }
-
-    private Map<String, String> filterTargetPackageVersionsByNewerPackageVersions(Map<String, String> targetProducts, Image targetImage,
-            Map<String, String> newerComponentVersions) {
-        String cmVersion = getCmVersion(targetImage.getPackageVersions());
-        return mixedPackageVersionComparator.filterTargetPackageVersionsByNewerPackageVersions(targetProducts, cmVersion, newerComponentVersions);
     }
 
     private Map<String, String> getProductsFromImage(Image targetImage) {
@@ -80,10 +94,6 @@ public class TargetImageAwareMixedPackageVersionService {
 
     private String createActiveParcelsMessage(Set<ParcelInfo> activeParcels) {
         return mixedPackageMessageProvider.createActiveParcelsMessage(activeParcels);
-    }
-
-    private String createSuggestedVersionsMessage(Image image, Set<ParcelInfo> activeParcels, Map<String, String> targetProducts) {
-        return mixedPackageMessageProvider.createSuggestedVersionsMessage(targetProducts, activeParcels, getCmVersion(image.getPackageVersions()));
     }
 
     private String createMessageFromMap(Map<String, String> components) {

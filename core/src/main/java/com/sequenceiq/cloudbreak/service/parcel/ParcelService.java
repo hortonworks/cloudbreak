@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -126,6 +127,14 @@ public class ParcelService {
         return targetProducts.stream()
                 .filter(product -> requiredParcelNames.contains(product.getName()))
                 .collect(Collectors.toSet());
+    }
+
+    public Set<ClouderaManagerProduct> getRequiredProductsForUpgrade(StackDtoDelegate stack, ClusterUpgradeProperties properties) {
+        Set<ClouderaManagerProduct> targetProducts = properties.targetImage().getAllProducts();
+        if (properties.targetImage().isBaseImage() && !stack.getStack().isDatalake()) {
+            return targetProducts;
+        }
+        return getRequiredProductsFromProducts(stack, targetProducts);
     }
 
     public Set<String> getComponentNamesByProducts(StackDtoDelegate stack, Set<ClouderaManagerProduct> products) {

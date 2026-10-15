@@ -78,7 +78,7 @@ public class ClusterUpgradeFailedHandler extends ExceptionCatcherEventHandler<Cl
             LOGGER.debug("Starting syncing parcel and CM version from CM to DB.");
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Set<Image> candidateImages = cmSyncImageCollectorService.collectImages(stack, Collections.emptySet());
-            cmSyncerService.syncFromCmToDb(stack, candidateImages);
+            cmSyncerService.syncFromCmToDb(stack, candidateImages, request.getClusterUpgradeProperties());
         } catch (Exception e) {
             LOGGER.warn("Error during syncing CM version to DB, syncing skipped.", e);
         }

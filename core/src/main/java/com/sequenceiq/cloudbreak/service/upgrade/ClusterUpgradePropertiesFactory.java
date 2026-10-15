@@ -7,13 +7,16 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
@@ -50,7 +53,13 @@ public class ClusterUpgradePropertiesFactory {
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
 
     @Inject
+    private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
+
+    @Inject
     private ImageToClouderaManagerRepoConverter imageToClouderaManagerRepoConverter;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     public ClusterUpgradeProperties create(ImageChangeDto imageChangeDto, boolean lockComponents, boolean rollingUpgradeEnabled, boolean replaceVms) {
         return create(imageChangeDto, null, new ClusterUpgradeProperties.UpgradeRequestOptions(replaceVms, lockComponents, rollingUpgradeEnabled));
@@ -93,19 +102,7 @@ public class ClusterUpgradePropertiesFactory {
         String runtimeVersion = targetCatalogImage.getPackageVersions()
                 .getOrDefault(ImagePackageVersion.STACK.getKey(), targetCatalogImage.getVersion());
 
-        ClusterUpgradeProperties.CurrentImageUpgradeContext currentImageContext = new ClusterUpgradeProperties.CurrentImageUpgradeContext(
-                currentImage.getImageId(),
-                currentImage.getImageCatalogName(),
-                currentImage.getImageCatalogUrl(),
-                currentImage.getPackageVersion(ImagePackageVersion.STACK),
-                currentImage.getPackageVersions() != null ? new HashMap<>(currentImage.getPackageVersions()) : new HashMap<>(),
-                currentImage.getTags() != null ? new HashMap<>(currentImage.getTags()) : new HashMap<>(),
-                OsType.getByOsTypeString(currentImage.getOsType()),
-                currentImage.getOs(),
-                currentImage.getArchitecture(),
-                currentImage.getDate(),
-                currentImage.getCreated(),
-                currentImage.getImageName());
+        ClusterUpgradeProperties.CurrentImageUpgradeContext currentImageContext = createCurrentImageContext(currentImage, stack);
         ClusterUpgradeProperties.TargetImageUpgradeContext targetImageContext = new ClusterUpgradeProperties.TargetImageUpgradeContext(
                 targetCatalogImage.getUuid(),
                 targetStatedImage.getImageCatalogName(),
@@ -131,5 +128,32 @@ public class ClusterUpgradePropertiesFactory {
 
         LOGGER.debug("Resolved cluster upgrade properties for target image {} with runtime version {}", targetCatalogImage.getUuid(), runtimeVersion);
         return new ClusterUpgradeProperties(options, currentImageContext, targetImageContext);
+    }
+
+    private ClusterUpgradeProperties.CurrentImageUpgradeContext createCurrentImageContext(Image currentImage, Stack stack) {
+        Image enrichedImage = StringUtils.isBlank(currentImage.getPackageVersion(ImagePackageVersion.STACK))
+                ? baseImagePackageVersionsEnricher.enrich(currentImage, stack) : currentImage;
+        Long clusterId = stack.getCluster() != null ? stack.getCluster().getId() : null;
+        Set<ClouderaManagerProduct> currentProducts = captureCurrentClusterProducts(clusterId);
+        ClouderaManagerRepo currentCmRepo = clusterId != null ? clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId) : null;
+        return new ClusterUpgradeProperties.CurrentImageUpgradeContext(
+                enrichedImage.getImageId(),
+                enrichedImage.getImageCatalogName(),
+                enrichedImage.getImageCatalogUrl(),
+                enrichedImage.getPackageVersion(ImagePackageVersion.STACK),
+                enrichedImage.getPackageVersions() != null ? new HashMap<>(enrichedImage.getPackageVersions()) : new HashMap<>(),
+                enrichedImage.getTags() != null ? new HashMap<>(enrichedImage.getTags()) : new HashMap<>(),
+                OsType.getByOsTypeString(enrichedImage.getOsType()),
+                enrichedImage.getOs(),
+                enrichedImage.getArchitecture(),
+                enrichedImage.getDate(),
+                enrichedImage.getCreated(),
+                enrichedImage.getImageName(),
+                currentProducts,
+                currentCmRepo);
+    }
+
+    private Set<ClouderaManagerProduct> captureCurrentClusterProducts(Long clusterId) {
+        return clusterId != null ? new HashSet<>(clusterComponentConfigProvider.getClouderaManagerProductDetails(clusterId)) : new HashSet<>();
     }
 }

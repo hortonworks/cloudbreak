@@ -293,7 +293,9 @@ public record ClusterUpgradeProperties(
             String architecture,
             String date,
             Long created,
-            String imageName) {
+            String imageName,
+            Set<ClouderaManagerProduct> products,
+            ClouderaManagerRepo clouderaManagerRepo) {
 
         @JsonCreator
         public CurrentImageUpgradeContext(
@@ -308,7 +310,9 @@ public record ClusterUpgradeProperties(
                 @JsonProperty("architecture") String architecture,
                 @JsonProperty("date") String date,
                 @JsonProperty("created") Long created,
-                @JsonProperty("imageName") String imageName) {
+                @JsonProperty("imageName") String imageName,
+                @JsonProperty("products") Set<ClouderaManagerProduct> products,
+                @JsonProperty("clouderaManagerRepo") ClouderaManagerRepo clouderaManagerRepo) {
             this.imageId = imageId;
             this.catalogName = catalogName;
             this.catalogUrl = catalogUrl;
@@ -321,6 +325,8 @@ public record ClusterUpgradeProperties(
             this.date = date;
             this.created = created;
             this.imageName = imageName;
+            this.products = products;
+            this.clouderaManagerRepo = clouderaManagerRepo;
         }
 
         @JsonIgnore
@@ -341,6 +347,16 @@ public record ClusterUpgradeProperties(
         @JsonIgnore
         public String getRuntimeVersion() {
             return runtimeVersion;
+        }
+
+        @JsonIgnore
+        public Set<ClouderaManagerProduct> getProducts() {
+            return products;
+        }
+
+        @JsonIgnore
+        public ClouderaManagerRepo getClouderaManagerRepo() {
+            return clouderaManagerRepo;
         }
 
         @JsonIgnore
@@ -587,6 +603,11 @@ public record ClusterUpgradeProperties(
                 products.addAll(preWarmParcels);
             }
             return products;
+        }
+
+        @JsonIgnore
+        public boolean isBaseImage() {
+            return stackDetails == null || stackDetails.getRepo() == null || stackDetails.getRepo().getStack() == null;
         }
 
         @JsonIgnore

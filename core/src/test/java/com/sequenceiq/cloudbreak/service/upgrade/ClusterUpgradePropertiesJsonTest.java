@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -13,6 +14,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradeParcelSettingsPreparationEvent;
@@ -23,10 +26,47 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedRequest;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.common.model.OsType;
 
 class ClusterUpgradePropertiesJsonTest {
+
+    @Test
+    void baseImageDetectionUsesImageMetadataAndIsNotSerialized() throws Exception {
+        ClusterUpgradeProperties base = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2");
+        ClusterUpgradeProperties.TargetImageUpgradeContext prewarmed = JsonUtil.readValue(
+                "{\"stackDetails\":{\"version\":\"7.3.2\",\"repo\":{\"stack\":{}}}}",
+                ClusterUpgradeProperties.TargetImageUpgradeContext.class);
+
+        assertTrue(base.targetImage().isBaseImage());
+        assertFalse(prewarmed.isBaseImage());
+        assertFalse(JsonUtil.readTree(JsonUtil.writeValueAsString(base.targetImage())).has("baseImage"));
+    }
+
+    @Test
+    void testLegacyCurrentImageContextWithoutComponentsDeserializes() throws Exception {
+        ClusterUpgradeProperties.CurrentImageUpgradeContext current = JsonUtil.readValue(
+                "{\"imageId\":\"currentImageId\",\"runtimeVersion\":\"7.2.17\",\"osType\":\"RHEL8\"}",
+                ClusterUpgradeProperties.CurrentImageUpgradeContext.class);
+
+        assertEquals("currentImageId", current.imageId());
+        assertNull(current.products());
+        assertNull(current.clouderaManagerRepo());
+    }
+
+    @Test
+    void originalComponentsSurviveSerializationForFlowRetry() throws Exception {
+        ClouderaManagerProduct parcel = new ClouderaManagerProduct().withName("FLINK").withVersion("1.20").withParcel("https://original/parcels");
+        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion("7.13.2").withBaseUrl("https://original/cm");
+        ClusterUpgradeProperties original = ClusterUpgradePropertiesTestUtils.withCurrentProducts(
+                ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2"), Set.of(parcel), repo);
+        ClusterUpgradeFailedRequest request = new ClusterUpgradeFailedRequest(1L, null, null, original);
+
+        ClusterUpgradeFailedRequest restored = JsonUtil.readValue(JsonUtil.writeValueAsString(request), ClusterUpgradeFailedRequest.class);
+
+        assertThat(restored.getClusterUpgradeProperties().currentImage()).usingRecursiveComparison().isEqualTo(original.currentImage());
+    }
 
     @Test
     void testRoundTripSerialization() throws Exception {

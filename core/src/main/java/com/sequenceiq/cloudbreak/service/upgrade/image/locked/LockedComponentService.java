@@ -54,6 +54,10 @@ public class LockedComponentService {
     }
 
     public boolean isComponentsLocked(StackDto stack, Image currentImage, com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage) {
+        if (!targetCatalogImage.isPrewarmed()) {
+            LOGGER.debug("Component versions cannot be locked based on base image {} alone.", targetCatalogImage.getUuid());
+            return false;
+        }
         LOGGER.debug("Determining that the stack {} component versions are the same on the current image {} and the target image {}", stack.getName(),
                 currentImage.getImageId(), targetCatalogImage.getUuid());
         return lockedComponentChecker.isUpgradePermitted(targetCatalogImage, imageFilterParamsFactory.getStackRelatedParcels(stack),

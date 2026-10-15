@@ -51,11 +51,12 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
         FlowEventChainFactory<Payload> flowEventChainFactory = flowChainConfigMap.get(key);
         String flowOperationType = flowEventChainFactory.getFlowOperationType().name();
         String flowChainId = UUID.randomUUID().toString();
-        flowChains.putFlowChain(flowChainId, parentFlowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData()));
+        Map<Object, Object> contextParams = event.getHeaders().get(FlowConstants.FLOW_CONTEXTPARAMS_ID);
+        contextParams = contextParams == null ? new HashMap<>() : new HashMap<>(contextParams);
+        flowChains.putFlowChain(flowChainId, parentFlowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData(), contextParams));
         flowChains.addNotSavedFlowChainLog(flowChainId);
         flowStatCache.putByFlowChainId(flowChainId, event.getData().getResourceId(), flowOperationType, false);
-        Map<Object, Object> contextParams = event.getHeaders().get(FlowConstants.FLOW_CONTEXTPARAMS_ID);
-        flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn, contextParams == null ? new HashMap<>() : new HashMap<>(contextParams),
+        flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn, contextParams,
                 flowOperationType, Optional.empty());
     }
 

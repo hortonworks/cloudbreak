@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -50,6 +51,27 @@ class BaseImagePackageVersionsEnricherTest {
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Test
+    void repairUsesPersistedClusterVersionsInsteadOfOldInstanceVersions() {
+        Image image = createBaseImage();
+        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion(CM_VERSION).withBuildNumber(CM_BUILD_NUMBER);
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion(STACK_VERSION + "-" + CDH_BUILD_NUMBER);
+        ClouderaManagerProduct cfm = new ClouderaManagerProduct().withName("CFM").withVersion("2.1.7");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(repo);
+        when(clusterComponentConfigProvider.getCdhProduct(CLUSTER_ID)).thenReturn(java.util.Optional.of(cdh));
+        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(CLUSTER_ID)).thenReturn(List.of(cdh, cfm));
+
+        Image actual = underTest.enrichWithClusterComponents(image, CLUSTER_ID);
+
+        assertEquals(CM_VERSION, actual.getPackageVersion(ImagePackageVersion.CM));
+        assertEquals(CM_BUILD_NUMBER, actual.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER));
+        assertEquals(STACK_VERSION, actual.getPackageVersion(ImagePackageVersion.STACK));
+        assertEquals(CDH_BUILD_NUMBER, actual.getPackageVersion(ImagePackageVersion.CDH_BUILD_NUMBER));
+        assertEquals("2.1.7", actual.getPackageVersion(ImagePackageVersion.CFM));
+        assertEquals(image.getPackageVersion(ImagePackageVersion.SALT), actual.getPackageVersion(ImagePackageVersion.SALT));
+        verifyNoInteractions(instanceMetaDataService);
+    }
 
     @Test
     void enrichShouldReturnSameImageWhenNotBaseImage() {

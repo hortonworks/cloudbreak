@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -38,6 +39,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
@@ -89,6 +92,29 @@ class ClusterUpgradeActionsTest {
 
     @InjectMocks
     private ClusterUpgradeActions underTest;
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void failedActionPassesPropertiesToCmSyncWhenAvailable(boolean withProperties) throws Exception {
+        ClusterUpgradeProperties properties = withProperties ? properties() : null;
+        Map<Object, Object> variables = new HashMap<>();
+        if (properties != null) {
+            variables.put(FLOW_VARIABLE_NAME, properties);
+        }
+        AbstractClusterUpgradeAction<ClusterUpgradeFailedEvent> action =
+                (AbstractClusterUpgradeAction<ClusterUpgradeFailedEvent>) underTest.clusterUpgradeFailedAction();
+        initAction(action);
+        ArgumentCaptor<ClusterUpgradeFailedRequest> emitted = ArgumentCaptor.forClass(ClusterUpgradeFailedRequest.class);
+        when(reactorEventFactory.createEvent(anyMap(), emitted.capture())).thenReturn(mock(Event.class));
+        ClusterUpgradeFailedEvent failure = new ClusterUpgradeFailedEvent(STACK_ID, new RuntimeException("failed"),
+                DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
+
+        new AbstractActionTestSupport<>(action).doExecute(context(), failure, variables);
+
+        assertThat(emitted.getValue().getClusterUpgradeProperties()).isSameAs(properties);
+        assertThat(emitted.getValue().getException()).isSameAs(failure.getException());
+        verifyNoInteractions(resolver);
+    }
 
     @Test
     void testInitUsesResolvedRuntimeInsteadOfBaseImageVersion() throws Exception {

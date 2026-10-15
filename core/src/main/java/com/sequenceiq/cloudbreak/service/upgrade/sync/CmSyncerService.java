@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmInstalledComponentFinderService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQueryService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.db.ComponentPersistingService;
@@ -49,14 +50,18 @@ public class CmSyncerService {
      * @return the summary of the sync operation, with status, parcel and package information
      */
     public CmSyncOperationSummary syncFromCmToDb(Stack stack, Set<Image> candidateImages) {
+        return syncFromCmToDb(stack, candidateImages, null);
+    }
+
+    public CmSyncOperationSummary syncFromCmToDb(Stack stack, Set<Image> candidateImages, ClusterUpgradeProperties properties) {
         if (cmServerQueryService.isCmServerNotRunning(stack)) {
             return buildSummaryWithErrorMessage("CM server is down, it is not possible to sync parcels and CM version from the server.");
         }
-        if (candidateImages.isEmpty()) {
+        if (candidateImages.isEmpty() && properties == null) {
             return buildSummaryWithErrorMessage("No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. "
                     + "Please open Cloudera support ticket to investigate the issue");
         }
-        return syncInternal(stack, candidateImages);
+        return syncInternal(stack, candidateImages, properties);
     }
 
     private CmSyncOperationSummary buildSummaryWithErrorMessage(String message) {
@@ -64,15 +69,15 @@ public class CmSyncerService {
         return new CmSyncOperationSummary(CmSyncOperationStatus.builder().withError(message).build());
     }
 
-    private CmSyncOperationSummary syncInternal(Stack stack, Set<Image> candidateImages) {
+    private CmSyncOperationSummary syncInternal(Stack stack, Set<Image> candidateImages, ClusterUpgradeProperties properties) {
         CmSyncOperationResult cmSyncOperationResult = new CmSyncOperationResult(
-                cmInstalledComponentFinderService.findCmRepoComponent(stack, candidateImages),
-                cmInstalledComponentFinderService.findParcelComponents(stack, candidateImages)
+                cmInstalledComponentFinderService.findCmRepoComponent(stack, candidateImages, properties),
+                cmInstalledComponentFinderService.findParcelComponents(stack, candidateImages, properties)
         );
         LOGGER.debug("Synced CM versions and found components: {}", cmSyncOperationResult);
         componentPersistingService.persistComponentsToDb(stack, cmSyncOperationResult);
         CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummaryService.evaluate(cmSyncOperationResult);
-        mixedPackageVersionService.validatePackageVersions(stack.getWorkspace().getId(), stack.getId(), cmSyncOperationResult, candidateImages);
+        mixedPackageVersionService.validatePackageVersions(stack.getWorkspace().getId(), stack.getId(), cmSyncOperationResult, candidateImages, properties);
         LOGGER.info("CM sync was executed, summary: {}", cmSyncOperationStatus);
         return new CmSyncOperationSummary(cmSyncOperationStatus, cmSyncOperationResult);
     }

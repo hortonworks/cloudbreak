@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
+import com.sequenceiq.cloudbreak.service.upgrade.BaseImagePackageVersionsEnricher;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
@@ -57,6 +58,9 @@ public class StackImageService {
     @Inject
     private StackDtoService stackDtoService;
 
+    @Inject
+    private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
+
     public void storeNewImageComponent(StackDtoDelegate stack, StatedImage targetImage) {
         try {
             replaceStackImageComponent(stack, targetImage);
@@ -66,7 +70,29 @@ public class StackImageService {
         }
     }
 
+    public void storeNewImageComponent(StackDtoDelegate stack, Image targetImage) {
+        try {
+            replaceStackImageComponent(stack, targetImage);
+        } catch (IllegalArgumentException e) {
+            LOGGER.info("Failed to create json", e);
+            throw new CloudbreakServiceException("Failed to create json", e);
+        }
+    }
+
+    public void storeNewImageComponentWithCurrentVersions(StackDtoDelegate stack, StatedImage targetImage) {
+        Image image = toImageModel(stack.getStack(), targetImage);
+        storeNewImageComponentWithCurrentVersions(stack, image);
+    }
+
+    public void storeNewImageComponentWithCurrentVersions(StackDtoDelegate stack, Image targetImage) {
+        storeNewImageComponent(stack, baseImagePackageVersionsEnricher.enrichWithClusterComponents(targetImage, stack.getCluster().getId()));
+    }
+
     public Image getImageModelFromStatedImage(StackView stack, Image currentImage, StatedImage targetStatedImage) {
+        return toImageModel(stack, targetStatedImage);
+    }
+
+    private Image toImageModel(StackView stack, StatedImage targetStatedImage) {
         try {
             ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(
                     stack.getCloudPlatform(),
@@ -137,13 +163,17 @@ public class StackImageService {
     private void replaceStackImageComponent(StackDtoDelegate stack, StatedImage targetImage) {
         try {
             Image newImage = getImageModelFromStatedImage(stack.getStack(), componentConfigProviderService.getImage(stack.getId()), targetImage);
-            Stack stackReference = stackDtoService.getStackReferenceById(stack.getId());
-            Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(newImage), stackReference);
-            componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
+            replaceStackImageComponent(stack, newImage);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Could not find image", e);
             throw new CloudbreakServiceException("Could not find image", e);
         }
+    }
+
+    private void replaceStackImageComponent(StackDtoDelegate stack, Image targetImage) {
+        Stack stackReference = stackDtoService.getStackReferenceById(stack.getId());
+        Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(targetImage), stackReference);
+        componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
     }
 
     public void replaceStackImageComponent(Stack stack, StatedImage targetImage, Image currentImage) {

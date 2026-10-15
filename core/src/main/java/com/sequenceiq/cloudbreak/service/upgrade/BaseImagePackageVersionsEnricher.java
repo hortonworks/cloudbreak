@@ -49,6 +49,10 @@ public class BaseImagePackageVersionsEnricher {
         return withPackageVersions(image, resolvedPackageVersions);
     }
 
+    public Image enrichWithClusterComponents(Image image, Long clusterId) {
+        return withPackageVersions(image, getPackageVersionsFromClusterComponents(clusterId));
+    }
+
     private Map<String, String> resolvePackageVersions(Stack stack) {
         Map<String, String> fromInstances = getPackageVersionsFromInstances(stack.getId());
         if (!fromInstances.isEmpty()) {
@@ -90,7 +94,10 @@ public class BaseImagePackageVersionsEnricher {
         if (stack.getCluster() == null) {
             return Map.of();
         }
-        Long clusterId = stack.getCluster().getId();
+        return getPackageVersionsFromClusterComponents(stack.getCluster().getId());
+    }
+
+    private Map<String, String> getPackageVersionsFromClusterComponents(Long clusterId) {
         Map<String, String> packageVersions = new HashMap<>();
         addCmPackageVersions(packageVersions, clusterId);
         addCdhPackageVersions(packageVersions, clusterId);

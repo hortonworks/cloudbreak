@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmParcelSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmRepoSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationResult;
@@ -77,6 +79,19 @@ public class MixedPackageVersionServiceTest {
 
     @Mock
     private CandidateImageAwareMixedPackageVersionService candidateImageAwareMixedPackageVersionService;
+
+    @Test
+    void usesResolvedTargetWhenCatalogIsUnavailable() throws Exception {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2");
+        CmSyncOperationResult result = createCmSyncResult(CM_VERSION, Map.of(CDH_KEY, CDH_VERSION, "FLINK", "1.20"));
+        when(imageService.getImage(STACK_ID)).thenThrow(new CloudbreakImageNotFoundException("unavailable"));
+
+        underTest.validatePackageVersions(WORKSPACE_ID, STACK_ID, result, Set.of(), properties);
+
+        verify(targetImageAwareMixedPackageVersionService).examinePackageVersionsWithTargetProperties(
+                STACK_ID, properties, CM_VERSION, result.getCmParcelSyncOperationResult().getActiveParcels());
+        verifyNoInteractions(clusterUpgradeTargetImageService, imageCatalogService, candidateImageAwareMixedPackageVersionService);
+    }
 
     @Test
     void testValidatePackageVersionsShouldNotSendNotificationWhenThePackageVersionsAreValidAndEqualsWithTheCurrentImage()

@@ -9,8 +9,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -41,11 +43,13 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
+import com.sequenceiq.cloudbreak.service.upgrade.BaseImagePackageVersionsEnricher;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
@@ -94,6 +98,9 @@ public class StackImageServiceTest {
     @Mock
     private StackDtoService stackDtoService;
 
+    @Mock
+    private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
+
     @Captor
     private ArgumentCaptor<Component> componentArgumentCaptor;
 
@@ -116,6 +123,25 @@ public class StackImageServiceTest {
 
         image = anImage("uuid");
         statedImage = StatedImage.statedImage(image, "url", "name");
+    }
+
+    @Test
+    void baseImageRepairStoresImageWithPersistedComponentVersions() throws Exception {
+        Cluster cluster = new Cluster();
+        cluster.setId(2L);
+        stack.setCluster(cluster);
+        com.sequenceiq.cloudbreak.cloud.model.Image enriched = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageId("base-id").withPackageVersions(Map.of("cm", "7.13.2", "stack", "7.3.2", "cfm", "2.1.7")).build();
+        when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
+                .thenReturn(imageCatalogPlatform(stack.getCloudPlatform()));
+        when(imageService.determineImageName(anyString(), any(), anyString(), eq(image))).thenReturn(IMAGE_NAME);
+        when(baseImagePackageVersionsEnricher.enrichWithClusterComponents(any(), eq(cluster.getId()))).thenReturn(enriched);
+
+        victim.storeNewImageComponentWithCurrentVersions(stack, statedImage);
+
+        verify(componentConfigProviderService, never()).getImage(anyLong());
+        verify(componentConfigProviderService).replaceImageComponentWithNew(componentArgumentCaptor.capture());
+        assertEquals(enriched, componentArgumentCaptor.getValue().getAttributes().get(com.sequenceiq.cloudbreak.cloud.model.Image.class));
     }
 
     @Test
@@ -143,6 +169,33 @@ public class StackImageServiceTest {
         assertEquals(ComponentType.IMAGE.name(), captor.getValue().getName());
         assertEquals(IMAGE_NAME, captor.getValue().getAttributes().get(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageName());
         assertEquals(image.getUuid(), captor.getValue().getAttributes().get(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageId());
+    }
+
+    @Test
+    void testStoreResolvedImagePreservesExplicitPackageVersions() throws IOException {
+        com.sequenceiq.cloudbreak.cloud.model.Image targetImage = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("base-image-name")
+                .withImageId("base-image-id")
+                .withImageCatalogName("catalog-name")
+                .withImageCatalogUrl("catalog-url")
+                .withOs("redhat9")
+                .withOsType("redhat9")
+                .withArchitecture("x86_64")
+                .withPackageVersions(Map.of("stack", "7.3.2", "cdh-build-number", "83281140", "cm", "7.13.2.20000",
+                        "cm-build-number", "83309838", "salt", "3006.0"))
+                .withTags(Map.of("test", "value"))
+                .build();
+        when(stackDtoService.getStackReferenceById(stack.getId())).thenReturn(stack);
+
+        victim.storeNewImageComponent(stack, targetImage);
+
+        verify(componentConfigProviderService).replaceImageComponentWithNew(componentArgumentCaptor.capture());
+        Component component = componentArgumentCaptor.getValue();
+        assertEquals(ComponentType.IMAGE, component.getComponentType());
+        assertEquals(ComponentType.IMAGE.name(), component.getName());
+        assertEquals(stack.getId(), component.getStackId());
+        assertEquals(targetImage, component.getAttributes().get(com.sequenceiq.cloudbreak.cloud.model.Image.class));
+        verifyNoInteractions(imageService, imageCatalogService, platformStringTransformer);
     }
 
     @Test

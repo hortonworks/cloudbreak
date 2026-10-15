@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
 class CsdParcelDecoratorTest {
@@ -164,6 +165,10 @@ class CsdParcelDecoratorTest {
         StackDto stackDto = spy(StackDto.class);
         Stack stack = new Stack();
         stack.setType(stackType);
+        stack.setId(1L);
+        Workspace workspace = new Workspace();
+        workspace.setId(2L);
+        stack.setWorkspace(workspace);
         stack.setResourceCrn(RESOURCE_CRN);
         when(stackDto.getStack()).thenReturn(stack);
         return stackDto;

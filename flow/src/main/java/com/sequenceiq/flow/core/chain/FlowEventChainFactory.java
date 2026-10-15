@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.core.chain;
 
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.FlowEventContext;
@@ -11,6 +13,10 @@ public interface FlowEventChainFactory<P extends Payload> {
     String initEvent();
 
     FlowTriggerEventQueue createFlowTriggerEventQueue(P event);
+
+    default FlowTriggerEventQueue createFlowTriggerEventQueue(P event, Map<Object, Object> contextParams) {
+        return createFlowTriggerEventQueue(event);
+    }
 
     default String getName() {
         return getClass().getSimpleName();

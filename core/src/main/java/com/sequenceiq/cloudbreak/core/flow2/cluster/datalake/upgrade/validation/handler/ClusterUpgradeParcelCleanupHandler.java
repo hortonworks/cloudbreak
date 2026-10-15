@@ -46,8 +46,7 @@ public class ClusterUpgradeParcelCleanupHandler extends ExceptionCatcherEventHan
         try {
             ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
             StackDto stackDto = stackDtoService.getById(stackId);
-            Set<ClouderaManagerProduct> clouderaManagerProducts = parcelService.getRequiredProductsFromProducts(stackDto,
-                    clusterUpgradeProperties.getAllTargetProducts());
+            Set<ClouderaManagerProduct> clouderaManagerProducts = parcelService.getRequiredProductsForUpgrade(stackDto, clusterUpgradeProperties);
             parcelService.removeUnusedParcelVersions(stackDto, clouderaManagerProducts);
             return new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.event(), stackId,
                     clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);

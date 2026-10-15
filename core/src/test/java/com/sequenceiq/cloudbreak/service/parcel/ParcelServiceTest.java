@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDeta
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -15,9 +17,12 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -26,16 +31,22 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 public class ParcelServiceTest {
@@ -79,6 +90,68 @@ public class ParcelServiceTest {
 
     @InjectMocks
     private ParcelService underTest;
+
+    @Test
+    void baseImageDataHubUpgradeKeepsAllExplicitProductsIncludingNewAdditionalParcel() {
+        Stack stack = createStack(StackType.WORKLOAD);
+        ClouderaManagerProduct cdh = createClouderaManagerProduct("CDH");
+        ClouderaManagerProduct flink = createClouderaManagerProduct("FLINK");
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                "7.3.2", "base-image", OsType.RHEL8, "x86_64", cdh, Set.of(flink), null);
+
+        assertEquals(Set.of(cdh, flink), underTest.getRequiredProductsForUpgrade(stack, properties));
+        verifyNoInteractions(centralCDHVersionCoordinator, parcelFilterService, clouderaManagerProductTransformer);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = StackType.class, names = {"DATALAKE", "WORKLOAD"})
+    void prewarmedUpgradeKeepsExistingParcelSelection(StackType stackType) {
+        Stack stack = createStack(stackType);
+        ClouderaManagerProduct cdh = createClouderaManagerProduct("CDH");
+        Set<ClouderaManagerProduct> products = Set.of(cdh, createClouderaManagerProduct("FLINK"));
+        ClusterUpgradeProperties properties = mock(ClusterUpgradeProperties.class);
+        ClusterUpgradeProperties.TargetImageUpgradeContext target = mock(ClusterUpgradeProperties.TargetImageUpgradeContext.class);
+        when(properties.targetImage()).thenReturn(target);
+        when(target.getAllProducts()).thenReturn(products);
+        when(target.isBaseImage()).thenReturn(false);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID)).thenReturn(Set.of(createClusterComponent("CDH")));
+        if (stackType == StackType.WORKLOAD) {
+            when(parcelFilterService.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, products, BLUEPRINT)).thenReturn(products);
+        }
+
+        assertEquals(Set.of(cdh), underTest.getRequiredProductsForUpgrade(stack, properties));
+    }
+
+    @Test
+    void baseImageDatalakeUpgradeOnlySelectsRuntimeParcel() {
+        Stack stack = createStack(StackType.DATALAKE);
+        ClouderaManagerProduct cdh = createClouderaManagerProduct("CDH");
+        ClouderaManagerProduct extra = createClouderaManagerProduct("FLINK");
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                "7.3.2", "base", OsType.RHEL8, "x86_64", cdh, Set.of(extra), null);
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID))
+                .thenReturn(Set.of(createClusterComponent("CDH"), createClusterComponent("FLINK")));
+
+        assertEquals(Set.of(cdh), underTest.getRequiredProductsForUpgrade(stack, properties));
+        verifyNoInteractions(imageReaderService, parcelFilterService);
+    }
+
+    @Test
+    void datalakeParcelSelectionDoesNotDependOnCatalogAvailability() throws Exception {
+        ImageService imageService = mock(ImageService.class);
+        ImageReaderService realImageReader = new ImageReaderService();
+        ReflectionTestUtils.setField(realImageReader, "imageService", imageService);
+        ReflectionTestUtils.setField(underTest, "imageReaderService", realImageReader);
+        Stack stack = createStack(StackType.DATALAKE);
+        ClusterComponentView cdh = createClusterComponent("CDH");
+        Set<ClusterComponentView> components = Set.of(cdh, createClusterComponent("FLINK"));
+        when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(CLUSTER_ID)).thenReturn(components);
+        lenient().when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID))
+                .thenThrow(new CloudbreakImageCatalogException("unavailable"));
+
+        assertEquals(Set.of(cdh), underTest.getParcelComponentsByBlueprint(stack));
+        verifyNoInteractions(imageService, parcelFilterService);
+    }
 
     @Test
     void testRemoveUnusedComponents() throws CloudbreakException {
@@ -241,6 +314,7 @@ public class ParcelServiceTest {
         ClusterComponentView clusterComponent = new ClusterComponentView();
         clusterComponent.setName(name);
         clusterComponent.setComponentType(cdhProductDetails());
+        clusterComponent.setAttributes(new Json(createClouderaManagerProduct(name)));
         return clusterComponent;
     }
 

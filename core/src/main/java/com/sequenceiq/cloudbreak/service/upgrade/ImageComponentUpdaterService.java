@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -11,13 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ComponentConverter;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.parcel.SmartRouterParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
@@ -45,16 +50,27 @@ public class ImageComponentUpdaterService {
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
     private ComponentConverter componentConverter;
+
+    @Inject
+    private SmartRouterParcelService smartRouterParcelService;
 
     public void updateComponentsForUpgrade(ClusterUpgradeProperties properties, Long stackId) {
         Stack stack = stackService.getById(stackId);
         restRequestThreadLocalService.setWorkspaceId(stack.getWorkspaceId());
         LOGGER.debug("Updating the components for target image {}", properties.targetImage().imageId());
-        Set<Component> targetComponents = new HashSet<>(componentConverter.fromClouderaManagerProductList(properties.getAllTargetProducts(), stack));
+        Set<ClouderaManagerProduct> targetProducts = properties.getAllTargetProducts();
+        Set<Component> targetComponents = new HashSet<>(componentConverter.fromClouderaManagerProductList(targetProducts, stack));
         targetComponents.add(componentConverter.fromClouderaManagerRepo(properties.targetImage().clouderaManagerRepo(), stack));
+        if (smartRouterParcelService.getSmartRouter(targetProducts).isEmpty()) {
+            Optional.ofNullable(componentConfigProviderService.getComponent(stackId, cdhProductDetails(), SmartRouterParcelService.COMPONENT_NAME))
+                    .ifPresent(targetComponents::add);
+        }
         stackComponentUpdater.updateComponentsByStackId(stack, targetComponents, true);
-        clusterComponentUpdater.updateClusterComponentsByStackId(stack, targetComponents, true);
+        clusterComponentUpdater.updateClusterComponentsByStackId(stack, targetComponents, true, properties.targetImage().isBaseImage());
     }
 
     public UpgradeImageInfo updateComponentsForUpgrade(String targetImageId, Long stackId) {

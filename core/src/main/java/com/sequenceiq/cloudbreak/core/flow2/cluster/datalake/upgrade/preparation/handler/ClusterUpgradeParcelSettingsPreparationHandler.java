@@ -56,8 +56,7 @@ public class ClusterUpgradeParcelSettingsPreparationHandler extends ExceptionCat
         try {
             StackDto stackDto = stackDtoService.getById(stackId);
             ClusterUpgradeProperties properties = clusterUpgradePropertiesResolver.resolve(request);
-            Set<ClouderaManagerProduct> clouderaManagerProducts = parcelService.getRequiredProductsFromProducts(stackDto,
-                    properties.targetImage().getAllProducts()).stream()
+            Set<ClouderaManagerProduct> clouderaManagerProducts = parcelService.getRequiredProductsForUpgrade(stackDto, properties).stream()
                     .map(ClouderaManagerProduct::copy)
                     .collect(Collectors.toSet());
             Set<ClouderaManagerProduct> updatedUpgradeCandidateProductsForOsChange = osChangeService.updatePreWarmParcelUrlInCaseOfOsChange(

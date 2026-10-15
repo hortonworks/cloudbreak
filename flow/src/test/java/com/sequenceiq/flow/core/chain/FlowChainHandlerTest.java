@@ -3,9 +3,9 @@ package com.sequenceiq.flow.core.chain;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_CONTEXTPARAMS_ID;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_TRIGGER_USERCRN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -57,6 +57,9 @@ class FlowChainHandlerTest {
     private static final Long RESOURCE_ID = 123L;
 
     @Mock
+    private FlowEventChainFactory<Payload> factory;
+
+    @Mock
     private FlowChains flowChains;
 
     @Mock
@@ -84,6 +87,7 @@ class FlowChainHandlerTest {
 
         ArgumentCaptor<Map<Object, Object>> context = ArgumentCaptor.forClass(Map.class);
         verify(flowChains).triggerNextFlow(anyString(), eq(USER_CRN), context.capture(), eq("PROVISION"), eq(Optional.empty()));
+        verify(factory).createFlowTriggerEventQueue(eq(event.getData()), eq(context.getValue()));
         assertThat(context.getValue()).containsExactlyInAnyOrderEntriesOf(parentContext).isNotSameAs(parentContext);
         context.getValue().put("child-variable", "value");
         assertThat(parentContext).doesNotContainKey("child-variable");
@@ -131,9 +135,10 @@ class FlowChainHandlerTest {
 
     private Event<SimpleSelectable> chainEvent(Map<String, Object> headers) {
         SimpleSelectable trigger = new SimpleSelectable(SELECTOR, RESOURCE_ID, TRIGGER_VALUE);
-        FlowEventChainFactory<Payload> factory = mock(FlowEventChainFactory.class);
         when(factory.getFlowOperationType()).thenReturn(OperationType.PROVISION);
-        when(factory.createFlowTriggerEventQueue(trigger)).thenReturn(new FlowTriggerEventQueue(FLOW_CHAIN_TYPE, trigger, new ConcurrentLinkedQueue<>()));
+        when(factory.createFlowTriggerEventQueue(trigger)).thenReturn(
+                new FlowTriggerEventQueue(FLOW_CHAIN_TYPE, trigger, new ConcurrentLinkedQueue<>()));
+        when(factory.createFlowTriggerEventQueue(eq(trigger), anyMap())).thenCallRealMethod();
         ReflectionTestUtils.setField(underTest, "flowChainConfigMap", Map.of(SELECTOR, factory));
         Event<SimpleSelectable> event = new Event<>(new Event.Headers(headers), trigger);
         event.setKey(SELECTOR);

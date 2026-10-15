@@ -32,7 +32,9 @@ public class ParcelUrlProvider {
 
     public Set<String> getRequiredParcelsFromImage(ClusterUpgradeProperties clusterUpgradeProperties, StackDto stackDto) {
         LOGGER.debug("Retrieving parcel URLs from image {}", clusterUpgradeProperties.getTargetImageId());
-        Set<String> requiredParcelNamesFromImage = parcelService.getComponentNamesByProducts(stackDto, clusterUpgradeProperties.getAllTargetProducts());
+        Set<String> requiredParcelNamesFromImage = parcelService.getRequiredProductsForUpgrade(stackDto, clusterUpgradeProperties).stream()
+                .map(ClouderaManagerProduct::getName)
+                .collect(Collectors.toSet());
         Set<String> requiredParcelUrls = getRequiredParcelUrls(clusterUpgradeProperties, stackDto, requiredParcelNamesFromImage);
         LOGGER.debug("Required parcel URLs: {}", requiredParcelUrls);
         return requiredParcelUrls;

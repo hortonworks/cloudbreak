@@ -37,11 +37,15 @@ public class ClusterComponentUpdater {
     private StackService stackService;
 
     public void updateClusterComponentsByStackId(Stack stack, Set<Component> targetComponents, boolean removeUnused) {
+        updateClusterComponentsByStackId(stack, targetComponents, removeUnused, false);
+    }
+
+    public void updateClusterComponentsByStackId(Stack stack, Set<Component> targetComponents, boolean removeUnused, boolean addMissingParcels) {
         Set<ClusterComponent> clusterComponentsFromDb = clusterComponentConfigProvider.getComponentsByClusterId(stack.getCluster().getId());
         targetComponents.forEach(targetComponent -> updateComponentFromDbAttributeField(
                 clusterComponentsFromDb,
                 targetComponent,
-                stack.getCluster())
+                stack.getCluster(), addMissingParcels)
         );
         clusterComponentConfigProvider.store(clusterComponentsFromDb);
         stackService.updateRuntimeVersion(
@@ -59,11 +63,17 @@ public class ClusterComponentUpdater {
                 .noneMatch(componentFromImage -> componentFromImage.getName().contains(component.getName()));
     }
 
-    private void updateComponentFromDbAttributeField(Set<ClusterComponent> clusterComponentsFromDb, Component targetComponent, Cluster targetCluster) {
+    private void updateComponentFromDbAttributeField(Set<ClusterComponent> clusterComponentsFromDb, Component targetComponent, Cluster targetCluster,
+            boolean addMissingParcels) {
         Optional<ClusterComponent> matchingComponentFromDb = clusterComponentsFromDb.stream()
                 .filter(clusterComponent -> isMatchingComponent(targetComponent, clusterComponent, targetCluster))
                 .findFirst();
         matchingComponentFromDb.ifPresent(clusterComponentFromDb -> clusterComponentFromDb.setAttributes(targetComponent.getAttributes()));
+        if (addMissingParcels && matchingComponentFromDb.isEmpty() && centralCDHVersionCoordinator.isCdhProductDetails(targetComponent)) {
+            String name = StackType.CDH.getComponentType().name().equals(targetComponent.getName())
+                    ? StackType.CDH.name() : targetComponent.getName();
+            clusterComponentsFromDb.add(new ClusterComponent(targetComponent.getComponentType(), name, targetComponent.getAttributes(), targetCluster));
+        }
     }
 
     private boolean isMatchingComponent(Component component, ClusterComponent clusterComponent, Cluster cluster) {

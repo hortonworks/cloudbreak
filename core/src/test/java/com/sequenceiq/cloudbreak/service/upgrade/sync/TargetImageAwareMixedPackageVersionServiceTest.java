@@ -19,11 +19,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 public class TargetImageAwareMixedPackageVersionServiceTest {
@@ -54,6 +59,74 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
 
     @Mock
     private MixedPackageNotificationService mixedPackageNotificationService;
+
+    @Test
+    void explicitCmAndAdditionalParcelVersionsAreComparedWithoutCatalogMetadata() {
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName(CDH_KEY).withVersion(V_7_2_2);
+        ClouderaManagerProduct flink = new ClouderaManagerProduct().withName("FLINK").withVersion("1.20");
+        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion(CM_VERSION).withBuildNumber(CM_BUILD_NUMBER);
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                V_7_2_2, "base", OsType.RHEL8, "x86_64", cdh, Set.of(flink), repo);
+        Map<String, String> products = Map.of(CDH_KEY, V_7_2_2, "FLINK", "1.20");
+        Set<ParcelInfo> active = createParcelInfo(products);
+        when(mixedPackageVersionComparator.areAllComponentVersionsMatchingWithImage(CM_VERSION_AND_BUILD, products, CM_VERSION_AND_BUILD, active))
+                .thenReturn(true);
+
+        underTest.examinePackageVersionsWithTargetProperties(STACK_ID, properties, CM_VERSION_AND_BUILD, active);
+
+        verify(mixedPackageVersionComparator).areAllComponentVersionsMatchingWithImage(CM_VERSION_AND_BUILD, products, CM_VERSION_AND_BUILD, active);
+        verifyNoInteractions(clouderaManagerProductTransformer, mixedPackageNotificationService);
+    }
+
+    @Test
+    void missingTargetCmRepoSkipsComparison() {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion(V_7_2_2);
+
+        underTest.examinePackageVersionsWithTargetProperties(STACK_ID, properties, CM_VERSION_AND_BUILD, Set.of());
+
+        verifyNoInteractions(mixedPackageVersionComparator, mixedPackageNotificationService);
+    }
+
+    @Test
+    void missingTargetParcelVersionSkipsComparison() {
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName(CDH_KEY);
+        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion(CM_VERSION).withBuildNumber(CM_BUILD_NUMBER);
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                V_7_2_2, "base", OsType.RHEL8, "x86_64", cdh, Set.of(), repo);
+
+        underTest.examinePackageVersionsWithTargetProperties(STACK_ID, properties, CM_VERSION_AND_BUILD, Set.of());
+
+        verifyNoInteractions(mixedPackageVersionComparator, mixedPackageNotificationService);
+    }
+
+    @Test
+    void conflictingTargetParcelVersionsSkipComparison() {
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName(CDH_KEY).withVersion(V_7_2_2);
+        ClouderaManagerProduct duplicate = new ClouderaManagerProduct().withName(CDH_KEY).withVersion("7.3.2");
+        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion(CM_VERSION).withBuildNumber(CM_BUILD_NUMBER);
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                V_7_2_2, "base", OsType.RHEL8, "x86_64", cdh, Set.of(duplicate), repo);
+
+        underTest.examinePackageVersionsWithTargetProperties(STACK_ID, properties, CM_VERSION_AND_BUILD, Set.of());
+
+        verifyNoInteractions(mixedPackageVersionComparator, mixedPackageNotificationService);
+    }
+
+    @Test
+    void duplicateParcelNamesWithSameVersionAreComparedOnce() {
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName(CDH_KEY).withVersion(V_7_2_2).withParcel("https://first/parcels");
+        ClouderaManagerProduct duplicate = new ClouderaManagerProduct().withName(CDH_KEY).withVersion(V_7_2_2).withParcel("https://second/parcels");
+        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion(CM_VERSION).withBuildNumber(CM_BUILD_NUMBER);
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                V_7_2_2, "base", OsType.RHEL8, "x86_64", cdh, Set.of(duplicate), repo);
+        Map<String, String> products = Map.of(CDH_KEY, V_7_2_2);
+        when(mixedPackageVersionComparator.areAllComponentVersionsMatchingWithImage(CM_VERSION_AND_BUILD, products, CM_VERSION_AND_BUILD, Set.of()))
+                .thenReturn(true);
+
+        underTest.examinePackageVersionsWithTargetProperties(STACK_ID, properties, CM_VERSION_AND_BUILD, Set.of());
+
+        verify(mixedPackageVersionComparator).areAllComponentVersionsMatchingWithImage(CM_VERSION_AND_BUILD, products, CM_VERSION_AND_BUILD, Set.of());
+    }
 
     @Test
     void testExaminePackageVersionsWithTargetImageShouldNotSendNotificationWhenThePackageVersionsAreValidAndEqualsWithTheTargetImage() {

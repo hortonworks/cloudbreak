@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -66,12 +65,12 @@ class ClusterUpgradeParcelCleanupHandlerTest {
         when(handlerEvent.getData()).thenReturn(request);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelService.getRequiredProductsFromProducts(stackDto, products)).thenReturn(products);
+        when(parcelService.getRequiredProductsForUpgrade(stackDto, properties)).thenReturn(products);
 
         Selectable result = underTest.doAccept(handlerEvent);
 
         assertEquals(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.event(), ((ClusterUpgradeValidationEvent) result).selector());
-        verify(parcelService).getRequiredProductsFromProducts(eq(stackDto), any());
+        verify(parcelService).getRequiredProductsForUpgrade(stackDto, properties);
         verify(parcelService).removeUnusedParcelVersions(stackDto, products);
     }
 }

@@ -407,13 +407,17 @@ public class ImageService {
     }
 
     private void addSmartRouterParcel(Stack stack, Set<Component> components, com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage) {
-        Optional.ofNullable(stack.getCluster())
+        getSmartRouterComponent(stack, catalogBasedImage.getOsType()).ifPresent(components::add);
+    }
+
+    public Optional<Component> getSmartRouterComponent(Stack stack, String osType) {
+        return Optional.ofNullable(stack.getCluster())
                 .map(Cluster::getBlueprint)
                 .map(Blueprint::getHybridOption)
                 .filter(BlueprintHybridOption.ON_PREM_BASE::equals)
-                .ifPresent(b -> {
-                    ClouderaManagerProduct product = smartRouterParcelService.getProduct(catalogBasedImage.getOsType());
-                    components.add(new Component(CDH_PRODUCT_DETAILS, product.getName(), new Json(product), stack));
+                .map(b -> {
+                    ClouderaManagerProduct product = smartRouterParcelService.getProduct(osType);
+                    return new Component(CDH_PRODUCT_DETAILS, product.getName(), new Json(product), stack);
                 });
     }
 

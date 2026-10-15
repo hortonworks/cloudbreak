@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.lenient;
@@ -21,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -31,9 +33,11 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ComponentConverter;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.parcel.SmartRouterParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -67,7 +71,13 @@ public class ImageComponentUpdaterServiceTest {
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
+    private ComponentConfigProviderService componentConfigProviderService;
+
+    @Mock
     private ComponentConverter componentConverter;
+
+    @Spy
+    private SmartRouterParcelService smartRouterParcelService;
 
     @InjectMocks
     private ImageComponentUpdaterService underTest;
@@ -197,8 +207,67 @@ public class ImageComponentUpdaterServiceTest {
 
         verify(restRequestThreadLocalService).setWorkspaceId(WORKSPACE_ID);
         verify(stackComponentUpdater).updateComponentsByStackId(stack, expected, true);
-        verify(clusterComponentUpdater).updateClusterComponentsByStackId(stack, expected, true);
-        verifyNoInteractions(imageService, upgradeImageInfoFactory);
+        verify(clusterComponentUpdater).updateClusterComponentsByStackId(stack, expected, true, true);
+        verifyNoInteractions(upgradeImageInfoFactory, imageService);
+    }
+
+    @Test
+    void prewarmedPropertiesKeepExistingClusterComponentSelection() {
+        ClusterUpgradeProperties properties = mock(ClusterUpgradeProperties.class);
+        ClusterUpgradeProperties.TargetImageUpgradeContext target = mock(ClusterUpgradeProperties.TargetImageUpgradeContext.class);
+        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion("7.13.2");
+        Component cmComponent = new Component();
+        when(properties.targetImage()).thenReturn(target);
+        when(target.clouderaManagerRepo()).thenReturn(repo);
+        when(componentConverter.fromClouderaManagerRepo(repo, stack)).thenReturn(cmComponent);
+
+        underTest.updateComponentsForUpgrade(properties, STACK_ID);
+
+        verify(clusterComponentUpdater).updateClusterComponentsByStackId(stack, Set.of(cmComponent), true, false);
+        verifyNoInteractions(upgradeImageInfoFactory);
+    }
+
+    @Test
+    void testUpdateComponentsKeepsExistingSmartRouterWithoutRemoteLookup() {
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion("7.2.18-1.cdh7.2.18.p0.12345");
+        ClouderaManagerRepo cm = new ClouderaManagerRepo().withVersion("7.11.3");
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts("7.2.18", "7.2.18",
+                OsType.RHEL8, "x86_64", cdh, Set.of(), cm);
+        Set<Component> parcelComponents = getComponents();
+        Component cmComponent = new Component();
+        cmComponent.setName("CM_REPO_DETAILS");
+        Component smartRouterComponent = new Component();
+        smartRouterComponent.setName(SmartRouterParcelService.COMPONENT_NAME);
+        when(componentConverter.fromClouderaManagerProductList(Set.of(cdh), stack)).thenReturn(parcelComponents);
+        when(componentConverter.fromClouderaManagerRepo(cm, stack)).thenReturn(cmComponent);
+        when(componentConfigProviderService.getComponent(STACK_ID, cdhProductDetails(), SmartRouterParcelService.COMPONENT_NAME))
+                .thenReturn(smartRouterComponent);
+        Set<Component> expected = new HashSet<>(parcelComponents);
+        expected.add(cmComponent);
+        expected.add(smartRouterComponent);
+
+        underTest.updateComponentsForUpgrade(properties, STACK_ID);
+
+        verify(stackComponentUpdater).updateComponentsByStackId(stack, expected, true);
+        verify(clusterComponentUpdater).updateClusterComponentsByStackId(stack, expected, true, true);
+        verifyNoInteractions(imageService);
+        verify(smartRouterParcelService, never()).getProduct(any());
+    }
+
+    @Test
+    void testUpdateComponentsDoesNotOverrideRequestedSmartRouter() {
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion("7.3.2-1.build");
+        ClouderaManagerProduct smartRouter = new ClouderaManagerProduct().withName(SmartRouterParcelService.COMPONENT_NAME).withVersion("1.0.0");
+        ClouderaManagerRepo cm = new ClouderaManagerRepo().withVersion("7.13.2");
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts("7.3.2", "base-image-version",
+                OsType.RHEL9, "x86_64", cdh, Set.of(smartRouter), cm);
+        when(componentConverter.fromClouderaManagerProductList(Set.of(cdh, smartRouter), stack)).thenReturn(getComponents());
+        when(componentConverter.fromClouderaManagerRepo(cm, stack)).thenReturn(new Component());
+
+        underTest.updateComponentsForUpgrade(properties, STACK_ID);
+
+        verifyNoInteractions(imageService, componentConfigProviderService);
+        verify(smartRouterParcelService, never()).getProduct(any());
     }
 
     private static Stream<Class<? extends Exception>> possibleExceptions() {

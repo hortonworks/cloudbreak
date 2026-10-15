@@ -48,11 +48,9 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.core.flow2.chain.util.SetDefaultJavaVersionFlowChainService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionFlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionForUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeFlowChainTriggerEvent;
@@ -132,9 +130,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     private ClusterSizeUpgradeValidator clusterSizeUpgradeValidator;
 
     @Mock
-    private SetDefaultJavaVersionFlowChainService setDefaultJavaVersionFlowChainService;
-
-    @Mock
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Test
@@ -152,11 +147,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
                 STACK_ID, new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
-        SetDefaultJavaVersionTriggerEvent setDefaultJavaEvent =
-                new SetDefaultJavaVersionTriggerEvent(SetDefaultJavaVersionFlowEvent.SET_DEFAULT_JAVA_VERSION_EVENT.event(), STACK_ID,
-                        "17", false, false, false);
-        when(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(eq(stackDto), eq(imageChangeDto)))
-                .thenReturn(List.of(setDefaultJavaEvent));
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(9, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
@@ -166,7 +156,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertSaltSecretRotationTriggerEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
-        assertSetDefaultJavaEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue, IMAGE_ID);
     }
 
@@ -216,7 +205,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
                 STACK_ID, new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(8, flowChainQueue.getQueue().size());
+        assertEquals(9, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
         assertClusterSyncTriggerEvent(flowChainQueue);
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
@@ -363,7 +352,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
                 STACK_ID, new Promise<>(), imageChangeDto, true, false, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(8, flowChainQueue.getQueue().size());
+        assertEquals(9, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
         assertClusterSyncTriggerEvent(flowChainQueue);
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
@@ -505,6 +494,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     private void assertUpgradeEvent(FlowTriggerEventQueue flowChainQueue, String imageId) {
+        assertSetDefaultJavaEvent(flowChainQueue);
         Selectable upgradeEvent = flowChainQueue.getQueue().remove();
         assertEquals(CLUSTER_UPGRADE_INIT_EVENT.event(), upgradeEvent.selector());
         assertEquals(STACK_ID, upgradeEvent.getResourceId());
@@ -537,7 +527,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     private void assertSetDefaultJavaEvent(FlowTriggerEventQueue flowChainQueue) {
         Selectable javaEvent = flowChainQueue.getQueue().remove();
-        assertInstanceOf(SetDefaultJavaVersionTriggerEvent.class, javaEvent);
+        assertInstanceOf(SetDefaultJavaVersionForUpgradeTriggerEvent.class, javaEvent);
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {

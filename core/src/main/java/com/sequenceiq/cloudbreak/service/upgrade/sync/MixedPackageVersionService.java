@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationResult;
 
 @Service
@@ -50,19 +51,25 @@ public class MixedPackageVersionService {
     private CandidateImageAwareMixedPackageVersionService candidateImageAwareMixedPackageVersionService;
 
     public void validatePackageVersions(Long workspaceId, Long stackId, CmSyncOperationResult syncResult, Set<Image> candidateImages) {
+        validatePackageVersions(workspaceId, stackId, syncResult, candidateImages, null);
+    }
+
+    public void validatePackageVersions(Long workspaceId, Long stackId, CmSyncOperationResult syncResult, Set<Image> candidateImages,
+            ClusterUpgradeProperties properties) {
         Optional<String> activeCmVersion = syncResult.getCmRepoSyncOperationResult().getInstalledCmVersion();
         if (activeCmVersion.isPresent()) {
             Set<ParcelInfo> activeParcels = syncResult.getCmParcelSyncOperationResult().getActiveParcels();
             Optional<StatedImage> currentImage = findCurrentImage(workspaceId, stackId);
-            if (currentImage.isPresent()) {
-                if (areComponentVersionsEqualWithTheOriginalImage(currentImage.get(), activeCmVersion.get(), activeParcels)) {
-                    LOGGER.debug("The current component versions {} are the same as the versions on the cluster's image {}", activeParcels, currentImage);
-                } else {
-                    findTargetImage(workspaceId, stackId).ifPresentOrElse(
-                            image -> examinePackageVersionsWithTargetImage(stackId, image, activeCmVersion.get(), activeParcels),
-                            () -> examinePackageVersionsWithAllCandidateImages(stackId, candidateImages, activeCmVersion.get(), activeParcels,
-                                    getImageCatalogUrl(currentImage)));
-                }
+            if (currentImage.isPresent() && areComponentVersionsEqualWithTheOriginalImage(currentImage.get(), activeCmVersion.get(), activeParcels)) {
+                LOGGER.debug("The current component versions {} are the same as the versions on the cluster's image {}", activeParcels, currentImage);
+            } else if (properties != null) {
+                targetImageAwareMixedPackageVersionService.examinePackageVersionsWithTargetProperties(stackId, properties,
+                        activeCmVersion.get(), activeParcels);
+            } else if (currentImage.isPresent()) {
+                findTargetImage(workspaceId, stackId).ifPresentOrElse(
+                        image -> examinePackageVersionsWithTargetImage(stackId, image, activeCmVersion.get(), activeParcels),
+                        () -> examinePackageVersionsWithAllCandidateImages(stackId, candidateImages, activeCmVersion.get(), activeParcels,
+                                getImageCatalogUrl(currentImage)));
             } else {
                 examinePackageVersionsWithAllCandidateImages(stackId, candidateImages, activeCmVersion.get(), activeParcels, getImageCatalogUrl(currentImage));
             }

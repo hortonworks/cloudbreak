@@ -233,7 +233,7 @@ public class ClusterUpgradeActions {
                 clusterUpgradeService.handleUpgradeClusterFailure(payload.getResourceId(), exceptionMessage, payload.getDetailedStatus(),
                         rollingUpgradeEnabled(variables));
                 ClusterUpgradeFailedRequest cmSyncRequest = new ClusterUpgradeFailedRequest(payload.getResourceId(), payload.getException(),
-                        payload.getDetailedStatus());
+                        payload.getDetailedStatus(), (ClusterUpgradeProperties) variables.get(FLOW_VARIABLE_NAME));
                 sendEvent(context, cmSyncRequest);
             }
 

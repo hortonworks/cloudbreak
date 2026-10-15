@@ -78,6 +78,7 @@ public class LockedComponentServiceTest {
 
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(targetCatalogImage.getUuid()).thenReturn(TARGET_IMAGE_ID);
+        when(targetCatalogImage.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID))
                 .thenReturn(StatedImage.statedImage(targetCatalogImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
         when(imageFilterParamsFactory.getStackRelatedParcels(stack)).thenReturn(ACTIVATED_PARCELS);
@@ -99,6 +100,7 @@ public class LockedComponentServiceTest {
 
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(targetCatalogImage.getUuid()).thenReturn(TARGET_IMAGE_ID);
+        when(targetCatalogImage.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID))
                 .thenReturn(StatedImage.statedImage(targetCatalogImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
 
@@ -109,6 +111,15 @@ public class LockedComponentServiceTest {
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(imageFilterParamsFactory).getStackRelatedParcels(stack);
         verify(lockedComponentChecker).isUpgradePermitted(targetCatalogImage, ACTIVATED_PARCELS, CM_BUILD_NUMBER);
+    }
+
+    @Test
+    void baseImageDoesNotLockComponentsBasedOnMissingCatalogVersions() {
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image target = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
+                .withUuid(TARGET_IMAGE_ID).build();
+
+        assertFalse(underTest.isComponentsLocked(stack, createCurrentImage(), target));
+        verifyNoInteractions(lockedComponentChecker, imageFilterParamsFactory);
     }
 
     private Image createCurrentImage() {

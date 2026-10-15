@@ -43,11 +43,11 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.core.flow2.chain.util.SetDefaultJavaVersionFlowChainService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionForUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
@@ -109,9 +109,6 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     private ClusterSizeUpgradeValidator clusterSizeUpgradeValidator;
 
     @Inject
-    private SetDefaultJavaVersionFlowChainService setDefaultJavaVersionFlowChainService;
-
-    @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
@@ -153,7 +150,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getSaltUpdateTriggerEvent(event));
         flowEventChain.addAll(getImageUpdateTriggerEvent(event));
-        flowEventChain.addAll(getClusterUpgradeTriggerEvent(event, stack, currentImage));
+        flowEventChain.addAll(getClusterUpgradeTriggerEvent(event, currentImage));
         flowEventChain.addAll(cloWorkaroundService.getClusterUpgradeTriggerEvent(event));
         flowEventChain.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(event.getResourceId(), true));
         flowEventChain.addAll(getClusterRepairTriggerEvent(event, stack));
@@ -214,16 +211,14 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         return List.of(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
     }
 
-    private List<Selectable> getClusterUpgradeTriggerEvent(DistroXUpgradeFlowChainTriggerEvent event, StackDto stack, Image currentImage) {
+    private List<Selectable> getClusterUpgradeTriggerEvent(DistroXUpgradeFlowChainTriggerEvent event, Image currentImage) {
         if (event.isLockComponents()) {
             LOGGER.debug("Skip runtime upgrade because the component versions are not changing.");
             return List.of();
         } else {
-            List<Selectable> upgradeEvents =
-                    new ArrayList<>(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(stack, event.getImageChangeDto()));
-            upgradeEvents.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
-                    event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled(), currentImage, null));
-            return upgradeEvents;
+            return List.of(new SetDefaultJavaVersionForUpgradeTriggerEvent(event.getResourceId()),
+                    new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
+                            event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled(), currentImage, null));
         }
     }
 

@@ -95,7 +95,7 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
         ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
                 "7.3.2", "base-image", OsType.RHEL9, Architecture.X86_64.getName(), null, requiredProducts, null);
         when(resolver.resolve(any(ClusterUpgradeParcelSettingsPreparationEvent.class))).thenReturn(properties);
-        when(parcelService.getRequiredProductsFromProducts(stackDto, properties.getAllTargetProducts())).thenReturn(requiredProducts);
+        when(parcelService.getRequiredProductsForUpgrade(stackDto, properties)).thenReturn(requiredProducts);
         when(osChangeService.updatePreWarmParcelUrlInCaseOfOsChange(anySet(), eq(OsType.RHEL8), eq(OsType.RHEL9), eq(Architecture.X86_64.getName())))
                 .thenReturn(updatedProducts);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
@@ -107,7 +107,7 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
         assertSame(properties, result.getClusterUpgradeProperties());
         assertEquals(updatedProducts, result.getClouderaManagerProducts());
         verify(stackDtoService).getById(STACK_ID);
-        verify(parcelService).getRequiredProductsFromProducts(stackDto, properties.getAllTargetProducts());
+        verify(parcelService).getRequiredProductsForUpgrade(stackDto, properties);
         verify(clusterApiConnectors).getConnector(stackDto);
         verify(clusterApi).updateParcelSettings(updatedProducts);
     }
@@ -122,7 +122,7 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
         ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
                 "7.3.2", "base-image", OsType.RHEL9, Architecture.X86_64.getName(), null, requiredProducts, null);
         when(resolver.resolve(any(ClusterUpgradeParcelSettingsPreparationEvent.class))).thenReturn(properties);
-        when(parcelService.getRequiredProductsFromProducts(stackDto, properties.getAllTargetProducts())).thenReturn(requiredProducts);
+        when(parcelService.getRequiredProductsForUpgrade(stackDto, properties)).thenReturn(requiredProducts);
         when(osChangeService.updatePreWarmParcelUrlInCaseOfOsChange(anySet(), eq(OsType.RHEL8), eq(OsType.RHEL9), eq(Architecture.X86_64.getName())))
                 .thenReturn(requiredProducts);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
@@ -132,7 +132,7 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
 
         assertEquals(FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT.name(), nextFlowStepSelector.selector());
         verify(stackDtoService).getById(STACK_ID);
-        verify(parcelService).getRequiredProductsFromProducts(stackDto, properties.getAllTargetProducts());
+        verify(parcelService).getRequiredProductsForUpgrade(stackDto, properties);
         verify(clusterApiConnectors).getConnector(stackDto);
         verify(clusterApi).updateParcelSettings(requiredProducts);
     }
@@ -145,7 +145,7 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
                 "7.3.2", "base-image", OsType.RHEL9, "x86_64", product, Set.of(), null);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(resolver.resolve(any(ClusterUpgradeParcelSettingsPreparationEvent.class))).thenReturn(properties);
-        when(parcelService.getRequiredProductsFromProducts(stackDto, properties.getAllTargetProducts())).thenReturn(Set.of(product));
+        when(parcelService.getRequiredProductsForUpgrade(stackDto, properties)).thenReturn(Set.of(product));
         when(osChangeService.updatePreWarmParcelUrlInCaseOfOsChange(anySet(), eq(OsType.RHEL8), eq(OsType.RHEL9), eq("x86_64")))
                 .thenAnswer(invocation -> {
                     Set<ClouderaManagerProduct> copies = invocation.getArgument(0);
@@ -183,7 +183,7 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
         ReflectionTestUtils.setField(underTest, "osChangeService", new OsChangeService());
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         Set<ClouderaManagerProduct> restoredProducts = request.getClusterUpgradeProperties().getAllTargetProducts();
-        when(parcelService.getRequiredProductsFromProducts(stackDto, restoredProducts)).thenReturn(restoredProducts);
+        when(parcelService.getRequiredProductsForUpgrade(stackDto, request.getClusterUpgradeProperties())).thenReturn(restoredProducts);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
 
         for (int attempt = 0; attempt < 2; attempt++) {

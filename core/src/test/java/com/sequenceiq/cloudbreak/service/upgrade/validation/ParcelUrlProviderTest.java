@@ -49,7 +49,7 @@ class ParcelUrlProviderTest {
         ClouderaManagerProduct nifi = createCmProduct("NIFI", "4.5.6", "https://nifi.parcel");
         ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
                 "7.2.15", "base-image", OsType.RHEL8, "x86_64", cdh, Set.of(spark3, nifi), null);
-        when(parcelService.getComponentNamesByProducts(stackDto, properties.getAllTargetProducts())).thenReturn(Set.of("CDH", "SPARK3"));
+        when(parcelService.getRequiredProductsForUpgrade(stackDto, properties)).thenReturn(Set.of(cdh, spark3));
         when(cmServerQueryService.queryAllParcels(stackDto)).thenReturn(
                 Set.of(new ParcelInfo("CDH", "7.2.7", ACTIVATED), new ParcelInfo("SPARK3", "1.2.3", ACTIVATED)));
 
@@ -59,7 +59,7 @@ class ParcelUrlProviderTest {
         assertTrue(actual.contains(cdh.getParcelFileUrl()));
         assertTrue(actual.contains(spark3.getParcelFileUrl()));
         assertTrue(actual.contains(PRE_WARM_CSD));
-        verify(parcelService).getComponentNamesByProducts(stackDto, properties.getAllTargetProducts());
+        verify(parcelService).getRequiredProductsForUpgrade(stackDto, properties);
         verify(cmServerQueryService).queryAllParcels(stackDto);
     }
 
@@ -68,14 +68,14 @@ class ParcelUrlProviderTest {
         ClouderaManagerProduct cdh = createCmProduct("CDH", "7.2.15", "https://cdh.parcel");
         ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
                 "7.2.15", "base-image", OsType.RHEL8, "x86_64", cdh, Set.of(), null);
-        when(parcelService.getComponentNamesByProducts(stackDto, properties.getAllTargetProducts())).thenReturn(Collections.singleton("CDH"));
+        when(parcelService.getRequiredProductsForUpgrade(stackDto, properties)).thenReturn(Collections.singleton(cdh));
         when(cmServerQueryService.queryAllParcels(stackDto)).thenReturn(Set.of(new ParcelInfo("CDH", "7.2.7", ACTIVATED)));
 
         Set<String> actual = underTest.getRequiredParcelsFromImage(properties, stackDto);
 
         assertEquals(1, actual.size());
         assertTrue(actual.contains(cdh.getParcelFileUrl()));
-        verify(parcelService).getComponentNamesByProducts(stackDto, properties.getAllTargetProducts());
+        verify(parcelService).getRequiredProductsForUpgrade(stackDto, properties);
         verify(cmServerQueryService).queryAllParcels(stackDto);
     }
 
@@ -86,7 +86,7 @@ class ParcelUrlProviderTest {
         ClouderaManagerProduct nifi = createCmProduct("NIFI", "4.5.6", "https://nifi.parcel");
         ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
                 "7.2.15", "base-image", OsType.RHEL8, "x86_64", cdh, Set.of(spark3, nifi), null);
-        when(parcelService.getComponentNamesByProducts(stackDto, properties.getAllTargetProducts())).thenReturn(Set.of("CDH", "SPARK3"));
+        when(parcelService.getRequiredProductsForUpgrade(stackDto, properties)).thenReturn(Set.of(cdh, spark3));
         when(cmServerQueryService.queryAllParcels(stackDto)).thenReturn(
                 Set.of(new ParcelInfo(cdh.getName(), "7.2.7", ACTIVATED), new ParcelInfo(spark3.getName(), "1.2.3", ACTIVATED),
                         new ParcelInfo(cdh.getName(), cdh.getVersion(), DISTRIBUTED), new ParcelInfo(spark3.getName(), spark3.getVersion(), DISTRIBUTED)));
@@ -94,7 +94,7 @@ class ParcelUrlProviderTest {
         Set<String> actual = underTest.getRequiredParcelsFromImage(properties, stackDto);
 
         assertTrue(actual.isEmpty());
-        verify(parcelService).getComponentNamesByProducts(stackDto, properties.getAllTargetProducts());
+        verify(parcelService).getRequiredProductsForUpgrade(stackDto, properties);
         verify(cmServerQueryService).queryAllParcels(stackDto);
     }
 

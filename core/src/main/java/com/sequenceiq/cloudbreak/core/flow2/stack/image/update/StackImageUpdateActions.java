@@ -132,13 +132,20 @@ public class StackImageUpdateActions {
                     throw new CloudbreakServiceException(e.getMessage(), e);
                 }
                 ClusterUpgradeProperties properties = (ClusterUpgradeProperties) variables.get(FLOW_VARIABLE_NAME);
-                if (properties != null && !properties.options().lockComponents()
+                if (properties != null && !properties.lockComponents()
                         && Objects.equals(properties.targetImage().imageId(), payload.getImage().getImage().getUuid())) {
                     getImageComponentUpdaterService().updateComponentsForUpgrade(properties, context.getStack().getId());
+                    if (properties.targetImage().isBaseImage()) {
+                        getStackImageService().storeNewImageComponentWithCurrentVersions(context.getStack(), properties.toCloudImage());
+                    } else {
+                        getStackImageService().storeNewImageComponent(context.getStack(), properties.toCloudImage());
+                    }
+                } else if (!payload.getImage().getImage().isPrewarmed()) {
+                    getStackImageService().storeNewImageComponentWithCurrentVersions(context.getStack(), payload.getImage());
                 } else {
                     getImageComponentUpdaterService().updateComponentsForUpgrade(payload.getImage(), context.getStack().getId());
+                    getStackImageService().storeNewImageComponent(context.getStack(), payload.getImage());
                 }
-                getStackImageService().storeNewImageComponent(context.getStack(), payload.getImage());
                 sendEvent(context, new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), context.getStack().getId()));
             }
 

@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -18,7 +19,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,10 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -83,7 +86,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -307,41 +309,65 @@ class StackImageUpdateActionsTest {
 
     @Test
     void updateImage() {
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image prewarmedImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        when(statedImage.getImage()).thenReturn(prewarmedImage);
+        when(prewarmedImage.isPrewarmed()).thenReturn(true);
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event(), 1L, statedImage);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.UPDATE_IMAGE_STATE);
 
         updateImageAction.execute(stateContext);
 
+        verify(imageComponentUpdaterService).updateComponentsForUpgrade(statedImage, 1L);
         verify(stackImageService, times(1)).storeNewImageComponent(any(StackDto.class), any(StatedImage.class));
+        verify(stackImageService, never()).storeNewImageComponent(any(StackDto.class), any(Image.class));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event()), any(Event.class));
         assertTrue(variables.containsKey(AbstractStackImageUpdateAction.ORIGINAL_IMAGE));
     }
 
     @ParameterizedTest
     @MethodSource("upgradeSnapshotScenarios")
-    void imageUpdateUsesUpgradeSnapshotOnlyForMatchingUnlockedUpgrade(boolean locked, boolean matchingImage) {
-        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts("7.3.2", "base-image", OsType.RHEL9,
-                "x86_64", null, Set.of(), null);
-        properties = new ClusterUpgradeProperties(new ClusterUpgradeProperties.UpgradeRequestOptions(false, locked, true),
-                properties.currentImage(), properties.targetImage());
+    void imageUpdateUsesPropertiesOnlyForUnlockedMatchingTargets(boolean locked, boolean matchingImage, boolean prewarmed) throws Exception {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersionAndFlags("7.3.2", locked, true, false);
+        properties.targetImage().packageVersions().putAll(Map.of("stack", "7.3.2", "cdh-build-number", "83281140",
+                "cm", "7.13.2.20000", "cm-build-number", "83309838", "salt", "3006.0"));
+        if (prewarmed) {
+            ClusterUpgradeProperties.TargetImageUpgradeContext target = JsonUtil.readValue(
+                    "{\"imageId\":\"targetImageId\",\"osType\":\"RHEL9\",\"stackDetails\":{\"version\":\"7.3.2\",\"repo\":{\"stack\":{}}}}",
+                    ClusterUpgradeProperties.TargetImageUpgradeContext.class);
+            properties = new ClusterUpgradeProperties(properties.options(), properties.currentImage(), target);
+        }
         variables.put(FLOW_VARIABLE_NAME, properties);
         StatedImage baseImage = StatedImage.statedImage(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
-                .withUuid(matchingImage ? properties.targetImageId() : "other-image").build(), "catalog-url", "catalog");
+                .withUuid(matchingImage ? properties.targetImageId() : "other-image").withPackageVersions(Map.of("salt", "3006.0"))
+                .withOsType(prewarmed ? "redhat9" : "redhat8")
+                .withStackDetails(prewarmed ? new ImageStackDetails("7.3.2", new StackRepoDetails(Map.of(), Map.of()), null) : null)
+                .build(), "catalog-url", "catalog");
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event(), 1L, baseImage);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.UPDATE_IMAGE_STATE);
 
         updateImageAction.execute(stateContext);
 
-        if (!locked && matchingImage) {
+        if (matchingImage && !locked) {
             verify(imageComponentUpdaterService).updateComponentsForUpgrade(properties, 1L);
             verify(imageComponentUpdaterService, never()).updateComponentsForUpgrade(any(StatedImage.class), anyLong());
-        } else {
-            verify(imageComponentUpdaterService).updateComponentsForUpgrade(baseImage, 1L);
+            if (prewarmed) {
+                verify(stackImageService).storeNewImageComponent(any(StackDto.class), eq(properties.toCloudImage()));
+            } else {
+                verify(stackImageService).storeNewImageComponentWithCurrentVersions(any(StackDto.class), eq(properties.toCloudImage()));
+            }
+            verify(stackImageService, never()).storeNewImageComponent(any(StackDto.class), any(StatedImage.class));
+        } else if (prewarmed) {
             verify(imageComponentUpdaterService, never()).updateComponentsForUpgrade(any(ClusterUpgradeProperties.class), anyLong());
+            verify(imageComponentUpdaterService).updateComponentsForUpgrade(baseImage, 1L);
+            verify(stackImageService).storeNewImageComponent(any(StackDto.class), eq(baseImage));
+        } else {
+            verify(imageComponentUpdaterService, never()).updateComponentsForUpgrade(baseImage, 1L);
+            verify(imageComponentUpdaterService, never()).updateComponentsForUpgrade(any(ClusterUpgradeProperties.class), anyLong());
+            verify(stackImageService).storeNewImageComponentWithCurrentVersions(any(StackDto.class), eq(baseImage));
+            verify(stackImageService, never()).storeNewImageComponent(any(StackDto.class), any(Image.class));
         }
-        verify(stackImageService).storeNewImageComponent(any(StackDto.class), eq(baseImage));
     }
 
     @Test
@@ -441,7 +467,8 @@ class StackImageUpdateActionsTest {
     }
 
     private static Stream<Arguments> upgradeSnapshotScenarios() {
-        return Stream.of(Arguments.of(false, true), Arguments.of(true, true), Arguments.of(false, false));
+        return Stream.of(Arguments.of(false, true, false), Arguments.of(true, true, false), Arguments.of(false, false, false),
+                Arguments.of(false, true, true), Arguments.of(true, true, true), Arguments.of(true, false, true));
     }
 
 }

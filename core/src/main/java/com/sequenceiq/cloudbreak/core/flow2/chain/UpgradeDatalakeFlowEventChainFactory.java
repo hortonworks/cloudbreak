@@ -25,10 +25,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.core.flow2.chain.util.SetDefaultJavaVersionFlowChainService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionForUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
@@ -64,9 +64,6 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     @Inject
     private SaltVersionUpgradeService saltVersionUpgradeService;
 
-    @Inject
-    private SetDefaultJavaVersionFlowChainService setDefaultJavaVersionFlowChainService;
-
     @Override
     public String initEvent() {
         return FlowChainTriggers.DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
@@ -87,7 +84,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getSaltUpdateTriggerEvent(event));
         flowEventChain.addAll(getImageUpdateTriggerEvent(imageChangeDto));
-        flowEventChain.addAll(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(stack, imageChangeDto));
+        flowEventChain.add(new SetDefaultJavaVersionForUpgradeTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getClusterUpgradeTriggerEvent(event, currentImage));
 
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);

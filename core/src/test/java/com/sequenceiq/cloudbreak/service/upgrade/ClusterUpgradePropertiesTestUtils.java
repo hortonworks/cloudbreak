@@ -52,7 +52,9 @@ public final class ClusterUpgradePropertiesTestUtils {
                 "x86_64",
                 "2024-01-01",
                 1L,
-                "currentImageName");
+                "currentImageName",
+                null,
+                null);
         ClusterUpgradeProperties.TargetImageUpgradeContext targetImage = new ClusterUpgradeProperties.TargetImageUpgradeContext(
                 "targetImageId",
                 "imageCatalogName",
@@ -86,6 +88,16 @@ public final class ClusterUpgradePropertiesTestUtils {
                 Map.of(), Map.of(), osType, osType.getOs(), architecture, "2024-01-01", 1L, "targetImageName",
                 null, Map.of(), null, null, cdhParcel, parcels, cmRepo);
         return new ClusterUpgradeProperties(properties.options(), properties.currentImage(), targetImage);
+    }
+
+    public static ClusterUpgradeProperties withCurrentProducts(ClusterUpgradeProperties properties, Set<ClouderaManagerProduct> currentProducts,
+            ClouderaManagerRepo currentCmRepo) {
+        ClusterUpgradeProperties.CurrentImageUpgradeContext current = properties.currentImage();
+        ClusterUpgradeProperties.CurrentImageUpgradeContext currentImage = new ClusterUpgradeProperties.CurrentImageUpgradeContext(
+                current.imageId(), current.catalogName(), current.catalogUrl(), current.runtimeVersion(), current.packageVersions(), current.tags(),
+                current.osType(), current.os(), current.architecture(), current.date(), current.created(), current.imageName(),
+                currentProducts, currentCmRepo);
+        return new ClusterUpgradeProperties(properties.options(), currentImage, properties.targetImage());
     }
 
 }
