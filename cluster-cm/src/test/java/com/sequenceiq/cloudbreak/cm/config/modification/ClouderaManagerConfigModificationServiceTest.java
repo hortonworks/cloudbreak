@@ -28,7 +28,7 @@ import com.cloudera.api.swagger.model.ApiRoleConfigGroupList;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
-import com.google.common.collect.Lists;
+import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerConfigService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerServiceManagementService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;

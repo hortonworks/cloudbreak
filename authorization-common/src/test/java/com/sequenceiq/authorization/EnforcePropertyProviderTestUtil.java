@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.CheckPermissionByCompositeRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;

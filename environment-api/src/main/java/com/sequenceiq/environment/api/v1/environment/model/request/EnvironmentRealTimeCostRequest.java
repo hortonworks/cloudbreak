@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.common.collect.Lists;
+import com.google.api.client.util.Lists;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

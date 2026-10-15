@@ -20,7 +20,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
-import com.google.common.collect.Lists;
+import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
