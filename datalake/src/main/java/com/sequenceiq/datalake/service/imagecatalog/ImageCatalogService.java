@@ -93,6 +93,17 @@ public class ImageCatalogService implements AuthorizationResourceCrnProvider {
         }
     }
 
+    public boolean isPrewarmedImage(ImageSettingsV4Request imageSettingsV4Request) {
+        if (imageSettingsV4Request == null || StringUtils.isBlank(imageSettingsV4Request.getId())) {
+            return true;
+        }
+        List<ImageV4Response> images = getImagesMatchingRequest(imageSettingsV4Request);
+        if (images == null || images.isEmpty()) {
+            return false;
+        }
+        return images.stream().anyMatch(img -> !img.getPreWarmParcels().isEmpty());
+    }
+
     public List<String> getDefaultImageCatalogRuntimeVersions(Long workspaceId) {
         ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakInternalCrnClient.withInternalCrn().imageCatalogV4Endpoint();
         try {

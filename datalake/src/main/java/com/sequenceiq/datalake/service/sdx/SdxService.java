@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -886,6 +887,20 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
         } else {
             return sdxClusterRepository.findByAccountIdAndDeletedIsNull(accountIdFromCrn);
+        }
+    }
+
+    public boolean isPrewarmedImage(SdxCluster sdxCluster) {
+        try {
+            String stackRequestJson = sdxCluster.getStackRequest();
+            if (StringUtils.isBlank(stackRequestJson)) {
+                return true;
+            }
+            StackV4Request stackV4Request = JsonUtil.readValue(stackRequestJson, StackV4Request.class);
+            return imageCatalogService.isPrewarmedImage(stackV4Request.getImage());
+        } catch (Exception e) {
+            LOGGER.warn("Could not determine image type for SDX {}, assuming base image timeout", sdxCluster.getId(), e);
+            return false;
         }
     }
 

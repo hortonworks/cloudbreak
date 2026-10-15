@@ -91,6 +91,11 @@ sdx:
     env.upgrade.database:
       targetversion: VERSION_14
   stack:
+    provision:
+      sleeptime_sec: 10
+      duration_min: 240
+      prewarmed:
+        duration_min: 120
     cmsync:
       sleeptime_sec: 10
       duration_min: 10

@@ -1,7 +1,9 @@
 package com.sequenceiq.datalake.service.imagecatalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -193,6 +195,63 @@ public class ImageCatalogServiceTest {
         imageV4Response.setImageSetsByProvider(imageSetsByProvider);
         imageV4Response.setStackDetails(stackDetails);
         return imageV4Response;
+    }
+
+    @Test
+    void testIsPrewarmedImageWithNullRequest() {
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isPrewarmedImage(null));
+        assertTrue(result);
+    }
+
+    @Test
+    void testIsPrewarmedImageWithBlankId() {
+        ImageSettingsV4Request request = new ImageSettingsV4Request();
+        request.setCatalog(IMAGE_CATALOG_NAME);
+
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isPrewarmedImage(request));
+        assertTrue(result);
+    }
+
+    @Test
+    void testIsPrewarmedImageWhenCatalogReturnsNoImages() throws Exception {
+        ImageSettingsV4Request request = new ImageSettingsV4Request();
+        request.setCatalog(IMAGE_CATALOG_NAME);
+        request.setId(IMAGE_ID);
+        ImagesV4Response imagesV4Response = new ImagesV4Response();
+        when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), eq(IMAGE_CATALOG_NAME), eq(IMAGE_ID), any())).thenReturn(imagesV4Response);
+
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isPrewarmedImage(request));
+        assertFalse(result);
+    }
+
+    @Test
+    void testIsPrewarmedImageWithPrewarmedImage() throws Exception {
+        ImageSettingsV4Request request = new ImageSettingsV4Request();
+        request.setCatalog(IMAGE_CATALOG_NAME);
+        request.setId(IMAGE_ID);
+        ImageV4Response image = new ImageV4Response();
+        image.setPreWarmParcels(List.of(List.of("CDH", "7.2.7")));
+        ImagesV4Response imagesV4Response = new ImagesV4Response();
+        imagesV4Response.setCdhImages(List.of(image));
+        when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), eq(IMAGE_CATALOG_NAME), eq(IMAGE_ID), any())).thenReturn(imagesV4Response);
+
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isPrewarmedImage(request));
+        assertTrue(result);
+    }
+
+    @Test
+    void testIsPrewarmedImageWithBaseImage() throws Exception {
+        ImageSettingsV4Request request = new ImageSettingsV4Request();
+        request.setCatalog(IMAGE_CATALOG_NAME);
+        request.setId(IMAGE_ID);
+        ImageV4Response image = new ImageV4Response();
+        image.setPreWarmParcels(List.of());
+        ImagesV4Response imagesV4Response = new ImagesV4Response();
+        imagesV4Response.setCdhImages(List.of(image));
+        when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), eq(IMAGE_CATALOG_NAME), eq(IMAGE_ID), any())).thenReturn(imagesV4Response);
+
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isPrewarmedImage(request));
+        assertFalse(result);
     }
 
     private BaseImageV4Response getBaseImageResponse() {

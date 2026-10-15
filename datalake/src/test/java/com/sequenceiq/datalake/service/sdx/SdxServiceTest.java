@@ -1387,4 +1387,43 @@ class SdxServiceTest {
         recipe.setName("post-service-deployment");
         sdxClusterRequest.setRecipes(Set.of(recipe));
     }
+
+    @Test
+    void testIsPrewarmedImageReturnsTrueWhenNoStackRequest() {
+        SdxCluster sdxCluster = new SdxCluster();
+        assertTrue(underTest.isPrewarmedImage(sdxCluster));
+    }
+
+    @Test
+    void testIsPrewarmedImageReturnsTrueWhenNoImageId() throws Exception {
+        SdxCluster sdxCluster = new SdxCluster();
+        StackV4Request stackV4Request = new StackV4Request();
+        sdxCluster.setStackRequest(stackV4Request);
+        when(imageCatalogService.isPrewarmedImage(null)).thenReturn(true);
+        assertTrue(underTest.isPrewarmedImage(sdxCluster));
+    }
+
+    @Test
+    void testIsPrewarmedImageDelegatesToImageCatalogService() throws Exception {
+        SdxCluster sdxCluster = new SdxCluster();
+        StackV4Request stackV4Request = new StackV4Request();
+        ImageSettingsV4Request imageSettings = new ImageSettingsV4Request();
+        imageSettings.setId("test-image-uuid");
+        stackV4Request.setImage(imageSettings);
+        sdxCluster.setStackRequest(stackV4Request);
+        when(imageCatalogService.isPrewarmedImage(imageSettings)).thenReturn(false);
+        assertFalse(underTest.isPrewarmedImage(sdxCluster));
+    }
+
+    @Test
+    void testIsPrewarmedImageReturnsFalseOnException() throws Exception {
+        SdxCluster sdxCluster = new SdxCluster();
+        StackV4Request stackV4Request = new StackV4Request();
+        ImageSettingsV4Request imageSettings = new ImageSettingsV4Request();
+        imageSettings.setId("test-image-uuid");
+        stackV4Request.setImage(imageSettings);
+        sdxCluster.setStackRequest(stackV4Request);
+        when(imageCatalogService.isPrewarmedImage(imageSettings)).thenThrow(new RuntimeException("image catalog unreachable"));
+        assertFalse(underTest.isPrewarmedImage(sdxCluster));
+    }
 }

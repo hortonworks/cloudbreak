@@ -354,7 +354,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             } else if (importCommand.isPresent()) {
                 retryTemplateInstallIfNeeded(importCommand.get());
             }
-            importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
+            importCommand.ifPresent(cmd ->
+                    clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId(), prewarmed));
         } catch (ApiException e) {
             String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
             throw new ClouderaManagerOperationFailedException(msg, e);

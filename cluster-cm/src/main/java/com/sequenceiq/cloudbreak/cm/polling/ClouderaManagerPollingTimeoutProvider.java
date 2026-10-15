@@ -38,4 +38,11 @@ public class ClouderaManagerPollingTimeoutProvider {
         }
         return POLL_FOR_THREE_HOURS;
     }
+
+    public static long getTemplateInstallationTimeout(String cloudPlatform, boolean prewarmed) {
+        if (CloudPlatform.MOCK.equals(CloudPlatform.valueOf(cloudPlatform))) {
+            return DEFAULT_MOCK_TIMEOUT;
+        }
+        return prewarmed ? POLL_FOR_ONE_HOUR : POLL_FOR_THREE_HOURS;
+    }
 }

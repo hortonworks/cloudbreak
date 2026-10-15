@@ -161,9 +161,11 @@ public class ClouderaManagerPollingServiceProvider {
                         entitlementService.targetedUpscaleSupported(accountId)));
     }
 
-    public ExtendedPollingResult startPollingCmTemplateInstallation(StackDtoDelegate stack, ApiClient apiClient, Long commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
+    public ExtendedPollingResult startPollingCmTemplateInstallation(StackDtoDelegate stack, ApiClient apiClient, Long commandId, boolean prewarmed) {
+        long timeout = ClouderaManagerPollingTimeoutProvider.getTemplateInstallationTimeout(stack.getCloudPlatform(), prewarmed);
+        LOGGER.debug("Waiting for Cloudera Manager to install template. Prewarmed image: {}, timeout: {} seconds. [Server address: {}]",
+                prewarmed, timeout, stack.getClusterManagerIp());
+        return pollCommandWithTimeListener(stack, apiClient, commandId, timeout,
                 new ClouderaManagerTemplateInstallationChecker(clouderaManagerApiPojoFactory, clusterEventService, clouderaManagerErrorMapperService));
     }
 

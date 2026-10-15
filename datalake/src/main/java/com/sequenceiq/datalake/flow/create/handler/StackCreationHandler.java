@@ -36,8 +36,11 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
     @Value("${sdx.stack.provision.sleeptime_sec:10}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.stack.provision.duration_min:120}")
+    @Value("${sdx.stack.provision.duration_min:240}")
     private int durationInMinutes;
+
+    @Value("${sdx.stack.provision.prewarmed.duration_min:120}")
+    private int durationInMinutesPrewarmed;
 
     @Inject
     private ProvisionerService provisionerService;
@@ -58,11 +61,14 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         Long sdxId = stackCreationWaitRequest.getResourceId();
         String userId = stackCreationWaitRequest.getUserId();
         Selectable response;
+        int duration = durationInMinutes;
         try {
-            LOGGER.debug("start polling stack creation process for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
-            StackV4Response stackV4Response = provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
             SdxCluster sdxCluster = sdxService.getById(sdxId);
+            boolean prewarmed = sdxService.isPrewarmedImage(sdxCluster);
+            duration = prewarmed ? durationInMinutesPrewarmed : durationInMinutes;
+            LOGGER.debug("Start polling stack creation process for id: {}. Prewarmed: {}, timeout: {} minutes", sdxId, prewarmed, duration);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration, TimeUnit.MINUTES);
+            StackV4Response stackV4Response = provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
             sdxService.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
             response = new StackCreationSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
@@ -71,7 +77,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Poller stopped for Data Lake: {}", sdxId, pollerStoppedException);
             response = new SdxCreateFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Data Lake stack creation timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Data Lake stack creation timed out after " + duration + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Polling failed for stack: {}", sdxId, exception);
             response = new SdxCreateFailedEvent(sdxId, userId, exception);
