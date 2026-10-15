@@ -516,6 +516,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public OsType getFreeIpaDestinationUpgradeImageOS() {
+        return awsProperties.getFreeipa().getUpgrade().getDestinationOs();
+    }
+
+    @Override
     public OsType getFreeIpaSourceUpgradeImageOS() {
         return awsProperties.getFreeipa().getUpgrade().getSourceOs();
     }

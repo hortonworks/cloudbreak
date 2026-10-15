@@ -55,9 +55,9 @@ public class FreeIpaProperties {
     }
 
     public static class Upgrade {
-        private OsType destinationOs;
+        private OsType destinationOs = OsType.RHEL9;
 
-        private OsType sourceOs;
+        private OsType sourceOs = OsType.RHEL9;
 
         private String catalog;
 

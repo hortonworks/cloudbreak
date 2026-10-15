@@ -422,14 +422,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public OsType getFreeIpaDestinationUpgradeImageOS() {
-        LOGGER.warn("'freeIpaUpgradeImageId' is not implemented");
-        return null;
+        return OsType.RHEL9;
     }
 
     @Override
     public OsType getFreeIpaSourceUpgradeImageOS() {
-        LOGGER.warn("'freeIpaCentos7UpgradeImageId' is not implemented");
-        return null;
+        return OsType.RHEL9;
     }
 
     @Override
