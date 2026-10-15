@@ -13,11 +13,13 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -29,6 +31,8 @@ import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelUrlProvider;
 public class ParcelAvailabilityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParcelAvailabilityService.class);
+
+    private static final String CM_REPOSITORY_METADATA_PATH = "repodata/repomd.xml";
 
     @Inject
     private ParcelUrlProvider parcelUrlProvider;
@@ -45,8 +49,10 @@ public class ParcelAvailabilityService {
     public Set<Response> validateAvailability(ClusterUpgradeProperties clusterUpgradeProperties, Long resourceId) {
         StackDto stackDto = stackDtoService.getById(resourceId);
         Set<String> requiredParcelUrlsFromImage = new HashSet<>(parcelUrlProvider.getRequiredParcelsFromImage(clusterUpgradeProperties, stackDto));
-        String cmRpmUrl = cmUrlProvider.getCmRpmUrl(clusterUpgradeProperties);
-        requiredParcelUrlsFromImage.add(cmRpmUrl);
+        String cmValidationUrl = getCmValidationUrl(clusterUpgradeProperties);
+        if (cmValidationUrl != null) {
+            requiredParcelUrlsFromImage.add(cmValidationUrl);
+        }
 
         Map<String, Optional<Response>> parcelsByResponse = getParcelsByResponse(requiredParcelUrlsFromImage);
         Set<String> unavailableParcels = getUnavailableParcels(parcelsByResponse);
@@ -54,32 +60,44 @@ public class ParcelAvailabilityService {
         if (unavailableParcels.isEmpty()) {
             LOGGER.debug("All required parcels are available on the image {}", clusterUpgradeProperties.getTargetImageId());
             return parcelsByResponse.entrySet().stream()
-                    .filter(filterCmRpmFile(cmRpmUrl).and(entry -> entry.getValue().isPresent()))
+                    .filter(filterCmResource(cmValidationUrl).and(entry -> entry.getValue().isPresent()))
                     .map(entry -> entry.getValue().get())
                     .collect(Collectors.toSet());
         } else {
             LOGGER.debug("Parcels by response status: {}", parcelsByResponse);
-            String errorMessage = buildErrorMessage(clusterUpgradeProperties.getTargetImageId(), cmRpmUrl, unavailableParcels);
+            String errorMessage = buildErrorMessage(clusterUpgradeProperties, cmValidationUrl, unavailableParcels);
             LOGGER.error(errorMessage);
             throw new UpgradeValidationFailedException(errorMessage);
         }
     }
 
-    private String buildErrorMessage(String imageId, String cmRpmUrl, Set<String> unavailableParcels) {
+    private String getCmValidationUrl(ClusterUpgradeProperties properties) {
+        ClouderaManagerRepo repo = properties.getClouderaManagerRepo();
+        if (repo != null && StringUtils.isBlank(repo.getBuildNumber())) {
+            String metadataUrl = StringUtils.appendIfMissing(repo.getBaseUrl(), "/") + CM_REPOSITORY_METADATA_PATH;
+            LOGGER.info("CM build number was not specified; checking repository metadata at {}", metadataUrl);
+            return metadataUrl;
+        }
+        return cmUrlProvider.getCmRpmUrl(properties);
+    }
+
+    private String buildErrorMessage(ClusterUpgradeProperties properties, String cmValidationUrl, Set<String> unavailableParcels) {
         StringBuilder errorMessageBuilder = new StringBuilder();
-        if (unavailableParcels.contains(cmRpmUrl)) {
-            errorMessageBuilder.append("Failed to access Cloudera Manager RPM: ").append(cmRpmUrl);
-            unavailableParcels.remove(cmRpmUrl);
+        if (unavailableParcels.contains(cmValidationUrl)) {
+            ClouderaManagerRepo repo = properties.getClouderaManagerRepo();
+            String resource = repo != null && StringUtils.isBlank(repo.getBuildNumber()) ? "repository metadata" : "RPM";
+            errorMessageBuilder.append("Failed to access Cloudera Manager ").append(resource).append(": ").append(cmValidationUrl);
+            unavailableParcels.remove(cmValidationUrl);
         }
         if (!unavailableParcels.isEmpty()) {
             errorMessageBuilder.append(" Failed to access the following parcels: ").append(unavailableParcels);
         }
-        errorMessageBuilder.append(" Image ID: ").append(imageId);
+        errorMessageBuilder.append(" Image ID: ").append(properties.getTargetImageId());
         return errorMessageBuilder.toString();
     }
 
-    private Predicate<Map.Entry<String, Optional<Response>>> filterCmRpmFile(String cmRpmUrl) {
-        return entry -> !entry.getKey().equals(cmRpmUrl);
+    private Predicate<Map.Entry<String, Optional<Response>>> filterCmResource(String cmValidationUrl) {
+        return entry -> !entry.getKey().equals(cmValidationUrl);
     }
 
     private Map<String, Optional<Response>> getParcelsByResponse(Set<String> requiredParcelsFromImage) {

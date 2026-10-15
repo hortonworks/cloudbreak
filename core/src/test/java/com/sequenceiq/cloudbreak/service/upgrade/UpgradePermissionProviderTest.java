@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,22 +16,32 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.matrix.UpgradeMatrixService;
+import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 public class UpgradePermissionProviderTest {
@@ -59,6 +71,9 @@ public class UpgradePermissionProviderTest {
 
     @Mock
     private UpgradePathRestrictionService upgradePathRestrictionService;
+
+    @Spy
+    private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
 
     @Test
     public void testPermitStackUpgradeShouldReturnTrueWhenTheVersionsAreEqualAndTheBuildNumberIsGreater() {
@@ -282,4 +297,58 @@ public class UpgradePermissionProviderTest {
         packageVersions.put(CDH_BUILD_NUMBER.getKey(), buildNumber);
         return packageVersions;
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "7.9.0, 999, 7.3.3-1.cdh7.3.3.p10000.999, false, Cloudera Manager",
+            "7.13.2.10000, 999, 7.3.3-1.cdh7.3.3.p10000.999, false, Cloudera Manager",
+            "7.13.2.20000, 199, 7.3.3-1.cdh7.3.3.p10000.999, false, Cloudera Manager",
+            "7.13.2.20000, 200, 7.3.1-1.cdh7.3.1.p99999.999, false, CDH",
+            "7.13.2.20000, 200, 7.3.2-1.cdh7.3.2.p10000.999, false, CDH",
+            "7.13.2.20000, 200, 7.3.2-1.cdh7.3.2.p20000.199, false, CDH",
+            "7.13.2.20000, 200, 7.3.2-1.cdh7.3.2.p20000.200, true, CDH",
+            "7.13.2.20000, 201, 7.3.2-1.cdh7.3.2.p20000.200, true, CDH",
+            "7.13.3.10000, 1, 7.3.3-1.cdh7.3.3.p10000.1, true, CDH",
+            "7.13.2.30000, 1, 7.3.2-1.cdh7.3.2.p30000.1, true, CDH",
+            "7.13.2.20000, 200, 7.3.2-1.cdh7.3.2.p20000.201, true, CDH",
+            "7.13.3.10000, , 7.3.3-1.cdh7.3.3.p10000.1, true, CDH"
+    })
+    void validatesRequestedVersionsWithExistingComparisonRules(String cmVersion, String cmBuild, String cdhVersion, boolean permitted, String component) {
+        ReflectionTestUtils.setField(underTest, "versionComparisonContextFactory", new VersionComparisonContextFactory());
+        ClusterUpgradeProperties properties = componentVersionProperties(cmVersion, cmBuild, cdhVersion);
+        UpgradeComponents components = new UpgradeComponents(new ClouderaManagerRepo()
+                .withVersion(cmBuild == null ? cmVersion : cmVersion + "-" + cmBuild), List.of(properties.targetImage().cdhParcel()));
+
+        if (permitted) {
+            assertDoesNotThrow(() -> underTest.validateRequestedComponentVersions(properties));
+            assertDoesNotThrow(() -> underTest.validateRequestedComponentVersions(properties.currentImage().packageVersions(),
+                    properties.currentImage().products(), components));
+        } else {
+            assertThatThrownBy(() -> underTest.validateRequestedComponentVersions(properties))
+                    .isInstanceOf(BadRequestException.class).hasMessageContaining(component).hasMessageNotContaining("VersionComparisonContext");
+            assertThatThrownBy(() -> underTest.validateRequestedComponentVersions(properties.currentImage().packageVersions(),
+                    properties.currentImage().products(), components)).isInstanceOf(BadRequestException.class).hasMessageContaining(component);
+        }
+        verifyNoInteractions(supportedRuntimes, upgradeMatrixService, upgradePathRestrictionService);
+    }
+
+    private ClusterUpgradeProperties componentVersionProperties(String cmVersion, String cmBuild, String cdhVersion) {
+        ClouderaManagerProduct currentCdh = new ClouderaManagerProduct().withName("CDH").withVersion("7.3.2-1.cdh7.3.2.p20000.200");
+        ClouderaManagerProduct targetCdh = new ClouderaManagerProduct().withName("CDH").withVersion(cdhVersion);
+        String runtime = CdhVersionProvider.getCdhStackVersionFromVersionString(cdhVersion).orElseThrow();
+        Map<String, String> targetPackages = new HashMap<>(Map.of(CM.getKey(), cmVersion, STACK.getKey(), runtime,
+                CDH_BUILD_NUMBER.getKey(), CdhVersionProvider.getCdhBuildNumberFromVersionString(cdhVersion).orElseThrow().toString()));
+        if (cmBuild != null) {
+            targetPackages.put(CM_BUILD_NUMBER.getKey(), cmBuild);
+        }
+        ClusterUpgradeProperties.CurrentImageUpgradeContext current = new ClusterUpgradeProperties.CurrentImageUpgradeContext(
+                "current", "catalog", "catalog-url", "7.3.2", Map.of(CM.getKey(), "7.13.2.20000", CM_BUILD_NUMBER.getKey(), "200",
+                        STACK.getKey(), "7.3.2", CDH_BUILD_NUMBER.getKey(), "200"), Map.of(), OsType.RHEL8, "redhat8", "x86_64",
+                null, 2L, "current-image", Set.of(currentCdh), null);
+        ClusterUpgradeProperties.TargetImageUpgradeContext target = new ClusterUpgradeProperties.TargetImageUpgradeContext(
+                "base", "catalog", "catalog-url", runtime, runtime, targetPackages.get(CDH_BUILD_NUMBER.getKey()), targetPackages, Map.of(),
+                OsType.RHEL8, "redhat8", "x86_64", null, 1L, "base-image", null, Map.of(), null, null, targetCdh, Set.of(), null);
+        return new ClusterUpgradeProperties(new ClusterUpgradeProperties.UpgradeRequestOptions(false, false, true), current, target);
+    }
+
 }

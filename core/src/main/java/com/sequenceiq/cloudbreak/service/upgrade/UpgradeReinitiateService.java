@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.converter.UpgradeComponentsConverter;
 import com.sequenceiq.cloudbreak.core.flow2.chain.UpgradeDistroxFlowEventChainFactory;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.util.CodUtil;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.UpgradeReinitiateStatus;
+import com.sequenceiq.distrox.v1.distrox.converter.ClouderaManagerV1ToClouderaManagerV4Converter;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.service.FlowService;
@@ -35,6 +37,9 @@ import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 public class UpgradeReinitiateService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeReinitiateService.class);
+
+    @Inject
+    private ClouderaManagerV1ToClouderaManagerV4Converter clouderaManagerConverter;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -132,6 +137,10 @@ public class UpgradeReinitiateService {
                     DistroXUpgradeV1Request distroXUpgradeV1Request = new DistroXUpgradeV1Request();
                     distroXUpgradeV1Request.setImageId(Optional.ofNullable(triggerEvent.getImageChangeDto()).map(ImageChangeDto::getImageId).orElse(null));
                     distroXUpgradeV1Request.setRuntime(triggerEvent.getRuntimeVersion());
+                    if (triggerEvent.getImageChangeDto() != null && triggerEvent.getImageChangeDto().getComponents() != null) {
+                        distroXUpgradeV1Request.setComponents(clouderaManagerConverter.convert(
+                                UpgradeComponentsConverter.toRequest(triggerEvent.getImageChangeDto().getComponents())));
+                    }
                     distroXUpgradeV1Request.setLockComponents(triggerEvent.isLockComponents());
                     distroXUpgradeV1Request.setRollingUpgradeEnabled(triggerEvent.isRollingUpgradeEnabled());
                     distroXUpgradeV1Request.setReplaceVms(DistroXUpgradeReplaceVms.fromBoolean(triggerEvent.isReplaceVms()));

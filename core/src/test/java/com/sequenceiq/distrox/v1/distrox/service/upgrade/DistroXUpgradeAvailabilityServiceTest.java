@@ -15,6 +15,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -25,9 +26,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -49,6 +53,7 @@ import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 
@@ -93,6 +98,9 @@ public class DistroXUpgradeAvailabilityServiceTest {
 
     private final Stack stack = new Stack();
 
+    @Mock
+    private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
+
     @BeforeEach
     public void init() {
         Blueprint blueprint = TestUtil.blueprint();
@@ -105,6 +113,48 @@ public class DistroXUpgradeAvailabilityServiceTest {
 
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(
                 Optional.of(SdxBasicView.builder().withName("name").build()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"7.3.1", "7.3.2"})
+    void validatesComponentsRuntimeAgainstDataLake(String datalakeRuntime) {
+        UpgradeV4Request request = new UpgradeV4Request();
+        request.setInternalUpgradeSettings(InternalUpgradeSettings.builder().build());
+        when(runtimeVersionService.getRuntimeVersion(stack.getCluster().getId())).thenReturn(Optional.of("7.3.1"));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN))
+                .thenReturn(Optional.of(SdxBasicView.builder().withRuntime(datalakeRuntime).build()));
+        DistroXUpgradeResponseFilterService realFilter = new DistroXUpgradeResponseFilterService();
+        ReflectionTestUtils.setField(realFilter, "platformAwareSdxConnector", platformAwareSdxConnector);
+        when(distroXUpgradeResponseFilterService.filterForDatalakeVersion(eq(ENVIRONMENT_CRN), any()))
+                .thenAnswer(invocation -> realFilter.filterForDatalakeVersion(invocation.getArgument(0), invocation.getArgument(1)));
+
+        if ("7.3.1".equals(datalakeRuntime)) {
+            assertThrows(BadRequestException.class, () -> underTest.validateUpgradeWithComponents(stack, request, "7.3.2", false, USER_CRN));
+        } else {
+            assertDoesNotThrow(() -> underTest.validateUpgradeWithComponents(stack, request, "7.3.2", false, USER_CRN));
+        }
+        verify(clusterUpgradeAvailabilityService).validateUpgradePreconditions(stack, false, request.getInternalUpgradeSettings());
+    }
+
+    @Test
+    void componentsUpgradeHonorsDifferentDataLakeRuntimeEntitlement() {
+        UpgradeV4Request request = new UpgradeV4Request();
+        when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(ACCOUNT_ID)).thenReturn(true);
+        when(runtimeVersionService.getRuntimeVersion(stack.getCluster().getId())).thenReturn(Optional.of("7.3.1"));
+
+        assertDoesNotThrow(() -> underTest.validateUpgradeWithComponents(stack, request, "7.3.2", false, USER_CRN));
+        verifyNoInteractions(distroXUpgradeResponseFilterService);
+    }
+
+    @Test
+    void componentsUpgradeHonorsRangerRazRestrictions() {
+        UpgradeV4Request request = new UpgradeV4Request();
+        when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(ACCOUNT_ID)).thenReturn(true);
+        when(runtimeVersionService.getRuntimeVersion(stack.getCluster().getId())).thenReturn(Optional.of("7.2.7"));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN))
+                .thenReturn(Optional.of(SdxBasicView.builder().withName("dl").withRuntime("7.2.10").withRazEnabled().build()));
+
+        assertThrows(BadRequestException.class, () -> underTest.validateUpgradeWithComponents(stack, request, "7.2.10", false, USER_CRN));
     }
 
     @Test

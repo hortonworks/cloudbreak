@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -18,22 +21,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
+import com.sequenceiq.cloudbreak.converter.UpgradeComponentsConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -45,6 +58,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.OsType;
 
@@ -85,8 +99,118 @@ class ClusterUpgradePropertiesFactoryTest {
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
+    @Spy
+    private OsChangeService osChangeService;
+
     @InjectMocks
     private ClusterUpgradePropertiesFactory underTest;
+
+    @BeforeEach
+    void setupPackageVersionMapping() {
+        lenient().when(baseImagePackageVersionsEnricher.getPackageVersionsFromComponents(
+                any(), anySet())).thenCallRealMethod();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void buildsBaseImagePropertiesFromRequestedComponents(boolean datalake) throws Exception {
+        Stack stack = new Stack();
+        stack.setType(datalake ? com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE
+                : com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD);
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
+        Image current = currentImage();
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image baseImage = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder().withUuid(TARGET_IMAGE_ID)
+                .withOs("redhat8").withOsType("redhat8").withArchitecture("x86_64")
+                .withPackageVersions(Map.of("salt", "3006.10")).build();
+        StatedImage statedImage = StatedImage.statedImage(baseImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(current);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(statedImage);
+        when(stackImageService.getImageModelFromStatedImage(stack, current, statedImage)).thenReturn(Image.builder().withImageName("base-ami").build());
+        ClouderaManagerV4Request components = requestedComponents();
+        ImageChangeDto dto = new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL,
+                UpgradeComponentsConverter.fromRequest(components));
+        ImageChangeDto restored = JsonUtil.readValue(JsonUtil.writeValueAsString(dto), ImageChangeDto.class);
+
+        ClusterUpgradeProperties properties = underTest.create(restored, false, true, false);
+
+        assertTrue(properties.targetImage().isBaseImage());
+        assertEquals("7.3.2", properties.runtimeVersion());
+        assertEquals("83281140", properties.cdhBuildNumber());
+        assertEquals("7.13.2.20000-83309838", properties.targetImage().clouderaManagerRepo().getFullVersion());
+        assertEquals("https://build/cm/", properties.targetImage().clouderaManagerRepo().getBaseUrl());
+        assertEquals("3006.10", properties.toCloudImage().getPackageVersions().get("salt"));
+        assertEquals("7.3.2", properties.toCloudImage().getPackageVersions().get("stack"));
+        assertEquals("83309838", properties.toCloudImage().getPackageVersions().get("cm-build-number"));
+        assertEquals(2, properties.getAllTargetProducts().size());
+        ClouderaManagerProduct additional = properties.getPreWarmParcels().iterator().next();
+        assertEquals("https://build/flink/FLINK-1.2.3-el8.parcel", additional.getParcelFileUrl());
+        assertEquals(List.of("https://build/flink.jar"), additional.getCsd());
+        assertEquals("https://build/cdh/CDH-7.3.2-1.cdh7.3.2.p20000.83281140-el8.parcel", properties.cdhParcel().getParcelFileUrl());
+        verifyNoInteractions(clouderaManagerProductTransformer, imageToClouderaManagerRepoConverter);
+    }
+
+    @Test
+    void rejectsIncompleteComponentsBeforeImageLookup() {
+        ImageChangeDto dto = new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID, null, null, new UpgradeComponents(null, null));
+
+        assertThatThrownBy(() -> underTest.create(dto, false, false, false))
+                .isInstanceOf(BadRequestException.class).hasMessageContaining("repository.version");
+        verifyNoInteractions(imageCatalogService, componentConfigProviderService, stackService);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"7.13.1.0-12345,7.13.1.0,12345,x86_64,el8", "7.13.1.0,7.13.1.0,,arm64,el8.aarch64le"})
+    void parsesCmVersionWithOptionalBuildNumber(String fullVersion, String version, String buildNumber,
+            String architecture, String parcelPostfix) throws Exception {
+        Stack stack = new Stack();
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
+        Image current = currentImage();
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image baseImage = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
+                .withUuid(TARGET_IMAGE_ID).withOsType("redhat8").withArchitecture(architecture).withPackageVersions(Map.of()).build();
+        StatedImage statedImage = StatedImage.statedImage(baseImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(current);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(statedImage);
+        when(stackImageService.getImageModelFromStatedImage(stack, current, statedImage)).thenReturn(Image.builder().build());
+        ClouderaManagerV4Request components = requestedComponents();
+        components.getRepository().setVersion(fullVersion);
+
+        ClusterUpgradeProperties result = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID, null, null,
+                UpgradeComponentsConverter.fromRequest(components)), false, false, false);
+
+        assertEquals(version, result.targetImage().clouderaManagerRepo().getVersion());
+        assertEquals(buildNumber, result.targetImage().clouderaManagerRepo().getBuildNumber());
+        assertEquals("https://build/cdh/CDH-7.3.2-1.cdh7.3.2.p20000.83281140-" + parcelPostfix + ".parcel", result.cdhParcel().getParcelFileUrl());
+    }
+
+    @Test
+    void resolvesCurrentRuntimeForAClusterProvisionedWithABaseImage() throws Exception {
+        Stack stack = new Stack();
+        Image current = Image.builder().withOsType("redhat8").withPackageVersions(Map.of("salt", "3006.10")).build();
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image baseImage = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
+                .withUuid(TARGET_IMAGE_ID).withOsType("redhat8").withPackageVersions(Map.of()).build();
+        StatedImage statedImage = StatedImage.statedImage(baseImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
+        when(stackImageService.getImageModelFromStatedImage(stack, current, statedImage)).thenReturn(Image.builder().build());
+        when(baseImagePackageVersionsEnricher.enrich(current, stack)).thenReturn(currentImage());
+
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(current);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(statedImage);
+        ClusterUpgradeProperties properties = underTest.create(
+                new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL,
+                        UpgradeComponentsConverter.fromRequest(requestedComponents())), false, false, false);
+
+        assertEquals("7.2.17", properties.currentImage().runtimeVersion());
+        assertEquals("7.3.2", properties.targetImage().runtimeVersion());
+    }
 
     @Test
     void resolvesCurrentRuntimeForBaseImageSourceWithPrewarmTarget() throws Exception {
@@ -148,6 +272,84 @@ class ClusterUpgradePropertiesFactoryTest {
         ClusterUpgradeProperties restored = JsonUtil.readValue(JsonUtil.writeValueAsString(properties), ClusterUpgradeProperties.class);
         assertEquals("1.20.0-custom.1", restored.currentImage().products().iterator().next().getVersion());
         assertEquals("7.13.1-1", restored.currentImage().clouderaManagerRepo().getFullVersion());
+    }
+
+    @Test
+    void normalizesRequestedCmBaseUrlWithoutTrailingSlash() throws Exception {
+        Stack stack = new Stack();
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
+        Image current = currentImage();
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image baseImage = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder().withUuid(TARGET_IMAGE_ID)
+                .withOsType("redhat8").withPackageVersions(Map.of()).build();
+        StatedImage statedImage = StatedImage.statedImage(baseImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(current);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(statedImage);
+        when(stackImageService.getImageModelFromStatedImage(stack, current, statedImage)).thenReturn(Image.builder().build());
+        ClouderaManagerV4Request components = requestedComponents();
+        components.getRepository().setBaseUrl("https://build/cm/redhat8/yum");
+
+        ClusterUpgradeProperties properties = underTest.create(
+                new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL,
+                UpgradeComponentsConverter.fromRequest(components)), false, false, false);
+
+        assertEquals("https://build/cm/redhat8/yum/", properties.targetImage().clouderaManagerRepo().getBaseUrl());
+    }
+
+    @Test
+    void alignsRequestedRepositoriesWithBaseImageOsWithoutChangingRequest() throws Exception {
+        Stack stack = new Stack();
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
+        Image current = currentImage();
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image baseImage = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
+                .withUuid(TARGET_IMAGE_ID).withOs("redhat8").withOsType("redhat8").withArchitecture("x86_64").withPackageVersions(Map.of()).build();
+        StatedImage statedImage = StatedImage.statedImage(baseImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(current);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(statedImage);
+        when(stackImageService.getImageModelFromStatedImage(stack, current, statedImage)).thenReturn(Image.builder().build());
+        ClouderaManagerV4Request components = requestedComponents();
+        String cmRepo = "https://build/cm/redhat9/yum/";
+        String cfmRepo = "https://build/cfm/redhat9/yum/tars/parcel/";
+        components.getRepository().setBaseUrl(cmRepo);
+        components.getRepository().setGpgKeyUrl(cmRepo + "RPM-GPG-KEY-cloudera");
+        ClouderaManagerProductV4Request cfm = components.getProducts().get(1);
+        cfm.setName("CFM");
+        cfm.setVersion("4.12.0.20000-231");
+        cfm.setParcel(cfmRepo);
+        cfm.setCsd(List.of(cfmRepo + "NIFI.jar", cfmRepo + "NIFIREGISTRY.jar", "https://build/shared/NIFI.jar"));
+
+        ClusterUpgradeProperties properties = underTest.create(
+                new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL,
+                UpgradeComponentsConverter.fromRequest(components)), false, false, false);
+
+        assertEquals("https://build/cm/redhat8/yum/", properties.targetImage().clouderaManagerRepo().getBaseUrl());
+        assertEquals("https://build/cm/redhat8/yum/RPM-GPG-KEY-cloudera", properties.targetImage().clouderaManagerRepo().getGpgKeyUrl());
+        ClouderaManagerProduct targetCfm = properties.getPreWarmParcels().iterator().next();
+        assertEquals("https://build/cfm/redhat8/yum/tars/parcel/", targetCfm.getParcel());
+        assertEquals("https://build/cfm/redhat8/yum/tars/parcel/CFM-4.12.0.20000-231-el8.parcel", targetCfm.getParcelFileUrl());
+        assertEquals(List.of("https://build/cfm/redhat8/yum/tars/parcel/NIFI.jar", "https://build/cfm/redhat8/yum/tars/parcel/NIFIREGISTRY.jar",
+                "https://build/shared/NIFI.jar"), targetCfm.getCsd());
+        assertEquals("https://build/cdh/", properties.cdhParcel().getParcel());
+        assertEquals(cmRepo, components.getRepository().getBaseUrl());
+        assertEquals(cmRepo + "RPM-GPG-KEY-cloudera", components.getRepository().getGpgKeyUrl());
+        assertEquals(cfmRepo, cfm.getParcel());
+        assertEquals(cfmRepo + "NIFI.jar", cfm.getCsd().getFirst());
+    }
+
+    private ClouderaManagerV4Request requestedComponents() {
+        ClouderaManagerRepositoryV4Request repository = new ClouderaManagerRepositoryV4Request();
+        repository.setVersion("7.13.2.20000-83309838");
+        repository.setBaseUrl("https://build/cm/");
+        return new ClouderaManagerV4Request().withRepository(repository).withProducts(List.of(
+                new ClouderaManagerProductV4Request().withName("CDH").withVersion("7.3.2-1.cdh7.3.2.p20000.83281140")
+                        .withParcel("https://build/cdh"),
+                new ClouderaManagerProductV4Request().withName("FLINK").withVersion("1.2.3").withParcel("https://build/flink/")
+                        .withCsd(List.of("https://build/flink.jar"))));
     }
 
     @Test

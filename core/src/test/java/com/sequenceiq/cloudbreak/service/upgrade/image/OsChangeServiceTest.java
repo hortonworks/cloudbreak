@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.image;
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.common.model.OsType.RHEL9;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,6 +23,10 @@ import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityRetrievalService;
@@ -52,6 +58,38 @@ class OsChangeServiceTest {
 
     @Mock
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    @Test
+    void rejectsMalformedRequestedRepoUrlWithClearMessage() {
+        assertThatThrownBy(() -> underTest.updateRepoUrlForOs("https://bad host/redhat9/yum/", OsType.RHEL8, "x86_64"))
+                .isInstanceOf(BadRequestException.class).hasMessageContaining("Invalid repository URL");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "redhat9, RHEL8, x86_64, redhat8",
+            "redhat8, RHEL9, x86_64, redhat9",
+            "redhat9arm64, RHEL8, arm64, redhat8arm64",
+            "redhat8arm64, RHEL9, arm64, redhat9arm64",
+            "redhat8, RHEL8, x86_64, redhat8",
+            "redhat9, RHEL8, , redhat8"
+    })
+    void alignsRepositoryPathWithRequestedOs(String sourcePath, OsType targetOs, String architecture, String targetPath) {
+        String sourceUrl = "https://build/cfm/" + sourcePath + "/yum/tars/parcel/NIFI.jar?source=/redhat9/yum/";
+
+        String result = underTest.updateRepoUrlForOs(sourceUrl, targetOs, architecture);
+
+        assertEquals("https://build/cfm/" + targetPath + "/yum/tars/parcel/NIFI.jar?source=/redhat9/yum/", result);
+        verifyNoInteractions(parcelAvailabilityRetrievalService, clouderaManagerProductTransformer);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"https://build/cdh/parcels/", "https://build/redhat9/custom/yum/NIFI.jar", "https://redhat9/yum/NIFI.jar"})
+    void preservesUrlsWithoutAnOsSpecificRepositoryPath(String url) {
+        assertEquals(url, underTest.updateRepoUrlForOs(url, RHEL8, Architecture.X86_64.getName()));
+        verifyNoInteractions(parcelAvailabilityRetrievalService, clouderaManagerProductTransformer);
+    }
 
     @Test
     void testIsOsChangePermittedShouldReturnTrueWhenTheCurrentOsIsRhel8AndTheTargetIsRhel9AndTheArchIsX86() {

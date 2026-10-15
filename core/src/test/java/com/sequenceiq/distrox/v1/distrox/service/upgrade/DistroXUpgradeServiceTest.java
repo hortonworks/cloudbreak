@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -41,6 +42,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
@@ -56,6 +60,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.converter.UpgradeComponentsConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -64,7 +69,9 @@ import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.service.upgrade.BaseImageUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeComponents;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
@@ -100,6 +107,9 @@ class DistroXUpgradeServiceTest {
     private static final boolean LOCK_COMPONENTS = false;
 
     private static final boolean ROLLING_UPGRADE_ENABLED = true;
+
+    @Mock
+    private BaseImageUpgradeService baseImageUpgradeService;
 
     @Mock
     private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
@@ -173,6 +183,122 @@ class DistroXUpgradeServiceTest {
         lenient().when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
         lenient().when(upgradeConverter.convert(any(UpgradeV4Response.class))).thenCallRealMethod();
         lenient().when(upgradeConverter.convert(any(DistroXUpgradeV1Request.class), anyBoolean(), anyBoolean())).thenCallRealMethod();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void forwardsComponentsToUpgradeAndPreparation(boolean prepare) {
+        UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);
+        ClouderaManagerV4Request components = new ClouderaManagerV4Request().withRepository(
+                new ClouderaManagerRepositoryV4Request()
+                        .withVersion("7.13.2.20000-83309838").withBaseUrl("https://build/cm/"))
+                .withProducts(List.of(
+                new ClouderaManagerProductV4Request().withName("CDH").withVersion("7.3.2-1.cdh7.3.2.p20000.83281140").withParcel("https://build/cdh/")));
+        request.setComponents(components);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(true);
+        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, "base-image", "catalog", "catalog-url",
+                UpgradeComponentsConverter.fromRequest(components));
+        when(baseImageUpgradeService.createImageChangeDto(eq(stack), any(UpgradeComponents.class))).thenReturn(imageChangeDto);
+        when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
+        if (!prepare) {
+            when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
+        }
+
+        doAs(USER_CRN, () -> underTest.upgradeCluster(request, CLUSTER, prepare, WS_ID));
+
+        if (prepare) {
+            verify(reactorFlowManager).triggerClusterUpgradePreparation(STACK_ID, imageChangeDto, "7.3.2");
+        } else {
+            verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, false, "variant", ROLLING_UPGRADE_ENABLED, "7.3.2");
+        }
+        verify(upgradeAvailabilityService).validateUpgradeWithComponents(stack, request, "7.3.2", false, USER_CRN);
+        verifyNoInteractions(imageSelector, stackCommonService);
+    }
+
+    @Test
+    void reinitiatedComponentsUpgradeKeepsOriginalBaseImage() {
+        UpgradeV4Request request = new UpgradeV4Request();
+        request.setInternalUpgradeSettings(InternalUpgradeSettings.builder()
+                .withRollingUpgradeEnabled(ROLLING_UPGRADE_ENABLED)
+                .withUpgradeReinitiation(true)
+                .build());
+        request.setImageId("original-base-image");
+        request.setRuntime("7.3.1");
+        ClouderaManagerV4Request components = new ClouderaManagerV4Request().withRepository(
+                new ClouderaManagerRepositoryV4Request()
+                        .withVersion("7.13.2.20000-83309838").withBaseUrl("https://build/cm/"))
+                .withProducts(List.of(
+                new ClouderaManagerProductV4Request().withName("CDH").withVersion("7.3.2-1.cdh7.3.2.p20000.83281140").withParcel("https://build/cdh/")));
+        request.setComponents(components);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(true);
+        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, "original-base-image", "catalog", "catalog-url",
+                UpgradeComponentsConverter.fromRequest(components));
+        when(baseImageUpgradeService.createImageChangeDto(eq(stack), any(UpgradeComponents.class), eq("original-base-image"))).thenReturn(imageChangeDto);
+        when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
+        when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN, DO_NOT_KEEP_VARIANT)).thenReturn("variant");
+
+        doAs(USER_CRN, () -> underTest.upgradeCluster(request, CLUSTER, false, WS_ID));
+
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, false, "variant", ROLLING_UPGRADE_ENABLED, "7.3.2");
+        verify(baseImageUpgradeService, never()).createImageChangeDto(eq(stack), any(UpgradeComponents.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void rejectsDowngradeSynchronouslyWithoutStartingUpgradeOrPreparation(boolean preparation) {
+        UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);
+        request.setComponents(new ClouderaManagerV4Request().withRepository(new ClouderaManagerRepositoryV4Request()
+                .withVersion("7.2.0-100").withBaseUrl("https://build/cm/"))
+                .withProducts(List.of(new ClouderaManagerProductV4Request().withName("CDH")
+                        .withVersion("7.3.2-1.cdh7.3.2.p20000.83281140").withParcel("https://build/cdh/"))));
+        when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(true);
+        BadRequestException failure = new BadRequestException("Cannot downgrade Cloudera Manager");
+        when(baseImageUpgradeService.createImageChangeDto(eq(stack), any(UpgradeComponents.class))).thenThrow(failure);
+
+        assertEquals(failure, assertThrows(BadRequestException.class,
+                () -> doAs(USER_CRN, () -> underTest.upgradeCluster(request, CLUSTER, preparation, WS_ID))));
+
+        verifyNoInteractions(reactorFlowManager, stackUpgradeService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"imageId", "runtime", "lockComponents", "dryRun", "showAvailableImages", "showLatestImages"})
+    void rejectsConflictingComponentsOptionsBeforeImageSelection(String option) {
+        UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);
+        switch (option) {
+            case "imageId" -> request.setImageId("some-image");
+            case "runtime" -> request.setRuntime("7.3.2");
+            case "lockComponents" -> request.setLockComponents(true);
+            case "dryRun" -> request.setDryRun(true);
+            case "showAvailableImages" -> request.setShowAvailableImages(UpgradeShowAvailableImages.SHOW);
+            case "showLatestImages" -> request.setShowAvailableImages(UpgradeShowAvailableImages.LATEST_ONLY);
+            default -> throw new IllegalArgumentException(option);
+        }
+        request.setComponents(new ClouderaManagerV4Request());
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> doAs(USER_CRN, () -> underTest.upgradeCluster(request, CLUSTER, true, WS_ID)));
+
+        assertTrue(exception.getMessage().contains("components cannot be combined"));
+        verifyNoInteractions(baseImageUpgradeService, reactorFlowManager, upgradeAvailabilityService);
+    }
+
+    @Test
+    void rejectsMissingCdhBeforeImageSelection() {
+        UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);
+        request.setComponents(new ClouderaManagerV4Request().withRepository(
+                new ClouderaManagerRepositoryV4Request()
+                        .withVersion("7.13.2.20000").withBaseUrl("https://build/cm/"))
+                .withProducts(List.of(new ClouderaManagerProductV4Request().withName("CFM").withVersion("1.0").withParcel("https://build/cfm/"))));
+        when(stackDtoService.getByNameOrCrn(CLUSTER, ACCOUNT_ID)).thenReturn(stack);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(true);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> doAs(USER_CRN, () -> underTest.upgradeCluster(request, CLUSTER, true, WS_ID)));
+
+        assertTrue(exception.getMessage().contains("exactly one CDH parcel"));
+        verifyNoInteractions(baseImageUpgradeService, reactorFlowManager, upgradeAvailabilityService);
     }
 
     @Test

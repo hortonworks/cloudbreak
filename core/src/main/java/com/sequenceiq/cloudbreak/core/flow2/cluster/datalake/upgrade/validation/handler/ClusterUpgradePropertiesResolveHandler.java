@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -27,6 +28,9 @@ public class ClusterUpgradePropertiesResolveHandler extends ExceptionCatcherEven
     @Inject
     private ClusterUpgradePropertiesResolver clusterUpgradePropertiesResolver;
 
+    @Inject
+    private UpgradePermissionProvider upgradePermissionProvider;
+
     @Override
     public String selector() {
         return RESOLVE_CLUSTER_UPGRADE_PROPERTIES_EVENT.event();
@@ -37,13 +41,16 @@ public class ClusterUpgradePropertiesResolveHandler extends ExceptionCatcherEven
         ClusterUpgradeValidationTriggerEvent request = event.getData();
         LOGGER.info("Resolving cluster upgrade properties for target image {}", request.getImageId());
         ClusterUpgradeProperties properties = clusterUpgradePropertiesResolver.resolve(request);
+        if (request.getImageChangeDto() != null && request.getImageChangeDto().getComponents() != null) {
+            upgradePermissionProvider.validateRequestedComponentVersions(properties);
+        }
         return new ClusterUpgradeValidationEvent(CLUSTER_UPGRADE_PROPERTIES_RESOLVED_EVENT.event(), request.getResourceId(),
                 properties.targetImage().imageId(), properties);
     }
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeValidationTriggerEvent> event) {
-        LOGGER.error("Failed to resolve cluster upgrade properties", e);
+        LOGGER.error("Failed to resolve or validate cluster upgrade properties", e);
         return new ClusterUpgradeValidationFailureEvent(resourceId, e);
     }
 }

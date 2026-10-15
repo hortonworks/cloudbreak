@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -18,8 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
@@ -36,7 +38,7 @@ public class BaseImagePackageVersionsEnricher {
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    public Image enrich(Image image, Stack stack) {
+    public Image enrich(Image image, StackDtoDelegate stack) {
         if (!BaseImageUtils.isBaseImage(image)) {
             return image;
         }
@@ -53,7 +55,15 @@ public class BaseImagePackageVersionsEnricher {
         return withPackageVersions(image, getPackageVersionsFromClusterComponents(clusterId));
     }
 
-    private Map<String, String> resolvePackageVersions(Stack stack) {
+    public Map<String, String> getPackageVersionsFromComponents(ClouderaManagerRepo repo, Set<ClouderaManagerProduct> products) {
+        Map<String, String> packageVersions = new HashMap<>();
+        addCmPackageVersions(packageVersions, repo);
+        addCdhPackageVersions(packageVersions, products.stream().filter(product -> CDH_PRODUCT_NAME.equals(product.getName())).findFirst());
+        addParcelPackageVersions(packageVersions, products);
+        return packageVersions;
+    }
+
+    private Map<String, String> resolvePackageVersions(StackDtoDelegate stack) {
         Map<String, String> fromInstances = getPackageVersionsFromInstances(stack.getId());
         if (!fromInstances.isEmpty()) {
             return fromInstances;
@@ -90,7 +100,7 @@ public class BaseImagePackageVersionsEnricher {
                 || StringUtils.isNotBlank(packageVersions.get(ImagePackageVersion.STACK.getKey()));
     }
 
-    private Map<String, String> getPackageVersionsFromClusterComponents(Stack stack) {
+    private Map<String, String> getPackageVersionsFromClusterComponents(StackDtoDelegate stack) {
         if (stack.getCluster() == null) {
             return Map.of();
         }
@@ -106,9 +116,12 @@ public class BaseImagePackageVersionsEnricher {
     }
 
     private void addCmPackageVersions(Map<String, String> packageVersions, Long clusterId) {
-        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
+        addCmPackageVersions(packageVersions, clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId));
+    }
+
+    private void addCmPackageVersions(Map<String, String> packageVersions, ClouderaManagerRepo clouderaManagerRepo) {
         if (clouderaManagerRepo == null) {
-            LOGGER.debug("CM repo details are not available for cluster {}", clusterId);
+            LOGGER.debug("CM repo details are not available");
             return;
         }
         if (StringUtils.isNotBlank(clouderaManagerRepo.getVersion())) {
@@ -120,7 +133,11 @@ public class BaseImagePackageVersionsEnricher {
     }
 
     private void addCdhPackageVersions(Map<String, String> packageVersions, Long clusterId) {
-        clusterComponentConfigProvider.getCdhProduct(clusterId).ifPresent(cdhProduct -> {
+        addCdhPackageVersions(packageVersions, clusterComponentConfigProvider.getCdhProduct(clusterId));
+    }
+
+    private void addCdhPackageVersions(Map<String, String> packageVersions, Optional<ClouderaManagerProduct> product) {
+        product.ifPresent(cdhProduct -> {
             String version = cdhProduct.getVersion();
             if (StringUtils.isBlank(version)) {
                 return;
@@ -139,7 +156,11 @@ public class BaseImagePackageVersionsEnricher {
     }
 
     private void addParcelPackageVersions(Map<String, String> packageVersions, Long clusterId) {
-        clusterComponentConfigProvider.getClouderaManagerProductDetails(clusterId).stream()
+        addParcelPackageVersions(packageVersions, clusterComponentConfigProvider.getClouderaManagerProductDetails(clusterId));
+    }
+
+    private void addParcelPackageVersions(Map<String, String> packageVersions, Collection<ClouderaManagerProduct> products) {
+        products.stream()
                 .filter(product -> !CDH_PRODUCT_NAME.equals(product.getName()))
                 .forEach(product -> toPackageVersionKey(product).ifPresent(key -> {
                     if (StringUtils.isNotBlank(product.getVersion())) {

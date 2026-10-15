@@ -6,10 +6,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -20,6 +22,8 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateNetworkCidrsRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
@@ -43,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
@@ -99,6 +105,21 @@ class StackV4ControllerTest {
     @BeforeEach
     void setUp() {
         lenient().when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void rejectsComponentsForUnsupportedDatalakePath(boolean prepare) {
+        ClouderaManagerV4Request components =
+                new ClouderaManagerV4Request();
+        assertThrows(BadRequestException.class, () -> {
+            if (prepare) {
+                underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, "image", USER_CRN, components);
+            } else {
+                underTest.upgradeClusterByNameInternal(WORKSPACE_ID, "stack", "image", USER_CRN, false, components);
+            }
+        });
+        verifyNoInteractions(stackUpgradeOperations);
     }
 
     @Test
@@ -193,6 +214,17 @@ class StackV4ControllerTest {
                 UpgradeReinitiateStatus.NON_REINITIABLE,
                 "There were no upgrades for this cluster, therefore upgrade reinitiation is not needed."
         );
+    }
+
+    @Test
+    void prewarmInternalUpgradeStillUsesExistingService() {
+        FlowIdentifier flow = new FlowIdentifier(FlowType.FLOW, "pollId");
+        when(stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID, "image", false)).thenReturn(flow);
+
+        FlowIdentifier result = doAs(USER_CRN,
+                () -> underTest.upgradeClusterByNameInternal(WORKSPACE_ID, STACK_NAME, "image", USER_CRN, false, null));
+
+        assertEquals(flow, result);
     }
 
     @Test

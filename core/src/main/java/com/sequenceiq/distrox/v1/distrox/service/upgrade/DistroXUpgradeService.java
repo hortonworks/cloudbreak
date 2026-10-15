@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.converter.UpgradeComponentsConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -39,11 +40,14 @@ import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.service.upgrade.BaseImageUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeComponents;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 import com.sequenceiq.cloudbreak.util.CodUtil;
+import com.sequenceiq.cloudbreak.validation.UpgradeRequestValidator;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
@@ -103,6 +107,9 @@ public class DistroXUpgradeService {
     private UpgradeConverter upgradeConverter;
 
     @Inject
+    private BaseImageUpgradeService baseImageUpgradeService;
+
+    @Inject
     private UpgradeReinitiateService upgradeReinitiateService;
 
     public FlowIdentifier triggerOsUpgradeByUpgradeSets(NameOrCrn nameOrCrn, Long workspaceId, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
@@ -125,6 +132,9 @@ public class DistroXUpgradeService {
     }
 
     private UpgradeV4Response triggerUpgrade(NameOrCrn cluster, Long workspaceId, String userCrn, UpgradeV4Request request, boolean upgradePreparation) {
+        if (request.getComponents() != null) {
+            return triggerUpgradeWithComponents(cluster, userCrn, request, upgradePreparation);
+        }
         UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(cluster, workspaceId, request, userCrn);
         validateUpgradeCandidates(cluster, upgradeV4Response);
         verifyPaywallAccess(userCrn, request);
@@ -140,6 +150,34 @@ public class DistroXUpgradeService {
                         upgradeV4Response.getUpgradeCandidates()) :
                 initUpgrade(new DistroXUpgradeDto(upgradeV4Response, imageChangeDto, targetImage, lockComponents, stack), userCrn,
                         request.getInternalUpgradeSettings().isRollingUpgradeEnabled(), request.isKeepVariant());
+    }
+
+    private UpgradeV4Response triggerUpgradeWithComponents(NameOrCrn cluster, String userCrn, UpgradeV4Request request, boolean preparation) {
+        StackDto stack = stackDtoService.getByNameOrCrn(cluster, ThreadBasedUserCrnProvider.getAccountId());
+        MDCBuilder.buildMdcContext(stack);
+        verifyPaywallAccess(userCrn, request);
+        UpgradeComponents components = UpgradeComponentsConverter.fromRequest(request.getComponents());
+        components.validate();
+        String runtime = components.getRuntimeVersion();
+        boolean replaceVms = clusterUpgradeAvailabilityService.determineReplaceVmsParameter(stack, request.getReplaceVms(), false, true);
+        upgradeAvailabilityService.validateUpgradeWithComponents(stack, request, runtime, replaceVms, userCrn);
+        boolean reinitiation = request.getInternalUpgradeSettings().isUpgradeReinitiation();
+        ImageChangeDto imageChangeDto = reinitiation && StringUtils.isNotBlank(request.getImageId())
+                ? baseImageUpgradeService.createImageChangeDto(stack, components, request.getImageId())
+                : baseImageUpgradeService.createImageChangeDto(stack, components);
+        replaceVms = !preparation && clusterUpgradeAvailabilityService.determineReplaceVmsParameter(stack, request.getReplaceVms(), false, false);
+        LOGGER.info("Starting upgrade with requested components: runtime={}, replaceVms={}, preparation={}, imageId={}",
+                runtime, replaceVms, preparation, imageChangeDto.getImageId());
+        FlowIdentifier flowIdentifier;
+        if (preparation) {
+            flowIdentifier = reactorFlowManager.triggerClusterUpgradePreparation(stack.getId(), imageChangeDto, runtime);
+        } else {
+            String variant = stackUpgradeService.calculateUpgradeVariant(stack.getStack(), userCrn, request.isKeepVariant());
+            flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stack.getId(), imageChangeDto, replaceVms, false, variant,
+                    request.getInternalUpgradeSettings().isRollingUpgradeEnabled(), runtime);
+        }
+        return new UpgradeV4Response((preparation ? "Upgrade preparation" : "Upgrade") + " started with image: " + imageChangeDto.getImageId(),
+                flowIdentifier, replaceVms);
     }
 
     private UpgradeV4Response initUpgrade(DistroXUpgradeDto upgradeDto, String userCrn, boolean rollingUpgradeEnabled, boolean keepVariant) {
@@ -203,7 +241,7 @@ public class DistroXUpgradeService {
     }
 
     private void verifyPaywallAccess(String userCrn, UpgradeV4Request upgradeRequest) {
-        if (upgradeRequest != null && !Boolean.TRUE.equals(upgradeRequest.getLockComponents())) {
+        if (upgradeRequest != null && (upgradeRequest.getComponents() != null || !Boolean.TRUE.equals(upgradeRequest.getLockComponents()))) {
             if (!isInternalRepoAllowedForUpgrade(userCrn)) {
                 verifyCMLicenseValidity(userCrn);
             } else {
@@ -237,6 +275,14 @@ public class DistroXUpgradeService {
 
     public DistroXUpgradeV1Response upgradeCluster(UpgradeV4Request request, NameOrCrn nameOrCrn, boolean upgradePreparation, Long workspaceId) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        if (request.getComponents() != null) {
+            if (request.getInternalUpgradeSettings() == null) {
+                request.setInternalUpgradeSettings(InternalUpgradeSettings.builder().build());
+            }
+            UpgradeRequestValidator.getComponentsOptionsError(request).ifPresent(error -> {
+                throw new BadRequestException(error);
+            });
+        }
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
             LOGGER.info("Checking for upgrade for cluster [{}] with request: {}", nameOrCrn, request);
             UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(nameOrCrn, workspaceId, request, userCrn);

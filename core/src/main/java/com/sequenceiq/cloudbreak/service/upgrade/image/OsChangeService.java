@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityRetrievalService;
@@ -35,6 +38,29 @@ public class OsChangeService {
 
     @Inject
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    public String updateRepoUrlForOs(String url, OsType targetOsType, String architecture) {
+        if (StringUtils.isBlank(url)) {
+            return url;
+        }
+        String path;
+        try {
+            path = URI.create(url).getRawPath();
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid repository URL: " + url, e);
+        }
+        Architecture repoArchitecture = Architecture.fromStringWithFallback(architecture);
+        String architecturePart = Architecture.ARM64.equals(repoArchitecture) ? repoArchitecture.getName() : "";
+        for (OsType sourceOsType : OsType.values()) {
+            if (sourceOsType != targetOsType && StringUtils.contains(path, "/" + sourceOsType.getOsType() + architecturePart + YUM_URL)) {
+                String updatedPath = updateUrl(sourceOsType.getOsType(), targetOsType, path, repoArchitecture.getName());
+                String updatedUrl = StringUtils.replaceOnce(url, path, updatedPath);
+                LOGGER.debug("Updating repository URL {} to {} for OS {}", url, updatedUrl, targetOsType);
+                return updatedUrl;
+            }
+        }
+        return url;
+    }
 
     public boolean isOsChangePermitted(Image targetImage, OsType currentOsType, Set<OsType> osUsedByInstances, String currentArchitecture,
             Map<String, String> stackRelatedParcels) {

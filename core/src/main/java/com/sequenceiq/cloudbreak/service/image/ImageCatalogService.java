@@ -272,6 +272,14 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
+    public StatedImage getLatestBaseImage(ImageFilter imageFilter) throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
+        StatedImages images = getImages(imageFilter);
+        Image latest = images.getImages().getBaseImages().stream()
+                .max(imageComparator)
+                .orElseThrow(() -> new CloudbreakImageNotFoundException(imageNotFoundErrorMessage(imageFilter)));
+        return statedImage(latest, images.getImageCatalogUrl(), images.getImageCatalogName());
+    }
+
     public StatedImage getLatestImageDefaultPreferred(ImageFilter imageFilter, boolean selectBaseImage)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         LOGGER.info("Trying to select a {} image.", selectBaseImage ? "base" : "prewarmed");

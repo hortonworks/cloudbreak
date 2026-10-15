@@ -13,23 +13,27 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 
 @Service
@@ -58,6 +62,27 @@ public class DistroXUpgradeAvailabilityService {
     @Inject
     private RuntimeVersionService runtimeVersionService;
 
+    @Inject
+    private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
+
+    public void validateUpgradeWithComponents(StackDtoDelegate stack, UpgradeV4Request request, String runtime, boolean replaceVms, String userCrn) {
+        clusterUpgradeAvailabilityService.validateUpgradePreconditions(stack, replaceVms, request.getInternalUpgradeSettings());
+        String currentRuntime = runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()).orElse("");
+        UpgradeV4Response response = new UpgradeV4Response(runtimeImage(currentRuntime), List.of(runtimeImage(runtime)), null);
+        List<ImageInfoV4Response> candidates = filterCandidates(Crn.safeFromString(userCrn).getAccountId(), stack, request, response);
+        if (validateRangerRazCandidates(stack, candidates).isEmpty()) {
+            throw new BadRequestException(StringUtils.defaultIfBlank(response.getReason(), "The requested runtime is not allowed for this Data Hub."));
+        }
+    }
+
+    private ImageInfoV4Response runtimeImage(String runtime) {
+        ImageComponentVersions versions = new ImageComponentVersions();
+        versions.setCdp(runtime);
+        ImageInfoV4Response image = new ImageInfoV4Response();
+        image.setComponentVersions(versions);
+        return image;
+    }
+
     public UpgradeV4Response checkForUpgrade(NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request, String userCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         String accountId = Crn.safeFromString(userCrn).getAccountId();
@@ -81,7 +106,7 @@ public class DistroXUpgradeAvailabilityService {
         return filteredCandidates;
     }
 
-    private List<ImageInfoV4Response> validateRangerRazCandidates(Stack stack, List<ImageInfoV4Response> filteredCandidates) {
+    private List<ImageInfoV4Response> validateRangerRazCandidates(StackDtoDelegate stack, List<ImageInfoV4Response> filteredCandidates) {
         SdxBasicView sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn()).orElseThrow();
         boolean rangerRazEnabled = sdxBasicView.razEnabled();
         if (!rangerRazEnabled) {
@@ -112,7 +137,7 @@ public class DistroXUpgradeAvailabilityService {
         throw new BadRequestException(message);
     }
 
-    private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
+    private List<ImageInfoV4Response> filterCandidates(String accountId, StackDtoDelegate stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
         List<ImageInfoV4Response> filteredCandidates;
         String stackName = stack.getName();
         boolean differentDataHubAndDataLakeVersionAllowed = entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(accountId);

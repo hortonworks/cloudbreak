@@ -193,7 +193,7 @@ public class ClusterUpgradeActions {
             @Override
             protected void doExecute(ClusterUpgradeContext context, ConfigureClusterManagerManagementServicesSuccess payload, Map<Object, Object> variables) {
                 ClusterUpgradeProperties properties = getUpgradeProperties(variables, payload.getResourceId());
-                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), properties.targetImage().packageVersions(), properties,
+                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), properties.currentImage().packageVersions(), properties,
                         rollingUpgradeEnabled(variables));
                 stackImageService.removeImageByComponentName(context.getStackId(), TARGET_IMAGE);
                 clusterComponentUpdateService.deleteClusterComponentByComponentTypeAndStackId(context.getStackId(),

@@ -21,7 +21,7 @@ public class BlueprintUpgradeOptionValidator {
     @Inject
     private BlueprintUpgradeOptionCondition blueprintUpgradeOptionCondition;
 
-    BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams) {
+    public BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams) {
         LOGGER.debug("Validating blueprint upgrade option. {}", imageFilterParams);
         if (imageFilterParams.isSkipValidations()) {
             LOGGER.debug("Skipping blueprint validation because the skipValidations flag is added to the request");

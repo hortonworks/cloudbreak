@@ -52,7 +52,7 @@ public class ImageRegionUpgradeImageFilter implements UpgradeImageFilter {
         return ORDER_NUMBER;
     }
 
-    private Predicate<Image> filterByRegion(ImageCatalogPlatform imageCatalogPlatform, String cloudPlatform, String region) {
+    public Predicate<Image> filterByRegion(ImageCatalogPlatform imageCatalogPlatform, String cloudPlatform, String region) {
         return image -> {
             try {
                 imageService.determineImageName(cloudPlatform, imageCatalogPlatform, region, image);

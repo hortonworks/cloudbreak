@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,9 +21,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.converter.UpgradeComponentsConverter;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.chain.UpgradeDistroxFlowEventChainFactory;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeFlowChainTriggerEvent;
@@ -33,9 +37,11 @@ import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.util.CodUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.ClouderaManagerV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.UpgradeReinitiateStatus;
+import com.sequenceiq.distrox.v1.distrox.converter.ClouderaManagerV1ToClouderaManagerV4Converter;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.service.FlowService;
@@ -66,6 +72,9 @@ class UpgradeReinitiateServiceTest {
 
     @Mock
     private StackStatusService stackStatusService;
+
+    @Mock
+    private ClouderaManagerV1ToClouderaManagerV4Converter clouderaManagerConverter;
 
     @InjectMocks
     private UpgradeReinitiateService underTest;
@@ -154,6 +163,23 @@ class UpgradeReinitiateServiceTest {
 
         assertEquals(expectedStatus, result.status());
         assertEquals(expectedReason, result.reason());
+    }
+
+    @Test
+    void restoresComponentsFromPersistedUpgradeRequest() {
+        ClouderaManagerV4Request components = new ClouderaManagerV4Request();
+        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, "catalog", "catalog-url", UpgradeComponentsConverter.fromRequest(components));
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(
+                FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, null, imageChangeDto, true, false, null, true, RUNTIME_VERSION);
+        FlowChainLog flowChainLog = mock();
+        when(flowChainLog.getTriggerEventJackson()).thenReturn(new Json(event).getValue());
+        when(upgradeDistroxFlowEventChainFactory.getName()).thenCallRealMethod();
+        when(flowChainLogService.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(STACK_ID, "UpgradeDistroxFlowEventChainFactory"))
+                .thenReturn(Optional.of(flowChainLog));
+        ClouderaManagerV1Request converted = new ClouderaManagerV1Request();
+        when(clouderaManagerConverter.convert(any(ClouderaManagerV4Request.class))).thenReturn(converted);
+
+        assertSame(converted, underTest.tryRetrieveLastDistroxUpgradeV1Request(STACK_ID).orElseThrow().getComponents());
     }
 
     @Test

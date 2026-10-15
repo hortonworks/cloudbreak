@@ -1,29 +1,49 @@
 package com.sequenceiq.distrox.api.v1.distrox.model.upgrade;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sequenceiq.cloudbreak.validation.UpgradeRequestValidator;
 import com.sequenceiq.common.api.util.ValidatorUtil;
 
 public class DistroXUpgradeRequestValidator implements ConstraintValidator<ValidUpgradeRequest, DistroXUpgradeV1Request> {
 
     @Override
-    public boolean isValid(DistroXUpgradeV1Request value, ConstraintValidatorContext context) {
-        if (!validateEmptyRequest(value, context)) {
+    public boolean isValid(DistroXUpgradeV1Request request, ConstraintValidatorContext context) {
+        if (!validateEmptyRequest(request, context)) {
             return false;
         }
-        if (!mutuallyExclusiveDryRunOrShowImages(value, context)) {
+        if (!mutuallyExclusiveDryRunOrShowImages(request, context)) {
             return false;
         }
-        return isOsUpgrade(value) || isRuntimeUpgrade(value) || value.isDryRunOnly() || value.isShowAvailableImagesOnly() || value.isEmpty();
+        if (request.getComponents() != null) {
+            return validateComponents(request, context);
+        }
+        return isOsUpgrade(request) || isRuntimeUpgrade(request) || request.isDryRunOnly() || request.isShowAvailableImagesOnly() || request.isEmpty();
     }
 
-    private boolean validateEmptyRequest(DistroXUpgradeV1Request value, ConstraintValidatorContext context) {
-        if (Objects.isNull(value)) {
+    private boolean validateComponents(DistroXUpgradeV1Request request, ConstraintValidatorContext context) {
+        Optional<String> error = getComponentsOptionsError(request)
+                .or(() -> UpgradeRequestValidator.getComponentsContentError(request.getComponents()));
+        error.ifPresent(message -> ValidatorUtil.addConstraintViolation(context, message).disableDefaultConstraintViolation());
+        return error.isEmpty();
+    }
+
+    private static Optional<String> getComponentsOptionsError(DistroXUpgradeV1Request request) {
+        if (Boolean.TRUE.equals(request.getLockComponents()) || request.isDryRun() || request.isShowAvailableImagesSet()
+                || StringUtils.isNotBlank(request.getImageId()) || StringUtils.isNotBlank(request.getRuntime())) {
+            return Optional.of(UpgradeRequestValidator.COMPONENTS_OPTIONS_ERROR);
+        }
+        return Optional.empty();
+    }
+
+    private boolean validateEmptyRequest(DistroXUpgradeV1Request request, ConstraintValidatorContext context) {
+        if (Objects.isNull(request)) {
             String msg = "Invalid upgrade request: empty content";
             ValidatorUtil.addConstraintViolation(context, msg).disableDefaultConstraintViolation();
             return false;

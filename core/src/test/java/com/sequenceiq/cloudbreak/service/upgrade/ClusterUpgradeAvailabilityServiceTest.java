@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -39,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -52,6 +55,8 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.BlueprintUpgradeOptionValidator;
+import com.sequenceiq.cloudbreak.service.upgrade.image.BlueprintValidationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -140,10 +145,55 @@ class ClusterUpgradeAvailabilityServiceTest {
 
     private boolean lockComponents;
 
+    @Mock
+    private BlueprintUpgradeOptionValidator blueprintUpgradeOptionValidator;
+
     @BeforeEach
     void setUp() {
         lenient().when(upgradePreconditionService.notUsingEphemeralVolume(any())).thenReturn(true);
         lenient().when(clusterDBValidationService.isGatewayRepairEnabled(any())).thenReturn(true);
+    }
+
+    @Test
+    void componentsUpgradeRejectsUnavailableCluster() {
+        Stack stack = createStack(createStackStatus(Status.UPDATE_FAILED), StackType.WORKLOAD);
+
+        assertThrows(BadRequestException.class,
+                () -> underTest.validateUpgradePreconditions(stack, false, InternalUpgradeSettings.builder().build()));
+        verifyNoInteractions(blueprintUpgradeOptionValidator, clusterUpgradeImageFilter);
+    }
+
+    @Test
+    void componentsReinitiationAllowsFailedState() {
+        Stack stack = createStack(createStackStatus(Status.UPDATE_FAILED), StackType.WORKLOAD);
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(any()))
+                .thenReturn(new BlueprintValidationResult(true));
+
+        assertDoesNotThrow(() -> underTest.validateUpgradePreconditions(stack, false,
+                InternalUpgradeSettings.builder().withUpgradeReinitiation(true).build()));
+        verifyNoInteractions(clusterUpgradeImageFilter);
+    }
+
+    @Test
+    void componentsUpgradeRejectsUnsupportedBlueprint() {
+        Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.WORKLOAD);
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(any()))
+                .thenReturn(new BlueprintValidationResult(false, "Rolling upgrade is not supported"));
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> underTest.validateUpgradePreconditions(stack, false, InternalUpgradeSettings.builder().build()));
+        assertEquals("Rolling upgrade is not supported", exception.getMessage());
+    }
+
+    @Test
+    void componentsUpgradeRejectsInvalidRepair() {
+        Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.WORKLOAD);
+        when(clusterRepairService.repairWithDryRun(stack.getId())).thenReturn(Result.error(new RepairValidation(List.of("repair blocked"))));
+
+        assertThrows(BadRequestException.class,
+                () -> underTest.validateUpgradePreconditions(stack, true, InternalUpgradeSettings.builder().build()));
+        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test

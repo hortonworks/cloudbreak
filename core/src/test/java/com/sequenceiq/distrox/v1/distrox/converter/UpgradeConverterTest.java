@@ -3,7 +3,9 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -12,14 +14,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
+import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.ClouderaManagerV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
@@ -30,6 +35,9 @@ import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeConverterTest {
+
+    @Mock
+    private ClouderaManagerV1ToClouderaManagerV4Converter clouderaManagerConverter;
 
     @InjectMocks
     private UpgradeConverter underTest;
@@ -44,6 +52,16 @@ class UpgradeConverterTest {
     @EnumSource(DistroXUpgradeShowAvailableImages.class)
     void testFromDistroxUpgradeShowAvailableImagesToUpgradeShowAvailableImages(DistroXUpgradeShowAvailableImages distroxUpgradeShowAvailableImages) {
         UpgradeShowAvailableImages.valueOf(distroxUpgradeShowAvailableImages.name());
+    }
+
+    @Test
+    void forwardsExplicitComponents() {
+        DistroXUpgradeV1Request request = new DistroXUpgradeV1Request();
+        ClouderaManagerV1Request source = new ClouderaManagerV1Request();
+        ClouderaManagerV4Request components = new ClouderaManagerV4Request();
+        request.setComponents(source);
+        when(clouderaManagerConverter.convert(source)).thenReturn(components);
+        assertSame(components, underTest.convert(request, false).getComponents());
     }
 
     @Test

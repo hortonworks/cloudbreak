@@ -2,6 +2,8 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import java.util.Optional;
 
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
@@ -17,6 +19,9 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Respo
 @Component
 public class UpgradeConverter {
 
+    @Inject
+    private ClouderaManagerV1ToClouderaManagerV4Converter clouderaManagerConverter;
+
     public UpgradeV4Request convert(DistroXUpgradeV1Request source, boolean skipValidations) {
         return convert(source, skipValidations, false);
     }
@@ -25,6 +30,9 @@ public class UpgradeConverter {
         UpgradeV4Request request = new UpgradeV4Request();
         request.setImageId(source.getImageId());
         request.setRuntime(source.getRuntime());
+        if (source.getComponents() != null) {
+            request.setComponents(clouderaManagerConverter.convert(source.getComponents()));
+        }
         request.setDryRun(source.getDryRun());
         request.setLockComponents(source.getLockComponents());
         request.setInternalUpgradeSettings(InternalUpgradeSettings.builder()

@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 
 @Component
@@ -68,13 +69,13 @@ public class ClouderaManagerProductTransformer {
                 .withVersion(stackInfo.get(StackRepoDetails.REPOSITORY_VERSION))
                 .withName(stackInfo.get(StackRepoDetails.REPO_ID_TAG).split("-")[0])
                 .withParcel(cdhBaseUrl)
-                .withParcelFileUrl(cdhBaseUrl
-                        + CDH.name()
-                        + "-"
-                        + getRepoVersion(stackInfo, image.getUuid())
-                        + "-"
-                        + OsType.getByOsTypeString(image.getOsType()).getParcelPostfix()
-                        + ".parcel");
+                .withParcelFileUrl(getParcelFileUrl(cdhBaseUrl, CDH.name(), getRepoVersion(stackInfo, image.getUuid()),
+                        OsType.getByOsTypeString(image.getOsType()), image.getArchitecture()));
+    }
+
+    public static String getParcelFileUrl(String baseUrl, String productName, String version, OsType osType, String architecture) {
+        String architectureSuffix = Architecture.ARM64.equals(Architecture.fromStringWithFallback(architecture)) ? ".aarch64le" : "";
+        return baseUrl + productName + "-" + version + "-" + osType.getParcelPostfix() + architectureSuffix + ".parcel";
     }
 
     private String getRepoVersion(Map<String, String> stack, String imageId) {

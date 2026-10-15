@@ -4,6 +4,7 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeComponents;
 
 public class ImageChangeDto {
 
@@ -15,16 +16,24 @@ public class ImageChangeDto {
 
     private final String imageCatalogUrl;
 
+    private final UpgradeComponents components;
+
+    public ImageChangeDto(Long stackId, String imageId, String imageCatalogName, String imageCatalogUrl) {
+        this(stackId, imageId, imageCatalogName, imageCatalogUrl, null);
+    }
+
     @JsonCreator
     public ImageChangeDto(
             @JsonProperty("stackId") Long stackId,
             @JsonProperty("imageId") String imageId,
             @JsonProperty("imageCatalogName") String imageCatalogName,
-            @JsonProperty("imageCatalogUrl") String imageCatalogUrl) {
+            @JsonProperty("imageCatalogUrl") String imageCatalogUrl,
+            @JsonProperty("components") UpgradeComponents components) {
         this.stackId = stackId;
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;
         this.imageCatalogUrl = imageCatalogUrl;
+        this.components = components;
     }
 
     public ImageChangeDto(Long stackId, String imageId) {
@@ -47,10 +56,15 @@ public class ImageChangeDto {
         return imageCatalogUrl;
     }
 
+    public UpgradeComponents getComponents() {
+        return components;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", ImageChangeDto.class.getSimpleName() + "[", "]")
                 .add("stackId=" + stackId)
+                .add("components=" + components)
                 .add("imageId='" + imageId + "'")
                 .add("imageCatalogName='" + imageCatalogName + "'")
                 .add("imageCatalogUrl='" + imageCatalogUrl + "'")

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -31,6 +32,8 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.BlueprintUpgradeOptionValidator;
+import com.sequenceiq.cloudbreak.service.upgrade.image.BlueprintValidationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -74,6 +77,23 @@ public class ClusterUpgradeAvailabilityService {
 
     @Inject
     private LockedComponentService lockedComponentService;
+
+    @Inject
+    private BlueprintUpgradeOptionValidator blueprintUpgradeOptionValidator;
+
+    public void validateUpgradePreconditions(StackDtoDelegate stack, boolean replaceVms, InternalUpgradeSettings settings) {
+        UpgradeV4Response response = new UpgradeV4Response();
+        addReasonIfNecessary(stack, false, replaceVms, response, settings);
+        if (StringUtils.isNotBlank(response.getReason())) {
+            throw new BadRequestException(response.getReason());
+        }
+        ImageFilterParams params = ImageFilterParams.builder().withBlueprint(stack.getBlueprint()).withReplaceVms(replaceVms)
+                .withInternalUpgradeSettings(settings).build();
+        BlueprintValidationResult result = blueprintUpgradeOptionValidator.isValidBlueprint(params);
+        if (!result.isValid()) {
+            throw new BadRequestException(result.getReason());
+        }
+    }
 
     public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, Boolean replaceVmsFromRequest,
             InternalUpgradeSettings internalUpgradeSettings, boolean getAllImages, String targetImageId) {
@@ -141,13 +161,13 @@ public class ClusterUpgradeAvailabilityService {
         return lockedComponentService.isComponentsLocked(stack, targetImage.getImageId());
     }
 
-    private void addReasonIfNecessary(Stack stack, boolean lockComponents, Boolean replaceVms, UpgradeV4Response upgradeOptions,
+    private void addReasonIfNecessary(StackDtoDelegate stack, boolean lockComponents, Boolean replaceVms, UpgradeV4Response upgradeOptions,
             InternalUpgradeSettings internalUpgradeSettings) {
         if (StringUtils.isEmpty(upgradeOptions.getReason())) {
             if (!stack.getStatus().isAvailable() && !internalUpgradeSettings.isUpgradeReinitiation()) {
                 upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));
                 LOGGER.warn(upgradeOptions.getReason());
-            } else if (stack.isDatalake() && instanceMetaDataService.anyInstanceStopped(stack.getId())) {
+            } else if (stack.getStack().isDatalake() && instanceMetaDataService.anyInstanceStopped(stack.getId())) {
                 upgradeOptions.setReason("Cannot upgrade cluster because there is stopped instance.");
                 LOGGER.warn(upgradeOptions.getReason());
             } else if (shouldValidateForRepair(lockComponents, replaceVms)) {

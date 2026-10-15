@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CDH_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties.FLOW_VARIABLE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -157,6 +158,9 @@ class ClusterUpgradeActionsTest {
 
         new AbstractActionTestSupport<>(action).doExecute(context(), trigger, variables);
 
+        verify(imageComponentUpdaterService).updateComponentsForUpgrade(properties, STACK_ID);
+        verify(targetImageService).saveImage(STACK_ID, properties);
+        verify(clusterUpgradeService).initUpgradeCluster(STACK_ID, properties, properties.rollingUpgradeEnabled());
         verifyNoInteractions(resolver);
         assertThat(variables.get(FLOW_VARIABLE_NAME)).isSameAs(properties);
         assertThat(variables.get(AbstractClusterUpgradeAction.ROLLING_UPGRADE_ENABLED)).isEqualTo(properties.rollingUpgradeEnabled());
@@ -233,6 +237,7 @@ class ClusterUpgradeActionsTest {
     @ValueSource(booleans = {false, true})
     void finishedUpgradeUsesSnapshotAndRollingOptionsForBothImageTypes(boolean prewarmed) throws Exception {
         ClusterUpgradeProperties properties = properties(prewarmed);
+        properties.currentImage().packageVersions().put(CDH_BUILD_NUMBER.getKey(), "83270000");
         Map<Object, Object> variables = variables(properties);
         variables.put(AbstractClusterUpgradeAction.ROLLING_UPGRADE_ENABLED, false);
         AbstractClusterUpgradeAction<ConfigureClusterManagerManagementServicesSuccess> action =
@@ -242,7 +247,7 @@ class ClusterUpgradeActionsTest {
 
         new AbstractActionTestSupport<>(action).doExecute(context(), new ConfigureClusterManagerManagementServicesSuccess(STACK_ID), variables);
 
-        verify(clusterUpgradeService).clusterUpgradeFinished(STACK_ID, properties.targetImage().packageVersions(), properties, true);
+        verify(clusterUpgradeService).clusterUpgradeFinished(STACK_ID, properties.currentImage().packageVersions(), properties, true);
         verifyNoInteractions(resolver);
     }
 

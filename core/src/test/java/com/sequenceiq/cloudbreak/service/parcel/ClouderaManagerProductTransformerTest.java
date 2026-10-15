@@ -4,6 +4,7 @@ import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +23,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -138,6 +140,19 @@ public class ClouderaManagerProductTransformerTest {
 
         assertThat(foundProducts, empty());
         verify(preWarmParcelParser, never()).parseProductFromParcel(any(), any());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"x86_64,el8", "arm64,el8.aarch64le"})
+    void resolvesCdhParcelFilenameForPrewarmArchitecture(String architecture, String postfix) {
+        StackRepoDetails repo = createStackRepoDetails(OsType.RHEL8);
+        repo.getStack().put(OsType.RHEL8.getOsType(), PARCEL_URL + "/");
+        Image image = Image.builder().withStackDetails(new ImageStackDetails(null, repo, null))
+                .withOsType(OsType.RHEL8.getOsType()).withArchitecture(architecture).build();
+
+        Set<ClouderaManagerProduct> products = underTest.transform(image, true, false);
+
+        assertEquals(PARCEL_URL + "/CDH-7.1.0-" + postfix + ".parcel", products.iterator().next().getParcelFileUrl());
     }
 
     private boolean assertCdhProduct(Set<ClouderaManagerProduct> actual) {

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.RELEASE_VERSION_TAG;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPOSITORY_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
@@ -138,4 +139,22 @@ class VersionComparisonContextFactoryTest {
         assertEquals(Optional.of(PATCH_VERSION), context.getPatchVersion());
         assertEquals(BUILD_NUMBER, context.getBuildNumber());
     }
+
+    @Test
+    void buildsCmContextWithoutBuildNumber() {
+        VersionComparisonContext context = underTest.buildForCm(Map.of(ImagePackageVersion.CM.getKey(), VERSION));
+
+        assertEquals(VERSION, context.getMajorVersion());
+        assertNull(context.getBuildNumber());
+    }
+
+    @Test
+    void buildsStackContextWithoutBuildNumber() {
+        VersionComparisonContext context = underTest.buildForStack(Map.of(ImagePackageVersion.STACK.getKey(), VERSION), Map.of("CDH", FULL_VERSION));
+
+        assertEquals(VERSION, context.getMajorVersion());
+        assertEquals(Optional.of(PATCH_VERSION), context.getPatchVersion());
+        assertNull(context.getBuildNumber());
+    }
+
 }

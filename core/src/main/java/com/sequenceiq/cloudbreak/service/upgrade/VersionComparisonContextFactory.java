@@ -28,7 +28,7 @@ public class VersionComparisonContextFactory {
         String currentCmVersion = packageVersions.get(CM.getKey());
         return new VersionComparisonContext.Builder()
                 .withMajorVersion(currentCmVersion)
-                .withBuildNumber(Integer.parseInt(packageVersions.get(CM_BUILD_NUMBER.getKey())))
+                .withBuildNumber(parseBuildNumber(packageVersions.get(CM_BUILD_NUMBER.getKey())))
                 .build();
     }
 
@@ -61,8 +61,12 @@ public class VersionComparisonContextFactory {
         return new VersionComparisonContext.Builder()
                 .withMajorVersion(packageVersions.get(STACK.getKey()))
                 .withPatchVersion(getPatchVersion(stackRelatedParcels))
-                .withBuildNumber(Integer.parseInt(packageVersions.get(CDH_BUILD_NUMBER.getKey())))
+                .withBuildNumber(parseBuildNumber(packageVersions.get(CDH_BUILD_NUMBER.getKey())))
                 .build();
+    }
+
+    private Integer parseBuildNumber(String buildNumber) {
+        return StringUtils.isBlank(buildNumber) ? null : Integer.valueOf(buildNumber);
     }
 
     private Integer getPatchVersion(Map<String, String> stackRelatedParcels) {

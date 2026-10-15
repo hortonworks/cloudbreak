@@ -123,6 +123,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.upgrade.BaseImagePackageVersionsEnricher;
+import com.sequenceiq.cloudbreak.service.upgrade.BaseImageUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.BlockedUpgradePath;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
@@ -186,6 +187,8 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Reque
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXUpgradeV1Controller;
+import com.sequenceiq.distrox.v1.distrox.converter.ClouderaManagerRepositoryV1ToClouderaManagerRepositoryV4Converter;
+import com.sequenceiq.distrox.v1.distrox.converter.ClouderaManagerV1ToClouderaManagerV4Converter;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeStatusService;
@@ -737,6 +740,8 @@ public class DistroXUpgradeRetrievalComponentTest {
     @Import(value = {
             DistroXUpgradeV1Controller.class,
             UpgradeConverter.class,
+            ClouderaManagerV1ToClouderaManagerV4Converter.class,
+            ClouderaManagerRepositoryV1ToClouderaManagerRepositoryV4Converter.class,
             AccountIdService.class,
             CloudbreakRestRequestThreadLocalService.class,
             DistroXUpgradeAvailabilityService.class,
@@ -744,6 +749,7 @@ public class DistroXUpgradeRetrievalComponentTest {
             DistroXUpgradeResponseFilterService.class,
             ClusterUpgradeAvailabilityService.class,
             BaseImagePackageVersionsEnricher.class,
+            BaseImageUpgradeService.class,
             CurrentImageRetrieverService.class,
             ClusterUpgradeCandidateFilterService.class,
             ClusterUpgradeImageFilter.class,

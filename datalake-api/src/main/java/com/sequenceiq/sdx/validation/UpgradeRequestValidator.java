@@ -13,18 +13,18 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgradeRequest, SdxUpgradeRequest> {
 
     @Override
-    public boolean isValid(SdxUpgradeRequest value, ConstraintValidatorContext context) {
-        if (!validateEmptyRequest(value, context)) {
+    public boolean isValid(SdxUpgradeRequest request, ConstraintValidatorContext context) {
+        if (!validateEmptyRequest(request, context)) {
             return false;
         }
-        if (!mutuallyExclusiveDryRunOrShowImages(value, context)) {
+        if (!mutuallyExclusiveDryRunOrShowImages(request, context)) {
             return false;
         }
-        return isOsUpgrade(value) || isRuntimeUpgrade(value) || value.isDryRunOnly() || value.isShowAvailableImagesOnly() || value.isEmpty();
+        return isOsUpgrade(request) || isRuntimeUpgrade(request) || request.isDryRunOnly() || request.isShowAvailableImagesOnly() || request.isEmpty();
     }
 
-    private boolean validateEmptyRequest(SdxUpgradeRequest value, ConstraintValidatorContext context) {
-        if (Objects.isNull(value)) {
+    private boolean validateEmptyRequest(SdxUpgradeRequest request, ConstraintValidatorContext context) {
+        if (Objects.isNull(request)) {
             String msg = "Invalid upgrade request: empty content";
             ValidatorUtil.addConstraintViolation(context, msg).disableDefaultConstraintViolation();
             return false;

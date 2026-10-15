@@ -21,9 +21,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -264,6 +266,40 @@ public class ImageCatalogServiceTest {
         ReflectionTestUtils.setField(underTest, "imageComparator", comparator);
 
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+    }
+
+    @Test
+    void latestBaseImageDoesNotPreferAnOlderDefaultImage() throws Exception {
+        ImageCatalogService service = spy(underTest);
+        ImageFilter filter = ImageFilter.builder().withPlatforms(Set.of(imageCatalogPlatform("AWS"))).build();
+        Image oldDefault = Image.builder().withUuid("old-default").withOs("centos7").withCreated(10L).withDefaultImage(true).build();
+        Image latest = Image.builder().withUuid("latest").withOs("centos7").withCreated(20L).build();
+        StatedImages images = StatedImages.statedImages(new Images(List.of(latest, oldDefault), List.of(), List.of()),
+                DEFAULT_CATALOG_URL, "catalog");
+        doReturn(images).when(service).getImages(filter);
+
+        assertEquals(latest, service.getLatestBaseImage(filter).getImage());
+    }
+
+    @Test
+    void latestBaseImageFailsWhenNoBaseImageMatches() throws Exception {
+        ImageCatalogService service = spy(underTest);
+        ImageFilter filter = ImageFilter.builder().withPlatforms(Set.of(imageCatalogPlatform("AWS"))).build();
+        StatedImages images = StatedImages.statedImages(new Images(List.of(), List.of(), List.of()), DEFAULT_CATALOG_URL, "catalog");
+        doReturn(images).when(service).getImages(filter);
+        assertThrows(CloudbreakImageNotFoundException.class, () -> service.getLatestBaseImage(filter));
+    }
+
+    @Test
+    void latestBaseImageSupportsMissingCreationTimestamp() throws Exception {
+        ImageCatalogService service = spy(underTest);
+        ImageFilter filter = ImageFilter.builder().withPlatforms(Set.of(imageCatalogPlatform("AWS"))).build();
+        Image old = Image.builder().withUuid("old").withOs("centos7").withDate("2026-10-01").withCreated(10L).build();
+        Image latest = Image.builder().withUuid("latest").withOs("centos7").withDate("2026-10-02").build();
+        StatedImages images = StatedImages.statedImages(new Images(List.of(old, latest), List.of(), List.of()), DEFAULT_CATALOG_URL, "catalog");
+        doReturn(images).when(service).getImages(filter);
+
+        assertEquals(latest, service.getLatestBaseImage(filter).getImage());
     }
 
     @Test
