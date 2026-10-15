@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.image;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -39,6 +41,10 @@ class CustomImageProviderTest {
     private static final String CUSTOM_IMAGE_DESCRIPTION = "Test description";
 
     private static final String CUSTOM_BASE_PARCEL_URL = "https://myarchive.test.com";
+
+    private static final long CUSTOM_IMAGE_CREATED_IN_EPOCH_MILLIS = 1761756179096L;
+
+    private static final long CUSTOM_IMAGE_CREATED_IN_EPOCH_SECONDS = 1761756179L;
 
     private CustomImageProvider underTest = new CustomImageProvider();
 
@@ -85,8 +91,8 @@ class CustomImageProviderTest {
 
     private void validateCommonParameters(StatedImage statedImage, CustomImage customImage, StatedImage result) {
         assertEquals(statedImage.getImage().getDate(), result.getImage().getDate());
-        assertEquals(customImage.getCreated(), result.getImage().getCreated());
-        assertEquals(customImage.getCreated(), result.getImage().getPublished());
+        assertEquals(CUSTOM_IMAGE_CREATED_IN_EPOCH_SECONDS, result.getImage().getCreated());
+        assertEquals(CUSTOM_IMAGE_CREATED_IN_EPOCH_SECONDS, result.getImage().getPublished());
         assertEquals(customImage.getDescription(), result.getImage().getDescription());
         assertEquals(statedImage.getImage().getOs(), result.getImage().getOs());
         assertEquals(customImage.getName(), result.getImage().getUuid());
@@ -120,7 +126,8 @@ class CustomImageProviderTest {
     }
 
     private CustomImage getCustomImage(ImageType imageType, String customizedImageId, String baseParcelUrl) {
-        CustomImage customImage = new CustomImage();
+        CustomImage customImage = spy(new CustomImage());
+        doReturn(CUSTOM_IMAGE_CREATED_IN_EPOCH_MILLIS).when(customImage).getCreated();
         customImage.setId(0L);
         customImage.setName(CUSTOM_IMAGE_ID);
         customImage.setDescription(CUSTOM_IMAGE_DESCRIPTION);

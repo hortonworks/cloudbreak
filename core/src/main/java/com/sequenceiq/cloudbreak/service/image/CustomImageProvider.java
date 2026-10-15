@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,10 +27,11 @@ public class CustomImageProvider {
     public StatedImage mergeSourceImageAndCustomImageProperties(
             StatedImage statedImage, CustomImage customImage, String imageCatalogUrl, String catalogName) {
         Image image = statedImage.getImage();
+        long createdInEpochSeconds = TimeUnit.MILLISECONDS.toSeconds(customImage.getCreated());
         Image result = Image.builder()
                 .withDate(image.getDate())
-                .withCreated(customImage.getCreated())
-                .withPublished(customImage.getCreated())
+                .withCreated(createdInEpochSeconds)
+                .withPublished(createdInEpochSeconds)
                 .withDescription(customImage.getDescription())
                 .withOs(image.getOs())
                 .withOsType(image.getOsType())
