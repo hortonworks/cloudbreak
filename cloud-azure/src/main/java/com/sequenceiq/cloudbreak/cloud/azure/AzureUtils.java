@@ -752,7 +752,7 @@ public class AzureUtils {
             azureClient.signImageConsent(azureMarketplaceImage);
             LOGGER.info("Successfully signed terms and conditions of azure marketplace image: {}", azureMarketplaceImage);
         } catch (Exception e) {
-            LOGGER.error("Error happened during signing the image consent: " + azureMarketplaceImage, e);
+            LOGGER.error("Error happened during signing the image consent: {}", azureMarketplaceImage, e);
             throw new CloudbreakServiceException("Cannot sign terms and conditions of azure marketplace image: " + azureMarketplaceImage, e);
         }
     }

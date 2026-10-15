@@ -37,8 +37,7 @@ public class DistroXRemoveInstancesAction implements Action<DistroXTestDto, Clou
                     .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
             testDto.setResponse(stackV4Response);
             Log.whenJson(LOGGER, " Distrox remove instances response: ", stackV4Response);
-            LOGGER.info(String.format("Hardware info for distrox '%s' after remove instances [%s].", testDto.getName(),
-                    stackV4Response.getHardwareInfoGroups()));
+            LOGGER.info("Hardware info for distrox '{}' after remove instances [{}].", testDto.getName(), stackV4Response.getHardwareInfoGroups());
             return testDto;
         } else {
             throw new TestFailException(String.format("Cannot find any instance to remove from distrox '%s'!", testDto.getName()));

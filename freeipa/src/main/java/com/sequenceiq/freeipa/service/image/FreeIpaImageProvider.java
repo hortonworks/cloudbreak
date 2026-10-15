@@ -56,7 +56,7 @@ public class FreeIpaImageProvider implements ImageProvider {
                 .flatMap(Collection::stream)
                 .distinct()
                 .collect(toList());
-        LOGGER.debug("Compatible images: {} " + System.lineSeparator() + "Images in versions: {}", compatibleImages, imagesInVersions);
+        LOGGER.debug("Compatible images: {} {}Images in versions: {}", compatibleImages, System.lineSeparator(), imagesInVersions);
         return compatibleImages.stream()
                 .filter(image -> imagesInVersions.contains(image.getUuid()))
                 .map(image -> ImageWrapper.ofFreeipaImage(image, imageFilterSettings.catalog()))

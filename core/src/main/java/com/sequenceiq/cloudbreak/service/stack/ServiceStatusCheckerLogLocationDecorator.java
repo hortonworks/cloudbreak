@@ -48,7 +48,7 @@ public class ServiceStatusCheckerLogLocationDecorator {
                 result = new HashMap<>();
                 for (Map.Entry<InstanceMetadataView, Optional<String>> entry : instancesWithReason.entrySet()) {
                     if (hostStatuses.hasHostUnhealthyServices(hostName(entry.getKey().getDiscoveryFQDN()))) {
-                        LOGGER.debug(String.format("Extend status reason with cloud storage link for instance: %s.", entry.getKey().getDiscoveryFQDN()));
+                        LOGGER.debug("Extend status reason with cloud storage link for instance: {}.", entry.getKey().getDiscoveryFQDN());
                         result.put(entry.getKey(), entry.getValue().map(reason -> String.format("%s %s", reason, locationMessage)));
                     } else {
                         result.put(entry.getKey(), entry.getValue());
@@ -64,27 +64,27 @@ public class ServiceStatusCheckerLogLocationDecorator {
         Component component = componentConfigProviderService
                 .getComponent(stackId, ComponentType.TELEMETRY, ComponentType.TELEMETRY.name());
         if (component == null) {
-            LOGGER.warn(String.format("Telemetry component is null for stack: %d", stackId));
+            LOGGER.warn("Telemetry component is null for stack: {}", stackId);
             return result;
         }
         Json attributes = component.getAttributes();
         if (attributes == null) {
-            LOGGER.warn(String.format("Attributes in the telemetry component is null for stack: %d", stackId));
+            LOGGER.warn("Attributes in the telemetry component is null for stack: {}", stackId);
             return result;
         }
         Telemetry telemetry = null;
         try {
             telemetry = attributes.get(Telemetry.class);
         } catch (IOException e) {
-            LOGGER.warn(String.format("Cannot get Telemetry from Components for stack: %d", stackId), e);
+            LOGGER.warn("Cannot get Telemetry from Components for stack: {}", stackId, e);
         }
         if (telemetry == null) {
-            LOGGER.warn(String.format("Telemetry in the telemetry component attributes is null for stack: %d", stackId));
+            LOGGER.warn("Telemetry in the telemetry component attributes is null for stack: {}", stackId);
             return result;
         }
         Logging logging = telemetry.getLogging();
         if (logging == null) {
-            LOGGER.warn(String.format("Logging configuration in the telemetry component is null for stack: %d", stackId));
+            LOGGER.warn("Logging configuration in the telemetry component is null for stack: {}", stackId);
             return result;
         }
 

@@ -41,7 +41,7 @@ public class BatchResourceOperation {
         String handlers = batchApiHandlers.stream()
                 .map(batchApiHandler -> String.format("%s: %s", batchApiHandler.getClass().getName(), batchApiHandler.getDescription()))
                 .collect(Collectors.joining(",\n"));
-        LOGGER.debug("Registered handlers:\n" + handlers);
+        LOGGER.debug("Registered handlers:\n{}", handlers);
     }
 
     public ResponseEntity<ApiBatchResponse> execute(String mockUuid, @Valid ApiBatchRequest body) {
@@ -72,8 +72,7 @@ public class BatchResourceOperation {
                 try {
                     return batchApiHandler.process(mockUuid, apiBatchRequestElement);
                 } catch (RuntimeException e) {
-                    LOGGER.error(String.format("Error while processing request, returning failed response. MockUuid: [%s]. Request: %s", mockUuid,
-                            apiBatchRequestElement), e);
+                    LOGGER.error("Error while processing request, returning failed response. MockUuid: [{}]. Request: {}", mockUuid, apiBatchRequestElement, e);
                     return getFailureApiBatchResponseElement();
                 }
             }
@@ -97,7 +96,7 @@ public class BatchResourceOperation {
             LOGGER.debug("Mapping response status: [{}]. Success: {}", httpStatus, success);
             return success;
         } else {
-            LOGGER.warn("Invalid status code for response, assuming failure. Response: " + apiBatchResponseElement);
+            LOGGER.warn("Invalid status code for response, assuming failure. Response: {}", apiBatchResponseElement);
             return false;
         }
     }

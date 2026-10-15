@@ -742,8 +742,7 @@ public class StackOperationService {
             return responses;
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to get DatabaseServersCertificateStatus for clusters '%s' due to: '%s'",
-                    request.getCrns(), errorMessage), e);
+            LOGGER.error("Failed to get DatabaseServersCertificateStatus for clusters '{}' due to: '{}'", request.getCrns(), errorMessage, e);
             throw new BadRequestException("Could not query database certificate status for clusters. " + errorMessage);
         }
     }

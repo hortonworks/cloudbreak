@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
-import static java.lang.String.format;
-
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -45,7 +43,7 @@ public class InstanceValidationService {
 
     private void validateResourceResults(StackContext context, Exception exception, List<CloudResourceStatus> results) throws CloudbreakException {
         if (exception != null) {
-            LOGGER.warn(format("Failed to upscale stack: %s", context.getCloudContext()), exception);
+            LOGGER.warn("Failed to upscale stack: {}", context.getCloudContext(), exception);
             throw new CloudbreakException(exception);
         } else {
             List<CloudResourceStatus> missingResources = results.stream()

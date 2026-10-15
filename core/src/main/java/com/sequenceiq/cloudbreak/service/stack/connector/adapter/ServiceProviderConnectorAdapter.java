@@ -195,7 +195,7 @@ public class ServiceProviderConnectorAdapter {
             }
             return res.getTemplate();
         } catch (InterruptedException e) {
-            LOGGER.error("Error while getting template: " + getPlatformTemplateRequest.getCloudContext(), e);
+            LOGGER.error("Error while getting template: {}", getPlatformTemplateRequest.getCloudContext(), e);
             throw new OperationException(e);
         }
     }
@@ -223,7 +223,7 @@ public class ServiceProviderConnectorAdapter {
             }
             return res.getPlatformParameters();
         } catch (InterruptedException e) {
-            LOGGER.error("Error while getting platform parameters: " + cloudContext, e);
+            LOGGER.error("Error while getting platform parameters: {}", cloudContext, e);
             throw new OperationException(e);
         }
     }
@@ -253,7 +253,7 @@ public class ServiceProviderConnectorAdapter {
             }
             return res.getDefaultPlatformVariant();
         } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform variant: " + cloudContext, e);
+            LOGGER.error("Error while getting the platform variant: {}", cloudContext, e);
             throw new OperationException(e);
         }
     }

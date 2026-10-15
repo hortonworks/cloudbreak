@@ -61,7 +61,7 @@ public class FinalizationCleanUpService {
                     additionalStartOperationMessage != null ? ' ' + additionalStartOperationMessage : "");
             transactionService.required(runnable::run);
         } catch (Exception e) {
-            LOGGER.info("Unable to clean up " + targetEntity.getSimpleName() + " entries due to: " + e.getMessage(), e);
+            LOGGER.info("Unable to clean up {} entries due to: {}", targetEntity.getSimpleName(), e.getMessage(), e);
             success = false;
             throw new CleanUpException(targetEntity.getSimpleName() + " cleanup has failed!", e);
         } finally {

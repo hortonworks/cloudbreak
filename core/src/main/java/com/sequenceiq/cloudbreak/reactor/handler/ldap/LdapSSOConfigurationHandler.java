@@ -66,7 +66,7 @@ public class LdapSSOConfigurationHandler implements EventHandler<LdapSSOConfigur
                     virtualGroupRequest);
             response = new LdapSSOConfigurationSuccess(stackId);
         } catch (Exception e) {
-            LOGGER.info("Error during LDAP configuration, stackId: " + stackId, e);
+            LOGGER.info("Error during LDAP configuration, stackId: {}", stackId, e);
             response = new LdapSSOConfigurationFailed(stackId, e);
         }
         eventBus.notify(response.selector(), new Event<>(ldapConfigurationRequestEvent.getHeaders(), response));

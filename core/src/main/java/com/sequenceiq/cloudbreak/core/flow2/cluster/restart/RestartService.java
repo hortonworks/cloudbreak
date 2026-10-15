@@ -47,7 +47,7 @@ public class RestartService {
     }
 
     public void allInstanceRestartFailed(RestartContext context, Exception errorDetails) {
-        LOGGER.info("Error during restart instance(s) flow: " + errorDetails.getMessage(), errorDetails);
+        LOGGER.info("Error during restart instance(s) flow: {}", errorDetails.getMessage(), errorDetails);
         instanceMetaDataService.updateStatus(context.getStack().getId(), context.getInstanceIds(), InstanceStatus.FAILED);
         flowMessageService.fireEventAndLog(context.getStack().getId(), Status.AVAILABLE.name(),
                 INSTANCES_RESTART_FAILED);

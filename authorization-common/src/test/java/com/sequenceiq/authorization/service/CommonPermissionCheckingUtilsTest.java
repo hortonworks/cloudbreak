@@ -311,17 +311,17 @@ public class CommonPermissionCheckingUtilsTest {
 
         @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
         public void exampleMethodWithParamAnnotation(@ResourceName String name, String other) {
-            LOGGER.info(name + other);
+            LOGGER.info("{}{}", name, other);
         }
 
         @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
         public void exampleMethodWithoutParamAnnotation(String name, String other) {
-            LOGGER.info(name + other);
+            LOGGER.info("{}{}", name, other);
         }
 
         @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
         public void exampleMethodWithTooManyParamAnnotation(@ResourceCrn String name, @ResourceCrn String other) {
-            LOGGER.info(name + other);
+            LOGGER.info("{}{}", name, other);
         }
     }
 

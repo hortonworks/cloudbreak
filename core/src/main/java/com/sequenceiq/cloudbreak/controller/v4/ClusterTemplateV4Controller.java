@@ -169,7 +169,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
             Optional.ofNullable(response.getEnvironmentCrn()).ifPresent(crn -> environmentServiceDecorator.prepareEnvironment(response));
             return response;
         } catch (TransactionExecutionException cse) {
-            LOGGER.warn("Unable to find cluster definition due to " + cse.getMessage(), cse.getCause());
+            LOGGER.warn("Unable to find cluster definition due to {}", cse.getMessage(), cse.getCause());
             throw new CloudbreakServiceException("Unable to obtain cluster definition!", cse.getCause());
         }
     }

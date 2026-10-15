@@ -101,13 +101,11 @@ public class ReportListener extends TestListenerAdapter {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
         if (startTime == null) {
             startTime = new Date(tr.getStartMillis());
-            LOGGER.warn(String.format("ITestResult Test Context ::: Start date is null! So we are using ITestResult Start time: %s!",
-                    formatter.format(startTime)));
+            LOGGER.warn("ITestResult Test Context ::: Start date is null! So we are using ITestResult Start time: {}!", formatter.format(startTime));
         }
         if (endTime == null) {
             endTime = new Date(tr.getEndMillis());
-            LOGGER.warn(String.format("ITestResult Test Context ::: End date is null! So we are using ITestResult End time: %s!",
-                    formatter.format(endTime)));
+            LOGGER.warn("ITestResult Test Context ::: End date is null! So we are using ITestResult End time: {}!", formatter.format(endTime));
         }
         tr.getTestContext().setAttribute(tr.getName() + SEARCH_URL, searchUrl.getSearchUrl(listOfSearchables, startTime, endTime));
 

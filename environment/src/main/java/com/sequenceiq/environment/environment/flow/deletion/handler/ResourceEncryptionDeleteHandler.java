@@ -89,7 +89,7 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
             environmentService.save(environment);
             LOGGER.info("Finished deleting encryption resources for environment \"{}\".", environmentName);
         } catch (Exception e) {
-            LOGGER.error(String.format("Failed to delete encryption resources for environment \"%s\"", environmentName), e);
+            LOGGER.error("Failed to delete encryption resources for environment \"{}\"", environmentName, e);
             throw new CloudbreakServiceException("Error occurred while deleting encryption resources: " + e.getMessage(), e);
         }
     }

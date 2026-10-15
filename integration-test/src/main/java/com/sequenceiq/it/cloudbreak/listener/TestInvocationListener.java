@@ -40,8 +40,7 @@ public class TestInvocationListener implements IInvokedMethodListener {
 
     @Override
     public void beforeInvocation(IInvokedMethod invokedMethod, ITestResult testResult) {
-        LOGGER.info("Before Invocation of: " + invokedMethod.getTestMethod().getMethodName()
-                + " with parameters: " + Arrays.toString(testResult.getParameters()));
+        LOGGER.info("Before Invocation of: {} with parameters: {}", invokedMethod.getTestMethod().getMethodName(), Arrays.toString(testResult.getParameters()));
         TestContext testContext;
         Object[] parameters = testResult.getParameters();
         if (parameters == null || parameters.length == 0) {

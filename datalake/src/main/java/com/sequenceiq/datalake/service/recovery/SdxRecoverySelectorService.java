@@ -79,7 +79,7 @@ public class SdxRecoverySelectorService {
     }
 
     private SdxRecoverableResponse interpretValidationError(SdxCluster sdxCluster, Exception e) {
-        LOGGER.error("Stack recovery validation failed on cluster: " + sdxCluster.getClusterName(), e);
+        LOGGER.error("Stack recovery validation failed on cluster: {}", sdxCluster.getClusterName(), e);
         return new SdxRecoverableResponse(String.format(
                 "Stack recovery validation failed on cluster: [%s]. Message: [%s]", sdxCluster.getClusterName(),
                 e.getMessage()), RecoveryStatus.NON_RECOVERABLE);

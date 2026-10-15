@@ -1,6 +1,5 @@
 package com.sequenceiq.thunderhead.service;
 
-import static java.lang.String.format;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static jakarta.servlet.http.HttpServletResponse.SC_FOUND;
 
@@ -108,7 +107,7 @@ public class MockUmsService {
                 .content(jsonUtil.toJsonString(altusToken).getBytes(StandardCharsets.UTF_8), "json")
                 .signWith(SIGNATURE_VERIFIER, Jwts.SIG.HS256)
                 .compact();
-        LOGGER.info(format("Token generated for Altus: %s", token));
+        LOGGER.info("Token generated for Altus: {}", token);
         return token;
     }
 

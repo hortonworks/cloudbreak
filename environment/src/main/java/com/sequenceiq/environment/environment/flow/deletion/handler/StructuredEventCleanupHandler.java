@@ -60,7 +60,7 @@ public class StructuredEventCleanupHandler extends EventSenderAwareHandler<Envir
         try {
             structuredEventCleanupService.cleanUpStructuredEvents(resourceCrn);
         } catch (Exception e) {
-            LOGGER.warn("Structured event cleanup [based on CRN: " + resourceCrn + "] failed due to: " + e.getMessage(), e);
+            LOGGER.warn("Structured event cleanup [based on CRN: {}] failed due to: {}", resourceCrn, e.getMessage(), e);
         }
     }
 

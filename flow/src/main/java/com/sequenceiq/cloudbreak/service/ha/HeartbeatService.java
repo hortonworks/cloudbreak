@@ -160,7 +160,7 @@ public class HeartbeatService {
                 try {
                     flow2Handler.restartFlow(flow);
                 } catch (RuntimeException e) {
-                    LOGGER.error(String.format("Failed to restart flow: %s", flow), e);
+                    LOGGER.error("Failed to restart flow: {}", flow, e);
                 }
             }
         }

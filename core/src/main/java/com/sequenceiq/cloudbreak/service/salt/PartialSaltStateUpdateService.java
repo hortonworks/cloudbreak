@@ -54,7 +54,7 @@ public class PartialSaltStateUpdateService {
                 }
             }
         } catch (Exception ex) {
-            LOGGER.error("Failed to update the Salt state for components " + filteredSaltComponents, ex);
+            LOGGER.error("Failed to update the Salt state for components {}", filteredSaltComponents, ex);
             throw new CloudbreakServiceException(ex.getMessage(), ex);
         }
     }

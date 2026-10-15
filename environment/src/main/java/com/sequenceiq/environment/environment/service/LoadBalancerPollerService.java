@@ -81,7 +81,7 @@ public class LoadBalancerPollerService {
                 List<FlowIdentifier> failedFlows = waitStackLoadBalancerUpdate(lbPollingConfig, stackNames, environmentName);
                 LOGGER.debug("Data Lake and Data Hub load balancer update finished.");
                 if (!failedFlows.isEmpty()) {
-                    LOGGER.error("Found failed flows for Data Lake or Data Hub load balancer updates: " + failedFlows);
+                    LOGGER.error("Found failed flows for Data Lake or Data Hub load balancer updates: {}", failedFlows);
                     throw new UpdateFailedException("Data Lake or Data Hub update flows failed: " + failedFlows);
                 }
             } catch (PollerStoppedException e) {

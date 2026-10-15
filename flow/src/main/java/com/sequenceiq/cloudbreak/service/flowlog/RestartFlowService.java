@@ -73,7 +73,7 @@ public class RestartFlowService {
                         flow2Handler.restartFlow(flowId);
                         stackIds.add(stackId);
                     } catch (RuntimeException e) {
-                        LOGGER.error(String.format("Failed to restart flow %s on stack %s", flowId, stackId), e);
+                        LOGGER.error("Failed to restart flow {} on stack {}", flowId, stackId, e);
                         flowLogService.terminate(stackId, flowId, String.format("Flow restart failed, reason: %s", e.getMessage()));
                     }
                 }
@@ -103,7 +103,7 @@ public class RestartFlowService {
                     flow2Handler.restartFlow(flowId);
                     stackIds.add(stackId);
                 } catch (RuntimeException e) {
-                    LOGGER.error(String.format("Failed to restart flow %s on stack %s", flowId, stackId), e);
+                    LOGGER.error("Failed to restart flow {} on stack {}", flowId, stackId, e);
                     flowLogService.terminate(stackId, flowId, String.format("Flow restart failed, reason: %s", e.getMessage()));
                 }
             }

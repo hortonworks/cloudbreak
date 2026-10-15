@@ -967,7 +967,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         try {
             return Optional.of(getEnvCrnByCrn(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn));
         } catch (NotFoundException e) {
-            LOGGER.error(String.format("Getting environment crn by resource crn %s failed, ", resourceCrn), e);
+            LOGGER.error("Getting environment crn by resource crn {} failed, ", resourceCrn, e);
             return Optional.empty();
         }
     }

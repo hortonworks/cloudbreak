@@ -149,7 +149,7 @@ public class FstabValidatorService extends ExistingStackPatchService<Stack> {
                     try {
                         return r.getAttributes().get(VolumeSetAttributes.class);
                     } catch (IOException e) {
-                        LOGGER.warn("Exception while parsing attributes for resource - " + r + " :: Exception - " + e);
+                        LOGGER.warn("Exception while parsing attributes for resource - {}", r, e);
                         return null;
                     }
                 }));

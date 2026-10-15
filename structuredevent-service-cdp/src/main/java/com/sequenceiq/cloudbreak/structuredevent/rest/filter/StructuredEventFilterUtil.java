@@ -56,7 +56,7 @@ public class StructuredEventFilterUtil {
         } catch (UnsupportedOperationException e) {
             LOGGER.debug("Audit log is unnecessary: {}", e.getMessage());
         } catch (Exception ex) {
-            LOGGER.warn("Failed to send structured event: " + ex.getMessage(), ex);
+            LOGGER.warn("Failed to send structured event: {}", ex.getMessage(), ex);
         }
     }
 
@@ -68,7 +68,7 @@ public class StructuredEventFilterUtil {
             CDPStructuredRestCallEvent event = createRestCallEventAndSetResponseBody(restRequest, restResponse, restParams, requestTime, responseBody, FALSE);
             cdpRestAuditEventSender.createEvent(event);
         } catch (Exception ex) {
-            LOGGER.warn("Failed to send rest audit event: " + ex.getMessage(), ex);
+            LOGGER.warn("Failed to send rest audit event: {}", ex.getMessage(), ex);
         }
     }
 

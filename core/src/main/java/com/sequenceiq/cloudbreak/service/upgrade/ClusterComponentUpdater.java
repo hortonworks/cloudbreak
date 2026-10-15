@@ -51,7 +51,7 @@ public class ClusterComponentUpdater {
         if (removeUnused) {
             removeUnusedComponents(targetComponents, clusterComponentsFromDb);
         }
-        LOGGER.info("Updated cluster components:" + clusterComponentsFromDb);
+        LOGGER.info("Updated cluster components: {}", clusterComponentsFromDb);
     }
 
     private Predicate<ClusterComponent> filterDiffBetweenComponentsFromImageAndDatabase(Set<Component> targetComponents) {

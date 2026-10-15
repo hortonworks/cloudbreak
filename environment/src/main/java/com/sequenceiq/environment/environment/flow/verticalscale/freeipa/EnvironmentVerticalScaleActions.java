@@ -130,8 +130,8 @@ public class EnvironmentVerticalScaleActions {
 
             @Override
             protected void doExecute(CommonContext context, EnvironmentVerticalScaleFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to Vertical scale in environment '%s'. Status: '%s'.",
-                        payload.getVerticalScaleFreeIPAEvent(), payload.getEnvironmentStatus()), payload.getException());
+                LOGGER.error("Failed to Vertical scale in environment '{}'. Status: '{}'.", payload.getVerticalScaleFreeIPAEvent(),
+                        payload.getEnvironmentStatus(), payload.getException());
                 String groupBeingScaled = (String) variables.getOrDefault(GROUP_BEING_SCALED, "unknown");
                 String previousInstanceType = (String) variables.getOrDefault(PREVIOUS_INSTANCE_TYPE, "unknown");
                 String targetInstanceType = (String) variables.getOrDefault(TARGET_INSTANCE_TYPE, "unknown");

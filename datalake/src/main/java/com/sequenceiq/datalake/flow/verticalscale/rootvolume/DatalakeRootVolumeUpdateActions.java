@@ -61,8 +61,8 @@ public class DatalakeRootVolumeUpdateActions {
         return new AbstractDatalakeRootVolumeUpdateAction<>(DatalakeRootVolumeUpdateFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeRootVolumeUpdateFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to update disks in Data Lake '%s'. Status: '%s'.",
-                        payload.getDatalakeRootVolumeUpdateEvent(), payload.getDatalakeStatus()), payload.getException());
+                LOGGER.error("Failed to update disks in Data Lake '{}'. Status: '{}'.",
+                        payload.getDatalakeRootVolumeUpdateEvent(), payload.getDatalakeStatus(), payload.getException());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         payload.getDatalakeStatus(),
                         payload.getDatalakeStatus().getDefaultResourceEvent(),

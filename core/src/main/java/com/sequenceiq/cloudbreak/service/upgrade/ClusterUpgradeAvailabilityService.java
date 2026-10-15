@@ -88,12 +88,12 @@ public class ClusterUpgradeAvailabilityService {
             boolean getAllImages, String targetImageId) {
         UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         try {
-            LOGGER.info(String.format("Retrieving images for upgrading stack %s", stack.getName()));
+            LOGGER.info("Retrieving images for upgrading stack {}", stack.getName());
             Image currentImage = currentImageRetrieverService.retrieveCurrentModelImage(stack);
             ImageFilterParams imageFilterParams =
                     imageFilterParamsFactory.create(targetImageId, currentImage, lockComponents, replaceVms, stack, internalUpgradeSettings, getAllImages);
             ImageFilterResult imageFilterResult = getAvailableImagesForUpgrade(stack, currentImage.getImageCatalogName(), imageFilterParams);
-            LOGGER.info(String.format("%d possible image found for stack upgrade.", imageFilterResult.getImages().size()));
+            LOGGER.info("{} possible image found for stack upgrade.", imageFilterResult.getImages().size());
             upgradeOptions = createResponse(imageFilterResult, imageFilterParams, stack);
         } catch (CloudbreakImageNotFoundException | NotFoundException e) {
             LOGGER.warn("Failed to get images", e);
@@ -155,7 +155,7 @@ public class ClusterUpgradeAvailabilityService {
                 Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.repairWithDryRun(stack.getId());
                 if (validationResult.isError()) {
                     upgradeOptions.setReason(String.join(",", validationResult.getError().getValidationErrors()));
-                    LOGGER.warn(String.format("Cannot upgrade cluster because: %s", upgradeOptions.getReason()));
+                    LOGGER.warn("Cannot upgrade cluster because: {}", upgradeOptions.getReason());
                 }
             }
         }

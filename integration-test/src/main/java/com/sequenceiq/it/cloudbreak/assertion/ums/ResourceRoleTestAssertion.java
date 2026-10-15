@@ -29,14 +29,12 @@ public class ResourceRoleTestAssertion {
             String userCrn = assignee.getCrn();
             String resourceRole = UmsClientUtils.getResourceRoleCrn(umsResourceRole, umsClient, resourceCrn, testContext);
 
-            LOGGER.info(format(" Validate resource role '%s' has been successfully assigned to user '%s' at resource '%s'... ",
-                    resourceRole, userCrn, resourceCrn));
+            LOGGER.info(" Validate resource role '{}' has been successfully assigned to user '{}' at resource '{}'... ", resourceRole, userCrn, resourceCrn);
             Multimap<String, String> assignedResourceRoles = umsClient.getDefaultClient(testContext).listAssignedResourceRoles(userCrn);
             boolean resourceRoleAssigned = assignedResourceRoles.get(resourceCrn).contains(resourceRole);
             if (expectedPresence) {
                 if (resourceRoleAssigned) {
-                    LOGGER.info(format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", resourceRole, userCrn,
-                            resourceCrn));
+                    LOGGER.info(" Resource role '{}' has successfully been assigned to user '{}' at resource '{}' ", resourceRole, userCrn, resourceCrn);
                     Log.then(LOGGER, format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", resourceRole, userCrn,
                             resourceCrn));
                 } else {
@@ -45,8 +43,7 @@ public class ResourceRoleTestAssertion {
                 }
             } else {
                 if (!resourceRoleAssigned) {
-                    LOGGER.info(format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", resourceRole, userCrn,
-                            resourceCrn));
+                    LOGGER.info(" Resource role '{}' has successfully been revoked from user '{}' at resource '{}' ", resourceRole, userCrn, resourceCrn);
                     Log.then(LOGGER, format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", resourceRole,
                             userCrn, resourceCrn));
                 } else {

@@ -375,7 +375,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 try {
                     client.detachDisksFromVm(vmDiskMap.get(vm), virtualMachine);
                 } catch (RuntimeException e) {
-                    LOGGER.warn("Can not detach " + volumeIds + " from " + instanceName, e);
+                    LOGGER.warn("Can not detach {} from {}", volumeIds, instanceName, e);
                 }
             } else {
                 LOGGER.warn("{} disks are not attached to the correct VM: {}", vmDiskMap.get(vm), instanceName);

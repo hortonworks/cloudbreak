@@ -39,7 +39,7 @@ public class EnvironmentUtil {
                 virtualGroup = client.getDefaultClient(testContext).getWorkloadAdministrationGroupName(accountId, right, environmentCrn);
             } catch (StatusRuntimeException ex) {
                 if (Status.Code.NOT_FOUND != ex.getStatus().getCode()) {
-                    LOGGER.info(format(" Virtual groups are missing for right: '%s' ", right.getRight()));
+                    LOGGER.info(" Virtual groups are missing for right: '{}' ", right.getRight());
                 }
             }
             if (StringUtils.hasText(virtualGroup)) {
@@ -49,7 +49,7 @@ public class EnvironmentUtil {
 
         if (MapUtils.isNotEmpty(virtualGroups)) {
             Log.then(LOGGER, format(" Virtual groups are present [%s] for environment '%s' ", virtualGroups, environmentCrn));
-            LOGGER.info(String.format(" Virtual groups are present [%s] for environment '%s' ", virtualGroups, environmentCrn));
+            LOGGER.info(" Virtual groups are present [{}] for environment '{}' ", virtualGroups, environmentCrn);
         } else {
             throw new TestFailException(String.format(" Cannot find virtual groups for environment '%s' ", environmentCrn));
         }

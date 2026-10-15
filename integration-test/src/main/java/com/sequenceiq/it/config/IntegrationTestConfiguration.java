@@ -45,7 +45,7 @@ public class IntegrationTestConfiguration {
         if (env instanceof ConfigurableEnvironment) {
             for (PropertySource<?> propertySource : ((ConfigurableEnvironment) env).getPropertySources()) {
                 if (propertySource instanceof EnumerablePropertySource) {
-                    LOGGER.info("processing property source ::: " + propertySource.getName());
+                    LOGGER.info("processing property source ::: {}", propertySource.getName());
                     for (String key : ((EnumerablePropertySource) propertySource).getPropertyNames()) {
                         String value = propertySource.getProperty(key).toString();
                         LOGGER.debug("{} = {}", key, value);

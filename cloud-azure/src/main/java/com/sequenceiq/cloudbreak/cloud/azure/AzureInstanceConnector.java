@@ -130,8 +130,7 @@ public class AzureInstanceConnector implements InstanceConnector {
             } else if (vm.getStatus() == InstanceStatus.STOPPED) {
                 completables.add(doReboot(vm, statuses, azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId(), null)));
             } else {
-                LOGGER.error(String.format("Unable to reboot instance %s because of invalid status %s.",
-                        vm.getCloudInstance().getInstanceId(), vm.getStatus().toString()));
+                LOGGER.error("Unable to reboot instance {} because of invalid status {}.", vm.getCloudInstance().getInstanceId(), vm.getStatus().toString());
             }
         }
         ReactiveUtils.waitAll(completables);
@@ -155,8 +154,7 @@ public class AzureInstanceConnector implements InstanceConnector {
                 completables.add(doReboot(vm, statuses, azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId(),
                         timeboundInMs)));
             } else {
-                LOGGER.error(String.format("Unable to restart instance %s because of invalid status %s.",
-                        vm.getCloudInstance().getInstanceId(), vm.getStatus().toString()));
+                LOGGER.error("Unable to restart instance {} because of invalid status {}.", vm.getCloudInstance().getInstanceId(), vm.getStatus().toString());
             }
         }
         ReactiveUtils.waitAll(completables);

@@ -252,7 +252,7 @@ public class AwsLoadBalancerCommonService {
                     .stream()
                     .flatMap(tg -> instanceIdsByGroupName.get(tg.getName()).stream())
                     .collect(Collectors.toSet());
-            LOGGER.debug(String.format("Adding instances %s to listener %s", instanceIds, listener.getName()));
+            LOGGER.debug("Adding instances {} to listener {}", instanceIds, listener.getName());
             listener.addInstancesToTargetGroup(instanceIds);
         }
     }

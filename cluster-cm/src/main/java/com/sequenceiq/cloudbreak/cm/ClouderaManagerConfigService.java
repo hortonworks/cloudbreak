@@ -123,7 +123,7 @@ public class ClouderaManagerConfigService {
                     .map(ApiService::getName)
                     .findFirst();
         } catch (ApiException e) {
-            LOGGER.debug(String.format("Failed to get %s service name from Cloudera Manager.", serviceType), e);
+            LOGGER.debug("Failed to get {} service name from Cloudera Manager.", serviceType, e);
             return Optional.empty();
         }
     }

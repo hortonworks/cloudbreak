@@ -39,7 +39,7 @@ public class CustomConfigurationsInjectorProcessor {
                     .filter(service -> service.getServiceType().equalsIgnoreCase(serviceName))
                     .findFirst();
             if (serviceOpt.isEmpty()) {
-                LOGGER.info("Service with name " + serviceName + " does not exist for the current template");
+                LOGGER.info("Service with name {} does not exist for the current template", serviceName);
             } else {
                 processor.mergeCustomServiceConfigs(serviceOpt.get(), serviceConfigs);
             }
@@ -53,7 +53,7 @@ public class CustomConfigurationsInjectorProcessor {
                     .filter(service -> service.getServiceType().equalsIgnoreCase(serviceName))
                     .findFirst();
             if (serviceOpt.isEmpty()) {
-                LOGGER.info("Service with name " + serviceName + " does not exist for the current template");
+                LOGGER.info("Service with name {} does not exist for the current template", serviceName);
             } else {
                 processor.mergeCustomRoleConfigs(serviceOpt.get(), roleConfigs);
             }

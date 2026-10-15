@@ -46,8 +46,7 @@ public class DistroXScaleStartInstancesAction implements Action<DistroXTestDto, 
                 .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
         testDto.setResponse(stackV4Response);
         Log.whenJson(LOGGER, " Distrox Compute scale start instances response: ", stackV4Response);
-        LOGGER.info(String.format("Hardware info for distrox '%s' after start instances for Compute scale: %s", testDto.getName(),
-                stackV4Response.getHardwareInfoGroups()));
+        LOGGER.info("Hardware info for distrox '{}' after start instances for Compute scale: {}", testDto.getName(), stackV4Response.getHardwareInfoGroups());
         return testDto;
     }
 }

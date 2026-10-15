@@ -396,11 +396,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             CloudbreakImageCatalogException {
         ImageCatalog imageCatalog = getImageCatalogByNameIfUrlIsEmpty(workspaceId, catalogUrl, catalogName);
         if (isCustomImageCatalog(imageCatalog)) {
-            LOGGER.debug(String.format("'%s' image catalog is a custom image catalog.", catalogName));
+            LOGGER.debug("'{}' image catalog is a custom image catalog.", catalogName);
             return getCustomStatedImage(imageCatalog, imageId);
         } else {
-            LOGGER.debug(String.format("'%s' image catalog is not a custom image catalog, we should lookup images by image catalog url '%s'.",
-                    catalogName, catalogUrl));
+            LOGGER.debug("'{}' image catalog is not a custom image catalog, we should lookup images by image catalog url '{}'.", catalogName, catalogUrl);
             return getImageByUrl(catalogUrl, catalogName, imageId);
         }
     }
@@ -410,7 +409,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             try {
                 return getImageCatalogByName(workspaceId, catalogName);
             } catch (Exception ex) {
-                LOGGER.debug(String.format("Failed to lookup '%s' image catalog by name.", catalogName));
+                LOGGER.debug("Failed to lookup '{}' image catalog by name.", catalogName);
                 return null;
             }
         } else {

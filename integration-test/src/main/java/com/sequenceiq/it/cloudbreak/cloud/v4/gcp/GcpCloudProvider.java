@@ -524,10 +524,10 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName) {
         String encryptionKey = environment.getGcp().getGcpResourceEncryptionParameters().getEncryptionKey();
         if (StringUtils.isBlank(encryptionKey)) {
-            LOGGER.error(format("KMS key is not available for '%s' environment!", environmentName));
+            LOGGER.error("KMS key is not available for '{}' environment!", environmentName);
             throw new TestFailException(format("KMS key is not available for '%s' environment!", environmentName));
         } else {
-            LOGGER.info(format("Environment '%s' create has been done with '%s' KMS key.", environmentName, encryptionKey));
+            LOGGER.info("Environment '{}' create has been done with '{}' KMS key.", environmentName, encryptionKey);
             Log.then(LOGGER, format(" Environment '%s' create has been done with '%s' KMS key. ", environmentName, encryptionKey));
         }
     }
@@ -537,10 +537,10 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         if (!volumeKmsKeyIds.isEmpty()) {
             String kmsKey = getEncryptionKey(true);
             if (volumeKmsKeyIds.stream().noneMatch(keyId -> StringUtils.containsIgnoreCase(keyId, kmsKey))) {
-                LOGGER.error(format("Volume has NOT been encrypted with '%s' KMS key!", kmsKey));
+                LOGGER.error("Volume has NOT been encrypted with '{}' KMS key!", kmsKey);
                 throw new TestFailException(format("Volume has NOT been encrypted with '%s' KMS key!", kmsKey));
             } else {
-                LOGGER.info(format("Volume has been encrypted with '%s' KMS key.", kmsKey));
+                LOGGER.info("Volume has been encrypted with '{}' KMS key.", kmsKey);
                 Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKey));
             }
         }

@@ -88,8 +88,8 @@ class RecipeModulTest extends CentralRecipeContext {
 
         String expected = outputFile.getFileContent();
         String resultRecipeText = getUnderTest().getRecipeText(testData, inputRecipeText);
-        LOGGER.info(String.format("Comparing expected and result recipe content. Expected content in file: %s%nexpected:%n%s%n%nactual:%n%s",
-                outputFile.getFileName(), expected, resultRecipeText));
+        LOGGER.info("Comparing expected and result recipe content. Expected content in file: {}\nexpected:\n{}\n\nactual:\n{}", outputFile.getFileName(),
+                expected, resultRecipeText);
 
         assertEquals(expected, resultRecipeText);
     }

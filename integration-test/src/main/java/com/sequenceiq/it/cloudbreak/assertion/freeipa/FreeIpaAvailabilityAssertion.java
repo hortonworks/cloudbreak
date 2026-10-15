@@ -381,7 +381,7 @@ public class FreeIpaAvailabilityAssertion {
                 sshJClientActions.checkKinitDuringFreeipaUpgrade(sdxTestDto, sdxTestDto.getResponse().getStackV4Response().getInstanceGroups(),
                         List.of(HostGroupType.MASTER.getName()));
             } else {
-                LOGGER.debug("Skipping kinit test because usersync state is not COMPLETED: " + lastSyncOperationStatus);
+                LOGGER.debug("Skipping kinit test because usersync state is not COMPLETED: {}", lastSyncOperationStatus);
             }
         } catch (TestFailException e) {
             throw e;

@@ -143,15 +143,14 @@ public class DistroXScaleTest extends AbstractE2ETest {
             DistroXScaleTestParameters distroXScaleTestParameters) {
         List<String> scalingInstances = getDistroxInstanceIds(testContext, testDto, cloudbreakClient, distroXScaleTestParameters.getHostGroup());
         if (scalingInstances.isEmpty()) {
-            LOGGER.warn(String.format(
-                    "At least 1 instance should be present for %s group by default!", distroXScaleTestParameters.getHostGroup()));
+            LOGGER.warn("At least 1 instance should be present for {} group by default!", distroXScaleTestParameters.getHostGroup());
         }
         defaultVolumeIds.addAll(listDistroxInstancesVolumeIds(testContext, testDto, scalingInstances));
         defaultInstanceVolumeRatio = defaultVolumeIds.size() / scalingInstances.size();
-        LOGGER.info(String.format("The selected group is %s for scaling. " +
-                        "The group contains %d nodes by default and these have following volumes: %s.",
+        LOGGER.info("The selected group is {} for scaling. " +
+                "The group contains {} nodes by default and these have following volumes: {}.",
                 distroXScaleTestParameters.getHostGroup(), scalingInstances.size(),
-                getDistroxInstancesAndVolumes(testContext, testDto, scalingInstances, defaultInstanceVolumeRatio, distroXScaleTestParameters)));
+                getDistroxInstancesAndVolumes(testContext, testDto, scalingInstances, defaultInstanceVolumeRatio, distroXScaleTestParameters));
         return testDto;
     }
 
@@ -159,9 +158,8 @@ public class DistroXScaleTest extends AbstractE2ETest {
             DistroXScaleTestParameters distroXScaleTestParameters) {
         List<String> scaledInstances = getDistroxInstanceIds(testContext, testDto, cloudbreakClient, distroXScaleTestParameters.getHostGroup());
         if (scaledInstances.isEmpty() || scaledInstances.size() != distroXScaleTestParameters.getScaleUpTarget()) {
-            LOGGER.warn(String.format(
-                    "At least %d instances should be present for the scaled up %s group!", distroXScaleTestParameters.getScaleUpTarget(),
-                    distroXScaleTestParameters.getHostGroup()));
+            LOGGER.warn("At least {} instances should be present for the scaled up {} group!", distroXScaleTestParameters.getScaleUpTarget(),
+                    distroXScaleTestParameters.getHostGroup());
         }
         scaledVolumeIds.addAll(listDistroxInstancesVolumeIds(testContext, testDto, scaledInstances));
         int scaledInstanceVolumeRatio = scaledVolumeIds.size() / scaledInstances.size();
@@ -171,9 +169,9 @@ public class DistroXScaleTest extends AbstractE2ETest {
                     "The required amount of new volumes per instance %d cannot get available after scaling of %s group!", scaledInstanceVolumeRatio,
                     distroXScaleTestParameters.getHostGroup()));
         } else {
-            LOGGER.info(String.format("The %s group after scaling contains %d nodes and these have following volumes: %s.",
-                    distroXScaleTestParameters.getHostGroup(), scaledInstances.size(),
-                    getDistroxInstancesAndVolumes(testContext, testDto, scaledInstances, scaledInstanceVolumeRatio, distroXScaleTestParameters)));
+            LOGGER.info("The {} group after scaling contains {} nodes and these have following volumes: {}.", distroXScaleTestParameters.getHostGroup(),
+                    scaledInstances.size(),
+                    getDistroxInstancesAndVolumes(testContext, testDto, scaledInstances, scaledInstanceVolumeRatio, distroXScaleTestParameters));
         }
         return testDto;
     }

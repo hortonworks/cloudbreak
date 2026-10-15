@@ -60,7 +60,7 @@ public class DistroxOperationValidatorService {
         if (entitlementService.isValidateDistroxOperationsBySdxHealthEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
                 (sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE) ||
                         sdxClusterResponses.getFirst().getClusterShape().equals(SdxClusterShape.ENTERPRISE_PRO))) {
-            LOGGER.info(String.format("Validating %s of data hub based on primary gateway health of Data Lake", distroXOperation.name()));
+            LOGGER.info("Validating {} of data hub based on primary gateway health of Data Lake", distroXOperation.name());
             boolean primaryGatewayHealthy = isPrimaryGatewayHealthy(instanceMetadataViews);
             distroXOperationValidationView.setAllowed(primaryGatewayHealthy);
             if (!primaryGatewayHealthy) {

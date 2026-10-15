@@ -112,7 +112,7 @@ public abstract class AbstractRecordProcessor<C extends CommonStreamingConfigura
      * Default behaviour: log the exception.
      */
     public void handleDataStreamingException(R input, StreamProcessingException e) {
-        LOGGER.warn(String.format("Exception during %s record processing [skip] - input: %s", getProcessorTypeForLog(), input), e);
+        LOGGER.warn("Exception during {} record processing [skip] - input: {}", getProcessorTypeForLog(), input, e);
     }
 
     /**
@@ -120,7 +120,7 @@ public abstract class AbstractRecordProcessor<C extends CommonStreamingConfigura
      * Default behaviour: log the exception.
      */
     public void handleUnexpectedException(R input, Exception e) {
-        LOGGER.warn(String.format("Unexpected exception during %s record processing [skip] - input: %s", getProcessorTypeForLog(), input), e);
+        LOGGER.warn("Unexpected exception during {} record processing [skip] - input: {}", getProcessorTypeForLog(), input, e);
     }
 
     public boolean isProcessingEnabled() {

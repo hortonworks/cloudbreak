@@ -90,7 +90,7 @@ public class AzureVirtualMachineService {
             for (String privateInstanceId : privateInstanceIds) {
                 Optional<VirtualMachine> virtualMachineByResourceGroup = azureClient.getVirtualMachineByResourceGroup(resourceGroup, privateInstanceId);
                 if (virtualMachineByResourceGroup.isEmpty()) {
-                    LOGGER.info("Could not find vm with private id: " + privateInstanceId);
+                    LOGGER.info("Could not find vm with private id: {}", privateInstanceId);
                 } else {
                     virtualMachines.add(virtualMachineByResourceGroup.get());
                 }

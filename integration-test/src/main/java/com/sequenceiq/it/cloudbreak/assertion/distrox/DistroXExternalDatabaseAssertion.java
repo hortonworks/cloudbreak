@@ -33,10 +33,10 @@ public final class DistroXExternalDatabaseAssertion extends BaseMicroserviceClie
                     .getByCrn(databaseServerCrn);
 
             if (StringUtils.containsIgnoreCase(extendedBlueprint, databaseServer.getHost())) {
-                LOGGER.info(format("Cluster template '%s' contains external database server host '%s'.", blueprintName, databaseServer.getHost()));
+                LOGGER.info("Cluster template '{}' contains external database server host '{}'.", blueprintName, databaseServer.getHost());
                 Log.then(LOGGER, format(" Cluster template '%s' contains external database server host '%s'. ", blueprintName, databaseServer.getHost()));
             } else {
-                LOGGER.error(format("Cluster template '%s' does not contain external database server host '%s'!", blueprintName, databaseServer.getHost()));
+                LOGGER.error("Cluster template '{}' does not contain external database server host '{}'!", blueprintName, databaseServer.getHost());
                 throw new TestFailException(format("Cluster template '%s' does not contain external database server host '%s'!", blueprintName,
                         databaseServer.getHost()));
             }

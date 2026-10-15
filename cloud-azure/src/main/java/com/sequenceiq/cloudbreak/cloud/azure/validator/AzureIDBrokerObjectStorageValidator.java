@@ -168,7 +168,7 @@ public class AzureIDBrokerObjectStorageValidator {
 
     private void validateIDBroker(AzureClient client, Identity identity, CloudAdlsGen2View cloudFileSystem, String singleResourceGroupName,
             String accountId, List<Identity> existingIdentities, ValidationResultBuilder resultBuilder) {
-        LOGGER.debug(String.format("Validating IDBroker identity %s", identity.name()));
+        LOGGER.debug("Validating IDBroker identity {}", identity.name());
 
         List<RoleAssignmentInner> roleAssignments;
         Optional<ResourceGroup> singleResourceGroup;
@@ -354,7 +354,7 @@ public class AzureIDBrokerObjectStorageValidator {
 
     private void addErrorOrLog(ValidationResultBuilder resultBuilder, String msg, boolean logOnly) {
         if (logOnly) {
-            LOGGER.info("Validation error only logged in this case: " + msg);
+            LOGGER.info("Validation error only logged in this case: {}", msg);
         } else {
             LOGGER.info(msg);
             resultBuilder.error(msg);

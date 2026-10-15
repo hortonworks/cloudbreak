@@ -91,7 +91,7 @@ public class AwsIamService {
                     LOGGER.error(msg, e);
                     validationResultBuilder.error(msg);
                 } else {
-                    LOGGER.error(String.format("Unable to look up EC2 Instance Profile of ARN='%s'", instanceProfileArn), e);
+                    LOGGER.error("Unable to look up EC2 Instance Profile of ARN='{}'", instanceProfileArn, e);
                 }
             }
         }
@@ -176,7 +176,7 @@ public class AwsIamService {
                 String decodedAssumeRolePolicyDocument = URLDecoder.decode(assumeRolePolicyDocument, StandardCharsets.UTF_8);
                 policy = Policy.fromJson(decodedAssumeRolePolicyDocument);
             } catch (IllegalArgumentException e) {
-                LOGGER.error(String.format("Unable to get policy from role (%s)", role.arn()), e);
+                LOGGER.error("Unable to get policy from role ({})", role.arn(), e);
             }
         }
 

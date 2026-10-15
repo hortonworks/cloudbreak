@@ -97,7 +97,7 @@ public class DatahubService {
             return distroXV1Endpoint.getByCrn(crn, entries);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to get Datahub cluster by crn %s due to: '%s'.", crn, errorMessage), e);
+            LOGGER.error("Failed to get Datahub cluster by crn {} due to: '{}'.", crn, errorMessage, e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
     }
@@ -107,7 +107,7 @@ public class DatahubService {
             distroXV1Endpoint.putStartByCrns(crns);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed start Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);
+            LOGGER.error("Failed start Datahub clusters for environment {} due to: '{}'.", environmentCrn, errorMessage, e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
     }
@@ -117,7 +117,7 @@ public class DatahubService {
             distroXV1Endpoint.putStopByCrns(crns);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed stop Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);
+            LOGGER.error("Failed stop Datahub clusters for environment {} due to: '{}'.", environmentCrn, errorMessage, e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
     }
@@ -127,7 +127,7 @@ public class DatahubService {
             distroXV1Endpoint.deleteMultiple(multiDeleteRequest, forced);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed delete multiple Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);
+            LOGGER.error("Failed delete multiple Datahub clusters for environment {} due to: '{}'.", environmentCrn, errorMessage, e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
     }
@@ -139,7 +139,7 @@ public class DatahubService {
                     () ->  distroXUpgradeV1Endpoint.upgradeCcmByCrnInternal(datahubCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to Upgrade Cluster Connectivity Manager for Data Hub CRN '%s' due to '%s'.", datahubCrn, errorMessage), e);
+            LOGGER.error("Failed to Upgrade Cluster Connectivity Manager for Data Hub CRN '{}' due to '{}'.", datahubCrn, errorMessage, e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
 

@@ -68,7 +68,7 @@ public class SdxService {
             return sdxEndpoint.getByCrn(clusterCrn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to get Data Lake cluster by crn '%s' due to '%s'.", clusterCrn, errorMessage), e);
+            LOGGER.error("Failed to get Data Lake cluster by crn '{}' due to '{}'.", clusterCrn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
@@ -88,7 +88,7 @@ public class SdxService {
             return sdxEndpoint.list(envName, false);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to list Data Lake clusters by environment name '%s' due to '%s'.", envName, errorMessage), e);
+            LOGGER.error("Failed to list Data Lake clusters by environment name '{}' due to '{}'.", envName, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
@@ -98,7 +98,7 @@ public class SdxService {
             return sdxEndpoint.getByEnvCrn(environmentCrn, false);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to list Data Lake clusters by environment CRN '%s' due to '%s'.", environmentCrn, errorMessage), e);
+            LOGGER.error("Failed to list Data Lake clusters by environment CRN '{}' due to '{}'.", environmentCrn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
@@ -111,9 +111,7 @@ public class SdxService {
             );
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.warn(String.format(
-                    "Failed to check if Data Lake cluster with crn '%s' has unstoppable flow due to '%s'.", crn, errorMessage
-            ), e);
+            LOGGER.warn("Failed to check if Data Lake cluster with crn '{}' has unstoppable flow due to '{}'.", crn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
@@ -132,7 +130,7 @@ public class SdxService {
                     () -> sdxUpgradeEndpoint.upgradeCcm(environmentCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to Upgrade Cluster Connectivity Manager by environment CRN '%s' due to '%s'.", environmentCrn, errorMessage), e);
+            LOGGER.error("Failed to Upgrade Cluster Connectivity Manager by environment CRN '{}' due to '{}'.", environmentCrn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
@@ -143,7 +141,7 @@ public class SdxService {
             return sdxOperationEndpoint.getOperationProgressByResourceCrn(datalakeCrn, detailed);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to get Operation for Data Lake CRN '%s' due to '%s'.", datalakeCrn, errorMessage), e);
+            LOGGER.error("Failed to get Operation for Data Lake CRN '{}' due to '{}'.", datalakeCrn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
@@ -155,7 +153,7 @@ public class SdxService {
                     initiatorUserCrn -> sdxInternalEndpoint.modifyProxy(datalakeCrn, previousProxyCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to modify proxy config of Data Lake cluster by crn '%s' due to '%s'.", datalakeCrn, errorMessage), e);
+            LOGGER.error("Failed to modify proxy config of Data Lake cluster by crn '{}' due to '{}'.", datalakeCrn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
@@ -167,7 +165,7 @@ public class SdxService {
                     initiatorUserCrn -> sdxInternalEndpoint.updateTrustedRealm(datalakeCrn, request, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to update trusted realm on Data Lake cluster by crn '%s' due to '%s'.", datalakeCrn, errorMessage), e);
+            LOGGER.error("Failed to update trusted realm on Data Lake cluster by crn '{}' due to '{}'.", datalakeCrn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }
@@ -179,7 +177,7 @@ public class SdxService {
                     initiatorUserCrn -> sdxInternalEndpoint.updateSalt(datalakeCrn, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to update salt on Data Lake cluster by crn '%s' due to '%s'.", datalakeCrn, errorMessage), e);
+            LOGGER.error("Failed to update salt on Data Lake cluster by crn '{}' due to '{}'.", datalakeCrn, errorMessage, e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
     }

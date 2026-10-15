@@ -12,7 +12,7 @@ public class CloudExceptionConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudExceptionConverter.class);
 
     public CloudConnectorException convertToCloudConnectorException(Throwable e, String actionDescription) {
-        LOGGER.warn(String.format("%s failed, %s happened:", actionDescription, e != null ? e.getClass().getName() : null), e);
+        LOGGER.warn("{} failed, {} happened:", actionDescription, e != null ? e.getClass().getName() : null, e);
         Throwable eEffective = unwrapActionFailedException(e);
         CloudConnectorException result;
         if (eEffective instanceof CloudConnectorException) {

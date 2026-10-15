@@ -144,7 +144,7 @@ public class KeytabCleanupService {
         } catch (DeleteException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Cleanup cluster failed " + e.getLocalizedMessage(), e);
+            LOGGER.error("Cleanup cluster failed {}", e.getLocalizedMessage(), e);
             throw new DeleteException("Failed to cleanup " + e.getLocalizedMessage());
         }
     }
@@ -157,7 +157,7 @@ public class KeytabCleanupService {
             vaultComponent.cleanupSecrets(environmentCrn, null, accountId);
             keytabCacheService.deleteByEnvironmentCrn(environmentCrn);
         } catch (Exception e) {
-            LOGGER.error("Cleanup cluster failed " + e.getLocalizedMessage(), e);
+            LOGGER.error("Cleanup cluster failed {}", e.getLocalizedMessage(), e);
             throw new DeleteException("Failed to cleanup " + e.getLocalizedMessage());
         }
     }
@@ -166,10 +166,10 @@ public class KeytabCleanupService {
         try {
             FreeIpaClientExceptionUtil.ignoreNotFoundException(() -> ipaClient.deleteService(canonicalPrincipal), null);
         } catch (RetryableFreeIpaClientException e) {
-            LOGGER.error(SERVICE_PRINCIPAL_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(SERVICE_PRINCIPAL_DELETION_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new RetryableFreeIpaClientException(SERVICE_PRINCIPAL_DELETION_FAILED, e, new DeleteException(SERVICE_PRINCIPAL_DELETION_FAILED));
         } catch (FreeIpaClientException e) {
-            LOGGER.error(SERVICE_PRINCIPAL_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(SERVICE_PRINCIPAL_DELETION_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new DeleteException(SERVICE_PRINCIPAL_DELETION_FAILED);
         }
     }

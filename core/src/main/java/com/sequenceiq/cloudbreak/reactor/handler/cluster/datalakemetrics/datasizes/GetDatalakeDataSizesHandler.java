@@ -85,7 +85,7 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
 
     @Override
     protected Selectable defaultFailureEvent(Long stackId, Exception ex, Event<GetDatalakeDataSizesRequest> request) {
-        LOGGER.error("Failed to get the Data Lake data sizes for stack with ID: '" + stackId.toString() + '\'', ex);
+        LOGGER.error("Failed to get the Data Lake data sizes for stack with ID: '{}'", stackId.toString(), ex);
         return new DetermineDatalakeDataSizesFailureEvent(stackId, ex);
     }
 

@@ -79,7 +79,7 @@ public class ImageComponentUpdaterService {
             stackComponentUpdater.updateComponentsByStackId(stack, targetComponents, true);
             clusterComponentUpdater.updateClusterComponentsByStackId(stack, targetComponents, true);
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            LOGGER.warn(String.format("Image was not found for stack %s", stack.getName()), e);
+            LOGGER.warn("Image was not found for stack {}", stack.getName(), e);
             throw notFoundException("Image", targetStatedImage.getImage().getUuid());
         }
     }
@@ -88,7 +88,7 @@ public class ImageComponentUpdaterService {
         try {
             return upgradeImageInfoFactory.create(targetImageId, stackId);
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            LOGGER.warn(String.format("Image was not found for stack %s", stack.getName()), e);
+            LOGGER.warn("Image was not found for stack {}", stack.getName(), e);
             throw notFoundException("Image", targetImageId);
         }
     }

@@ -114,8 +114,7 @@ public class FreeIpaService {
                 );
             }
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to create FreeIpa cluster for environment '%s' due to: '%s'",
-                    createFreeIpaRequest.getEnvironmentCrn(), errorMessage), e);
+            LOGGER.error("Failed to create FreeIpa cluster for environment '{}' due to: '{}'", createFreeIpaRequest.getEnvironmentCrn(), errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -124,11 +123,11 @@ public class FreeIpaService {
         try {
             return Optional.of(freeIpaV1Endpoint.describe(envCrn));
         } catch (NotFoundException e) {
-            LOGGER.warn("Could not find freeipa with envCrn: " + envCrn);
+            LOGGER.warn("Could not find freeipa with envCrn: {}", envCrn);
             return Optional.empty();
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to describe FreeIpa cluster for environment '%s' due to: '%s'.", envCrn, errorMessage), e);
+            LOGGER.error("Failed to describe FreeIpa cluster for environment '{}' due to: '{}'.", envCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -147,7 +146,7 @@ public class FreeIpaService {
             }
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to describe FreeIpa cluster for environment '%s' due to: '%s'.", envCrn, errorMessage), e);
+            LOGGER.error("Failed to describe FreeIpa cluster for environment '{}' due to: '{}'.", envCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -157,7 +156,7 @@ public class FreeIpaService {
             freeIpaV1Endpoint.delete(environmentCrn, forced);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to delete FreeIpa cluster for environment '%s' due to: '%s'", environmentCrn, errorMessage), e);
+            LOGGER.error("Failed to delete FreeIpa cluster for environment '{}' due to: '{}'", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -167,8 +166,8 @@ public class FreeIpaService {
             freeIpaV1Endpoint.attachChildEnvironment(attachChildEnvironmentRequest);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to attach child environment '%s' for '%s' due to: '%s'",
-                    attachChildEnvironmentRequest.getChildEnvironmentCrn(), attachChildEnvironmentRequest.getParentEnvironmentCrn(), errorMessage), e);
+            LOGGER.error("Failed to attach child environment '{}' for '{}' due to: '{}'", attachChildEnvironmentRequest.getChildEnvironmentCrn(),
+                    attachChildEnvironmentRequest.getParentEnvironmentCrn(), errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -178,8 +177,7 @@ public class FreeIpaService {
             freeIpaV1Endpoint.detachChildEnvironment(detachChildEnvironmentRequest);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to detach child environment '%s' due to: '%s'",
-                    detachChildEnvironmentRequest.getChildEnvironmentCrn(), errorMessage), e);
+            LOGGER.error("Failed to detach child environment '{}' due to: '{}'", detachChildEnvironmentRequest.getChildEnvironmentCrn(), errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -190,8 +188,7 @@ public class FreeIpaService {
                     () -> userV1Endpoint.getSyncOperationStatusInternal(Crn.fromString(environmentCrn).getAccountId(), operationId));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to get user synchronization status from FreeIpa for environment '%s' due to: '%s'",
-                    environmentCrn, errorMessage), e);
+            LOGGER.error("Failed to get user synchronization status from FreeIpa for environment '{}' due to: '{}'", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }
@@ -201,8 +198,7 @@ public class FreeIpaService {
             return freeIpaV1Endpoint.healthDetails(environmentCrn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to get health details for the freeIpa of the given environment: '%s' due to: '%s'",
-                    environmentCrn, errorMessage), e);
+            LOGGER.error("Failed to get health details for the freeIpa of the given environment: '{}' due to: '{}'", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

@@ -82,7 +82,7 @@ public class YarnLoadBalancerLaunchService {
         List<String> gatewayIPs = getGatewayIPs(authenticatedContext, yarnClient, cloudStack);
         List<YarnComponent> loadBalancerComponents = componentFactory.create(cloudStack, gatewayIPs, applicationName);
         createApplicationRequest.setComponents(loadBalancerComponents);
-        LOGGER.debug("Successfully created the Yarn laod balancer application request: " + createApplicationRequest);
+        LOGGER.debug("Successfully created the Yarn laod balancer application request: {}", createApplicationRequest);
         return createApplicationRequest;
     }
 
@@ -109,7 +109,7 @@ public class YarnLoadBalancerLaunchService {
                 }
             }
         });
-        LOGGER.info("Successfully found the following gateway IPs for the load balancer: " + gatewayIPs + ".");
+        LOGGER.info("Successfully found the following gateway IPs for the load balancer: {}.", gatewayIPs);
         return gatewayIPs;
     }
 
@@ -118,25 +118,25 @@ public class YarnLoadBalancerLaunchService {
      * given by the application name provided.
      */
     public Iterable<Container> getContainers(String applicationName, YarnClient yarnClient) {
-        LOGGER.debug("Getting the Yarn containers for application " + applicationName + ".");
+        LOGGER.debug("Getting the Yarn containers for application {}.", applicationName);
         ApplicationDetailRequest applicationDetailRequest = new ApplicationDetailRequest();
         applicationDetailRequest.setName(applicationName);
         ResponseContext responseContext;
 
         try {
             responseContext = yarnClient.getApplicationDetail(applicationDetailRequest);
-            LOGGER.debug("Successfully for a response for Yarn application " + applicationName + " from the Yarn client.");
+            LOGGER.debug("Successfully for a response for Yarn application {} from the Yarn client.", applicationName);
         } catch (MalformedURLException ex) {
-            LOGGER.warn("Failed to get information for the Yarn loadbalancer! Application name: " + applicationName + " Error: " + ex.getMessage());
+            LOGGER.warn("Failed to get information for the Yarn loadbalancer! Application name: {} Error: {}", applicationName, ex.getMessage());
             throw new CloudConnectorException("Failed to get information for the Yarn loadbalancer.", ex);
         }
 
         if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_SUCCESS) {
-            LOGGER.info("Successfully retrieved container information for the Yarn application " + applicationName + ".");
+            LOGGER.info("Successfully retrieved container information for the Yarn application {}.", applicationName);
             ApplicationDetailResponse applicationDetailResponse = (ApplicationDetailResponse) responseContext.getResponseObject();
             return applicationDetailResponse.getContainers();
         } else {
-            LOGGER.warn("Failed to get yarn container! Application name: " + applicationName);
+            LOGGER.warn("Failed to get yarn container! Application name: {}", applicationName);
             ApplicationErrorResponse errorResponse = responseContext.getResponseError();
             throw new CloudConnectorException(String.format("Failed to get yarn container details: HTTP Return: %d Error: %s",
                     responseContext.getStatusCode(), errorResponse == null ? "unknown" : errorResponse.getDiagnostics()));

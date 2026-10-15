@@ -80,7 +80,7 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
                 LOGGER.info("Scheduling dynamic entitlement checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 scheduler.scheduleJob(jobDetail, trigger);
             } catch (Exception e) {
-                LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
+                LOGGER.error("Error during scheduling quartz job: {}", id, e);
             }
         }
     }
@@ -97,7 +97,7 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
                 LOGGER.debug("Scheduling dynamic entitlement checker job for stack {}", resource.getJobResource().getRemoteResourceId());
                 scheduler.scheduleJob(jobDetail, trigger);
             } catch (Exception e) {
-                LOGGER.error(String.format("Error during scheduling dynamic entitlement checker job: %s", jobDetail), e);
+                LOGGER.error("Error during scheduling dynamic entitlement checker job: {}", jobDetail, e);
             }
         }
     }
@@ -108,7 +108,7 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
                 scheduler.deleteJob(jobKey);
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+            LOGGER.error("Error during unscheduling quartz job: {}", jobKey, e);
         }
     }
 

@@ -75,7 +75,7 @@ public class ClouderaManagerStorageErrorMapper implements ClouderaManagerErrorMa
                 && cloudStorage.get().getAccountMapping().getUserMappings() != null) {
             return mapCloudPlatformSpecificMessage(originalMessage, cloudPlatform);
         } else {
-            LOGGER.warn(MESSAGE_VALIDATION_ERROR + JsonUtil.writeValueAsStringSilent(cloudStorage.orElse(null)));
+            LOGGER.warn(MESSAGE_VALIDATION_ERROR + "{}", JsonUtil.writeValueAsStringSilent(cloudStorage.orElse(null)));
             return originalMessage;
         }
     }

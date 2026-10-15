@@ -39,9 +39,9 @@ public class CreateUserGroupAction implements Action<UmsGroupTestDto, UmsClient>
                     .orElse(null);
             List<String> groupMembers = client.getDefaultClient(testContext).listMembersFromGroup(accountId, groupName);
             testDto.setResponse(existingGroup);
-            LOGGER.info(format(" User group is already present at account '%s' with details: %nGroup Id: %s %nGroup Crn: %s %nGroup Name: %s " +
-                            "%nGroup Members: %s. So creation is not necessary! ", accountId, testDto.getResponse().getGroupId(),
-                    testDto.getResponse().getCrn(), testDto.getResponse().getGroupName(), groupMembers));
+            LOGGER.info(" User group is already present at account '{}' with details: \nGroup Id: {} \nGroup Crn: {} \nGroup Name: {} " +
+                    "\nGroup Members: {}. So creation is not necessary! ", accountId, testDto.getResponse().getGroupId(),
+                    testDto.getResponse().getCrn(), testDto.getResponse().getGroupName(), groupMembers);
             Log.when(LOGGER, format(" User group is already present at account '%s' with details: %nGroup Id: %s %nGroup Crn: %s %nGroup Name: %s " +
                             "%nGroup Members: %s. So creation is not necessary! ", accountId, testDto.getResponse().getGroupId(),
                     testDto.getResponse().getCrn(), testDto.getResponse().getGroupName(), groupMembers));
@@ -49,8 +49,8 @@ public class CreateUserGroupAction implements Action<UmsGroupTestDto, UmsClient>
             Log.when(LOGGER, format(" Creating new user group '%s' at account '%s'. ", groupName, accountId));
             Log.whenJson(LOGGER, format(" Create new user group request:%n "), testDto.getRequest());
             testDto.setResponse(client.getDefaultClient(testContext).createGroup(accountId, groupName));
-            LOGGER.info(format(" New user group has been created at account '%s' with details: %nGroup Id: %s %nGroup Crn: %s %nGroup Name: %s. ",
-                    accountId, testDto.getResponse().getGroupId(), testDto.getResponse().getCrn(), testDto.getResponse().getGroupName()));
+            LOGGER.info(" New user group has been created at account '{}' with details: \nGroup Id: {} \nGroup Crn: {} \nGroup Name: {}. ", accountId,
+                    testDto.getResponse().getGroupId(), testDto.getResponse().getCrn(), testDto.getResponse().getGroupName());
             Log.when(LOGGER, format(" New user group has been created at account '%s' with details: %nGroup Id: %s %nGroup Crn: %s %nGroup Name: %s. ",
                     accountId, testDto.getResponse().getGroupId(), testDto.getResponse().getCrn(), testDto.getResponse().getGroupName()));
         }

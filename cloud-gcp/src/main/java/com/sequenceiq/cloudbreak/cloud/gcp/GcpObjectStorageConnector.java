@@ -76,7 +76,7 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
                 storage.buckets().get(bucketName).execute();
             } catch (Exception e) {
                 String message = String.format("The specified bucket with %s name does not exist", bucketName);
-                LOGGER.debug(message + ":" + e.getMessage());
+                LOGGER.debug("{}:{}", message, e.getMessage());
                 resultBuilder.error(message);
             }
         }

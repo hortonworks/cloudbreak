@@ -127,7 +127,7 @@ public class TerminationService {
             cleanUpService.cleanUpStructuredEventsForStack(stackId);
             cleanUpService.detachClusterComponentRelatedAuditEntries(stackId);
         } catch (Exception e) {
-            LOGGER.warn("Unable to clean up resources due to: " + e.getMessage(), e);
+            LOGGER.warn("Unable to clean up resources due to: {}", e.getMessage(), e);
         }
     }
 

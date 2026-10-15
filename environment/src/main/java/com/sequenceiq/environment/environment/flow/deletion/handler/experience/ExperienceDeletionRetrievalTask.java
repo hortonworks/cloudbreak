@@ -43,8 +43,8 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
                     .filter(e -> DELETE_FAILED_STATUS.equals(e.getStatus()))
                     .collect(Collectors.toSet());
             if (experiencesWithDeleteFailed.isEmpty()) {
-                LOGGER.info(connectedExperiences.size() + " experience has found for the environment (name: {}, crn: {})",
-                        pollerObject.getEnvironmentName(), pollerObject.getEnvironmentCrn());
+                LOGGER.info("{} experience has found for the environment (name: {}, crn: {})", connectedExperiences.size(), pollerObject.getEnvironmentName(),
+                        pollerObject.getEnvironmentCrn());
                 return false;
             } else {
                 String collectedStatusReason = experiencesWithDeleteFailed.stream()

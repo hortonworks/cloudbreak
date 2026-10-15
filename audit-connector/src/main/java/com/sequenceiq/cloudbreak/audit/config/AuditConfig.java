@@ -105,9 +105,9 @@ public class AuditConfig {
             String eventDataUpdaters = result.entrySet().stream().map(auditEventDataUpdaterEntry -> String.format("[%s :: %s]",
                     getIfNotNull(auditEventDataUpdaterEntry.getKey(), Class::getSimpleName),
                     getIfNotNull(auditEventDataUpdaterEntry.getValue(), u -> u.getClass().getSimpleName()))).collect(Collectors.joining(","));
-            LOGGER.debug("The " + AuditEventBuilderUpdater.class.getSimpleName() + " has the following implementations: {}", eventDataUpdaters);
+            LOGGER.debug("The {} has the following implementations: {}", AuditEventBuilderUpdater.class.getSimpleName(), eventDataUpdaters);
         } else {
-            LOGGER.debug("The " + AuditEventBuilderUpdater.class.getSimpleName() + " has no any implementation!");
+            LOGGER.debug("The {} has no any implementation!", AuditEventBuilderUpdater.class.getSimpleName());
         }
         return result;
     }
@@ -120,10 +120,9 @@ public class AuditConfig {
             String auditEventDataUpdaters = result.entrySet().stream().map(auditEventDataUpdaterEntry -> String.format("[%s :: %s]",
                     getIfNotNull(auditEventDataUpdaterEntry.getKey(), Class::getSimpleName),
                     getIfNotNull(auditEventDataUpdaterEntry.getValue(), u -> u.getClass().getSimpleName()))).collect(Collectors.joining(","));
-            LOGGER.debug("The " + AttemptAuditEventResultBuilderUpdater.class.getSimpleName() + " has the following implementations: {}",
-                    auditEventDataUpdaters);
+            LOGGER.debug("The {} has the following implementations: {}", AttemptAuditEventResultBuilderUpdater.class.getSimpleName(), auditEventDataUpdaters);
         } else {
-            LOGGER.debug("The " + AttemptAuditEventResultBuilderUpdater.class.getSimpleName() + " has no any implementation!");
+            LOGGER.debug("The {} has no any implementation!", AttemptAuditEventResultBuilderUpdater.class.getSimpleName());
         }
         return result;
     }

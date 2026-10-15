@@ -142,8 +142,8 @@ public class EnvStartActions {
         return new AbstractEnvStartAction<>(EnvStartFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvStartFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.warn(String.format("Failed to start environment '%s'. Status: '%s'.",
-                        payload.getEnvironmentDto(), payload.getEnvironmentStatus()), payload.getException());
+                LOGGER.warn("Failed to start environment '{}'. Status: '{}'.", payload.getEnvironmentDto(), payload.getEnvironmentStatus(),
+                        payload.getException());
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                         .updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
                                 convertStatus(payload.getEnvironmentStatus()), EnvStartState.ENV_START_FAILED_STATE);

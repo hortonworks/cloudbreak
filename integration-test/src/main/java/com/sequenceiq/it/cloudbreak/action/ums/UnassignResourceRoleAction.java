@@ -31,16 +31,16 @@ public class UnassignResourceRoleAction extends AbstractUmsAction<UmsTestDto> {
 
         Log.when(LOGGER, format(" Revoke resource role '%s' from user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         Log.whenJson(LOGGER, format(" Revoke resource role request:%n "), testDto.getRequest());
-        LOGGER.info(format(" Revoking resource role '%s' from user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
+        LOGGER.info(" Revoking resource role '{}' from user '{}' at resource '{}'... ", resourceRole, userCrn, resourceCrn);
         Multimap<String, String> assignedResourceRoles = client.getDefaultClient(testContext).listAssignedResourceRoles(userCrn);
         if (assignedResourceRoles.get(resourceCrn).contains(resourceRole)) {
             client.getDefaultClient(testContext).unassignResourceRole(userCrn, resourceCrn, resourceRole);
             // wait for UmsRightsCache to expire
             Thread.sleep(7000);
-            LOGGER.info(format(" Resource role '%s' has been revoked from user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
+            LOGGER.info(" Resource role '{}' has been revoked from user '{}' at resource '{}' ", resourceRole, userCrn, resourceCrn);
             Log.when(LOGGER, format(" Resource role '%s' has been revoked from user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         } else {
-            LOGGER.info(format(" Resource role '%s' has already been revoked from user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
+            LOGGER.info(" Resource role '{}' has already been revoked from user '{}' at resource '{}' ", resourceRole, userCrn, resourceCrn);
             Log.when(LOGGER, format(" Resource role '%s' has already been revoked from user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         }
         return testDto;

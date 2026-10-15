@@ -51,7 +51,7 @@ public class EnvironmentArchiverJobService implements JobSchedulerService {
             LOGGER.info("Scheduling environment cleanup job for key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
+            LOGGER.error("Error during scheduling quartz job: {}", jobDetail, e);
         }
     }
 
@@ -83,7 +83,7 @@ public class EnvironmentArchiverJobService implements JobSchedulerService {
         try {
             scheduler.deleteJob(jobKey);
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+            LOGGER.error("Error during unscheduling quartz job: {}", jobKey, e);
         }
     }
 

@@ -57,12 +57,12 @@ public class ClusterProxyRegistrationClient {
         } catch (RestClientResponseException e) {
             String message = String.format("Error registering proxy configuration for cluster '%s' with Cluster Proxy, " +
                             "Error Response Body '%s'", configRegistrationRequest.getClusterCrn(), e.getResponseBodyAsString());
-            LOGGER.error(message + " URL: " + registerConfigUrl, e);
+            LOGGER.error("{} URL: {}", message, registerConfigUrl, e);
             throw new ClusterProxyException(message, e);
         } catch (Exception e) {
             String message = String.format("Error registering proxy configuration for cluster '%s' with Cluster Proxy.",
                     configRegistrationRequest.getClusterCrn());
-            LOGGER.error(message + " URL: " + registerConfigUrl, e);
+            LOGGER.error("{} URL: {}", message, registerConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
@@ -79,12 +79,12 @@ public class ClusterProxyRegistrationClient {
         } catch (RestClientResponseException e) {
             String message = String.format("Error updating configuration for cluster '%s' with Cluster Proxy, " +
                             "Error Response Body '%s'", configUpdateRequest.getClusterCrn(), e.getResponseBodyAsString());
-            LOGGER.error(message + " URL: " + updateConfigUrl, e);
+            LOGGER.error("{} URL: {}", message, updateConfigUrl, e);
             throw new ClusterProxyException(message, e);
         } catch (Exception e) {
             String message = String.format("Error updating configuration for cluster '%s' with Cluster Proxy.",
                     configUpdateRequest.getClusterCrn());
-            LOGGER.error(message + " URL: " + updateConfigUrl, e);
+            LOGGER.error("{} URL: {}", message, updateConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
@@ -101,12 +101,12 @@ public class ClusterProxyRegistrationClient {
         } catch (RestClientResponseException e) {
             String message = String.format("Error de-registering proxy configuration for cluster identifier '%s' from Cluster Proxy, " +
                             "Error Response Body '%s'", clusterIdentifier, e.getResponseBodyAsString());
-            LOGGER.error(message + " URL: " + removeConfigUrl, e);
+            LOGGER.error("{} URL: {}", message, removeConfigUrl, e);
             throw new ClusterProxyException(message, e);
         } catch (Exception e) {
             String message = String.format("Error de-registering proxy configuration for cluster identifier '%s' from Cluster Proxy.",
                     clusterIdentifier);
-            LOGGER.error(message + " URL: " + removeConfigUrl, e);
+            LOGGER.error("{} URL: {}", message, removeConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
@@ -124,12 +124,12 @@ public class ClusterProxyRegistrationClient {
         } catch (RestClientResponseException e) {
             String message = String.format("Error reading cluster proxy configuration for cluster identifier '%s' from Cluster Proxy, " +
                             "Error Response Body '%s'", clusterIdentifier, e.getResponseBodyAsString());
-            LOGGER.error(message + " URL: " + readConfigUrl, e);
+            LOGGER.error("{} URL: {}", message, readConfigUrl, e);
             throw new ClusterProxyException(message, e);
         } catch (Exception e) {
             String message = String.format("Error reading cluster proxy configuration for cluster identifier '%s' from Cluster Proxy.",
                     clusterIdentifier);
-            LOGGER.error(message + " URL: " + readConfigUrl, e);
+            LOGGER.error("{} URL: {}", message, readConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }

@@ -604,7 +604,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss, CloudPlatform cloudPlatform) {
         checkShutdown();
-        LOGGER.info("init " + clss.getSimpleName());
+        LOGGER.info("init {}", clss.getSimpleName());
         O bean = applicationContext.getBean(clss, getTestContext());
         bean.setCloudPlatform(cloudPlatform);
         String key = bean.getClass().getSimpleName();
@@ -923,8 +923,8 @@ public abstract class TestContext implements ApplicationContextAware {
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, "Cloudbreak await for flow should be skipped because of previous error.");
         } else {
-            LOGGER.info(String.format("Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
-                    Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
+            LOGGER.info("Cloudbreak await for flow on resource: {} at account: {} - for entity: {} ", awaitEntity.getCrn(),
+                    Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity);
             Log.await(LOGGER, String.format("Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
                     Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
             MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
@@ -1167,7 +1167,7 @@ public abstract class TestContext implements ApplicationContextAware {
     public Tunnel getTunnel() {
         checkNonEmpty("integrationtest.cloudbreak.server", defaultServer);
         if (StringUtils.containsIgnoreCase(defaultServer, "usg-1.cdp.mow-dev")) {
-            LOGGER.info(format("Tested environmet is GOV Dev at '%s'. So we are using CCM2 connection to the CDP Control Plane!", defaultServer));
+            LOGGER.info("Tested environmet is GOV Dev at '{}'. So we are using CCM2 connection to the CDP Control Plane!", defaultServer);
             return Tunnel.CCMV2_JUMPGATE;
         } else {
             return Tunnel.CLUSTER_PROXY;

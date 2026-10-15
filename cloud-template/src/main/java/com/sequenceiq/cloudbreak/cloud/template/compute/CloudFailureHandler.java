@@ -173,12 +173,12 @@ public class CloudFailureHandler {
         List<CloudResource> resources = new ArrayList<>(cloudResourceStatuses.size());
         for (CloudResourceStatus exception : cloudResourceStatuses) {
             if (ResourceStatus.FAILED.equals(exception.getStatus()) || ids.contains(exception.getPrivateId())) {
-                LOGGER.info("Failed to create instance with id '" + exception.getPrivateId() + "'. Reason: " + exception.getStatusReason());
+                LOGGER.info("Failed to create instance with id '{}'. Reason: {}", exception.getPrivateId(), exception.getStatusReason());
                 resources.add(exception.getCloudResource());
             }
         }
         if (!resources.isEmpty()) {
-            LOGGER.info("Resource list not empty so rollback will start.Resource list size is: " + resources.size());
+            LOGGER.info("Resource list not empty so rollback will start.Resource list size is: {}", resources.size());
             doRollback(auth, allResources, ids, ctx, upscale, repair);
         }
     }

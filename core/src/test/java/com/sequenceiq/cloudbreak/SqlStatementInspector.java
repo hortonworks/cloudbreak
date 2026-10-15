@@ -19,7 +19,7 @@ public class SqlStatementInspector implements StatementInspector {
 
     @Override
     public String inspect(String sql) {
-        LOGGER.info(" Inspect the statement: " + sql);
+        LOGGER.info(" Inspect the statement: {}", sql);
         if (sql.toLowerCase(Locale.ROOT).startsWith("select")) {
             SELECT_STATEMENTS.incrementAndGet();
         }

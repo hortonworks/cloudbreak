@@ -71,7 +71,7 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StopExternalDatabaseRequest> event) {
         Stack stack = stackService.getById(event.getData().getResourceId());
-        LOGGER.error(String.format("Exception during DB 'stop' for stack/cluster: %s", stack.getName()), e);
+        LOGGER.error("Exception during DB 'stop' for stack/cluster: {}", stack.getName(), e);
         return stopFailedEvent(stack, e);
     }
 
@@ -114,10 +114,10 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
             LOGGER.error("Database 'stop' polling exited before timeout. Cause: ", e);
             result = stopFailedEvent(stack, e);
         } catch (PollerStoppedException e) {
-            LOGGER.error(String.format("Database 'stop' poller stopped for stack: %s", stack.getName()), e);
+            LOGGER.error("Database 'stop' poller stopped for stack: {}", stack.getName(), e);
             result = stopFailedEvent(stack, e);
         } catch (PollerException e) {
-            LOGGER.error(String.format("Database 'stop' polling failed for stack: %s", stack.getName()), e);
+            LOGGER.error("Database 'stop' polling failed for stack: {}", stack.getName(), e);
             result = stopFailedEvent(stack, e);
         }
         return result;

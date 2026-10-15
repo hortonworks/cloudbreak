@@ -184,7 +184,7 @@ public class AzureMetadataCollector implements MetadataCollector {
 
                 addCloudLoadBalancerMetadata(cloudLoadBalancerMetadata, ac, resourceGroup, loadBalancerName, loadBalancerName, type, ip);
             } catch (RuntimeException e) {
-                LOGGER.warn("Unable to find metadata for load balancer " + loadBalancerName, e);
+                LOGGER.warn("Unable to find metadata for load balancer {}", loadBalancerName, e);
             }
         }
 
@@ -223,7 +223,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                 addCloudLoadBalancerMetadata(cloudLoadBalancerMetadata, ac, resourceGroup,
                         gatewayPrivateLoadBalancerName, privateLoadBalancerName.get(), LoadBalancerType.GATEWAY_PRIVATE, ip);
             } catch (RuntimeException e) {
-                LOGGER.warn("Unable to find metadata for load balancer " + privateLoadBalancerName, e);
+                LOGGER.warn("Unable to find metadata for load balancer {}", privateLoadBalancerName, e);
             }
         }
     }

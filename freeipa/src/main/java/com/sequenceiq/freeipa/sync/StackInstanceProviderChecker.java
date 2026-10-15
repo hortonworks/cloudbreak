@@ -66,7 +66,7 @@ public class StackInstanceProviderChecker {
             return checkedMeasure(() -> instanceStateQuery.getCloudVmInstanceStatusesWithoutRetry(cloudCredential, cloudContext, instances), LOGGER,
                     ":::Auto sync::: get instance statuses in {}ms");
         } catch (Exception e) {
-            LOGGER.info(":::Auto sync::: Could not fetch vm statuses: " + e.getMessage(), e);
+            LOGGER.info(":::Auto sync::: Could not fetch vm statuses: {}", e.getMessage(), e);
             return instances.stream()
                     .map(instance -> new CloudVmInstanceStatus(instance, InstanceStatus.UNKNOWN))
                     .collect(toList());

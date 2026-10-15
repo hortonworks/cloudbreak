@@ -169,7 +169,7 @@ public class EnvironmentService implements EnvironmentPropertyProvider, Composit
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> {
                         if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
-                            LOGGER.info("Environment wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
+                            LOGGER.info("Environment wait polling cancelled in inmemory store, id: {}", sdxCluster.getId());
                             return AttemptResults.breakFor("Environment wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
                         }
                         LOGGER.info("Creation polling environment for environment status: '{}' in '{}' env",

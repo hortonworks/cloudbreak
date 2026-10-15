@@ -65,7 +65,7 @@ public class MockInstanceConnector implements InstanceConnector {
             LOGGER.debug("Collect instance statuses from mock spi");
             CloudVmInstanceStatus[] cloudVmInstanceStatusArray = mockUrlFactory.get(authenticatedContext, "/spi/cloud_instance_statuses")
                     .post(Entity.entity(vms, MediaType.APPLICATION_JSON_TYPE), CloudVmInstanceStatus[].class);
-            LOGGER.debug("Collected instance statuses: " + Arrays.toString(cloudVmInstanceStatusArray));
+            LOGGER.debug("Collected instance statuses: {}", Arrays.toString(cloudVmInstanceStatusArray));
             List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
             for (CloudInstance instance : vms) {
                 Optional<CloudVmInstanceStatus> vmInstanceStatusFromApi = Arrays.stream(cloudVmInstanceStatusArray)

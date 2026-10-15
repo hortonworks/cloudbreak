@@ -255,7 +255,7 @@ public class TlsSecurityService {
                 return instanceMetadata.getImage().get(Image.class).getPackageVersion(ImagePackageVersion.SALT);
             }
         } catch (IOException | IllegalArgumentException e) {
-            LOGGER.warn("Missing image information for instance: " + instanceMetadata.getInstanceId(), e);
+            LOGGER.warn("Missing image information for instance: {}", instanceMetadata.getInstanceId(), e);
         }
         return null;
     }

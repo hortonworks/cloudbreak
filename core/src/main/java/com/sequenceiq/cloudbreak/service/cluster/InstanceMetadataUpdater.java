@@ -285,7 +285,7 @@ public class InstanceMetadataUpdater {
                     instancesWithMissingPackageVersions.put(instanceMetaData.getInstanceId(), missingPackageVersions);
                 }
             } catch (IOException e) {
-                LOGGER.warn("Missing image information for instance: " + instanceMetaData.getInstanceId(), e);
+                LOGGER.warn("Missing image information for instance: {}", instanceMetaData.getInstanceId(), e);
             }
         }
 

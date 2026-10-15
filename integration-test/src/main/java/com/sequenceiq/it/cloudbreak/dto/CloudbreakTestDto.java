@@ -39,7 +39,7 @@ public interface CloudbreakTestDto extends Orderable, Assignable {
         try {
             deleteForCleanup();
         } catch (Exception ignore) {
-            LOGGER.error(String.format("%s cleanup failed because: ", getClass().getSimpleName()), ignore);
+            LOGGER.error("{} cleanup failed because: ", getClass().getSimpleName(), ignore);
         }
     }
 

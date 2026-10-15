@@ -60,8 +60,8 @@ public class EnvironmentExperienceDeletionAction {
             LOGGER.debug("Rethrow IllegalArgumentException during experienceConnectorService.deleteConnectedExperiences", e);
             throw e;
         } catch (IllegalStateException ise) {
-            LOGGER.debug(IllegalStateException.class.getSimpleName() + " has occurred as the result of calling " +
-                    "experienceConnectorService.deleteConnectedExperiences!", ise);
+            LOGGER.debug("{} has occurred as the result of calling experienceConnectorService.deleteConnectedExperiences!",
+                    IllegalStateException.class.getSimpleName(), ise);
             if (!forceDelete) {
                 throw new ExperienceOperationFailedException("Unable to delete connected experience(s)!", ise);
             }

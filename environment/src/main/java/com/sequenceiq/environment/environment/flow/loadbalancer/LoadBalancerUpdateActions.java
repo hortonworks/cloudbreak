@@ -102,8 +102,8 @@ public class LoadBalancerUpdateActions {
         return new AbstractLoadBalancerUpdateAction<>(LoadBalancerUpdateFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, LoadBalancerUpdateFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.warn(String.format("Failed to update load balancer on environment '%s'. Status: '%s'.",
-                    payload.getEnvironmentDto(), payload.getEnvironmentStatus()), payload.getException());
+                LOGGER.warn("Failed to update load balancer on environment '{}'. Status: '{}'.", payload.getEnvironmentDto(), payload.getEnvironmentStatus(),
+                        payload.getException());
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                     .updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
                         convertStatus(payload.getEnvironmentStatus()), LoadBalancerUpdateState.LOAD_BALANCER_UPDATE_FAILED_STATE);

@@ -254,13 +254,13 @@ public class ResourceSyncUtil {
         GatewayConfig primaryGateway = gatewayConfigService.getPrimaryGatewayConfig(stack);
         Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
         try {
-            LOGGER.info("Fetching fstab from instances to validate against CB context - Nodes - " + allHosts);
+            LOGGER.info("Fetching fstab from instances to validate against CB context - Nodes - {}", allHosts);
             Map<String, Map<String, String>> saltFstabInfo =  saltOrchestrator.getFstabInformation(saltService.createSaltConnector(primaryGateway),
                 allHosts, nodesWithDiskData);
             return saltFstabInfo.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey, entry -> entry.getValue().getOrDefault("fstab", EMPTY_STRING)));
         } catch (Exception e) {
-            LOGGER.warn("Exception while fetching fstab information for nodes - " + allHosts + " :: Exception - " + e);
+            LOGGER.warn("Exception while fetching fstab information for nodes - {}", allHosts, e);
             throw e;
         }
     }

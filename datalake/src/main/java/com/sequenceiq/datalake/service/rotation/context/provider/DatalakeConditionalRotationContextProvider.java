@@ -18,7 +18,7 @@ public abstract class DatalakeConditionalRotationContextProvider extends Abstrac
         try {
             return getConditionalRotationFunction().apply(entity);
         } catch (Exception e) {
-            LOGGER.warn(String.format("Couldn't decide if rotation for resource %s is applicable, thus allowing it, reason: ", entity.getCrn()), e);
+            LOGGER.warn("Couldn't decide if rotation for resource {} is applicable, thus allowing it, reason: ", entity.getCrn(), e);
             return true;
         }
     }

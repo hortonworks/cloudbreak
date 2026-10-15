@@ -53,7 +53,7 @@ public class StackTemplateService {
             }
             return res.getTemplate();
         } catch (InterruptedException e) {
-            LOGGER.error("Error while getting template: " + getPlatformTemplateRequest.getCloudContext(), e);
+            LOGGER.error("Error while getting template: {}", getPlatformTemplateRequest.getCloudContext(), e);
             throw new OperationException(e);
         }
     }

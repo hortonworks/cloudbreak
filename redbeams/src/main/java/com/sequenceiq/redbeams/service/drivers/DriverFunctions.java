@@ -52,7 +52,7 @@ public class DriverFunctions {
         Driver driver;
         switch (databaseVendor) {
             case POSTGRES:
-                LOGGER.debug("Using internal driver for " + databaseVendor);
+                LOGGER.debug("Using internal driver for {}", databaseVendor);
                 driver = new org.postgresql.Driver();
                 break;
             default:

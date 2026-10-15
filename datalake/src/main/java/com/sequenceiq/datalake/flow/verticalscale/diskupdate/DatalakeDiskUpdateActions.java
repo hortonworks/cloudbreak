@@ -85,8 +85,8 @@ public class DatalakeDiskUpdateActions {
         return new AbstractDatalakeDiskUpdateAction<>(DatalakeDiskUpdateFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeDiskUpdateFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to update disks in Data Lake '%s'. Status: '%s'.",
-                        payload.getDatalakeDiskUpdateEvent(), payload.getDatalakeStatus()), payload.getException());
+                LOGGER.error("Failed to update disks in Data Lake '{}'. Status: '{}'.",
+                        payload.getDatalakeDiskUpdateEvent(), payload.getDatalakeStatus(), payload.getException());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         payload.getDatalakeStatus(),
                         payload.getDatalakeStatus().getDefaultResourceEvent(),

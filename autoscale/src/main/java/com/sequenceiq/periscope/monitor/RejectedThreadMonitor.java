@@ -33,7 +33,7 @@ public class RejectedThreadMonitor extends AbstractMonitor<RejectedThread> {
         try {
             return Class.forName(rejectedThread.getType());
         } catch (ClassNotFoundException e) {
-            LOGGER.info("The given class does not found. " + e.getMessage());
+            LOGGER.info("The given class does not found. {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }

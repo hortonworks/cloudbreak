@@ -224,7 +224,7 @@ public class GcpStackUtil {
         try {
             return Long.valueOf(resourceName.split("-")[PRIVATE_ID_PART]);
         } catch (RuntimeException e) {
-            LOGGER.warn("Cannot determine the private id of GCP instance, name: " + resourceName, e);
+            LOGGER.warn("Cannot determine the private id of GCP instance, name: {}", resourceName, e);
         }
         return null;
     }

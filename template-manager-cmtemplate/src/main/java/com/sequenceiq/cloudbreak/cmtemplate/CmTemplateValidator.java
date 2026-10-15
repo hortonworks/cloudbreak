@@ -155,7 +155,7 @@ public class CmTemplateValidator implements BlueprintValidator {
             throw new BadRequestException(String.format("'%s' service is not presented on the cluster, and that is required",
                     role.getRequiredService().get()));
         } else {
-            LOGGER.info("Account is entitled for {} so scaling " + role.scaleType() + " is enabled.", role.getEntitledFor());
+            LOGGER.info("Account is entitled for {} so scaling {} is enabled.", role.getEntitledFor(), role.scaleType());
         }
     }
 

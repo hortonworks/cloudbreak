@@ -87,7 +87,7 @@ public class ExperiencesByLiftie implements Experience {
                 updatePolicyMapWithResult(fetchedPolicies, result, key);
             }
         } catch (ExperienceOperationFailedException eofe) {
-            LOGGER.warn("Unable to fetch policy from Liftie  due to: " + eofe.getMessage(), eofe);
+            LOGGER.warn("Unable to fetch policy from Liftie  due to: {}", eofe.getMessage(), eofe);
             result.put(key, "");
         }
         return result;

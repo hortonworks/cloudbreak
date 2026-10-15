@@ -50,7 +50,7 @@ public class TestNgListener implements IResultListener, ISuiteListener {
     @Override
     public  void onTestStart(ITestResult result) {
         Reporter.setCurrentTestResult(result);
-        LOGGER.info(String.format("Starting test: %s%s", result.getName(), getParameters(result)));
+        LOGGER.info("Starting test: {}{}", result.getName(), getParameters(result));
     }
 
     @Override
@@ -60,7 +60,7 @@ public class TestNgListener implements IResultListener, ISuiteListener {
         if (throwable != null) {
             LOGGER.info("Expected exception of {} '{}' was thrown.", throwable.getClass().getName(), throwable.getMessage());
         }
-        LOGGER.info(String.format("Test Passed: %s%s", result.getName(), getParameters(result)));
+        LOGGER.info("Test Passed: {}{}", result.getName(), getParameters(result));
     }
 
     @Override

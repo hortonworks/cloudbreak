@@ -660,7 +660,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             // YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
             // so it can happen that some roles will be missing on some nodes. Please do not delete only if you know what you are doing.
             Map<String, JsonNode> roles = saltStateService.getGrains(sc, "roles");
-            LOGGER.info("Roles before highstate: " + roles);
+            LOGGER.info("Roles before highstate: {}", roles);
         } catch (RuntimeException e) {
             LOGGER.warn("Can't get roles before highstate", e);
             throw new Retry.ActionFailedException("Can't get roles before highstate: " + e.getMessage());
@@ -1044,7 +1044,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                     .stream()
                     .collect(Collectors.toMap(Entry::getKey, entry -> convertPackageInfoListToMap(entry.getValue())));
         } catch (RuntimeException e) {
-            LOGGER.warn("Error occurred during determine package versions: " + Joiner.on(",").join(packages.keySet()), e);
+            LOGGER.warn("Error occurred during determine package versions: {}", Joiner.on(",").join(packages.keySet()), e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1055,7 +1055,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return saltStateService.getPackageVersions(saltConnector, packages);
         } catch (RuntimeException e) {
-            LOGGER.warn("Error occurred during determine package versions: " + Joiner.on(",").join(packages.keySet()), e);
+            LOGGER.warn("Error occurred during determine package versions: {}", Joiner.on(",").join(packages.keySet()), e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1108,7 +1108,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return saltStateService.getGrains(saltConnector, grain);
         } catch (RuntimeException e) {
-            LOGGER.warn("Error occurred during get grain execution: " + grain, e);
+            LOGGER.warn("Error occurred during get grain execution: {}", grain, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1124,7 +1124,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saltConnector.wheel("key.delete", downNodes, Object.class);
             }
         } catch (Exception e) {
-            LOGGER.warn("Error occurred during dead salt minions removal on " + gateway.getHostname(), e);
+            LOGGER.warn("Error occurred during dead salt minions removal on {}", gateway.getHostname(), e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1829,7 +1829,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 executeSingleSaltState(target, exitModel, maxRetry, maxRetryOnError, sc, state);
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Error occurred during execute state %s", Joiner.on(",").join(states)), e);
+            LOGGER.error("Error occurred during execute state {}", Joiner.on(",").join(states), e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }

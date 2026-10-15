@@ -37,7 +37,7 @@ public class SdxRestoreInternalAction implements Action<SdxInternalTestDto, SdxC
 
         Log.when(LOGGER, format(" Internal Data Lake '%s' restore has been started to '%s' ", sdxName, backupLocation));
         Log.whenJson(LOGGER, " Internal Data Lake restore request: ", testDto.getRequest());
-        LOGGER.info(format(" Internal Data Lake '%s' restore has been started to '%s'... ", sdxName, backupLocation));
+        LOGGER.info(" Internal Data Lake '{}' restore has been started to '{}'... ", sdxName, backupLocation);
         SdxRestoreResponse sdxRestoreResponse = client.getDefaultClient(testContext)
                 .sdxRestoreEndpoint()
                 .restoreDatalakeByName(sdxName, backupId, backupLocation, false, false, false, false,

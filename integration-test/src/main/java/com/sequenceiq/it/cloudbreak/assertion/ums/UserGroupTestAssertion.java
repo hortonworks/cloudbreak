@@ -63,8 +63,8 @@ public class UserGroupTestAssertion {
                         .orElse(null);
                 umsGroupTestDto.setResponse(foundGroup);
                 if (expectedPresence) {
-                    LOGGER.info(format(" User group '%s' is present at account '%s' with details: %nGroup Id: %s %nGroup Crn: %s ", groupName, accountId,
-                            umsGroupTestDto.getResponse().getGroupId(), umsGroupTestDto.getResponse().getCrn()));
+                    LOGGER.info(" User group '{}' is present at account '{}' with details: \nGroup Id: {} \nGroup Crn: {} ", groupName, accountId,
+                            umsGroupTestDto.getResponse().getGroupId(), umsGroupTestDto.getResponse().getCrn());
                     Log.then(LOGGER, format(" User group '%s' is present at account '%s' with details: %nGroup Id: %s %nGroup Crn: %s ", groupName, accountId,
                             umsGroupTestDto.getResponse().getGroupId(), umsGroupTestDto.getResponse().getCrn()));
                 } else {

@@ -11,7 +11,7 @@ public abstract class AbstractCloudProviderAssertion implements CloudProviderAss
 
     @Override
     public void assertServiceEndpoint(EnvironmentTestDto environmentTestDto) {
-        LOGGER.debug("Service endpoint not applicable for cloud provider " + getCloudPlatform().name());
+        LOGGER.debug("Service endpoint not applicable for cloud provider {}", getCloudPlatform().name());
     }
 
 }

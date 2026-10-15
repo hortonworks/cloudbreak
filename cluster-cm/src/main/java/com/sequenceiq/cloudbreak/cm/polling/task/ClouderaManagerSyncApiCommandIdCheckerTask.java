@@ -59,7 +59,7 @@ public class ClouderaManagerSyncApiCommandIdCheckerTask
                 LOGGER.debug("Not found any new commandId yet - [recent_id: {}]", castedObj.getId());
             }
         } catch (ApiException | CloudbreakException e) {
-            LOGGER.debug(String.format("Exception during polling the newest %s command.", castedObj.getCommandName()), e);
+            LOGGER.debug("Exception during polling the newest {} command.", castedObj.getCommandName(), e);
             result = false;
         }
         return result;

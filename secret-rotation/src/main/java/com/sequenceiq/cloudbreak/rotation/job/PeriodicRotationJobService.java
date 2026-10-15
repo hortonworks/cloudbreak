@@ -100,7 +100,7 @@ public class PeriodicRotationJobService implements JobSchedulerService {
                 scheduler.deleteJob(jobKey);
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+            LOGGER.error("Error during unscheduling quartz job: {}", jobKey, e);
         }
     }
 

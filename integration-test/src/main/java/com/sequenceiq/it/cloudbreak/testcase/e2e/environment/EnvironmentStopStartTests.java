@@ -272,10 +272,10 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
     private EnvironmentTestDto getTelemetryStorageLocation(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         telemetryStorageLocation = testDto.getResponse().getTelemetry().getLogging().getStorageLocation();
         if (StringUtils.isBlank(telemetryStorageLocation)) {
-            LOGGER.error(format(" Telemetry Storage Location has not been set at '%s' environment! ", testDto.getName()));
+            LOGGER.error(" Telemetry Storage Location has not been set at '{}' environment! ", testDto.getName());
             throw new TestFailException(format(" Telemetry Storage Location has not been set at '%s' environment! ", testDto.getName()));
         } else {
-            LOGGER.info(format(" Telemetry Storage Location has been set to '%s' at '%s' environment! ", telemetryStorageLocation, testDto.getName()));
+            LOGGER.info(" Telemetry Storage Location has been set to '{}' at '{}' environment! ", telemetryStorageLocation, testDto.getName());
             Log.then(LOGGER, format(" Telemetry Storage Location has been set to '%s' at '%s' environment! ", telemetryStorageLocation, testDto.getName()));
         }
         return testDto;

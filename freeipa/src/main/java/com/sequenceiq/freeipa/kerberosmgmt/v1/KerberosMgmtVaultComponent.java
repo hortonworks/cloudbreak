@@ -42,7 +42,7 @@ public class KerberosMgmtVaultComponent {
     }
 
     public void recursivelyCleanupVault(String path) {
-        LOGGER.debug("Cleaning vault path: " + path);
+        LOGGER.debug("Cleaning vault path: {}", path);
         List<String> entries = secretService.listEntriesWithoutAppPath(path);
         if (entries.isEmpty()) {
             secretService.deleteByPathPostfix(path);

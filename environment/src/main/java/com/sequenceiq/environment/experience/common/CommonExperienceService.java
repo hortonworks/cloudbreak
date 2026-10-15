@@ -55,7 +55,7 @@ public class CommonExperienceService implements Experience {
 
     @Override
     public Set<ExperienceCluster> getConnectedClustersForEnvironment(EnvironmentExperienceDto environment) {
-        LOGGER.debug("About to find connected experiences for environment which is in the following tenant: " + environment.getAccountId());
+        LOGGER.debug("About to find connected experiences for environment which is in the following tenant: {}", environment.getAccountId());
         Set<ExperienceCluster> activeExperiences = getActiveExperiences(environment.getCrn());
         if (!activeExperiences.isEmpty()) {
             String combinedNames = activeExperiences
@@ -96,7 +96,7 @@ public class CommonExperienceService implements Experience {
                         ExperiencePolicyResponse res = experienceConnectorService.collectPolicy(xpPath, environment.getCloudPlatform());
                         policies.put(configuredExperience.getBusinessName(), getIfNotNullOtherwise(res.getAws(), ProviderPolicyResponse::getPolicy, null));
                     } catch (ExperienceOperationFailedException eofe) {
-                        LOGGER.warn("Unable to fetch policy from experience \"" + configuredExperience.getName() + "\" due to: " + eofe.getMessage(), eofe);
+                        LOGGER.warn("Unable to fetch policy from experience \"{}\" due to: {}", configuredExperience.getName(), eofe.getMessage(), eofe);
                         policies.put(configuredExperience.getBusinessName(), "");
                     }
                 });

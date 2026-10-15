@@ -67,7 +67,7 @@ public class VaultRetryService {
         try {
             return action.get();
         } catch (CancellationException e) {
-            LOGGER.warn("Exception during vault " + operation + ", possible shutdown.");
+            LOGGER.warn("Exception during vault {}, possible shutdown.", operation);
             throw e;
         } catch (RuntimeException e) {
             String message = e.getMessage();
@@ -76,7 +76,7 @@ public class VaultRetryService {
                 forceVaultReLogin();
                 throw new VaultRetryException(message, e, operation, metricType);
             }
-            LOGGER.warn("Exception during vault " + operation, e);
+            LOGGER.warn("Exception during vault {}", operation, e);
             if (message != null && (message.contains(FORBIDDEN_ERROR_MESSAGE) || message.equals(CONNECTION_POOL_SHUT_DOWN))) {
                 throw e;
             } else {

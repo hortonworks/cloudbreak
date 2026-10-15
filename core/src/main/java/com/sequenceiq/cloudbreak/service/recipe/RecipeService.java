@@ -103,8 +103,8 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
                     Optional.ofNullable(JsonUtil.writeValueAsStringSilentSafe(typeDetails)),
                     Optional.ofNullable(JsonUtil.writeValueAsStringSilentSafe(hostGroupDetails)));
         } catch (Exception e) {
-            LOGGER.error(String.format("We could not send usage report regarding recipes during cluster creation for stack %s, because: ",
-                    stack.getResourceCrn()), e.getMessage());
+            LOGGER.error("We could not send usage report regarding recipes during cluster creation for stack {}, because: {}",
+                    stack.getResourceCrn(), e.getMessage());
         }
     }
 

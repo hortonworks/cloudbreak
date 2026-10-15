@@ -19,7 +19,7 @@ public class ListClustersResponseValidator {
     private boolean isClustersAreEmpty(ListClustersResponse response) {
         boolean clustersMapIsEmpty = MapUtils.isEmpty(response.getClusters());
         if (clustersMapIsEmpty) {
-            LOGGER.info("The map of clusters within the " + ListClustersResponse.class.getSimpleName() + " was empty or null!");
+            LOGGER.info("The map of clusters within the {} was empty or null!", ListClustersResponse.class.getSimpleName());
         }
         return clustersMapIsEmpty;
     }
@@ -27,14 +27,14 @@ public class ListClustersResponseValidator {
     private boolean isPagesAreEmpty(ListClustersResponse response) {
         boolean pagesAreEmpty = response.getPage() == null || response.getPage().getTotalPages() == null || response.getPage().getTotalPages() == 0;
         if (pagesAreEmpty) {
-            LOGGER.info(ListClustersResponse.class.getSimpleName() + " has not contained any element!");
+            LOGGER.info("{} has not contained any element!", ListClustersResponse.class.getSimpleName());
         }
         return pagesAreEmpty;
     }
 
     private boolean isNull(ListClustersResponse response) {
         if (response == null) {
-            LOGGER.info(ListClustersResponse.class.getSimpleName() + " was null!");
+            LOGGER.info("{} was null!", ListClustersResponse.class.getSimpleName());
             return true;
         }
         return false;

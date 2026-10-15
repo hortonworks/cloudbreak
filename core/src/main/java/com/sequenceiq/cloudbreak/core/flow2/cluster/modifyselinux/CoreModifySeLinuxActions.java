@@ -103,7 +103,7 @@ public class CoreModifySeLinuxActions {
 
             @Override
             protected void doExecute(StackContext context, CoreModifySeLinuxFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to Modify SELinux on Stack '%s'.", payload.getResourceId()), payload.getException());
+                LOGGER.error("Failed to Modify SELinux on Stack '{}'.", payload.getResourceId(), payload.getException());
                 StackDtoDelegate stack = context.getStack();
                 getMetricService().incrementMetricCounter(MetricType.MODIFY_SELINUX_FAILED, stack.getResourceCrn(), stack.getDisplayName(),
                         "" + stack.getId(), "Exception: " + payload.getException().getMessage());

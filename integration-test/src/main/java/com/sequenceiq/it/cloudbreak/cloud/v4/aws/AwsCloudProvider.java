@@ -564,10 +564,10 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName) {
         String encryptionKeyArn = environment.getAws().getAwsDiskEncryptionParameters().getEncryptionKeyArn();
         if (StringUtils.isEmpty(encryptionKeyArn)) {
-            LOGGER.error(format("KMS key is not available for '%s' environment!", environmentName));
+            LOGGER.error("KMS key is not available for '{}' environment!", environmentName);
             throw new TestFailException(format("KMS key is not available for '%s' environment!", environmentName));
         } else {
-            LOGGER.info(format("Environment '%s' create has been done with '%s' KMS key.", environmentName, encryptionKeyArn));
+            LOGGER.info("Environment '{}' create has been done with '{}' KMS key.", environmentName, encryptionKeyArn);
             Log.then(LOGGER, format(" Environment '%s' create has been done with '%s' KMS key. ", environmentName, encryptionKeyArn));
         }
     }
@@ -577,10 +577,10 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         if (!volumeKmsKeyIds.isEmpty()) {
             String kmsKeyArn = getEncryptionKeyArn(true);
             if (volumeKmsKeyIds.stream().noneMatch(keyId -> keyId.equalsIgnoreCase(kmsKeyArn))) {
-                LOGGER.error(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
+                LOGGER.error("Volume has not been encrypted with '{}' KMS key!", kmsKeyArn);
                 throw new TestFailException(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
             } else {
-                LOGGER.info(format("Volume has been encrypted with '%s' KMS key.", kmsKeyArn));
+                LOGGER.info("Volume has been encrypted with '{}' KMS key.", kmsKeyArn);
                 Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKeyArn));
             }
         }

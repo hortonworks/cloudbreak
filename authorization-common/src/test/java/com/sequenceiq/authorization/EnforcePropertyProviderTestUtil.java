@@ -100,8 +100,8 @@ public class EnforcePropertyProviderTestUtil {
         try {
             validateMethodForGivenProvider(method, errors, annotationClass, validationEntry);
         } catch (Exception e) {
-            LOGGER.error(String.format("Could not validate method %s for annotation %s because: ",
-                    method.getDeclaringClass().getSimpleName() + "#" + method.getName(), annotationClass.getSimpleName()), e);
+            LOGGER.error("Could not validate method {} for annotation {} because: ", method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
+                    annotationClass.getSimpleName(), e);
         }
     }
 

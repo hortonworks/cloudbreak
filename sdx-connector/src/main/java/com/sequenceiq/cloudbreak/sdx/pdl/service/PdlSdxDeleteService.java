@@ -15,7 +15,7 @@ public class PdlSdxDeleteService extends PdlSdxStatusService implements Platform
 
     @Override
     public void deleteSdx(String sdxCrn, Boolean force) {
-        LOGGER.info(String.format("DL with CRN: %s is Private so it should not be deleted.", sdxCrn));
+        LOGGER.info("DL with CRN: {} is Private so it should not be deleted.", sdxCrn);
     }
 
     @Override

@@ -36,7 +36,7 @@ public class AwsRootVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         String resourceName = getResourceNameService().rootDisk(context.getName(), auth.getCloudContext().getId(), group.getName(),
                 privateId);
-        LOGGER.info("Creating AWS_ROOT_DISK resource with resource name " + resourceName);
+        LOGGER.info("Creating AWS_ROOT_DISK resource with resource name {}", resourceName);
         return List.of(volumeBuilderUtil.createRootVolumeResource(resourceName, group.getName(), ResourceType.AWS_ROOT_DISK,
                 instance.getAvailabilityZone()));
     }
@@ -45,7 +45,7 @@ public class AwsRootVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     public List<CloudResource> build(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         String instanceId = context.getComputeResources(privateId).getFirst().getInstanceId();
-        LOGGER.info("Updating AWS_ROOT_DISK resource with resource name " + buildableResource.getFirst().getName() + " with instance ID " + instanceId);
+        LOGGER.info("Updating AWS_ROOT_DISK resource with resource name {} with instance ID {}", buildableResource.getFirst().getName(), instanceId);
         List<Instance> instances = volumeBuilderUtil.describeInstancesByInstanceIds(List.of(instanceId), auth);
         List<String> rootVolumeIds = volumeBuilderUtil.getRootVolumeIdsFromInstances(instances);
         List<CloudResource> rootVolumeResources = volumeBuilderUtil.updateRootVolumeResource(buildableResource, rootVolumeIds, auth);

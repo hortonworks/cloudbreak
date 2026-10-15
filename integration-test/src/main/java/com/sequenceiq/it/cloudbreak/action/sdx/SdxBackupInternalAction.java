@@ -37,7 +37,7 @@ public class SdxBackupInternalAction implements Action<SdxInternalTestDto, SdxCl
 
         Log.when(LOGGER, format(" Internal Data Lake '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
         Log.whenJson(LOGGER, " Internal Data Lake backup request: ", testDto.getRequest());
-        LOGGER.info(format(" Internal Data Lake '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
+        LOGGER.info(" Internal Data Lake '{}' backup has been started to '{}' by name '{}'... ", sdxName, backupLocation, backupName);
         SdxBackupResponse sdxBackupResponse = client.getDefaultClient(testContext)
                 .sdxBackupEndpoint()
                 .backupDatalakeByName(sdxName, backupLocation, backupName, false, false, false, false,

@@ -301,7 +301,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private void logVolumeDeletionProblem(Exception e) {
-        LOGGER.info(String.format("%s %s", VOLUME_DELETION_FAILED_BASE_MSG, e.getMessage()), e);
+        LOGGER.info("{} {}", VOLUME_DELETION_FAILED_BASE_MSG, e.getMessage(), e);
     }
 
 }

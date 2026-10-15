@@ -100,7 +100,7 @@ public class BlueprintLoaderService {
                 .filter(blueprint -> clusterTemplateService.getTemplatesByBlueprint(blueprint, workspace).isEmpty())
                 .collect(Collectors.toList());
 
-        LOGGER.info("Put old default blueprints to DEFAULT_DELETED: " + deletableDefaults);
+        LOGGER.info("Put old default blueprints to DEFAULT_DELETED: {}", deletableDefaults);
 
         for (Blueprint blueprint : deletableDefaults) {
             blueprint.setStatus(DEFAULT_DELETED);

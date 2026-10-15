@@ -506,8 +506,7 @@ public class AzureDatabaseResourceService {
                 if (vaultName != null) {
                     // Check for the existence of keyVault user has specified before removing Database access permissions from this keyVault.
                     if (!client.keyVaultExists(keyVaultResourceGroupName, vaultName)) {
-                        LOGGER.warn(String.format(
-                                "Vault with name \"%s\" either does not exist/has been deleted or user does not have permissions to access it.", vaultName));
+                        LOGGER.warn("Vault with name \"{}\" either does not exist/has been deleted or user does not have permissions to access it.", vaultName);
                     } else {
                         String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
                                 "associated with Database.", vaultName, keyVaultResourceGroupName, dbPrincipalId);

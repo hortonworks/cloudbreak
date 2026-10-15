@@ -73,7 +73,7 @@ public class SdxRetryService {
 
     private void retryCloudbreakIfNecessary(SdxCluster sdxCluster, FlowLog lastSuccessfulStateLog) {
         if (isCloudbreakRetryNecessary(lastSuccessfulStateLog.getNextEvent(), lastSuccessfulStateLog.getFlowType())) {
-            LOGGER.info("Last successful state was " + lastSuccessfulStateLog.getNextEvent() + ", so try a retry on stack");
+            LOGGER.info("Last successful state was {}, so try a retry on stack", lastSuccessfulStateLog.getNextEvent());
             try {
                 ThreadBasedUserCrnProvider.doAsInternalActor(
                         () -> stackV4Endpoint.retry(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId()));

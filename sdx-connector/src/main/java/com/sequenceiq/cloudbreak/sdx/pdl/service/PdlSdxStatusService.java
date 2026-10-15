@@ -32,7 +32,7 @@ public class PdlSdxStatusService extends AbstractPdlSdxService implements Platfo
                 result.add(Pair.of(environment.getCrn(), environment.getPvcEnvironmentDetails().getPrivateDatalakeDetails().getStatus()));
             }
         } catch (RuntimeException exception) {
-            LOGGER.error(String.format("Private datalake not found for environment. CRN: %s.", environmentCrn), exception);
+            LOGGER.error("Private datalake not found for environment. CRN: {}.", environmentCrn, exception);
             return Collections.emptySet();
         }
         return result;

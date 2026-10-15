@@ -34,12 +34,11 @@ public class SshSudoCommandActions {
                         outcome.result(), ipAddress, commandsAsSingleCommand, outcome.exceptionMessage().orElse(null)), outcome.throwable());
             } else {
                 if (!outcome.returnCodeSuccess()) {
-                    LOGGER.error(String.format("Unexpected exit code [%s] for command '%s'. Output: %s",
-                            outcome.returnCode(), commandsAsSingleCommand, outcome.commandOutput()));
+                    LOGGER.error("Unexpected exit code [{}] for command '{}'. Output: {}",
+                            outcome.returnCode(), commandsAsSingleCommand, outcome.commandOutput());
                     throw new TestFailException(String.format("sudo command failed on '%s' for user '%s'. ", ipAddress, user));
                 } else {
-                    LOGGER.info(String.format("Expected exit code [%s] for command '%s'. Output: %s",
-                            outcome.returnCode(), commandsAsSingleCommand, outcome.commandOutput()));
+                    LOGGER.info("Expected exit code [{}] for command '{}'. Output: {}", outcome.returnCode(), commandsAsSingleCommand, outcome.commandOutput());
                 }
             }
         });

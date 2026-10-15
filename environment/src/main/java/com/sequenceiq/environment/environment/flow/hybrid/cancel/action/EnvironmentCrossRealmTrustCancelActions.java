@@ -192,8 +192,7 @@ public class EnvironmentCrossRealmTrustCancelActions {
 
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustCancelFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to cancel Cross Realm Trust in environment status: '%s'.",
-                        payload.getEnvironmentStatus()), payload.getException());
+                LOGGER.error("Failed to cancel Cross Realm Trust in environment status: '{}'.", payload.getEnvironmentStatus(), payload.getException());
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                         .updateFailedEnvironmentStatusAndNotify(
                                 context,

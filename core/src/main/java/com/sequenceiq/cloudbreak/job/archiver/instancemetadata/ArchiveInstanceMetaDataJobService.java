@@ -59,7 +59,7 @@ public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
                 LOGGER.info("Scheduling instance metadata archiver job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 scheduler.scheduleJob(jobDetail, trigger);
             } catch (Exception e) {
-                LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
+                LOGGER.error("Error during scheduling quartz job: {}", id, e);
             }
         }
     }
@@ -75,7 +75,7 @@ public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
             LOGGER.debug("Scheduling archive InstanceMetaData job for stack {}", resource.getJobResource().getRemoteResourceId());
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during scheduling archive InstanceMetaData job: %s", jobDetail), e);
+            LOGGER.error("Error during scheduling archive InstanceMetaData job: {}", jobDetail, e);
         }
     }
 
@@ -88,7 +88,7 @@ public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
                 LOGGER.info("All terminated InstanceMetaData older than a week have been archived, hooray!");
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+            LOGGER.error("Error during unscheduling quartz job: {}", jobKey, e);
         }
     }
 

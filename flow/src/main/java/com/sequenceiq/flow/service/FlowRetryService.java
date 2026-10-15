@@ -95,16 +95,16 @@ public class FlowRetryService {
         switch (retryableStateResponse.getState()) {
             case FLOW_PENDING:
                 String flowPendingMessage = "Retry cannot be performed, because there is already an active flow.";
-                LOGGER.info(flowPendingMessage + " stackId: {}", stackId);
+                LOGGER.info("{} stackId: {}", flowPendingMessage, stackId);
                 throw new BadRequestException(flowPendingMessage);
             case LAST_NOT_FAILED_OR_NOT_RETRYABLE:
                 String notFailedOrNotRetryableMessage = "Retry cannot be performed. The last flow did not fail or not retryable."
                         + retryableStateResponse.getLastKnownStateMessage();
-                LOGGER.info(notFailedOrNotRetryableMessage + " stackId: {}", stackId);
+                LOGGER.info("{} stackId: {}", notFailedOrNotRetryableMessage, stackId);
                 throw new BadRequestException(notFailedOrNotRetryableMessage);
             case NO_SUCCESSFUL_STATE:
                 String noSuccessfulStateMessage = "Cannot restart previous flow because there is no successful state in the flow.";
-                LOGGER.info(noSuccessfulStateMessage + " stackId: {}", stackId);
+                LOGGER.info("{} stackId: {}", noSuccessfulStateMessage, stackId);
                 throw new BadRequestException(noSuccessfulStateMessage);
             case RETRYABLE:
                 FlowLog lastSuccessfulStateFlowLog = retryableStateResponse.getLastSuccessfulStateFlowLog();

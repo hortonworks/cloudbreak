@@ -379,7 +379,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
                     .findFirst()
                     .isPresent();
         } catch (ApiException e) {
-            LOGGER.info(String.format("Failed to get the service state from CM for service type '%s' in cluster '%s'", serviceType, clusterName), e);
+            LOGGER.info("Failed to get the service state from CM for service type '{}' in cluster '{}'", serviceType, clusterName, e);
             return false;
         }
     }

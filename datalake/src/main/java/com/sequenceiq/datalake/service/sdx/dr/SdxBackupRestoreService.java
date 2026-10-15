@@ -332,7 +332,7 @@ public class SdxBackupRestoreService {
                 }
             }
         } catch (jakarta.ws.rs.NotFoundException e) {
-            LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
+            LOGGER.debug("Stack not found on CB side {}", sdxCluster.getClusterName(), e);
             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
         }
     }
@@ -764,7 +764,7 @@ public class SdxBackupRestoreService {
             }
         }
         if (reason != null) {
-            LOGGER.info("Backup not triggered. Reason: " + reason);
+            LOGGER.info("Backup not triggered. Reason: {}", reason);
             return false;
         }
         return true;
@@ -803,7 +803,7 @@ public class SdxBackupRestoreService {
             }
         }
         if (reason != null) {
-            LOGGER.info("Restore not triggered. Reason: " + reason);
+            LOGGER.info("Restore not triggered. Reason: {}", reason);
             return false;
         }
         return true;
@@ -829,16 +829,16 @@ public class SdxBackupRestoreService {
         try {
             response = datalakeDrClient.submitDatalakeDataInfo(operationId, inputJson, userId);
         } catch (Exception ex) {
-            LOGGER.error("Unable to properly parse Data Lake data info input '" + inputJson + "' and submit it.", ex);
+            LOGGER.error("Unable to properly parse Data Lake data info input {} and submit it.", inputJson, ex);
             throw new BadRequestException("Unable to properly parse Data Lake data info input '" + inputJson + "' and submit it.", ex);
         }
 
         if (response == null) {
-            LOGGER.error("Failed to submit Data Lake data info for operation: " + operationId);
+            LOGGER.error("Failed to submit Data Lake data info for operation: {}", operationId);
             throw new CloudbreakServiceException("Failed to submit Data Lake data info for operation: " + operationId);
         }
 
-        LOGGER.info("Successfully submitted Data Lake data info for operation: " + operationId);
+        LOGGER.info("Successfully submitted Data Lake data info for operation: {}", operationId);
     }
 
     public boolean isDatalakeInBackupProgress(String sdxClusterName, String actorCrn) {

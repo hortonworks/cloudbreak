@@ -379,7 +379,7 @@ public class StackCreationService {
     private void validateResourceResults(CloudContext cloudContext, Exception exception, List<CloudResourceStatus> results) {
         String action = "create";
         if (exception != null) {
-            LOGGER.info(format("Failed to %s stack: %s", action, cloudContext), exception);
+            LOGGER.info("Failed to {} stack: {}", action, cloudContext, exception);
             throw new OperationException(exception);
         }
         if (results.size() == 1 && (results.get(0).isFailed() || results.get(0).isDeleted())) {

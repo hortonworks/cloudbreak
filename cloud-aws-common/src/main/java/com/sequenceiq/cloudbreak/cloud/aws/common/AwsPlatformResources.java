@@ -393,7 +393,7 @@ public class AwsPlatformResources implements PlatformResources {
             result.put(region.value(), cloudNetworks);
             return new CloudNetworks(result);
         } catch (SdkClientException e) {
-            LOGGER.error(String.format("Unable to enumerate networks in region '%s'. Check exception for details.", region.getRegionName()), e);
+            LOGGER.error("Unable to enumerate networks in region '{}'. Check exception for details.", region.getRegionName(), e);
             throw e;
         }
     }
@@ -1453,7 +1453,6 @@ public class AwsPlatformResources implements PlatformResources {
 
     private Set<CloudAccessConfig> getAccessConfigByRole(AmazonIdentityManagementClient client) {
         LOGGER.info("Get all Roles from Amazon");
-        String queryFailedMessage = "Could not get roles from Amazon: ";
         try {
             boolean finished = false;
             String marker = null;
@@ -1475,15 +1474,14 @@ public class AwsPlatformResources implements PlatformResources {
             return roles.stream().map(this::roleToCloudAccessConfig).collect(Collectors.toSet());
         } catch (AwsServiceException ase) {
             if (ase.statusCode() == UNAUTHORIZED) {
-                String policyMessage = "Could not get roles because the user does not have enough permission. ";
-                LOGGER.error(policyMessage + ase.getMessage(), ase);
+                LOGGER.error("Could not get roles because the user does not have enough permission. {}", ase.getMessage(), ase);
                 throw new CloudUnauthorizedException(ase.awsErrorDetails().errorMessage(), ase);
             } else {
-                LOGGER.info(queryFailedMessage + ase.getMessage(), ase);
+                LOGGER.info("Could not get roles from Amazon: {}", ase.getMessage(), ase);
                 throw new CloudConnectorException(ase.getMessage(), ase);
             }
         } catch (Exception e) {
-            LOGGER.warn(queryFailedMessage + e.getMessage(), e);
+            LOGGER.warn("Could not get roles from Amazon: {}", e.getMessage(), e);
             throw new CloudConnectorException(e.getMessage(), e);
         }
     }

@@ -91,7 +91,7 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
             ValidatorUtil.addConstraintViolation(context, msg);
         } catch (Throwable throwable) {
             ValidatorUtil.addConstraintViolation(context, String.format(FAILED_TO_GET_WITH_EXCEPTION, value));
-            LOGGER.debug("Failed to validate the specified image catalog URL: " + value, throwable);
+            LOGGER.debug("Failed to validate the specified image catalog URL: {}", value, throwable);
         }
         return false;
     }

@@ -30,8 +30,7 @@ public class SshJClient {
     public Pair<Integer, String> execute(SSHClient ssh, String command, long timeoutInSec) throws IOException {
         LOGGER.info("Waiting to SSH command to be executed...");
         try (Session session = startSshSession(ssh); Command cmd = session.exec(command); OutputStream os = IOUtils.readFully(cmd.getInputStream())) {
-            LOGGER.info(String.format("The following SSH command [%s] is going to be executed on host [%s]...",
-                    command, ssh.getConnection().getTransport().getRemoteHost()));
+            LOGGER.info("The following SSH command [{}] is going to be executed on host [{}]...", command, ssh.getConnection().getTransport().getRemoteHost());
             cmd.join(timeoutInSec, TimeUnit.SECONDS);
             return Pair.of(cmd.getExitStatus(), os.toString());
         } catch (Exception ex) {

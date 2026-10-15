@@ -113,10 +113,7 @@ public class ClusterProxyReRegistrationActions {
         return new AbstractStackFailureAction<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(
-                        "Failed to re-register the cluster proxy config for stack with ID: " + context.getStackId(),
-                        payload.getException()
-                );
+                LOGGER.error("Failed to re-register the cluster proxy config for stack with ID: {}", context.getStackId(), payload.getException());
                 sendEvent(context);
             }
 

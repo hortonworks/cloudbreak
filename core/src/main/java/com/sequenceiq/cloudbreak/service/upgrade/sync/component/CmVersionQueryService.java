@@ -76,7 +76,7 @@ public class CmVersionQueryService {
                         PackageName::getName,
                         packageName -> Optional.ofNullable(packageName.getPattern())));
         Map<String, List<PackageInfo>> fullPackageVersionsFromAllHosts = hostOrchestrator.getFullPackageVersionsFromAllHosts(gatewayConfig, packageMap);
-        LOGGER.debug("Reading CM package info, found packages: " + fullPackageVersionsFromAllHosts);
+        LOGGER.debug("Reading CM package info, found packages: {}", fullPackageVersionsFromAllHosts);
         return fullPackageVersionsFromAllHosts;
     }
 

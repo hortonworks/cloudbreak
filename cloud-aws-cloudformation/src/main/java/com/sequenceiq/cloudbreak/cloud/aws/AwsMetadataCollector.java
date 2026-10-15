@@ -376,7 +376,7 @@ public class AwsMetadataCollector implements MetadataCollector {
                 LOGGER.debug("Saved metadata for load balancer {}: DNS {}, zone id {}", loadBalancerName, loadBalancer.dnsName(),
                         loadBalancer.canonicalHostedZoneId());
             } catch (RuntimeException e) {
-                LOGGER.debug("Unable to find metadata for load balancer " + loadBalancerName, e);
+                LOGGER.debug("Unable to find metadata for load balancer {}", loadBalancerName, e);
             }
         }
         return cloudLoadBalancerMetadata;

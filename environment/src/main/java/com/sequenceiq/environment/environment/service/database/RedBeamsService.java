@@ -64,8 +64,7 @@ public class RedBeamsService {
                     () -> databaseServerV4Endpoint.listDatabaseServersCertificateStatus(databaseServerCertificateStatusV4Request, userCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to get DatabaseServersCertificateStatus for environments '%s' due to: '%s'",
-                    request.getEnvironmentCrns(), errorMessage), e);
+            LOGGER.error("Failed to get DatabaseServersCertificateStatus for environments '{}' due to: '{}'", request.getEnvironmentCrns(), errorMessage, e);
             throw new RedbeamsOperationFailedException(errorMessage, e);
         }
     }

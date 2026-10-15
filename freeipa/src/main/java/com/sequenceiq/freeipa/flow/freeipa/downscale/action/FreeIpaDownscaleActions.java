@@ -526,7 +526,7 @@ public class FreeIpaDownscaleActions {
 
             @Override
             protected void doExecute(StackContext context, DownscaleFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Downscale failed with payload: " + payload);
+                LOGGER.error("Downscale failed with payload: {}", payload);
                 Stack stack = context.getStack();
                 String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack(), getFailedStatus(variables), errorReason);

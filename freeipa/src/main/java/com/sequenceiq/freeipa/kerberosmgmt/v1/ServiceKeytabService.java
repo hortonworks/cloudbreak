@@ -137,10 +137,10 @@ public class ServiceKeytabService {
             roleComponent.addRoleAndPrivileges(Optional.of(service), Optional.empty(), request.getRoleRequest(), ipaClient);
             return service;
         } catch (RetryableFreeIpaClientException e) {
-            LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + ' ' + e.getLocalizedMessage(), e);
+            LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new RetryableFreeIpaClientException(SERVICE_PRINCIPAL_CREATION_FAILED, e, new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED));
         } catch (FreeIpaClientException e) {
-            LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + ' ' + e.getLocalizedMessage(), e);
+            LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
         }
     }
@@ -194,7 +194,7 @@ public class ServiceKeytabService {
         try {
             ipaClient.allowServiceKeytabRetrieval(canonicalPrincipal, FreeIpaClientFactory.ADMIN_USER);
         } catch (FreeIpaClientException e) {
-            LOGGER.error(SERVICE_ALLOW_FAILURE + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(SERVICE_ALLOW_FAILURE + " {}", e.getLocalizedMessage(), e);
             throw e;
         }
     }

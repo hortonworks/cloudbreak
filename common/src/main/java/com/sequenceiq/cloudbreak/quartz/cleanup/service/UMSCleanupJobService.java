@@ -42,7 +42,7 @@ public abstract class UMSCleanupJobService<T extends UMSCleanupJob> implements J
             LOGGER.info("Scheduling UMS cleanup job with name: '{}' and group: '{}'", JOB_NAME, JOB_GROUP);
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
+            LOGGER.error("Error during scheduling quartz job: {}", jobDetail, e);
         }
     }
 
@@ -74,7 +74,7 @@ public abstract class UMSCleanupJobService<T extends UMSCleanupJob> implements J
                 scheduler.deleteJob(jobKey);
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+            LOGGER.error("Error during unscheduling quartz job: {}", jobKey, e);
         }
     }
 

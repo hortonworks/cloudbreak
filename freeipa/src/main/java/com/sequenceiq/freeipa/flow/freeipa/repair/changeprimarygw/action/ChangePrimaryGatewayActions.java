@@ -215,7 +215,7 @@ public class ChangePrimaryGatewayActions {
 
             @Override
             protected void doExecute(ChangePrimaryGatewayContext context, ChangePrimaryGatewayFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Change primary gateway failed with payload: " + payload);
+                LOGGER.error("Change primary gateway failed with payload: {}", payload);
                 Stack stack = context.getStack();
                 String environmentCrn = stack.getEnvironmentCrn();
                 SuccessDetails successDetails = new SuccessDetails(environmentCrn);

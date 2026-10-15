@@ -27,7 +27,7 @@ public class SdxSyncAction implements Action<SdxTestDto, SdxClient> {
 
         Log.when(LOGGER, format(" Data Lake '%s' sync has been started... ", sdxName));
         Log.whenJson(LOGGER, " Data Lake sync request: ", testDto.getRequest());
-        LOGGER.info(format(" Data Lake '%s' sync has been started... ", sdxName));
+        LOGGER.info(" Data Lake '{}' sync has been started... ", sdxName);
         client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .sync(sdxName);

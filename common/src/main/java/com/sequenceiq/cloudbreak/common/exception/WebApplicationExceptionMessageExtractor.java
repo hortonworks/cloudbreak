@@ -29,7 +29,7 @@ public class WebApplicationExceptionMessageExtractor {
         try (Response response = exception.getResponse()) {
             if (response.hasEntity()) {
                 String errorResponse = response.readEntity(String.class);
-                LOGGER.info("Client error response is " + errorResponse);
+                LOGGER.info("Client error response is {}", errorResponse);
                 try {
                     JsonNode jsonNode = JsonUtil.readTree(errorResponse);
                     if (jsonNode.has("validationErrors")) {

@@ -195,7 +195,7 @@ public class YarnMetricsClient {
             throw new RuntimeException(String.format("Endpoint for Yarn Metrics is not configured for %s, " +
                     " cannot query YARN Metrics.", cluster.getStackCrn()));
         }
-        LOGGER.info(String.format("Yarn Api Url for %s is %s", cluster.getStackName(), yarnApiUrl));
+        LOGGER.info("Yarn Api Url for {} is {}", cluster.getStackName(), yarnApiUrl);
         return yarnApiUrl;
     }
 

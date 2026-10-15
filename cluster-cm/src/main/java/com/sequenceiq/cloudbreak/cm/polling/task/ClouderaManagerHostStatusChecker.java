@@ -90,7 +90,7 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApi
         HostsResourceApi hostsResourceApi = clouderaManagerApiPojoFactory.getHostsResourceApi(pollerObject.getApiClient());
         ApiHostList hostList = hostsResourceApi.readHosts(null, null, VIEW_TYPE);
         List<String> hostIpsFromManager = filterForHeartBeatedIps(hostList);
-        LOGGER.debug("Hosts in the list from manager: " + hostIpsFromManager);
+        LOGGER.debug("Hosts in the list from manager: {}", hostIpsFromManager);
         return hostIpsFromManager;
     }
 

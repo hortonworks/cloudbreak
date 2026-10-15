@@ -162,7 +162,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             }
             eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
         } catch (Exception ex) {
-            LOGGER.error(String.format("Error occurred during creating FreeIpa for environment %s.", environmentDto), ex);
+            LOGGER.error("Error occurred during creating FreeIpa for environment {}.", environmentDto, ex);
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(),
                     environmentDto.getName(), ex, environmentDto.getResourceCrn());
             eventBus.notify(failureEvent.selector(), new Event<>(environmentDtoEvent.getHeaders(), failureEvent));

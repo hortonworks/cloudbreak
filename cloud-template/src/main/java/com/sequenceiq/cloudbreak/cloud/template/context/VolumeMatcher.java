@@ -79,7 +79,7 @@ public class VolumeMatcher {
         List<CloudResource> groupVolumeSetsWithFQDN = groupVolumeSets.stream()
                 .filter(groupVolumeSet -> groupVolumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getDiscoveryFQDN() != null)
                 .collect(Collectors.toList());
-        LOGGER.info("Volume sets with FQDN: " + groupVolumeSetsWithFQDN);
+        LOGGER.info("Volume sets with FQDN: {}", groupVolumeSetsWithFQDN);
         return groupVolumeSetsWithFQDN;
     }
 
@@ -87,7 +87,7 @@ public class VolumeMatcher {
         List<CloudResource> groupVolumeSetsWithoutFQDN = groupVolumeSets.stream()
                 .filter(groupVolumeSet -> groupVolumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getDiscoveryFQDN() == null)
                 .collect(Collectors.toList());
-        LOGGER.info("Volume sets without FQDN: " + groupVolumeSetsWithoutFQDN);
+        LOGGER.info("Volume sets without FQDN: {}", groupVolumeSetsWithoutFQDN);
         return groupVolumeSetsWithoutFQDN;
     }
 

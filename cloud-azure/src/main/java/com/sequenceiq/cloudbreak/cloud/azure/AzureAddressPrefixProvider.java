@@ -20,17 +20,16 @@ public class AzureAddressPrefixProvider {
         SubnetInner subnetInner = subnet.innerModel();
         String addressPrefix = subnet.addressPrefix();
         if (!Strings.isNullOrEmpty(addressPrefix)) {
-            LOGGER.info("The root level addressPrefix not null so using that as addressPrefix: " + addressPrefix);
+            LOGGER.info("The root level addressPrefix not null so using that as addressPrefix: {}", addressPrefix);
             resultAddressPrefix = addressPrefix;
         } else if (subnetInner != null) {
             if (CollectionUtils.isNotEmpty(subnetInner.addressPrefixes())) {
                 resultAddressPrefix = subnetInner.addressPrefixes().get(0);
-                LOGGER.info("The addressPrefix in inner subnet not null so using that as addressPrefix: " + resultAddressPrefix);
+                LOGGER.info("The addressPrefix in inner subnet not null so using that as addressPrefix: {}", resultAddressPrefix);
             }
         }
         if (Strings.isNullOrEmpty(resultAddressPrefix)) {
-            LOGGER.info("The root level addressPrefix and inner level addressPrefix null so " +
-                    "sending back null as addressPrefix for subnet: " + subnet.id());
+            LOGGER.info("The root level addressPrefix and inner level addressPrefix null so sending back null as addressPrefix for subnet: {}", subnet.id());
             throw new BadRequestException("Your subnet " + subnet.id() + " does not have a proper address prefix. Please fix that.");
         }
         return resultAddressPrefix;

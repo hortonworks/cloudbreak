@@ -219,10 +219,10 @@ public class EnvironmentValidatorService {
             try {
                 fetchSecurityGroup(editDto, environment, sg);
             } catch (BadRequestException e) {
-                LOGGER.info("Security group cannot be fetched, because BadRequest occurred with: " + e.getMessage());
+                LOGGER.info("Security group cannot be fetched, because BadRequest occurred with: {}", e.getMessage());
                 validationResultBuilder.error(e.getMessage());
             } catch (GetCloudParameterException e) {
-                LOGGER.info("Security group cannot be fetched, because: " + e.getMessage());
+                LOGGER.info("Security group cannot be fetched, because: {}", e.getMessage());
                 validationResultBuilder.error(e.getCause().getMessage());
             }
         });

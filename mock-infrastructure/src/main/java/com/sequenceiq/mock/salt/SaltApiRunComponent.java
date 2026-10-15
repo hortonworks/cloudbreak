@@ -63,7 +63,7 @@ public class SaltApiRunComponent {
                 return response;
             }
         }
-        LOGGER.error("no response for this SALT RUN request: " + body);
+        LOGGER.error("no response for this SALT RUN request: {}", body);
         throw new IllegalStateException("no response for this SALT RUN request: " + body);
     }
 

@@ -49,7 +49,7 @@ public class PlatformParameterService {
             }
             return res.getPlatformParameters();
         } catch (InterruptedException e) {
-            LOGGER.error("Error while getting platform parameters: " + cloudContext, e);
+            LOGGER.error("Error while getting platform parameters: {}", cloudContext, e);
             throw new OperationException(e);
         }
     }

@@ -40,7 +40,7 @@ public final class CommonExperience {
         this.forceDeleteCapable = forceDeleteCapable;
         this.environmentEndpointPort = environmentEndpointPort;
         this.internalEnvironmentEndpoint = internalEnvironmentEndpoint;
-        getLogger(CommonExperience.class).debug(CommonExperience.class.getSimpleName() + " has been created: {}", toString());
+        getLogger(CommonExperience.class).debug("{} has been created: {}", CommonExperience.class.getSimpleName(), toString());
     }
 
     public CommonExperience() {

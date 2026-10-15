@@ -231,7 +231,7 @@ public class AzureClientActions {
     public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {
         if (StringUtils.isNotBlank(resourceGroupName)) {
             if (!resourceGroupExists(resourceGroupName)) {
-                LOGGER.info(format("Creating resource group '%s'...", resourceGroupName));
+                LOGGER.info("Creating resource group '{}'...", resourceGroupName);
                 Map<String, String> allTags = new HashMap<>();
                 allTags.putAll(tags);
                 allTags.putAll(commonCloudProperties.getTags());
@@ -249,7 +249,7 @@ public class AzureClientActions {
                     throw e;
                 }
                 if (resourceGroup.provisioningState().equalsIgnoreCase("Succeeded")) {
-                    LOGGER.info(format("New resource group '%s' has been created.", resourceGroupName));
+                    LOGGER.info("New resource group '{}' has been created.", resourceGroupName);
                     Log.then(LOGGER, format(" New resource group '%s' has been created. ", resourceGroupName));
                     return resourceGroup;
                 } else {
@@ -257,8 +257,7 @@ public class AzureClientActions {
                     throw new TestFailException(format("Failed to provision the resource group '%s'!", resourceGroupName));
                 }
             } else {
-                LOGGER.warn(format("Resource group already exist! So creating new resource group with name '%s' is not necessary.",
-                        resourceGroupName));
+                LOGGER.warn("Resource group already exist! So creating new resource group with name '{}' is not necessary.", resourceGroupName);
                 return azure.resourceGroups().getByName(resourceGroupName);
             }
         } else {
@@ -289,20 +288,20 @@ public class AzureClientActions {
 
     public void deleteResourceGroup(String resourceGroupName) {
         if (StringUtils.isNotBlank(resourceGroupName) && resourceGroupExists(resourceGroupName)) {
-            LOGGER.info(format("Removing resource group '%s'...", resourceGroupName));
+            LOGGER.info("Removing resource group '{}'...", resourceGroupName);
             azure.resourceGroups().deleteByName(resourceGroupName);
         } else {
-            LOGGER.info(format("Resource group ('%s') has already been removed at Azure or name is null!", resourceGroupName));
+            LOGGER.info("Resource group ('{}') has already been removed at Azure or name is null!", resourceGroupName);
         }
     }
 
     private boolean resourceGroupExists(String resourceGroupName) {
         boolean exists = azure.resourceGroups().contain(resourceGroupName);
         if (exists) {
-            LOGGER.info(format("Found resource group with name '%s'", resourceGroupName));
+            LOGGER.info("Found resource group with name '{}'", resourceGroupName);
             return true;
         } else {
-            LOGGER.info(format("Resource group '%s' is not present", resourceGroupName));
+            LOGGER.info("Resource group '{}' is not present", resourceGroupName);
             return false;
         }
     }

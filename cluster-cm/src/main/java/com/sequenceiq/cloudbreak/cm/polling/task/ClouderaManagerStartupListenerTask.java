@@ -38,7 +38,7 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerA
             if (testMessage.equals(testIfRunning.getMessage())) {
                 return true;
             } else {
-                LOGGER.info("test message is different which is strange, returned message: " + testIfRunning.getMessage());
+                LOGGER.info("test message is different which is strange, returned message: {}", testIfRunning.getMessage());
                 return false;
             }
         } catch (ApiException e) {

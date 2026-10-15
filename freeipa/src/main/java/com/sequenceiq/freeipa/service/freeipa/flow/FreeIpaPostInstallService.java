@@ -175,11 +175,11 @@ public class FreeIpaPostInstallService {
         Optional<User> user = client.userFind(freeIpaClientFactory.getAdminUser());
         if (user.isPresent() && !FreeIpaClient.MAX_PASSWORD_EXPIRATION_DATETIME.equals(user.get().getKrbPasswordExpiration())) {
             User actualUser = user.get();
-            LOGGER.debug(String.format("Modifying user [%s] current password expiration time [%s] to [%s]",
-                    actualUser.getUid(), actualUser.getKrbPasswordExpiration(), FreeIpaClient.MAX_PASSWORD_EXPIRATION_DATETIME));
+            LOGGER.debug("Modifying user [{}] current password expiration time [{}] to [{}]", actualUser.getUid(), actualUser.getKrbPasswordExpiration(),
+                    FreeIpaClient.MAX_PASSWORD_EXPIRATION_DATETIME);
             client.updateUserPasswordMaxExpiration(actualUser.getUid());
         } else if (user.isEmpty()) {
-            LOGGER.warn(String.format("No [%s] user found!", freeIpaClientFactory.getAdminUser()));
+            LOGGER.warn("No [{}] user found!", freeIpaClientFactory.getAdminUser());
         } else {
             LOGGER.debug("Password expiration is already set.");
         }

@@ -133,8 +133,8 @@ public class UpgradeCcmActions {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, UpgradeCcmFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to upgrade CCM in environment '%s'. Status: '%s'.",
-                        payload.getEnvironmentDto(), payload.getEnvironmentStatus()), payload.getException());
+                LOGGER.error("Failed to upgrade CCM in environment '{}'. Status: '{}'.", payload.getEnvironmentDto(), payload.getEnvironmentStatus(),
+                        payload.getException());
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                         .updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
                                 convertStatus(payload.getEnvironmentStatus()), UpgradeCcmState.UPGRADE_CCM_FAILED_STATE);

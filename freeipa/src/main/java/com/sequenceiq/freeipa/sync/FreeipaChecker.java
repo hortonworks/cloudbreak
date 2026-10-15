@@ -94,7 +94,7 @@ public class FreeipaChecker {
             }
             return new SyncResult(statusReason, status, statusCheckPair.getFirst());
         } catch (Exception e) {
-            LOGGER.info("Error occurred during status fetch: " + e.getMessage(), e);
+            LOGGER.info("Error occurred during status fetch: {}", e.getMessage(), e);
             return new SyncResult("FreeIpa is unreachable, because error occurred: " + e.getMessage(), DetailedStackStatus.UNREACHABLE, null);
         }
     }

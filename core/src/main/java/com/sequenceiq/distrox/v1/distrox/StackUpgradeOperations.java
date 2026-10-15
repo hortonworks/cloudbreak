@@ -67,18 +67,18 @@ public class StackUpgradeOperations {
     private ClusterUpgradeCandidateFilterService clusterUpgradeCandidateFilterService;
 
     public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, String accountId, boolean keepVariant) {
-        LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
+        LOGGER.debug("Starting to upgrade OS: {}", nameOrCrn);
         return upgradeService.upgradeOs(accountId, nameOrCrn, keepVariant);
     }
 
     public FlowIdentifier upgradeOsByUpgradeSets(@NotNull NameOrCrn nameOrCrn, Long workspaceId, OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest) {
-        LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
+        LOGGER.debug("Starting to upgrade OS: {}", nameOrCrn);
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         return upgradeService.upgradeOsByUpgradeSets(stack, orderedOsUpgradeSetRequest.getImageId(), orderedOsUpgradeSetRequest.getOrderedOsUpgradeSets());
     }
 
     public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId, Boolean rollingUpgradeEnabled) {
-        LOGGER.debug("Starting to upgrade cluster: " + nameOrCrn);
+        LOGGER.debug("Starting to upgrade cluster: {}", nameOrCrn);
         return upgradeService.upgradeCluster(accountId, nameOrCrn, imageId, rollingUpgradeEnabled);
     }
 
@@ -89,7 +89,7 @@ public class StackUpgradeOperations {
     }
 
     public FlowIdentifier prepareClusterUpgrade(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId) {
-        LOGGER.debug("Starting to prepare upgrade for cluster: " + nameOrCrn);
+        LOGGER.debug("Starting to prepare upgrade for cluster: {}", nameOrCrn);
         return upgradeService.prepareClusterUpgrade(accountId, nameOrCrn, imageId);
     }
 

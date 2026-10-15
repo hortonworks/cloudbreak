@@ -400,7 +400,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public FlowIdentifier updateSalt(@NotNull NameOrCrn nameOrCrn, String accountId, boolean skipHighstate) {
-        LOGGER.debug("Starting salt update: " + nameOrCrn);
+        LOGGER.debug("Starting salt update: {}", nameOrCrn);
         return clusterCommonService.updateSalt(nameOrCrn, accountId, skipHighstate);
     }
 
@@ -412,7 +412,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public FlowIdentifier updatePillarConfiguration(@NotNull NameOrCrn nameOrCrn, String accountId) {
-        LOGGER.debug("Starting pillar configuration update: " + nameOrCrn);
+        LOGGER.debug("Starting pillar configuration update: {}", nameOrCrn);
         return clusterCommonService.updatePillarConfiguration(nameOrCrn, accountId);
     }
 
@@ -505,7 +505,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public FlowIdentifier backupClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId,
             boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin, boolean dryRun) {
         databaseBackupRestoreService.validate(workspaceId, nameOrCrn, location, backupId);
-        LOGGER.debug("Starting cluster database backup: " + nameOrCrn);
+        LOGGER.debug("Starting cluster database backup: {}", nameOrCrn);
         return databaseBackupRestoreService.backupDatabase(workspaceId, nameOrCrn, location, backupId, closeConnections, skipDatabaseNames,
                 databaseMaxDurationInMin, dryRun);
     }
@@ -513,7 +513,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public FlowIdentifier restoreClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId,
             int databaseMaxDurationInMin, boolean dryRun) {
         databaseBackupRestoreService.validate(workspaceId, nameOrCrn, location, backupId);
-        LOGGER.debug("Starting cluster database restore: " + nameOrCrn);
+        LOGGER.debug("Starting cluster database restore: {}", nameOrCrn);
         return databaseBackupRestoreService.restoreDatabase(workspaceId, nameOrCrn, location, backupId, databaseMaxDurationInMin, dryRun);
     }
 
@@ -541,7 +541,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         try {
             return Optional.of(stackService.getEnvCrnByCrn(resourceCrn));
         } catch (NotFoundException e) {
-            LOGGER.error(String.format("Getting environment crn by resource crn %s failed, ", resourceCrn), e);
+            LOGGER.error("Getting environment crn by resource crn {} failed, ", resourceCrn, e);
             return Optional.empty();
         }
     }
@@ -559,12 +559,12 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     public CertificatesRotationV4Response rotateAutoTlsCertificates(@NotNull NameOrCrn nameOrCrn, String accountId,
             CertificatesRotationV4Request certificatesRotationV4Request) {
-        LOGGER.debug("Starting cluster AutoTLS certificates rotation: " + nameOrCrn);
+        LOGGER.debug("Starting cluster AutoTLS certificates rotation: {}", nameOrCrn);
         return clusterCommonService.rotateAutoTlsCertificates(nameOrCrn, accountId, certificatesRotationV4Request);
     }
 
     public FlowIdentifier updateLoadBalancers(@NotNull NameOrCrn nameOrCrn, String accountId) {
-        LOGGER.debug("Creating load balancers for stack: " + nameOrCrn);
+        LOGGER.debug("Creating load balancers for stack: {}", nameOrCrn);
         return loadBalancerUpdateService.updateLoadBalancers(nameOrCrn, accountId);
     }
 

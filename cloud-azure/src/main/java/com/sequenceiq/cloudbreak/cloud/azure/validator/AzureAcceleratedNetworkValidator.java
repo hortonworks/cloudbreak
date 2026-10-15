@@ -43,7 +43,7 @@ public class AzureAcceleratedNetworkValidator {
     }
 
     public boolean isSupportedForVm(String vmType, Map<String, AzureVmCapabilities> azureVmCapabilities) {
-        LOGGER.trace("Validating vm type: " + vmType);
+        LOGGER.trace("Validating vm type: {}", vmType);
         return azureVmCapabilities.getOrDefault(vmType, new AzureVmCapabilities(vmType, List.of())).isAcceleratedNetworkingEnabled();
     }
 }

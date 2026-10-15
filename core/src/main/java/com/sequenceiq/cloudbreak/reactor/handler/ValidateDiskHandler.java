@@ -69,8 +69,8 @@ public class ValidateDiskHandler extends ExceptionCatcherEventHandler<ValidateDi
                                 getAllInstanceIdSafely(deletedResources))));
             }
         } catch (UnsupportedOperationException e) {
-            LOGGER.debug(format("Call checkForSyncer is not supported for %s platform, %s variant. Error message: %s",
-                    cloudContext.getPlatform().value(), cloudContext.getVariant().value(), e.getMessage()));
+            LOGGER.debug("Call checkForSyncer is not supported for {} platform, {} variant. Error message: {}", cloudContext.getPlatform().value(),
+                    cloudContext.getVariant().value(), e.getMessage());
             result = validCase(event);
         }
         return result;

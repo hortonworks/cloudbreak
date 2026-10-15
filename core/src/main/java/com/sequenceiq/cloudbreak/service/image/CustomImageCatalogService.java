@@ -40,12 +40,12 @@ public class CustomImageCatalogService {
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public Set<ImageCatalog> getImageCatalogs(Long workspaceId) {
-        LOGGER.debug(String.format("List custom image catalogs in workspace '%d'", workspaceId));
+        LOGGER.debug("List custom image catalogs in workspace '{}'", workspaceId);
         return imageCatalogService.findAllByWorkspaceId(workspaceId, true);
     }
 
     public ImageCatalog getImageCatalog(Long workspaceId, String imageCatalogName) {
-        LOGGER.debug(String.format("Get custom image catalog '%s' from workspace '%d'", imageCatalogName, workspaceId));
+        LOGGER.debug("Get custom image catalog '{}' from workspace '{}'", imageCatalogName, workspaceId);
         ImageCatalog imageCatalog = imageCatalogService.getImageCatalogByName(workspaceId, imageCatalogName);
 
         if (Strings.isNullOrEmpty(imageCatalog.getImageCatalogUrl())) {
@@ -56,18 +56,18 @@ public class CustomImageCatalogService {
     }
 
     public ImageCatalog create(ImageCatalog imageCatalog, Long workspaceId, String accountId, String creator) {
-        LOGGER.debug(String.format("Create new custom image catalog '%s' in workspace '%d'", imageCatalog.getName(), workspaceId));
+        LOGGER.debug("Create new custom image catalog '{}' in workspace '{}'", imageCatalog.getName(), workspaceId);
         Optional<ImageCatalog> optionalImageCatalog = imageCatalogService.repository().findByNameAndWorkspaceId(imageCatalog.getName(), workspaceId);
         if (optionalImageCatalog.isEmpty()) {
             return imageCatalogService.createForLoggedInUser(imageCatalog, workspaceId, accountId, creator);
         } else {
-            LOGGER.error(String.format("Image catalog '%s' is already available in workspace '%d'", imageCatalog.getName(), workspaceId));
+            LOGGER.error("Image catalog '{}' is already available in workspace '{}'", imageCatalog.getName(), workspaceId);
             throw new BadRequestException(String.format("ImageCatalog or CustomImageCatalog is already available with name '%s'.", imageCatalog.getName()));
         }
     }
 
     public ImageCatalog delete(Long workspaceId, String imageCatalogName) {
-        LOGGER.debug(String.format("Delete custom image catalog '%s' in workspace '%d'", imageCatalogName, workspaceId));
+        LOGGER.debug("Delete custom image catalog '{}' in workspace '{}'", imageCatalogName, workspaceId);
         ImageCatalog imageCatalog = imageCatalogService.getImageCatalogByName(workspaceId, imageCatalogName);
         if (Strings.isNullOrEmpty(imageCatalog.getImageCatalogUrl())) {
             return imageCatalogService.delete(workspaceId, imageCatalogName);
@@ -77,19 +77,19 @@ public class CustomImageCatalogService {
     }
 
     public CustomImage getCustomImage(Long workspaceId, String imageCatalogName, String imageId) {
-        LOGGER.debug(String.format("Get custom image '%s' from catalog '%s' in workspace '%d'", imageId, imageCatalogName, workspaceId));
+        LOGGER.debug("Get custom image '{}' from catalog '{}' in workspace '{}'", imageId, imageCatalogName, workspaceId);
         ImageCatalog imageCatalog = getImageCatalog(workspaceId, imageCatalogName);
         return getCustomImageFromCatalog(imageCatalog, imageId);
     }
 
     public Image getSourceImage(CustomImage image) {
         String imageId = image.getCustomizedImageId();
-        LOGGER.debug(String.format("Get source image '%s' from default catalog", imageId));
+        LOGGER.debug("Get source image '{}' from default catalog", imageId);
         try {
             StatedImage sourceStatedImage = imageCatalogService.getSourceImageByImageType(image);
             return sourceStatedImage.getImage();
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            LOGGER.error(String.format("Failed to get source image: %s", e.getMessage()));
+            LOGGER.error("Failed to get source image: {}", e.getMessage());
             throw new NotFoundException(String.format("Could not find source image with id: '%s'", imageId));
         }
     }
@@ -110,7 +110,7 @@ public class CustomImageCatalogService {
                 return getCustomImageFromCatalog(savedCatalog, upserted.getName());
             });
         } catch (TransactionService.TransactionExecutionException e) {
-            LOGGER.error(String.format("Custom image creation failed: %s", e.getMessage()));
+            LOGGER.error("Custom image creation failed: {}", e.getMessage());
             throw new TransactionService.TransactionRuntimeExecutionException(e);
         }
     }
@@ -126,7 +126,7 @@ public class CustomImageCatalogService {
     private CustomImage addNewCustomImage(ImageCatalog imageCatalog, CustomImage customImage, String accountId, String imageCatalogName,
             Long workspaceId) {
         String imageName = UUID.randomUUID().toString();
-        LOGGER.debug(String.format("Creating custom image '%s' in catalog '%s' in workspace '%d'", imageName, imageCatalogName, workspaceId));
+        LOGGER.debug("Creating custom image '{}' in catalog '{}' in workspace '{}'", imageName, imageCatalogName, workspaceId);
         customImage.setName(imageName);
         customImage.setResourceCrn(regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.IMAGE_CATALOG, imageName, accountId));
         customImage.getVmImage().forEach(vmImage -> vmImage.setCustomImage(customImage));
@@ -137,8 +137,8 @@ public class CustomImageCatalogService {
     private CustomImage replaceMatchingCustomImages(ImageCatalog imageCatalog, List<CustomImage> matches, CustomImage customImage,
             String imageCatalogName) {
         CustomImage mostRecent = matches.get(0);
-        LOGGER.info(String.format("Found %d custom image(s) for source '%s' (type %s) in catalog '%s'; removing duplicates and updating '%s'.",
-                matches.size(), customImage.getCustomizedImageId(), customImage.getImageType(), imageCatalogName, mostRecent.getName()));
+        LOGGER.info("Found {} custom image(s) for source '{}' (type {}) in catalog '{}'; removing duplicates and updating '{}'.", matches.size(),
+                customImage.getCustomizedImageId(), customImage.getImageType(), imageCatalogName, mostRecent.getName());
         matches.stream().skip(1).forEach(imageCatalog.getCustomImages()::remove);
         if (customImage.getBaseParcelUrl() != null) {
             mostRecent.setBaseParcelUrl(customImage.getBaseParcelUrl());
@@ -148,7 +148,7 @@ public class CustomImageCatalogService {
     }
 
     public CustomImage deleteCustomImage(Long workspaceId, String imageCatalogName, String imageId) {
-        LOGGER.debug(String.format("Delete custom image '%s' from catalog '%s' in workspace '%d'", imageId, imageCatalogName, workspaceId));
+        LOGGER.debug("Delete custom image '{}' from catalog '{}' in workspace '{}'", imageId, imageCatalogName, workspaceId);
 
         try {
             return transactionService.required(() -> {
@@ -161,15 +161,14 @@ public class CustomImageCatalogService {
                 return customImage;
             });
         } catch (TransactionService.TransactionExecutionException e) {
-            LOGGER.error(String.format("Custom image '%s' delete failed from custom image catalog '%s' in workspace '%d': %s",
-                    imageId, imageCatalogName, workspaceId, e.getMessage()));
+            LOGGER.error("Custom image '{}' delete failed from custom image catalog '{}' in workspace '{}': {}", imageId, imageCatalogName, workspaceId,
+                    e.getMessage());
             throw new TransactionService.TransactionRuntimeExecutionException(e);
         }
     }
 
     public CustomImage updateCustomImage(Long workspaceId, String imageCatalogName, CustomImage customImage) {
-        LOGGER.debug(String.format("Update custom image '%s' in catalog '%s' in workspace '%d'",
-                customImage.getName(), imageCatalogName, workspaceId));
+        LOGGER.debug("Update custom image '{}' in catalog '{}' in workspace '{}'", customImage.getName(), imageCatalogName, workspaceId);
 
         try {
             return transactionService.required(() -> {
@@ -197,8 +196,8 @@ public class CustomImageCatalogService {
                 return getCustomImageFromCatalog(savedImageCatalog, customImage.getName());
             });
         } catch (TransactionService.TransactionExecutionException e) {
-            LOGGER.error(String.format("Custom image '%s' update failed in custom image catalog '%s' in workspace '%d': %s",
-                    customImage.getName(), imageCatalogName, workspaceId, e.getMessage()));
+            LOGGER.error("Custom image '{}' update failed in custom image catalog '{}' in workspace '{}': {}", customImage.getName(), imageCatalogName,
+                    workspaceId, e.getMessage());
             throw new TransactionService.TransactionRuntimeExecutionException(e);
         }
     }
@@ -242,8 +241,8 @@ public class CustomImageCatalogService {
         try {
             imageCatalogService.getSourceImageByImageType(customImage);
         } catch (Exception ex) {
-            LOGGER.error(String.format("Could not find '%s' image in default image catalog with id '%s'. %s",
-                    customImage.getImageType(), customImage.getCustomizedImageId(), ex.getMessage()));
+            LOGGER.error("Could not find '{}' image in default image catalog with id '{}'. {}", customImage.getImageType(), customImage.getCustomizedImageId(),
+                    ex.getMessage());
             throw new NotFoundException(String.format("Could not find '%s' image in default image catalog with id '%s'",
                     customImage.getImageType(), customImage.getCustomizedImageId()));
         }

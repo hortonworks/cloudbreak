@@ -53,7 +53,7 @@ public class AwsNoSqlConnector implements NoSqlConnector {
                     .withStatus(ResponseStatus.RESOURCE_NOT_FOUND)
                     .build();
         } catch (DynamoDbException e) {
-            LOGGER.error(String.format("DynamoDB exception on describeTAble '%s'", request.getTableName()), e);
+            LOGGER.error("DynamoDB exception on describeTAble '{}'", request.getTableName(), e);
             throw new CloudConnectorException(String.format("Cannot get metadata for NoSQL table %s. "
                     + "Provider error message: %s", request.getTableName(), e.awsErrorDetails().errorMessage()), e);
         }
@@ -78,7 +78,7 @@ public class AwsNoSqlConnector implements NoSqlConnector {
                     .withStatus(ResponseStatus.RESOURCE_NOT_FOUND)
                     .build();
         } catch (DynamoDbException e) {
-            LOGGER.error(String.format("DynamoDB exception on deleteTable '%s'", request.getTableName()), e);
+            LOGGER.error("DynamoDB exception on deleteTable '{}'", request.getTableName(), e);
             throw new CloudConnectorException(String.format("Cannot delete NoSQL table %s. "
                     + "Provider error message: %s", request.getTableName(), e.awsErrorDetails().errorMessage()), e);
         }

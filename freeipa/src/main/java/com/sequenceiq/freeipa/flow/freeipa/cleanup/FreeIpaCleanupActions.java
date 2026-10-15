@@ -194,7 +194,7 @@ public class FreeIpaCleanupActions {
 
             @Override
             protected void doExecute(FreeIpaContext context, CleanupFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Cleanup failed with payload: " + payload);
+                LOGGER.error("Cleanup failed with payload: {}", payload);
                 String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
                 getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_CLEANUP_FAILED,
                         List.of(payload.getFailedPhase(), errorReason));

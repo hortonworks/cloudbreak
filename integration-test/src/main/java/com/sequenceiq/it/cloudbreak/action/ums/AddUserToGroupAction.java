@@ -32,7 +32,7 @@ public class AddUserToGroupAction implements Action<UmsGroupTestDto, UmsClient> 
         Log.when(LOGGER, format(" Assigning user '%s' to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.whenJson(LOGGER, format(" Assign user to group request:%n "), testDto.getRequest());
         client.getDefaultClient(testContext).addMemberToGroup(accountId, groupName, memberCrn);
-        LOGGER.info(format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
+        LOGGER.info(" User '{}' has been assigned to group '{}' at account '{}'. ", memberCrn, groupName, accountId);
         Log.when(LOGGER, format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         return testDto;
     }

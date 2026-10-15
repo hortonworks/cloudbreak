@@ -328,10 +328,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (ApiException e) {
-            LOGGER.error(String.format("Failed to upscale. Response: %s", e.getResponseBody()), e);
+            LOGGER.error("Failed to upscale. Response: {}", e.getResponseBody(), e);
             throwScalingException(upscaleInstancesMap, e);
         } catch (ClouderaManagerParcelActivationTimeoutException e) {
-            LOGGER.error(String.format("Failed to upscale. Response: %s", e.getMessage()), e);
+            LOGGER.error("Failed to upscale. Response: {}", e.getMessage(), e);
             throwScalingException(upscaleInstancesMap, e);
         }
         return Collections.emptyList();

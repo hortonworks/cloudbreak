@@ -38,10 +38,10 @@ public class SshEnaDriverCheckActions {
         String wrongResult = "modinfo: ERROR: Module ena not found.";
         Pair<Integer, String> result = sshJClientActions.executeCommand(instanceIp, modinfoEnaCmd);
         if (result.getValue().startsWith(wrongResult)) {
-            LOGGER.error(format("ENA driver is not available at '%s' instance!", instanceIp));
+            LOGGER.error("ENA driver is not available at '{}' instance!", instanceIp);
             throw new TestFailException(format("ENA driver is not available at '%s' instance!", instanceIp));
         } else {
-            LOGGER.info(format("ENA driver is available at '%s' instance: [%s]", instanceIp, result.getValue()));
+            LOGGER.info("ENA driver is available at '{}' instance: [{}]", instanceIp, result.getValue());
             Log.then(LOGGER, format(" ENA driver is available at '%s' instance: [%s] ", instanceIp, result.getValue()));
         }
     }
@@ -50,10 +50,10 @@ public class SshEnaDriverCheckActions {
         Map<String, Boolean> enaSupportResult = awsCloudFunctionality.enaSupport(List.of(instanceId));
         boolean actual = enaSupportResult.values().stream().allMatch(it -> it);
         if (enaSupportResult.isEmpty() || !actual) {
-            LOGGER.error(format("ENA is not supported at '%s' instance: [%s]", instanceId, enaSupportResult));
+            LOGGER.error("ENA is not supported at '{}' instance: [{}]", instanceId, enaSupportResult);
             throw new TestFailException(format("ENA is not supported at '%s' instance: [%s] ", instanceId, enaSupportResult));
         } else {
-            LOGGER.info(format("ENA is supported at '%s' instance: [%s]", instanceId, enaSupportResult));
+            LOGGER.info("ENA is supported at '{}' instance: [{}]", instanceId, enaSupportResult);
             Log.then(LOGGER, format(" ENA is supported at '%s' instance: [%s] ", instanceId, enaSupportResult));
         }
     }
@@ -69,8 +69,7 @@ public class SshEnaDriverCheckActions {
             checkEnaDriver(metadata.getPrivateIp());
             checkEnaSupport(metadata.getInstanceId());
         } else {
-            LOGGER.warn(format("ENA driver is only available at AWS. So validation on '%s' provider is not possible!",
-                    stackV4Response.getCloudPlatform()));
+            LOGGER.warn("ENA driver is only available at AWS. So validation on '{}' provider is not possible!", stackV4Response.getCloudPlatform());
         }
     }
 

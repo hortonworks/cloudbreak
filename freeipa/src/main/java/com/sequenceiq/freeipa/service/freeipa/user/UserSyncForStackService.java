@@ -170,7 +170,7 @@ public class UserSyncForStackService {
             if (userStateDifferenceCalculator.usersStateDifferenceChanged(usersStateDifferenceBeforeSync, usersStateDifferenceAfterSync)) {
                 Multimap<String, String> retryWarnings = ArrayListMultimap.create();
                 try {
-                    LOGGER.info(String.format("Sync was partially successful for %s, thus we are trying it once again", stack.resourceCrn()));
+                    LOGGER.info("Sync was partially successful for {}, thus we are trying it once again", stack.resourceCrn());
                     stateApplier.applyDifference(umsUsersState, stack.environmentCrn(), retryWarnings, usersStateDifferenceAfterSync, options, freeIpaClient,
                             stack.id());
                     warnings.clear();

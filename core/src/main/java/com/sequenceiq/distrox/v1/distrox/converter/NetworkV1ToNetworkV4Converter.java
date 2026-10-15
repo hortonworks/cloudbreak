@@ -91,7 +91,7 @@ public class NetworkV1ToNetworkV4Converter {
                 request.setOpenstack(getOpenstackNetworkParameters(Optional.ofNullable(networkV1Request.getOpenstack()), networkResponse));
                 break;
             default:
-                LOGGER.warn(NetworkV1ToNetworkV4Converter.class.getSimpleName() + " has no implemented action for cloud platform: " +
+                LOGGER.warn("{} has no implemented action for cloud platform: {}", NetworkV1ToNetworkV4Converter.class.getSimpleName(),
                         source.getValue().getCloudPlatform());
         }
         return request;

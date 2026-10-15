@@ -137,7 +137,7 @@ class ClouderaManagerParcelDecommissionService {
             LOGGER.info("[{}] Successful for parcel: {}", commandName, parcel);
             return new ParcelOperationStatus().withSuccessful(parcel.getName(), parcel.getVersion());
         } catch (ApiException e) {
-            LOGGER.info(String.format("[%s] Failed for parcel: %s", commandName, parcel), e);
+            LOGGER.info("[{}] Failed for parcel: {}", commandName, parcel, e);
             return new ParcelOperationStatus().withFailed(parcel.getName(), parcel.getVersion());
         }
     }

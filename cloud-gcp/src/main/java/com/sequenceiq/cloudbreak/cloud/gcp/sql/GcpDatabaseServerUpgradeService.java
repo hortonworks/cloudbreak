@@ -115,10 +115,10 @@ public class GcpDatabaseServerUpgradeService extends GcpDatabaseServerBaseServic
             LOGGER.warn(message);
             throw new GcpResourceException(message);
         } else if (databaseEngineVersion.equals(targetEngineVersion)) {
-            LOGGER.debug("Database version is up to date: " + targetEngineVersion);
+            LOGGER.debug("Database version is up to date: {}", targetEngineVersion);
             return false;
         } else {
-            LOGGER.debug("Database upgrade is possible and needed from " + databaseEngineVersion + " to " + targetEngineVersion);
+            LOGGER.debug("Database upgrade is possible and needed from {} to {}", databaseEngineVersion, targetEngineVersion);
             return true;
         }
     }

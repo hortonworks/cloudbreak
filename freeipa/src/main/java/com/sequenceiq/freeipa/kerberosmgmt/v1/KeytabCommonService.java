@@ -84,10 +84,10 @@ public class KeytabCommonService {
             Keytab keytab = ipaClient.getKeytab(canonicalPrincipal);
             return keytabCacheService.saveOrUpdate(environmentCrn, canonicalPrincipal, hostName, keytab.getKeytab());
         } catch (RetryableFreeIpaClientException e) {
-            LOGGER.error(KEYTAB_GENERATION_FAILED + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(KEYTAB_GENERATION_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new RetryableFreeIpaClientException(KEYTAB_GENERATION_FAILED, e, new KeytabCreationException(KEYTAB_GENERATION_FAILED));
         } catch (FreeIpaClientException e) {
-            LOGGER.error(KEYTAB_GENERATION_FAILED + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(KEYTAB_GENERATION_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new KeytabCreationException(KEYTAB_GENERATION_FAILED);
         }
     }
@@ -105,10 +105,10 @@ public class KeytabCommonService {
                 return keytabCacheService.saveOrUpdate(environmentCrn, canonicalPrincipal, hostName, keytab.getKeytab());
             }
         } catch (RetryableFreeIpaClientException e) {
-            LOGGER.error(KEYTAB_FETCH_FAILED + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(KEYTAB_FETCH_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new RetryableFreeIpaClientException(KEYTAB_FETCH_FAILED, e, new KeytabCreationException(KEYTAB_FETCH_FAILED));
         } catch (FreeIpaClientException e) {
-            LOGGER.error(KEYTAB_FETCH_FAILED + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(KEYTAB_FETCH_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new KeytabCreationException(KEYTAB_FETCH_FAILED);
         }
     }
@@ -120,10 +120,10 @@ public class KeytabCommonService {
             roleComponent.addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, ipaClient);
             return host;
         } catch (RetryableFreeIpaClientException e) {
-            LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(HOST_CREATION_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new RetryableFreeIpaClientException(HOST_CREATION_FAILED, e, new KeytabCreationException(HOST_CREATION_FAILED));
         } catch (FreeIpaClientException e) {
-            LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(HOST_CREATION_FAILED + " {}", e.getLocalizedMessage(), e);
             throw new KeytabCreationException(HOST_CREATION_FAILED);
         }
     }
@@ -132,7 +132,7 @@ public class KeytabCommonService {
         try {
             ipaClient.allowHostKeytabRetrieval(fqdn, FreeIpaClientFactory.ADMIN_USER);
         } catch (FreeIpaClientException e) {
-            LOGGER.error(HOST_ALLOW_FAILURE + " " + e.getLocalizedMessage(), e);
+            LOGGER.error(HOST_ALLOW_FAILURE + " {}", e.getLocalizedMessage(), e);
             throw e;
         }
     }
@@ -149,7 +149,7 @@ public class KeytabCommonService {
                 LOGGER.debug("Host [{}] was already created while trying to create it", hostname);
                 return ipaClient.showHost(hostname);
             } else {
-                LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
+                LOGGER.error(HOST_CREATION_FAILED + " {}", e.getLocalizedMessage(), e);
                 throw new KeytabCreationException(HOST_CREATION_FAILED);
             }
         }

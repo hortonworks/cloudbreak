@@ -54,7 +54,7 @@ public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxSt
             LOGGER.error("Polling exited before timeout. Cause ", userBreakException);
             response = new SdxStopFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Poller stopped for stack: " + sdxId, pollerStoppedException);
+            LOGGER.error("Poller stopped for stack: {}", sdxId, pollerStoppedException);
             response = new SdxStopFailedEvent(sdxId, userId,
                     new PollerStoppedException("Data Lake stop timed out after " + DURATION_IN_MINUTES + " minutes", pollerStoppedException));
         } catch (PollerException exception) {

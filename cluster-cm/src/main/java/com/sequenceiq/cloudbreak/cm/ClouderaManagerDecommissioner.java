@@ -327,7 +327,7 @@ public class ClouderaManagerDecommissioner {
             LOGGER.debug("Finished putting {} instances into CM maintenance mode. Initial request size: {}, CM availableCount: {}",
                     successCount, hostList == null ? 0 : hostList.size(), availableHostsIdsFromCm == null ? "null" : availableHostsIdsFromCm);
         } catch (ApiException e) {
-            LOGGER.error("Failed while putting a node into maintenance mode. nodeId=" + currentHostId + ", successCount=" + successCount, e);
+            LOGGER.error("Failed while putting a node into maintenance mode. nodeId={}, successCount={}", currentHostId, successCount, e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }

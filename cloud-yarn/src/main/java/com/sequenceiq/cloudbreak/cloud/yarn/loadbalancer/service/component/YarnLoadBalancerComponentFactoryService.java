@@ -57,7 +57,7 @@ public class YarnLoadBalancerComponentFactoryService {
      * Each container is pointed at a specific docker image which contains the loadbalancing service and logic.
      */
     public List<YarnComponent> create(CloudStack cloudStack, List<String> gatewayIPs, String applicationName) {
-        LOGGER.debug("Creating the loadbalancer components for application " + applicationName + " with gatewayIPs: " + gatewayIPs.toString() + ".");
+        LOGGER.debug("Creating the loadbalancer components for application {} with gatewayIPs: {}.", applicationName, gatewayIPs.toString());
         Artifact artifact = createLoadBalancerArtifact();
         if (checkDeHa(cloudStack)) {
             artifact.setId(loadBalancerImageNameForDEHA);
@@ -69,11 +69,11 @@ public class YarnLoadBalancerComponentFactoryService {
         List<YarnComponent> loadBalancerComponents = Lists.newArrayList();
         for (CloudLoadBalancer loadBalancer : cloudStack.getLoadBalancers()) {
             String componentName = applicationNameUtil.createLoadBalancerComponentName(applicationName, loadBalancer.getType());
-            LOGGER.debug("Creating the load balancer Yarn component object for " + componentName + ".");
+            LOGGER.debug("Creating the load balancer Yarn component object for {}.", componentName);
             loadBalancerComponents.add(createLoadBalancerComponent(componentName, artifact, resource, launchCommand, configuration));
         }
 
-        LOGGER.debug("Finished creating the Yarn load balancer components for application " + applicationName + ".");
+        LOGGER.debug("Finished creating the Yarn load balancer components for application {}.", applicationName);
         return loadBalancerComponents;
     }
 
@@ -95,7 +95,7 @@ public class YarnLoadBalancerComponentFactoryService {
         component.setRunPrivilegedContainer(true);
         component.setLaunchCommand(launchCommand);
         component.setConfiguration(configuration);
-        LOGGER.debug("Created Yarn load balancer component: " + component);
+        LOGGER.debug("Created Yarn load balancer component: {}", component);
         return component;
     }
 

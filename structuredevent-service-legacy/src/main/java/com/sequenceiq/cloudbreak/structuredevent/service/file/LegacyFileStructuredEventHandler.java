@@ -40,7 +40,7 @@ public class LegacyFileStructuredEventHandler<T extends StructuredEvent> impleme
             FileUtils.writeStringToFile(file, structuredEventAsJson + '\n', StandardCharsets.UTF_8, true);
             LOGGER.trace("Structured event\n{}\nhas been sent to file: {}", structuredEventAsJson, file.getAbsolutePath());
         } catch (IOException e) {
-            LOGGER.error("Can not write structured event to file " + file.getAbsolutePath(), e);
+            LOGGER.error("Can not write structured event to file {}", file.getAbsolutePath(), e);
         }
     }
 }

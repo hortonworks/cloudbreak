@@ -25,7 +25,7 @@ public class AwsNativeSecretEncryptionValidator extends CommonSecretEncryptionVa
         if (secretEncryptionEnabled(cloudStack)) {
             String accountId = ac.getCloudCredential().getAccountId();
             if (entitlementService.isSecretEncryptionForCommercialAwsEnabled(accountId)) {
-                LOGGER.info("Secret encryption is available for platform variant " + getCloudPlatformVariantString(ac));
+                LOGGER.info("Secret encryption is available for platform variant {}", getCloudPlatformVariantString(ac));
             } else {
                 throw new CloudConnectorException(String.format("Account '%s' is not entitled to use secret encryption on commercial AWS.", accountId));
             }

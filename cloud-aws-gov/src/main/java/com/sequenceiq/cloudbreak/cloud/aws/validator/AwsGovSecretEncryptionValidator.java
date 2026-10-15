@@ -15,6 +15,6 @@ public class AwsGovSecretEncryptionValidator extends CommonSecretEncryptionValid
 
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
-        LOGGER.info("Secret encryption is always enabled for platform variant " + getCloudPlatformVariantString(ac));
+        LOGGER.info("Secret encryption is always enabled for platform variant {}", getCloudPlatformVariantString(ac));
     }
 }

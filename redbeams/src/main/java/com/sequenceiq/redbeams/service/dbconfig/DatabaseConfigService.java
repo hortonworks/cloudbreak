@@ -239,7 +239,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         String databaseUserName = databaseConfig.getConnectionUserName().getRaw();
         DatabaseServerConfig databaseServerConfig = databaseConfig.getServer();
         if (databaseServerConfig == null) {
-            LOGGER.error("Cannot delete database " + databaseName + " from server, server not known");
+            LOGGER.error("Cannot delete database {} from server, server not known", databaseName);
             return;
         }
 

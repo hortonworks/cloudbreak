@@ -28,7 +28,7 @@ public class RecipeUsageService {
                     .setStatus(UsageProto.CDPRecipeStatus.Value.CREATED)
                     .build());
         } catch (Exception e) {
-            LOGGER.error(String.format("Couldn't send usage report about recipe [name: %s] creation because: ", recipeName), e);
+            LOGGER.error("Couldn't send usage report about recipe [name: {}] creation because: ", recipeName, e);
         }
     }
 
@@ -38,7 +38,7 @@ public class RecipeUsageService {
                     .setStatus(UsageProto.CDPRecipeStatus.Value.DELETED)
                     .build());
         } catch (Exception e) {
-            LOGGER.error(String.format("Couldn't send usage report about recipe [name: %s] deletion because: ", recipeName), e);
+            LOGGER.error("Couldn't send usage report about recipe [name: {}] deletion because: ", recipeName, e);
         }
     }
 
@@ -49,7 +49,7 @@ public class RecipeUsageService {
                     .setStatus(UsageProto.CDPRecipeStatus.Value.ATTACHED)
                     .build());
         } catch (Exception e) {
-            LOGGER.error(String.format("Couldn't send usage report about recipe [name: %s] attachment because: ", recipeName), e);
+            LOGGER.error("Couldn't send usage report about recipe [name: {}] attachment because: ", recipeName, e);
         }
     }
 
@@ -60,7 +60,7 @@ public class RecipeUsageService {
                     .setStatus(UsageProto.CDPRecipeStatus.Value.DETACHED)
                     .build());
         } catch (Exception e) {
-            LOGGER.error(String.format("Couldn't send usage report about recipe [name: %s] detachment because: ", recipeName), e);
+            LOGGER.error("Couldn't send usage report about recipe [name: {}] detachment because: ", recipeName, e);
         }
     }
 
@@ -74,7 +74,7 @@ public class RecipeUsageService {
                     .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
                     .build());
         } catch (Exception e) {
-            LOGGER.error(String.format("Couldn't send recipe related usage report about cluster creation [stack CRN: %s], because: ", stackCrn), e);
+            LOGGER.error("Couldn't send recipe related usage report about cluster creation [stack CRN: {}], because: ", stackCrn, e);
         }
     }
 

@@ -62,7 +62,7 @@ public class OperationService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.debug(String.format("Could not fetch remote database details for stack with crn %s", resourceCrn), e);
+            LOGGER.debug("Could not fetch remote database details for stack with crn {}", resourceCrn, e);
         }
         return stackOperationView;
     }

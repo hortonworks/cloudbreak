@@ -164,8 +164,7 @@ public class EnvironmentCrossRealmTrustSetupActions {
 
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustSetupFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to setup Cross Realm Trust in environment status: '%s'.",
-                        payload.getEnvironmentStatus()), payload.getException());
+                LOGGER.error("Failed to setup Cross Realm Trust in environment status: '{}'.", payload.getEnvironmentStatus(), payload.getException());
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                         .updateFailedEnvironmentStatusAndNotify(
                                 context,

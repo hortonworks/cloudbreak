@@ -47,7 +47,7 @@ public abstract class AbstractClouderaManagerCommandListCheckerTask<T extends Cl
             ApiCommand apiCommand = commandsResourceApi.readCommand(commandId);
             apiCommands.add(apiCommand);
             if (apiCommand.isActive()) {
-                LOGGER.debug("Command [" + getCommandName() + "] with id [" + commandId + "] is active, so it hasn't finished yet");
+                LOGGER.debug("Command [{}] with id [{}] is active, so it hasn't finished yet", getCommandName(), commandId);
                 break;
             }
         }

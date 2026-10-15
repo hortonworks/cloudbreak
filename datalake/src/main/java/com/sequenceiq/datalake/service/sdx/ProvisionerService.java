@@ -119,8 +119,8 @@ public class ProvisionerService {
                                 // it's a hack, until we implement a nice non-async terminate which can return with flowid..
                                 // if it is implemented, please remove this
                                 if (deleteFailedCount.getAndIncrement() >= DELETE_FAILED_RETRY_COUNT) {
-                                    LOGGER.error("Cluster deletion failed '" + sdxCluster.getClusterName() + "', "
-                                            + stackV4Response.getCluster().getStatusReason());
+                                    LOGGER.error("Cluster deletion failed '{}', {}",
+                                            sdxCluster.getClusterName(), stackV4Response.getCluster().getStatusReason());
                                     return AttemptResults.breakFor(
                                             "Data Lake deletion failed '" + sdxCluster.getClusterName() + "', "
                                                     + stackV4Response.getCluster().getStatusReason()
@@ -134,7 +134,7 @@ public class ProvisionerService {
                             // it's a hack, until we implement a nice non-async terminate which can return with flowid..
                             // if it is implemented, please remove this
                             if (deleteFailedCount.getAndIncrement() >= DELETE_FAILED_RETRY_COUNT) {
-                                LOGGER.error("Stack deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason());
+                                LOGGER.error("Stack deletion failed '{}', {}", sdxCluster.getClusterName(), stackV4Response.getStatusReason());
                                 return AttemptResults.breakFor(
                                         "Data Lake deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
                                 );

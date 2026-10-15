@@ -39,7 +39,7 @@ public class DistroxScaleThresholdAssertions implements Assertion<DistroXTestDto
     public DistroXTestDto doAssertion(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         DistroxUtil distroxUtil = new DistroxUtil();
         List<String> instanceIds = distroxUtil.getInstanceIds(testDto, client, hostGroupName);
-        LOGGER.info(String.format("Found instanceIds after DistroX scaling: [%s]", instanceIds));
+        LOGGER.info("Found instanceIds after DistroX scaling: [{}]", instanceIds);
         int instanceCount = instanceIds.size();
 
         assertThat(

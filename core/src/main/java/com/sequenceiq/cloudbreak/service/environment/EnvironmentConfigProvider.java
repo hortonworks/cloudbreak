@@ -38,7 +38,7 @@ public class EnvironmentConfigProvider {
             LOGGER.info("Fetch environment details by crn:'{}' from Environment service", environmentCrn);
             return environmentClientService.getByCrn(environmentCrn);
         } catch (Exception ex) {
-            LOGGER.warn(String.format("Failed to get environment by crn:'%s' from Environment service", environmentCrn), ex);
+            LOGGER.warn("Failed to get environment by crn:'{}' from Environment service", environmentCrn, ex);
             throw new CloudbreakServiceException("Failed to get environment details from Environment service due to:", ex);
         }
     }

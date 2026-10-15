@@ -118,7 +118,7 @@ public class AwsRdsTerminateService {
         if (!e.awsErrorDetails().errorMessage().contains(cFStackName + " does not exist") && !force) {
             throw e;
         }
-        LOGGER.warn("Stack " + cFStackName + " does not exist, assuming that it has already been deleted");
+        LOGGER.warn("Stack {} does not exist, assuming that it has already been deleted", cFStackName);
         // FIXME
         return List.of();
     }

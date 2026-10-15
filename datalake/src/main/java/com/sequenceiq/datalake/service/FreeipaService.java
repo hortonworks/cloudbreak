@@ -44,7 +44,7 @@ public class FreeipaService {
         try {
             return Optional.ofNullable(freeIpaV1Endpoint.describe(envCrn));
         } catch (NotFoundException e) {
-            LOGGER.error("Could not find freeipa with envCrn: " + envCrn, e);
+            LOGGER.error("Could not find freeipa with envCrn: {}", envCrn, e);
             return Optional.empty();
         }
     }

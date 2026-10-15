@@ -388,7 +388,7 @@ public class DatabaseService {
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
                     if (cancellable && PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
-                        LOGGER.info("Database wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
+                        LOGGER.info("Database wait polling cancelled in inmemory store, id: {}", sdxCluster.getId());
                         return AttemptResults.breakFor("Database wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
                     }
                     try {

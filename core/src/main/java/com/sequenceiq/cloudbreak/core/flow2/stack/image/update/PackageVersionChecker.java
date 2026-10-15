@@ -65,11 +65,11 @@ public class PackageVersionChecker {
             if (!SALT_BOOTSTRAP.equals(packageToCompare) && !SALT.equals(packageToCompare)) {
                 String packageVersionInImage = packageVersions.get(packageToCompare);
                 if (StringUtils.isBlank(packageVersionInImage)) {
-                    LOGGER.debug("Missing package in image: " + packageToCompare);
+                    LOGGER.debug("Missing package in image: {}", packageToCompare);
                     missingPackageVersion.add(packageToCompare);
                 } else if (!instanceMetadataUpdater.isPackagesVersionEqual(packageVersionInImage, instancePackageVersions.get(packageToCompare))) {
-                    LOGGER.debug(String.format("Different package [%s] version on image [%s] and on instance [%s]",
-                            packageToCompare, packageVersionInImage, instancePackageVersions.get(packageToCompare)));
+                    LOGGER.debug("Different package [{}] version on image [{}] and on instance [{}]", packageToCompare, packageVersionInImage,
+                            instancePackageVersions.get(packageToCompare));
                     differentPackageVersion.add(packageToCompare);
                 }
             }

@@ -277,7 +277,7 @@ public class ScalingRequest implements Runnable {
             String nodeLimitExceededMsg = messagesService.getMessage(AUTOSCALING_ACTIVITY_NODE_LIMIT_EXCEEDED,
                     List.of(policy.getAlert().getAlertType(), requestedScalingAdjustment, cbSupportedMaxClusterSize, scalingAdjustment));
             historyService.createEntry(ScalingStatus.TRIGGER_INFO, nodeLimitExceededMsg, cluster);
-            LOGGER.info(nodeLimitExceededMsg + " Existing Cluster Size '" + existingClusterNodeCount + "'.");
+            LOGGER.info("{} Existing Cluster Size '{}'.", nodeLimitExceededMsg, existingClusterNodeCount);
         }
         return scalingAdjustment;
     }

@@ -28,9 +28,9 @@ public class GetUserDetailsAction implements Action<UmsTestDto, UmsClient> {
         Log.whenJson(LOGGER, " Get UMS user details request: ", testDto.getRequest());
         testDto.setResponse(client.getDefaultClient(testContext).getUserDetails(userCrn));
         UserManagementProto.User user = testDto.getResponse();
-        LOGGER.info(format(" User details %ncrn: %s %nworkload username: %s %nfirst name: %s %nlast name: %s %nstate: %s %ncreation date: %s " +
-                        "%nemail: %s %nexternal user id: %s %nSFDC contact id: %s ", user.getCrn(), user.getWorkloadUsername(), user.getFirstName(),
-                user.getLastName(), user.getState().name(), user.getCreationDate(), user.getEmail(), user.getExternalUserId(), user.getSfdcContactId()));
+        LOGGER.info(" User details \ncrn: {} \nworkload username: {} \nfirst name: {} \nlast name: {} \nstate: {} \ncreation date: {} " +
+                "\nemail: {} \nexternal user id: {} \nSFDC contact id: {} ", user.getCrn(), user.getWorkloadUsername(), user.getFirstName(),
+                user.getLastName(), user.getState().name(), user.getCreationDate(), user.getEmail(), user.getExternalUserId(), user.getSfdcContactId());
         Log.when(LOGGER, format(" User details %ncrn: %s %nworkload username: %s %nfirst name: %s %nlast name: %s %nstate: %s %ncreation date: %s " +
                         "%nemail: %s %nexternal user id: %s %nSFDC contact id: %s ", user.getCrn(), user.getWorkloadUsername(), user.getFirstName(),
                 user.getLastName(), user.getState().name(), user.getCreationDate(), user.getEmail(), user.getExternalUserId(), user.getSfdcContactId()));

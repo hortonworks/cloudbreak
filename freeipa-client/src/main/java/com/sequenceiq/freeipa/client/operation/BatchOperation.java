@@ -53,7 +53,7 @@ public class BatchOperation<T> extends AbstractFreeipaOperation<T> {
             }
         } catch (FreeIpaClientException e) {
             if (FreeIpaClientExceptionUtil.isExceptionWithErrorCode(e, acceptableErrorCodes)) {
-                LOGGER.debug(String.format("Batch call had error with acceptable error code: %s", e.getMessage()));
+                LOGGER.debug("Batch call had error with acceptable error code: {}", e.getMessage());
             } else {
                 LOGGER.warn(e.getMessage());
                 warnings.accept("batch call failed: ", e.getMessage());
@@ -74,7 +74,7 @@ public class BatchOperation<T> extends AbstractFreeipaOperation<T> {
             }
         } catch (FreeIpaClientException e) {
             if (FreeIpaClientExceptionUtil.isExceptionWithErrorCode(e, acceptableErrorCodes)) {
-                LOGGER.debug(String.format("Batch call had error with acceptable error code: %s", e.getMessage()));
+                LOGGER.debug("Batch call had error with acceptable error code: {}", e.getMessage());
             } else {
                 LOGGER.warn(e.getMessage());
                 warnings.accept("batch call failed: ", e.getMessage());

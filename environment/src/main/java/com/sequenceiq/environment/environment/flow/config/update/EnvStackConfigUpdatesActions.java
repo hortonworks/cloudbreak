@@ -85,10 +85,8 @@ public class EnvStackConfigUpdatesActions {
         return new AbstractEnvStackConfigUpdatesAction<>(EnvStackConfigUpdatesFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvStackConfigUpdatesFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.warn(
-                    String.format("Failed to update environments stack configs '%s'. Status: '%s'.",
-                        payload.getEnvironmentDto(), payload.getEnvironmentStatus()),
-                    payload.getException());
+                LOGGER.warn("Failed to update environments stack configs '{}'. Status: '{}'.", payload.getEnvironmentDto(), payload.getEnvironmentStatus(),
+                        payload.getException());
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                     .updateFailedEnvironmentStatusAndNotify(context, payload,
                         getCurrentStatus(payload.getResourceId()),

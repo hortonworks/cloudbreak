@@ -39,7 +39,7 @@ public class FreeIpaPollerProvider {
     public AttemptMaker<Void> startPoller(Long envId, String envCrn) {
         return () -> {
             if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-                LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
+                LOGGER.info("FreeIpa polling cancelled in inmemory store, id: {}", envId);
                 return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
             }
             Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
@@ -59,7 +59,7 @@ public class FreeIpaPollerProvider {
     public AttemptMaker<Void> stopPoller(Long envId, String envCrn) {
         return () -> {
             if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-                LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
+                LOGGER.info("FreeIpa polling cancelled in inmemory store, id: {}", envId);
                 return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
             }
             Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
@@ -79,7 +79,7 @@ public class FreeIpaPollerProvider {
     public AttemptMaker<Void> syncUsersPoller(Long envId, String envCrn, String operationId) {
         return () -> {
             if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-                LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
+                LOGGER.info("FreeIpa polling cancelled in inmemory store, id: {}", envId);
                 return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
             }
             SyncOperationStatus freeIpaResponse = freeIpaService.getSyncOperationStatus(envCrn, operationId);
@@ -147,7 +147,7 @@ public class FreeIpaPollerProvider {
 
     private AttemptResult<Void> operationStatusPoller(Long envId, String envCrn, String operationId, String operationName) {
         if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
+            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: {}", envId);
             return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
         }
         OperationStatus operationStatus = freeIpaService.getOperationStatus(operationId);
@@ -175,7 +175,7 @@ public class FreeIpaPollerProvider {
 
     private AttemptResult<Void> flowPoller(Long envId, String envCrn, FlowIdentifier flowIdentifier, String flowName) {
         if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
-            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
+            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: {}", envId);
             return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
         }
         FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() -> freeIpaService.checkFlow(flowIdentifier));

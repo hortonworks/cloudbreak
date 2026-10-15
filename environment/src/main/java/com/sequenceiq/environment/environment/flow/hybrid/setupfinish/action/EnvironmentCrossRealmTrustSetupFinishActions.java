@@ -114,8 +114,7 @@ public class EnvironmentCrossRealmTrustSetupFinishActions {
 
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustSetupFinishFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to finish cross realm in environment status: '%s'.",
-                        payload.getEnvironmentStatus()), payload.getException());
+                LOGGER.error("Failed to finish cross realm in environment status: '{}'.", payload.getEnvironmentStatus(), payload.getException());
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                         .updateFailedEnvironmentStatusAndNotify(
                                 context,

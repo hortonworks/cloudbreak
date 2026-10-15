@@ -32,7 +32,7 @@ public class CmServerQueryService {
 
     public Set<ParcelInfo> queryAllParcels(StackDto stackDto) {
         Set<ParcelInfo> parcels = apiConnectors.getConnector(stackDto).getAllParcels(stackDto.getName());
-        LOGGER.debug("Reading parcel info from CM server, found parcels: " + parcels);
+        LOGGER.debug("Reading parcel info from CM server, found parcels: {}", parcels);
         return parcels;
     }
 
@@ -47,7 +47,7 @@ public class CmServerQueryService {
      */
     public Set<ParcelInfo> queryActiveParcels(Stack stack) {
         Set<ParcelInfo> activeParcels = apiConnectors.getConnector(stack).gatherInstalledParcels(stack.getName());
-        LOGGER.debug("Reading parcel info from CM server, found active parcels: " + activeParcels);
+        LOGGER.debug("Reading parcel info from CM server, found active parcels: {}", activeParcels);
         return activeParcels;
     }
 

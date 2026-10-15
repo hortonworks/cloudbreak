@@ -38,7 +38,7 @@ public class ClouderaManagerClient {
     }
 
     private ApiClient getApiClient(String serverFqdn, String cmUser, String cmPassword, String basePath) {
-        LOGGER.info(String.format("Cloudera Manager Server access details: %nserverFqdn: %s %ncmUser: %s %ncmPassword: %s", serverFqdn, cmUser, cmPassword));
+        LOGGER.info("Cloudera Manager Server access details: \nserverFqdn: {} \ncmUser: {} \ncmPassword: {}", serverFqdn, cmUser, cmPassword);
         ApiClient cmClient = new ApiClient();
         cmClient.setBasePath(basePath);
         cmClient.setUsername(cmUser);
@@ -56,7 +56,7 @@ public class ClouderaManagerClient {
             throw new RuntimeException("Failed to create a SSL context that trusts all certificates", e);
         }
         cmClient.setHttpClient(builder.build());
-        LOGGER.info(String.format("Cloudera Manager Base Path: %s", cmClient.getBasePath()));
+        LOGGER.info("Cloudera Manager Base Path: {}", cmClient.getBasePath());
         return cmClient;
     }
 

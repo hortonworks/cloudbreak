@@ -79,7 +79,7 @@ public class MaintenanceModeValidationService {
             throw new CloudbreakServiceException("Stack repository info cannot be validated!");
         }
 
-        LOGGER.debug(String.format("Stack repo fetched: %s", stackRepo));
+        LOGGER.debug("Stack repo fetched: {}", stackRepo);
         return stackRepo;
     }
 
@@ -148,7 +148,7 @@ public class MaintenanceModeValidationService {
         try {
             if (!warnings.isEmpty()) {
                 String warningJson = new ObjectMapper().writeValueAsString(warnings);
-                LOGGER.warn(String.format("Found warnings: {%s}", warningJson));
+                LOGGER.warn("Found warnings: {{}}", warningJson);
                 flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS, warningJson);
             } else {
                 flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS);

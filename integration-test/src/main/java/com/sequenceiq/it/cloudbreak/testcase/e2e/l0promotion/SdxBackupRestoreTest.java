@@ -90,13 +90,13 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
                 .getDetailByCrn(testDto.getCrn(), Collections.emptySet())
                 .getStatusReason();
         if (statusReason.contains("Data Lake backup failed")) {
-            LOGGER.error(String.format(" Data Lake '%s' backup has been failed: '%s' ", testDto.getName(), statusReason));
+            LOGGER.error(" Data Lake '{}' backup has been failed: '{}' ", testDto.getName(), statusReason);
             throw new TestFailException(String.format(" Data Lake '%s' backup has been failed: '%s' ", testDto.getName(), statusReason));
         } else if (statusReason.contains("Data Lake restore failed")) {
-            LOGGER.error(String.format(" Data Lake '%s' restore has been failed: '%s' ", testDto.getName(), statusReason));
+            LOGGER.error(" Data Lake '{}' restore has been failed: '{}' ", testDto.getName(), statusReason);
             throw new TestFailException(String.format(" Data Lake '%s' restore has been failed: '%s' ", testDto.getName(), statusReason));
         } else {
-            LOGGER.info(String.format(" Data Lake '%s' backup/restore has been done with '%s'. ", testDto.getName(), statusReason));
+            LOGGER.info(" Data Lake '{}' backup/restore has been done with '{}'. ", testDto.getName(), statusReason);
             Log.then(LOGGER, format(" Data Lake '%s' backup/restore has been done with '%s'. ", testDto.getName(), statusReason));
         }
         return testDto;
@@ -112,12 +112,12 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
                 .getBackupDatalakeStatus(sdxName, backupId, null);
         String status = sdxBackupStatusResponse.getStatus();
         String statusReason = sdxBackupStatusResponse.getReason();
-        LOGGER.info(format(" Data Lake '%s' backup '%s' status '%s', because of %s ", sdxName, backupId, status, statusReason));
+        LOGGER.info(" Data Lake '{}' backup '{}' status '{}', because of {} ", sdxName, backupId, status, statusReason);
         if (status.contains("FAILED")) {
-            LOGGER.error(String.format(" Data Lake '%s' backup has been failed: '%s' ", testDto.getName(), statusReason));
+            LOGGER.error(" Data Lake '{}' backup has been failed: '{}' ", testDto.getName(), statusReason);
             throw new TestFailException(String.format(" Data Lake '%s' backup has been failed: '%s' ", testDto.getName(), statusReason));
         } else {
-            LOGGER.info(String.format(" Data Lake '%s' backup has been done with '%s'. ", testDto.getName(), statusReason));
+            LOGGER.info(" Data Lake '{}' backup has been done with '{}'. ", testDto.getName(), statusReason);
             Log.then(LOGGER, format(" Data Lake '%s' backup has been done with '%s'. ", testDto.getName(), statusReason));
         }
         return testDto;
@@ -137,7 +137,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
                     .getRestoreDatalakeStatus(sdxName, restoreId, null);
             status = sdxRestoreStatusResponse.getStatus();
             statusReason = sdxRestoreStatusResponse.getReason();
-            LOGGER.info(format(" Data Lake '%s' restore '%s' status '%s', because of %s ", sdxName, restoreId, status, statusReason));
+            LOGGER.info(" Data Lake '{}' restore '{}' status '{}', because of {} ", sdxName, restoreId, status, statusReason);
         } catch (Exception e) {
             if (e.getMessage().contains("not found")) {
                 throw new TestFailException(String.format(" NOT FOUND :: Cannot get status information for restore '%s' on Data Lake '%s'." +
@@ -148,13 +148,13 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
         }
 
         if (StringUtils.isBlank(status)) {
-            LOGGER.error(String.format(" Data Lake '%s' restore status is not available ", testDto.getName()));
+            LOGGER.error(" Data Lake '{}' restore status is not available ", testDto.getName());
             throw new TestFailException(String.format(" Data Lake '%s' restore status is not available  ", testDto.getName()));
         } else if (status.contains("FAILED")) {
-            LOGGER.error(String.format(" Data Lake '%s' restore has been failed: '%s' ", testDto.getName(), statusReason));
+            LOGGER.error(" Data Lake '{}' restore has been failed: '{}' ", testDto.getName(), statusReason);
             throw new TestFailException(String.format(" Data Lake '%s' restore has been failed: '%s' ", testDto.getName(), statusReason));
         } else {
-            LOGGER.info(String.format(" Data Lake '%s' restore has been done with '%s'. ", testDto.getName(), statusReason));
+            LOGGER.info(" Data Lake '{}' restore has been done with '{}'. ", testDto.getName(), statusReason);
             Log.then(LOGGER, format(" Data Lake '%s' restore has been done with '%s'. ", testDto.getName(), statusReason));
         }
         return testDto;

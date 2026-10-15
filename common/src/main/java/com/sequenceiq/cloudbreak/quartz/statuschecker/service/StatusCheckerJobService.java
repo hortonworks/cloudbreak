@@ -101,7 +101,7 @@ public class StatusCheckerJobService implements JobSchedulerService {
             scheduler.deleteJob(jobKey);
             LOGGER.info("Status checker job unscheduled with id: {}", id);
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
+            LOGGER.error("Error during unscheduling quartz job: {}", id, e);
         }
     }
 

@@ -59,7 +59,7 @@ public class DiskEncryptionSetCreationPoller {
 
             return result;
         } catch (Exception e) {
-            LOGGER.error("Disk Encryption Set creation failed, context=" + checkerContext, e);
+            LOGGER.error("Disk Encryption Set creation failed, context={}", checkerContext, e);
             throw azureUtils.convertToCloudConnectorException(e, "Disk Encryption Set creation");
         }
     }

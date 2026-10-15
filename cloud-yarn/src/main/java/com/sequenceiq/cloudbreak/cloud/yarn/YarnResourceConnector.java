@@ -98,8 +98,8 @@ public class YarnResourceConnector implements ResourceConnector {
         LOGGER.debug("Launching Yarn load balancers for stack.");
         YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
         CloudResource loadBalancerApplication = yarnLoadBalancerLaunchService.launch(authenticatedContext, stack, persistenceNotifier, yarnClient);
-        LOGGER.debug("Successfully initiated Yarn load balancer creation on the Yarn client. Created application with name: " +
-                loadBalancerApplication.getName() + ".");
+        LOGGER.debug("Successfully initiated Yarn load balancer creation on the Yarn client. Created application with name: {}.",
+                loadBalancerApplication.getName());
         return check(authenticatedContext, Collections.singletonList(loadBalancerApplication));
     }
 

@@ -52,7 +52,7 @@ class ModelTest {
             try {
                 validator.validate(pojoClass);
             } catch (Exception e) {
-                LOGGER.error(String.format("Exception occurred because: %s in %s class", e, pojoClass.getName()));
+                LOGGER.error("Exception occurred because: {} in {} class", e, pojoClass.getName());
             }
         }
 
@@ -63,7 +63,7 @@ class ModelTest {
             try {
                 validator.validate(pojoClass);
             } catch (Exception e) {
-                LOGGER.error(String.format("Exception occurred because: %s in %s class", e, pojoClass.getName()));
+                LOGGER.error("Exception occurred because: {} in {} class", e, pojoClass.getName());
             }
         }
         // openpojo will do for now (seems buggy) but later would worth experimenting with pojo-tester (https://www.pojo.pl/)

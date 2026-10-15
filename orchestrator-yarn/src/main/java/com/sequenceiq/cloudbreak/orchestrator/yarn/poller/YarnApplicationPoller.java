@@ -44,7 +44,7 @@ public class YarnApplicationPoller {
 
                     // Validate the application is "RUNNING"
                     if (!applicationDetailResponse.getState().equals(ApplicationState.READY.name())) {
-                        LOGGER.debug(String.format("Application %s not ready, in %s state, sleeping 1000 ms", appName, applicationDetailResponse.getState()));
+                        LOGGER.debug("Application {} not ready, in {} state, sleeping 1000 ms", appName, applicationDetailResponse.getState());
                         sleep();
                     } else {
                         // Validate the container is running

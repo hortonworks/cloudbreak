@@ -42,9 +42,9 @@ public class KnoxGroupDeterminer {
             LOGGER.debug("Knox gateway is not explicitly defined; searching for CM gateway hosts");
             groupNames = gatewayGroupNames;
         } else if (!gatewayGroupNames.containsAll(groupNames)) {
-            LOGGER.error("KNOX can only be installed on instance group where type is GATEWAY. As per the template " + getBlueprintName(cluster) +
-                    " KNOX_GATEWAY role config is present in groups " + groupNames  + " while the GATEWAY nodeType is available for instance group " +
-                    gatewayGroupNames);
+            LOGGER.error("KNOX can only be installed on instance group where type is GATEWAY. As per the template {} KNOX_GATEWAY role config "
+                    + "is present in groups {} while the GATEWAY nodeType is available for instance group {}",
+                    getBlueprintName(cluster), groupNames, gatewayGroupNames);
             throw new CloudbreakServiceException("KNOX can only be installed on instance group where type is GATEWAY. As per the template " +
                     getBlueprintName(cluster) + " KNOX_GATEWAY role config is present in groups " + groupNames  +
                     " while the GATEWAY nodeType is available for instance group " + gatewayGroupNames);

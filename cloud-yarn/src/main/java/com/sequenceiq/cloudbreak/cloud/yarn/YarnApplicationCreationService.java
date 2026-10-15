@@ -39,7 +39,7 @@ public class YarnApplicationCreationService {
         ApplicationDetailRequest applicationDetailRequest = new ApplicationDetailRequest();
         applicationDetailRequest.setName(applicationName);
         boolean created = yarnClient.getApplicationDetail(applicationDetailRequest).getStatusCode() == YarnResourceConstants.HTTP_SUCCESS;
-        LOGGER.debug("The yarn application " + applicationName + " already being created = " + created + ".");
+        LOGGER.debug("The yarn application {} already being created = {}.", applicationName, created);
         return created;
     }
 
@@ -48,10 +48,10 @@ public class YarnApplicationCreationService {
      * correctly received.
      */
     public void createApplication(YarnClient yarnClient, CreateApplicationRequest createApplicationRequest) throws MalformedURLException {
-        LOGGER.info("Creating the Yarn application " + createApplicationRequest.getName() + ".");
+        LOGGER.info("Creating the Yarn application {}.", createApplicationRequest.getName());
         ResponseContext responseContext = yarnClient.createApplication(createApplicationRequest);
         if (Objects.nonNull(responseContext.getResponseError())) {
-            LOGGER.warn("Received a response error from the Yarn client when trying to create the application " + createApplicationRequest.getName() + ".");
+            LOGGER.warn("Received a response error from the Yarn client when trying to create the application {}.", createApplicationRequest.getName());
             ApplicationErrorResponse applicationErrorResponse = responseContext.getResponseError();
             throw new CloudConnectorException(String.format("Yarn Application creation error: HTTP Return: %d Error: %s", responseContext.getStatusCode(),
                     applicationErrorResponse.getDiagnostics()));
@@ -68,7 +68,7 @@ public class YarnApplicationCreationService {
         createApplicationRequest.setQueue(stack.getParameters().getOrDefault(YarnConstants.YARN_QUEUE_PARAMETER, defaultQueue));
         String lifeTimeStr = stack.getParameters().get(YarnConstants.YARN_LIFETIME_PARAMETER);
         createApplicationRequest.setLifetime(lifeTimeStr != null ? Integer.parseInt(lifeTimeStr) : defaultLifeTime);
-        LOGGER.debug("Created an initial application request for " + applicationName + ".");
+        LOGGER.debug("Created an initial application request for {}.", applicationName);
         return createApplicationRequest;
     }
 }

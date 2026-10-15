@@ -90,13 +90,13 @@ public class CreateExternalDatabaseHandler implements EventHandler<CreateExterna
             LOGGER.info("Database polling exited before timeout. Cause: ", e);
             result = createFailedEvent(stack, e);
         } catch (PollerStoppedException e) {
-            LOGGER.info(String.format("Database poller stopped for stack: %s", stack.getName()), e);
+            LOGGER.info("Database poller stopped for stack: {}", stack.getName(), e);
             result = createFailedEvent(stack, e);
         } catch (PollerException e) {
-            LOGGER.info(String.format("Database polling failed for stack: %s", stack.getName()), e);
+            LOGGER.info("Database polling failed for stack: {}", stack.getName(), e);
             result = createFailedEvent(stack, e);
         } catch (Exception e) {
-            LOGGER.error(String.format("Exception during DB creation for stack/cluster: %s", stack.getName()), e);
+            LOGGER.error("Exception during DB creation for stack/cluster: {}", stack.getName(), e);
             result = createFailedEvent(stack, e);
         }
         LOGGER.debug("Sending reactor notification for selector {}", result.selector());

@@ -161,7 +161,7 @@ public class StackStartStopService {
     private void validateResourceResults(CloudContext cloudContext, Exception exception, InstancesStatusResult results, boolean start) {
         String action = start ? "start" : "stop";
         if (exception != null) {
-            LOGGER.info(format("Failed to %s stack: %s", action, cloudContext), exception);
+            LOGGER.info("Failed to {} stack: {}", action, cloudContext, exception);
             throw new OperationException(exception);
         }
         List<CloudVmInstanceStatus> failedInstances =

@@ -202,7 +202,7 @@ public class StackUpscaleService {
 
     private void validateResourceResults(StackScalingFlowContext context, Exception exception, List<CloudResourceStatus> results) {
         if (exception != null) {
-            LOGGER.info(format("Failed to upscale stack: %s", context.getCloudContext()), exception);
+            LOGGER.info("Failed to upscale stack: {}", context.getCloudContext(), exception);
             throw new OperationException(exception);
         }
         List<CloudResourceStatus> templates = results.stream().filter(result -> CommonResourceType.TEMPLATE == result.getCloudResource().getType()

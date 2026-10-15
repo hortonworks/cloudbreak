@@ -111,8 +111,7 @@ public class EnvironmentCrossRealmTrustRepairActions {
 
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustRepairFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error(String.format("Failed to repair Cross Realm Trust in environment status: '%s'.",
-                        payload.getEnvironmentStatus()), payload.getException());
+                LOGGER.error("Failed to repair Cross Realm Trust in environment status: '{}'.", payload.getEnvironmentStatus(), payload.getException());
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                         .updateFailedEnvironmentStatusAndNotify(
                                 context,

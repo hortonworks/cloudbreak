@@ -77,7 +77,7 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
             HttpStatus httpStatus = HttpStatus.valueOf(code);
             return httpStatus.is5xxServerError();
         } catch (IllegalArgumentException e) {
-            LOGGER.error(String.format("HTTP response status cannot be recognized, possibly it is a custom HTTP status (not specified in any RFCs): %d", code));
+            LOGGER.error("HTTP response status cannot be recognized, possibly it is a custom HTTP status (not specified in any RFCs): {}", code);
             return String.valueOf(code).matches(REGEX_5XX);
         }
     }

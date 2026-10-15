@@ -61,8 +61,7 @@ public class SdxAttachService {
             reRegisterClusterProxyConfig(reattached, false, detachedCrn);
             return reattached;
         } catch (Exception e) {
-            LOGGER.error("Failed to reattach Data Lake cluster with CRN '" + detachedCrn +
-                    "'. Putting detached cluster back to its original state.", e);
+            LOGGER.error("Failed to reattach Data Lake cluster with CRN '{}'. Putting detached cluster back to its original state.", detachedCrn, e);
             undoReattach(reattached, detachedName, detachedCrn, stackReattached);
             throw e;
         }
@@ -140,8 +139,7 @@ public class SdxAttachService {
             ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, created.getCrn());
             return created;
         } catch (Exception e) {
-            LOGGER.error("Failed to assign resource owner role to new Data Lake with CRN '" + created.getCrn() +
-                    "'. Removing it from database.", e);
+            LOGGER.error("Failed to assign resource owner role to new Data Lake with CRN '{}'. Removing it from database.", created.getCrn(), e);
             sdxService.delete(created);
             throw e;
         }

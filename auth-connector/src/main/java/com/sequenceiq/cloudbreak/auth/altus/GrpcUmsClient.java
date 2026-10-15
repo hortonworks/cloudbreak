@@ -865,7 +865,7 @@ public class GrpcUmsClient {
             makeClient().notifyResourceDeleted(resourceCrn);
             LOGGER.info("Notified UMS about deletion of resource {}", resourceCrn);
         } catch (Exception e) {
-            LOGGER.error(String.format("Notifying UMS about deletion of resource %s has failed: ", resourceCrn), e);
+            LOGGER.error("Notifying UMS about deletion of resource {} has failed: ", resourceCrn, e);
         }
     }
 

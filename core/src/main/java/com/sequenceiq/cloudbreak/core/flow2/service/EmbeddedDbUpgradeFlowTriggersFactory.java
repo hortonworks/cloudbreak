@@ -70,10 +70,9 @@ public class EmbeddedDbUpgradeFlowTriggersFactory {
             return targetMajorVersion;
         } else {
             LOGGER.debug("Check of embedded db upgrade necessity has evaluated to False. At least one of the following conditions is false:"
-                    + ", os upgrade requested: " + upgradeRequested
-                    + ", embedded database is on attached disk: " + embeddedDBOnAttachedDisk
-                    + ", target db version is different: " + versionsAreDifferent
-                    + ", targetMajorVersion is valid: " + (targetMajorVersion != null));
+                    + ", os upgrade requested: {}, embedded database is on attached disk: {}, target db version is different: {}"
+                    + ", targetMajorVersion is valid: {}",
+                    upgradeRequested, embeddedDBOnAttachedDisk, versionsAreDifferent, targetMajorVersion != null);
             return null;
         }
     }

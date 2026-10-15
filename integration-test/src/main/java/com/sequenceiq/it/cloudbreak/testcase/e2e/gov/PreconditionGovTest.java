@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.gov;
 
-import static java.lang.String.format;
-
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -108,7 +106,7 @@ public class PreconditionGovTest extends AbstractE2ETest {
     protected void initUsers(TestContext testContext) {
         testContext.checkNonEmpty("integrationtest.cloudbreak.server", defaultServer);
         if (StringUtils.containsIgnoreCase(defaultServer, "usg-1.cdp.mow-dev")) {
-            LOGGER.info(format("Tested environmet is GOV Dev at '%s'. So we are initializing GOV Dev UMS users!", defaultServer));
+            LOGGER.info("Tested environmet is GOV Dev at '{}'. So we are initializing GOV Dev UMS users!", defaultServer);
             useRealUmsUser(testContext, GovUserKeys.USER_ACCOUNT_ADMIN);
             useRealUmsUser(testContext, GovUserKeys.ENV_CREATOR_A);
         } else {

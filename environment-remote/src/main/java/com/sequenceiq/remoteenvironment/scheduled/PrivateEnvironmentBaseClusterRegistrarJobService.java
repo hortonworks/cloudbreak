@@ -48,7 +48,7 @@ public class PrivateEnvironmentBaseClusterRegistrarJobService implements JobSche
             LOGGER.info("Scheduling private environment base cluster registrar job for key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
+            LOGGER.error("Error during scheduling quartz job: {}", jobDetail, e);
         }
     }
 
@@ -80,7 +80,7 @@ public class PrivateEnvironmentBaseClusterRegistrarJobService implements JobSche
         try {
             scheduler.deleteJob(jobKey);
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+            LOGGER.error("Error during unscheduling quartz job: {}", jobKey, e);
         }
     }
 

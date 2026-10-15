@@ -62,7 +62,7 @@ public class PaasDatalakeAuthorizationService implements HierarchyAuthResourcePr
                     "Stack by CRN %s not found", "Stack with CRN %s is not a Data Lake.", resourceCrn)
                     .getEnvironmentCrn());
         } catch (NotFoundException e) {
-            LOGGER.error(String.format("Getting environment crn by resource crn %s failed, ", resourceCrn), e);
+            LOGGER.error("Getting environment crn by resource crn {} failed, ", resourceCrn, e);
             return Optional.empty();
         }
     }

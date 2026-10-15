@@ -41,8 +41,7 @@ public class DistroxStopStartScaleDurationAssertions implements Assertion<Distro
                 .max(Comparator.comparing(OperationDetails::getTimestamp))
                 .orElseThrow(() -> new TestFailException(String.format("Cannot find Structured Event for '%s' message!", message)));
         long latestEventTimestamp = latestEvent.getTimestamp();
-        LOGGER.info(String.format("[%s] event time '%s'.", message,
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(latestEventTimestamp), ZoneId.systemDefault())));
+        LOGGER.info("[{}] event time '{}'.", message, LocalDateTime.ofInstant(Instant.ofEpochMilli(latestEventTimestamp), ZoneId.systemDefault()));
         return latestEventTimestamp;
     }
 
@@ -59,7 +58,7 @@ public class DistroxStopStartScaleDurationAssertions implements Assertion<Distro
         long startTime = getTimestampForEvent(structuredNotificationEvents, startMessage);
         long endTime = getTimestampForEvent(structuredNotificationEvents, stopMessage);
         long actualDuration = endTime - startTime;
-        LOGGER.info(String.format("[%s] event duration '%s' minutes.", startMessage, TimeUnit.MILLISECONDS.toMinutes(actualDuration)));
+        LOGGER.info("[{}] event duration '{}' minutes.", startMessage, TimeUnit.MILLISECONDS.toMinutes(actualDuration));
 
         String message = String.format("Distrox last scale have been took (%d) more than the expected %d minutes!",
                 TimeUnit.MILLISECONDS.toMinutes(actualDuration), expectedDuration);

@@ -33,7 +33,7 @@ public class AzureImageInfoService {
         String imageId = getImageId(resourceGroup, client, imageNameWithRegion);
 
         AzureImageInfo imageInfo = new AzureImageInfo(imageNameWithRegion, imageName, imageId, region, resourceGroup, hyperVGeneration);
-        LOGGER.debug(AzureImageInfo.class.getSimpleName() + " was created: {}", imageInfo);
+        LOGGER.debug("{} was created: {}", AzureImageInfo.class.getSimpleName(), imageInfo);
         return imageInfo;
     }
 

@@ -112,7 +112,7 @@ public class CoreProviderTemplateUpdateActions {
 
             @Override
             protected void doExecute(StackContext context, CoreProviderTemplateUpdateFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Updating launch template failed with payload: " + payload);
+                LOGGER.error("Updating launch template failed with payload: {}", payload);
                 StackDtoDelegate stack = context.getStack();
                 String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVIDER_TEMPLATE_UPDATE_FAILED, errorReason);

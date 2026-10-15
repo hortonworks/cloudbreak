@@ -34,7 +34,7 @@ public class SdxRestoreAction implements Action<SdxTestDto, SdxClient> {
 
         Log.when(LOGGER, format(" Data Lake '%s' restore has been started to '%s' ", sdxName, backupLocation));
         Log.whenJson(LOGGER, " Data Lake restore request: ", testDto.getRequest());
-        LOGGER.info(format(" Data Lake '%s' restore has been started to '%s'... ", sdxName, backupLocation));
+        LOGGER.info(" Data Lake '{}' restore has been started to '{}'... ", sdxName, backupLocation);
         SdxRestoreResponse sdxRestoreResponse = client.getDefaultClient(testContext)
                 .sdxRestoreEndpoint()
                 .restoreDatalakeByName(sdxName, backupId, backupLocation, false, false, false, false,

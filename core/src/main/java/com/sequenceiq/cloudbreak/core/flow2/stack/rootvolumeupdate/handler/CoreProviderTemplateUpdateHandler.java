@@ -64,7 +64,7 @@ public class CoreProviderTemplateUpdateHandler extends ExceptionCatcherEventHand
             cloudConnector.resources().update(authenticatedContext, cloudStack, List.of(),
                     UpdateType.PROVIDER_TEMPLATE_UPDATE, Optional.empty());
         } catch (Exception e) {
-            LOGGER.warn("Exception while updating Provider Template - " + e.getMessage());
+            LOGGER.warn("Exception while updating Provider Template - {}", e.getMessage());
             throw new RuntimeException(e);
         }
         return new CoreProviderTemplateUpdateEvent(

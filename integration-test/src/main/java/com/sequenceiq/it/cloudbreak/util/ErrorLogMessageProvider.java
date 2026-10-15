@@ -46,7 +46,7 @@ public class ErrorLogMessageProvider {
         StringBuilder messageBuilder = new StringBuilder("All Exceptions that occurred during the test are logged after this message.")
                 .append(System.lineSeparator());
         exceptionsDuringTest.forEach((msg, ex) -> {
-            LOGGER.error("Exception during test: " + msg, ex);
+            LOGGER.error("Exception during test: {}", msg, ex);
             messageBuilder.append(msg).append(": ")
                     .append(ResponseUtil.getErrorMessage(ex))
                     .append(System.lineSeparator())

@@ -53,8 +53,7 @@ public class SdxAttachDetachUtils {
                             0L, originalName, initiatorUserCrn, newName, newCrn, retainOriginalName
                     );
                 } catch (NotFoundException e) {
-                    LOGGER.warn("Stack not found for original name: '" + originalName +
-                            "'. Skipping update of stack.", e);
+                    LOGGER.warn("Stack not found for original name: '{}'. Skipping update of stack.", originalName, e);
                 }
             }
         );
@@ -69,8 +68,7 @@ public class SdxAttachDetachUtils {
                                 cluster.getEnvCrn(), originalCrn, cluster.getCrn(), initiatorUserCrn
                         );
                     } catch (NotFoundException e) {
-                        LOGGER.warn("External DB not found for original CRN: '" + originalCrn +
-                                "'. Skipping update of external DB.", e);
+                        LOGGER.warn("External DB not found for original CRN: '{}'. Skipping update of external DB.", originalCrn, e);
                     }
                 }
         );

@@ -92,7 +92,7 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
             }
             response = new KeytabConfigurationSuccess(stackId);
         } catch (Exception e) {
-            LOGGER.info("Error during keytab configuration, stackId: " + stackId, e);
+            LOGGER.info("Error during keytab configuration, stackId: {}", stackId, e);
             KeytabConfigurationException configurationException = new KeytabConfigurationException("Keytab generation failed with: " + e.getMessage(), e);
             response = new KeytabConfigurationFailed(stackId, configurationException);
         }

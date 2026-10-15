@@ -31,16 +31,16 @@ public class AssignResourceRoleUserAction extends AbstractUmsAction<UmsTestDto> 
 
         Log.when(LOGGER, format(" Assigning resource role '%s' to user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());
-        LOGGER.info(format(" Assigning resource role '%s' to user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
+        LOGGER.info(" Assigning resource role '{}' to user '{}' at resource '{}'... ", resourceRole, userCrn, resourceCrn);
         Multimap<String, String> assignedResourceRoles = client.getDefaultClient(testContext).listAssignedResourceRoles(userCrn);
         if (assignedResourceRoles.get(resourceCrn).contains(resourceRole)) {
-            LOGGER.info(format(" Resource role '%s' has already been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
+            LOGGER.info(" Resource role '{}' has already been assigned to user '{}' at resource '{}' ", resourceRole, userCrn, resourceCrn);
             Log.when(LOGGER, format(" Resource role '%s' has already been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         } else {
             client.getDefaultClient(testContext).assignResourceRole(userCrn, resourceCrn, resourceRole);
             // wait for UmsRightsCache to expire
             Thread.sleep(7000);
-            LOGGER.info(format(" Resource role '%s' has been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
+            LOGGER.info(" Resource role '{}' has been assigned to user '{}' at resource '{}' ", resourceRole, userCrn, resourceCrn);
             Log.when(LOGGER, format(" Resource role '%s' has been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         }
         return testDto;

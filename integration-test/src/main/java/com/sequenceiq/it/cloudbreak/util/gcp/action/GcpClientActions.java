@@ -75,7 +75,7 @@ public class GcpClientActions extends GcpClient {
                         .execute();
                 instanceTags.put(instanceId, instance.getLabels());
             } catch (Exception e) {
-                LOGGER.warn(format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
+                LOGGER.warn("Failed to get the details of the instance from Gcp with instance id: '{}'", instanceId, e);
             }
         }
         return instanceTags;
@@ -116,7 +116,7 @@ public class GcpClientActions extends GcpClient {
                         .collect(Collectors.toSet());
                 instanceIdDiskNamesMap.put(instanceId, attachedDiskNames);
             } catch (Exception e) {
-                LOGGER.warn(format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
+                LOGGER.warn("Failed to get the details of the instance from Gcp with instance id: '{}'", instanceId, e);
             }
         }
         instanceIdDiskNamesMap.forEach((instanceId, diskNames) -> Log.log(LOGGER, format(" Attached disk names are %s for [%s] instance ",
@@ -155,7 +155,7 @@ public class GcpClientActions extends GcpClient {
                     encryptionKeys.add(encryptionKey.get());
                 }
             } catch (Exception e) {
-                LOGGER.warn(format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
+                LOGGER.warn("Failed to get the details of the instance from Gcp with instance id: '{}'", instanceId, e);
             }
         }
         return encryptionKeys;
@@ -205,7 +205,7 @@ public class GcpClientActions extends GcpClient {
                 if (!e.getMessage().contains("Not Found")) {
                     handleGeneralInstanceDeletionError(instance.getKey(), e);
                 } else {
-                    LOGGER.info(format("Gcp instance [%s] is not found, thus it is deleted.", instanceId));
+                    LOGGER.info("Gcp instance [{}] is not found, thus it is deleted.", instanceId);
                 }
             } catch (IOException e) {
                 handleGeneralInstanceDeletionError(instanceId, e);
@@ -255,7 +255,7 @@ public class GcpClientActions extends GcpClient {
                 if (stopInstanceOperation != null && stopInstanceOperation.getError() != null) {
                     LOGGER.error("Waiting for GCP instance stop was resulting in error: {}", stopInstanceOperation.getError().getErrors());
                 }
-                LOGGER.error(format("Failed to wait for the STOPPED state on GCP instance: '%s'", instanceId), e);
+                LOGGER.error("Failed to wait for the STOPPED state on GCP instance: '{}'", instanceId, e);
                 throw new TestFailException(defaultErrorMessageForInstanceStop);
             }
             if ("DONE".equals(stopInstanceOperation.getStatus())) {

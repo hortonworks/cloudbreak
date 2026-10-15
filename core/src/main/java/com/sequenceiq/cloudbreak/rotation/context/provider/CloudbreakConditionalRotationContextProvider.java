@@ -17,7 +17,7 @@ public abstract class CloudbreakConditionalRotationContextProvider implements Co
         try {
             return getConditionalRotationFunction().apply(entity);
         } catch (Exception e) {
-            LOGGER.warn(String.format("Couldn't decide if rotation for resource %s is applicable, thus allowing it, reason: ", entity.getResourceCrn()), e);
+            LOGGER.warn("Couldn't decide if rotation for resource {} is applicable, thus allowing it, reason: ", entity.getResourceCrn(), e);
             return true;
         }
     }

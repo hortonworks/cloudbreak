@@ -172,12 +172,10 @@ public class DistroxService {
     private AttemptResult<Void> checkStatus(StackV4Response stack, Type type) {
         ClusterV4Response cluster = stack.getCluster();
         if (Status.STOP_FAILED.equals(stack.getStatus()) || Status.START_FAILED.equals(stack.getStatus())) {
-            LOGGER.info("Datahub stack " + type +
-                    " failed for '{}' with status: {} and reason: {}", stack.getName(), stack.getStatus(), stack.getStatusReason());
+            LOGGER.info("Datahub stack {} failed for '{}' with status: {} and reason: {}", type, stack.getName(), stack.getStatus(), stack.getStatusReason());
             return AttemptResults.breakFor("Datahub " + type + " failed '" + stack.getName() + "', " + stack.getStatusReason());
         } else if (cluster != null && (Status.STOP_FAILED.equals(cluster.getStatus()) || Status.START_FAILED.equals(cluster.getStatus()))) {
-            LOGGER.info("Datahub cluster " + type +
-                    " failed for '{}' status: {} and reason: {}", cluster.getName(), cluster.getStatus(), cluster.getStatusReason());
+            LOGGER.info("Datahub cluster {} failed for '{}' status: {} and reason: {}", type, cluster.getName(), cluster.getStatus(), cluster.getStatusReason());
             return AttemptResults.breakFor("Datahub " + type + " failed '" + cluster.getName() + "', reason: " + cluster.getStatusReason());
         } else {
             return AttemptResults.justContinue();

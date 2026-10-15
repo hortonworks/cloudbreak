@@ -102,7 +102,7 @@ public class ResourceEncryptionInitializationHandler extends EventSenderAwareHan
             environmentService.save(environment);
             LOGGER.info("Finished initializing encryption resources for environment \"{}\".", environmentName);
         } catch (Exception e) {
-            LOGGER.error(String.format("Failed to initialize encryption resources for environment \"%s\"", environmentName), e);
+            LOGGER.error("Failed to initialize encryption resources for environment \"{}\"", environmentName, e);
             throw new CloudbreakServiceException("Error occurred while initializing encryption resources: " + e.getMessage(), e);
         }
     }

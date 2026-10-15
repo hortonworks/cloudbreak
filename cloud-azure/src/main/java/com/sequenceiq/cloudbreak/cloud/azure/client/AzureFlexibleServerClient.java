@@ -112,7 +112,7 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
             }
             return flexibleServerCapabilities.isEmpty() ? Optional.empty() : Optional.of(flexibleServerCapabilities.get(0));
         } catch (ManagementException managementException) {
-            LOGGER.debug("We were not able to query flexible supported capability because of: " + managementException.getMessage());
+            LOGGER.debug("We were not able to query flexible supported capability because of: {}", managementException.getMessage());
             return Optional.empty();
         }
     }

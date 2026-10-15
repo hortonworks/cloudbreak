@@ -29,7 +29,7 @@ public class VirtualGroupTestAssertion {
                     .filter(group -> group.getKey().name().contains("ADMIN"))
                     .map(Map.Entry::getValue)
                     .collect(Collectors.toList());
-            LOGGER.info(String.format(" Admin groups are present [%s] at environment '%s' ", adminGroups, freeIpaTestDto.getResponse().getEnvironmentCrn()));
+            LOGGER.info(" Admin groups are present [{}] at environment '{}' ", adminGroups, freeIpaTestDto.getResponse().getEnvironmentCrn());
             adminGroups.forEach(adminGroup -> freeIpaTestClient.findUsersInGroup(adminUsers, adminGroup, expectedPresence));
 
             return freeIpaTestDto;
@@ -44,7 +44,7 @@ public class VirtualGroupTestAssertion {
                 .filter(group -> group.getKey().name().contains("ACCESS"))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
-            LOGGER.info(String.format(" User groups are present [%s] at environment '%s' ", userGroups, freeIpaTestDto.getResponse().getEnvironmentCrn()));
+            LOGGER.info(" User groups are present [{}] at environment '{}' ", userGroups, freeIpaTestDto.getResponse().getEnvironmentCrn());
             userGroups.forEach(userGroup -> freeIpaTestClient.findUsersInGroup(environmentUsers, userGroup, expectedPresence));
 
             return freeIpaTestDto;

@@ -275,7 +275,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
                 for (String path : pathes) {
                     JsonNode idNode = jsonNode.path(path);
                     if (idNode.isMissingNode()) {
-                        LOGGER.debug("Response was a JSON but no " + path + " available");
+                        LOGGER.debug("Response was a JSON but no {} available", path);
                     } else {
                         resourceMap.put(path, idNode.asText());
                     }

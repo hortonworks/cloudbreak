@@ -81,7 +81,7 @@ public class EfmConfigProvider extends AbstractRoleConfigProvider {
             case USER:
                 return Optional.of(umsClient.getUserDetails(userCrn).getWorkloadUsername());
             default:
-                LOGGER.warn(String.format("UserCrn %s is not of resource type USER. EFM bootstrapping requires USER creator.", userCrn));
+                LOGGER.warn("UserCrn {} is not of resource type USER. EFM bootstrapping requires USER creator.", userCrn);
         }
 
         return Optional.empty();

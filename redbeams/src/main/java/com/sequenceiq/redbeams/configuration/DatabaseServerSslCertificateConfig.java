@@ -115,7 +115,7 @@ public class DatabaseServerSslCertificateConfig {
                             String value = FileReaderUtils.readFileFromClasspath(key);
                             return Map.entry(key, value);
                         } catch (IOException e) {
-                            LOGGER.error("Could not load certificates from classpath: " + e.getMessage(), e);
+                            LOGGER.error("Could not load certificates from classpath: {}", e.getMessage(), e);
                         }
                         return null;
                     })
@@ -123,7 +123,7 @@ public class DatabaseServerSslCertificateConfig {
                     .filter(e -> StringUtils.isNoneBlank(e.getValue()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (IOException e) {
-            LOGGER.error("Could not load certificates from classpath: " + e.getMessage(), e);
+            LOGGER.error("Could not load certificates from classpath: {}", e.getMessage(), e);
         }
 
         certsByCloudPlatformCache = certs.entrySet()

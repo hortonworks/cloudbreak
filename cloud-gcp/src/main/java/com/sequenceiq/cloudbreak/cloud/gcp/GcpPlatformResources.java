@@ -408,7 +408,7 @@ public class GcpPlatformResources implements PlatformResources {
                         }
                     }
                 } catch (Exception ex) {
-                    LOGGER.warn(String.format("We can not read the host project with id %s", sharedProjectId));
+                    LOGGER.warn("We can not read the host project with id {}", sharedProjectId);
                 }
             }
         }

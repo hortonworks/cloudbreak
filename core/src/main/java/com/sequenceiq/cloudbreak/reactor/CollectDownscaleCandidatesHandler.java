@@ -77,9 +77,8 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
                             .verifyNodesAreRemovable(stack, removableAndNotDeletedInstances);
                 }
             }
-            LOGGER.info("Moving ahead with " + CollectDownscaleCandidatesResult.class.getSimpleName() + " with the following request [{}] " +
-                            "and private IDs: [{}]", request,
-                    privateIds.stream().map(String::valueOf).collect(Collectors.joining(", ")));
+            LOGGER.info("Moving ahead with {} with the following request [{}] and private IDs: [{}]", CollectDownscaleCandidatesResult.class.getSimpleName(),
+                    request, privateIds.stream().map(String::valueOf).collect(Collectors.joining(", ")));
             if (isEmpty(privateIds)) {
                 LOGGER.info("No instances met downscale criteria in host groups: {}",
                         String.join(", ", request.getHostGroupWithAdjustment().keySet()));

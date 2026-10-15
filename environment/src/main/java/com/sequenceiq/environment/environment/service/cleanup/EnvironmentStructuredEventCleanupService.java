@@ -31,8 +31,8 @@ public class EnvironmentStructuredEventCleanupService {
             LOGGER.debug("About to request deletion for environment [CRN: {}] structured events where the timestamp is smaller than {}", resourceCrn,
                     timestampOneMonthAgo);
             structuredEventService.deleteStructuredEventByResourceCrnThatIsOlderThan(resourceCrn, timestampOneMonthAgo)
-                    .ifPresent(exception -> LOGGER.warn("Cleaning up structured events for environment [CRN: " + resourceCrn + "] has failed due to: "
-                            + exception.getMessage(), exception));
+                    .ifPresent(exception -> LOGGER.warn("Cleaning up structured events for environment [CRN: {}] has failed due to: {}", resourceCrn,
+                            exception.getMessage(), exception));
         } else {
             LOGGER.debug("No resource CRN has been provided, therefore no structured event cleanup has happened.");
         }

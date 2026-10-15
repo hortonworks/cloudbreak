@@ -73,7 +73,7 @@ public class ClusterCredentialChangeActions {
                                 payload.getRequest().getPassword());
                         break;
                     default:
-                        LOGGER.error("Ambari credential update request not supported: " + payload.getRequest().getType());
+                        LOGGER.error("Ambari credential update request not supported: {}", payload.getRequest().getType());
                 }
                 sendEvent(context);
             }

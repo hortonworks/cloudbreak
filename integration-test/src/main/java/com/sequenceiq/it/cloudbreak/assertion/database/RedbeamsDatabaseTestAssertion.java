@@ -69,7 +69,7 @@ public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDepende
                     throw new TestFailException(format("Expected database server '%s' to use instance type '%s' but it uses '%s'!",
                             databaseServerCrn, customInstanceType, actualInstanceType));
                 }
-                LOGGER.info(format("Database server '%s' is provisioned with the expected instance type '%s'.", databaseServerCrn, actualInstanceType));
+                LOGGER.info("Database server '{}' is provisioned with the expected instance type '{}'.", databaseServerCrn, actualInstanceType);
                 return entity;
             }
             if (customInstanceTypeEntitled) {
@@ -77,15 +77,14 @@ public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDepende
                     throw new TestFailException(format("Custom database instance type entitlement is granted, expected database server '%s' to use "
                             + "instance type '%s' but it uses '%s'!", databaseServerCrn, customInstanceType, actualInstanceType));
                 }
-                LOGGER.info(format("Database server '%s' is provisioned with the expected custom instance type '%s'.",
-                        databaseServerCrn, actualInstanceType));
+                LOGGER.info("Database server '{}' is provisioned with the expected custom instance type '{}'.", databaseServerCrn, actualInstanceType);
             } else {
                 if (customInstanceType.equalsIgnoreCase(actualInstanceType)) {
                     throw new TestFailException(format("Custom database instance type entitlement is not granted, yet database server '%s' uses the "
                             + "custom instance type '%s'!", databaseServerCrn, actualInstanceType));
                 }
-                LOGGER.info(format("Custom database instance type entitlement is not granted; requested '%s' was correctly ignored, database server "
-                        + "'%s' uses the default instance type '%s'.", customInstanceType, databaseServerCrn, actualInstanceType));
+                LOGGER.info("Custom database instance type entitlement is not granted; requested '{}' was correctly ignored, database server "
+                        + "'{}' uses the default instance type '{}'.", customInstanceType, databaseServerCrn, actualInstanceType);
             }
             return entity;
         };

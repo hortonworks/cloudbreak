@@ -37,7 +37,7 @@ public class SdxBackupAction implements Action<SdxTestDto, SdxClient> {
 
         Log.when(LOGGER, format(" Data Lake '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
         Log.whenJson(LOGGER, " Data Lake backup request: ", testDto.getRequest());
-        LOGGER.info(format(" Data Lake '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
+        LOGGER.info(" Data Lake '{}' backup has been started to '{}' by name '{}'... ", sdxName, backupLocation, backupName);
         SdxBackupResponse sdxBackupResponse = client.getDefaultClient(testContext)
                 .sdxBackupEndpoint()
                 .backupDatalakeByName(sdxName, backupLocation, backupName, false, false, false, false,

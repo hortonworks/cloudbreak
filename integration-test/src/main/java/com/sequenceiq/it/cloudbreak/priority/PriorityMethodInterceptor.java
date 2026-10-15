@@ -39,8 +39,7 @@ public class PriorityMethodInterceptor implements IMethodInterceptor {
 
         IMethodInstance[] array = methods.toArray(new IMethodInstance[methods.size()]);
         Arrays.sort(array, comparator);
-        Arrays.stream(array).forEach(method -> LOGGER.info("###test priority: "
-                + method.getMethod().getMethodName()));
+        Arrays.stream(array).forEach(method -> LOGGER.info("###test priority: {}", method.getMethod().getMethodName()));
         return Arrays.asList(array);
     }
 }

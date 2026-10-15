@@ -259,7 +259,7 @@ public class FreeIpaInstanceHealthDetailsClientService {
                 found = true;
             }
             if (!found) {
-                LOGGER.info("No node for message: {}" + message.getMessage());
+                LOGGER.info("No node for message: {}", message.getMessage());
             } else {
                 // When parsing the messages, if there's an error, the error
                 // appears in the preceding message.

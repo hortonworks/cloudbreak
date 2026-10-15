@@ -27,7 +27,7 @@ public class SdxSyncInternalAction implements Action<SdxInternalTestDto, SdxClie
 
         Log.when(LOGGER, format(" Internal Data Lake '%s' sync has been started... ", sdxName));
         Log.whenJson(LOGGER, " Internal Data Lake sync request: ", testDto.getRequest());
-        LOGGER.info(format(" Internal Data Lake '%s' sync has been started... ", sdxName));
+        LOGGER.info(" Internal Data Lake '{}' sync has been started... ", sdxName);
         client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .sync(sdxName);

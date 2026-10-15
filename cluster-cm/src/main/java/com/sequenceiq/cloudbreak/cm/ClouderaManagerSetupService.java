@@ -565,7 +565,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 .value(optionalProxy.flatMap(ProxyConfig::getProxyAuthentication).map(ProxyAuthentication::getPassword).orElse("")));
         addNoProxyHosts(proxyConfig, proxyConfigList);
         try {
-            LOGGER.info("Update settings with: " + proxyConfigList);
+            LOGGER.info("Update settings with: {}", proxyConfigList);
             clouderaManagerResourceApi.updateConfig(proxyConfigList, "Update proxy settings");
         } catch (ApiException e) {
             String failMessage = "Update proxy settings failed";

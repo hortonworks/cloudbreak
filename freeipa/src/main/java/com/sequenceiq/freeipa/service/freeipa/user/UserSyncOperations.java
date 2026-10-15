@@ -176,7 +176,7 @@ public class UserSyncOperations {
             boolean localErrorHandling, AbstractFreeipaOperation<?> operation, FreeIpaClientException e) throws FreeIpaClientException {
         if (localErrorHandling) {
             if (FreeIpaClientExceptionUtil.isExceptionWithErrorCode(e, acceptableErrorCodes)) {
-                LOGGER.debug(String.format("Operation %s failed with acceptable error: %s", operation.getOperationName(), e.getMessage()));
+                LOGGER.debug("Operation {} failed with acceptable error: {}", operation.getOperationName(), e.getMessage());
             } else {
                 LOGGER.warn(e.getMessage());
                 warnings.accept(String.format("operation %s failed", operation.getOperationName()), e.getMessage());

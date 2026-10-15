@@ -34,8 +34,7 @@ public class StructuredEventCleanUpService {
             LOGGER.debug("About to request deletion for Data Lake structured events where the timestamp is smaller than {} and the resource CRN is the " +
                     "following: {}", timestampsThreeMonthsAgo, resourceCrn.get());
             structuredEventDBService.deleteStructuredEventByResourceCrnThatIsOlderThan(resourceCrn.get(), timestampsThreeMonthsAgo)
-                    .ifPresent(e -> LOGGER.info("Unable to delete structured events for Data Lake [CRN: " + resourceCrn.get() + "] due to: "
-                            + e.getMessage(), e));
+                    .ifPresent(e -> LOGGER.info("Unable to delete structured events for Data Lake [CRN: {}] due to: {}", resourceCrn.get(), e.getMessage(), e));
         } else {
             LOGGER.debug("No stack has been found for the following stack id, therefore ne structured event cleanup happened: {}", sdxId);
         }

@@ -95,7 +95,7 @@ public class AwsLoadBalancerLaunchService {
         List<CloudLoadBalancer> cloudLoadBalancers = stack.getLoadBalancers();
         String cFStackName = cfStackUtil.getCfStackName(ac);
         if (!cloudLoadBalancers.isEmpty()) {
-            LOGGER.debug("Creating load balancers of types " + cloudLoadBalancers.stream().map(CloudLoadBalancer::getType)
+            LOGGER.debug("Creating load balancers of types {}", cloudLoadBalancers.stream().map(CloudLoadBalancer::getType)
                     .map(LoadBalancerType::name).collect(Collectors.joining(",")));
 
             AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
@@ -230,14 +230,14 @@ public class AwsLoadBalancerLaunchService {
     }
 
     private CloudResourceStatus createLoadBalancerStatus(AuthenticatedContext ac, AwsLoadBalancer loadBalancer, ListStackResourcesResponse result) {
-        LOGGER.debug(String.format("Checking final status of AWS load balancer %s", loadBalancer.getName()));
+        LOGGER.debug("Checking final status of AWS load balancer {}", loadBalancer.getName());
         List<StackResourceSummary> summaries = result.stackResourceSummaries();
         boolean createSuccess = isResourceStatusGood(summaries, loadBalancer.getName());
 
         for (AwsListener listener : loadBalancer.getListeners()) {
-            LOGGER.debug(String.format("Checking final status of AWS listener %s", listener.getName()));
+            LOGGER.debug("Checking final status of AWS listener {}", listener.getName());
             createSuccess = createSuccess && isResourceStatusGood(summaries, listener.getName());
-            LOGGER.debug(String.format("Checking final status of AWS target group %s", listener.getTargetGroup().getName()));
+            LOGGER.debug("Checking final status of AWS target group {}", listener.getTargetGroup().getName());
             createSuccess = createSuccess && isResourceStatusGood(summaries, listener.getTargetGroup().getName());
         }
         Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES,
@@ -261,11 +261,10 @@ public class AwsLoadBalancerLaunchService {
 
         boolean success = true;
         if (summary.isEmpty()) {
-            LOGGER.error(String.format("Could not fetch summary for AWS resource with name %s", name));
+            LOGGER.error("Could not fetch summary for AWS resource with name {}", name);
             success = false;
         } else if (isFailedStatus(summary.get().resourceStatus())) {
-            LOGGER.error(String.format("Resource %s creation failed. Reason: %s",
-                    name, summary.get().resourceStatusReason()));
+            LOGGER.error("Resource {} creation failed. Reason: {}", name, summary.get().resourceStatusReason());
             success = false;
         }
         return success;

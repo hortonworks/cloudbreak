@@ -15,7 +15,7 @@ public class CustomConfigurationsValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomConfigurationsValidator.class);
 
     public void validateServiceNames(CustomConfigurations customConfigurations) {
-        LOGGER.info("Validating service names for Custom Configs " + customConfigurations.getName());
+        LOGGER.info("Validating service names for Custom Configs {}", customConfigurations.getName());
         customConfigurations.getConfigurations().forEach(config -> {
             try {
                 AllServiceTypes.valueOf(config.getServiceType().toUpperCase(Locale.ROOT));

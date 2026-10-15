@@ -52,7 +52,7 @@ public class StructuredSynchronizerJobService implements JobSchedulerService {
             Trigger trigger = buildJobTrigger(jobDetail);
             schedule(resourceAdapter.getJobResource().getLocalId(), jobDetail, trigger);
         } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
+            LOGGER.error("Error during scheduling quartz job: {}", id, e);
         }
     }
 
@@ -73,7 +73,7 @@ public class StructuredSynchronizerJobService implements JobSchedulerService {
                 LOGGER.info("Scheduling structured event sync job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 scheduler.scheduleJob(jobDetail, trigger);
             } catch (Exception e) {
-                LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
+                LOGGER.error("Error during scheduling quartz job: {}", id, e);
             }
         }
     }
@@ -84,7 +84,7 @@ public class StructuredSynchronizerJobService implements JobSchedulerService {
             LOGGER.info("Unscheduling instance metadata archiver job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.deleteJob(jobKey);
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
+            LOGGER.error("Error during unscheduling quartz job: {}", id, e);
         }
     }
 

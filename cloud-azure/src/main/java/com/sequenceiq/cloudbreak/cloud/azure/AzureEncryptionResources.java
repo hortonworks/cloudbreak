@@ -196,7 +196,7 @@ public class AzureEncryptionResources implements EncryptionResources {
             }
             return diskEncryptionSet;
         } catch (Exception e) {
-            LOGGER.error("Disk Encryption Set creation failed, request=" + request, e);
+            LOGGER.error("Disk Encryption Set creation failed, request={}", request, e);
             throw azureUtils.convertToCloudConnectorException(e, "Disk Encryption Set creation");
         }
     }
@@ -233,7 +233,7 @@ public class AzureEncryptionResources implements EncryptionResources {
                 deleteDiskEncryptionSetOnCloud(azureClient, desResourceGroupName, diskEncryptionSetName);
                 persistenceNotifier.notifyDeletion(desCloudResource, request.getCloudContext());
             } else {
-                LOGGER.info("No Disk Encryption Set found to delete, request=" + request);
+                LOGGER.info("No Disk Encryption Set found to delete, request={}", request);
             }
             if (rgCloudResourceOptional.isPresent()) {
                 CloudResource rgCloudResource = rgCloudResourceOptional.get();
@@ -241,10 +241,10 @@ public class AzureEncryptionResources implements EncryptionResources {
                         rgCloudResource.getName());
                 persistenceNotifier.notifyDeletion(rgCloudResource, request.getCloudContext());
             } else {
-                LOGGER.info("No resource group is found to delete, request=" + request);
+                LOGGER.info("No resource group is found to delete, request={}", request);
             }
         } catch (Exception e) {
-            LOGGER.error("Disk Encryption Set deletion failed, request=" + request, e);
+            LOGGER.error("Disk Encryption Set deletion failed, request={}", request, e);
             throw azureUtils.convertToCloudConnectorException(e, "Disk Encryption Set deletion");
         }
     }
@@ -404,8 +404,7 @@ public class AzureEncryptionResources implements EncryptionResources {
 
         // Check for the existence of keyVault user has specified before removing disk encryption set's (DES) access permissions from this keyVault.
         if (!azureClient.keyVaultExists(vaultResourceGroupName, vaultName)) {
-            LOGGER.warn(String.format("Vault with name \"%s\" either does not exist/have been deleted or user does not have permissions to access it.",
-                    vaultName));
+            LOGGER.warn("Vault with name \"{}\" either does not exist/have been deleted or user does not have permissions to access it.", vaultName);
         } else {
             String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
                             "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,

@@ -460,7 +460,7 @@ public class AzureClient {
         try {
             LOGGER.debug("create container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
             boolean created = getBlobContainerClient(resourceGroup, storageName, containerName).createIfNotExists();
-            LOGGER.debug("Container created: " + created);
+            LOGGER.debug("Container created: {}", created);
         } catch (BlobStorageException e) {
             throw new CloudConnectorException("can't create container in storage, storage service error occurred", e);
         }

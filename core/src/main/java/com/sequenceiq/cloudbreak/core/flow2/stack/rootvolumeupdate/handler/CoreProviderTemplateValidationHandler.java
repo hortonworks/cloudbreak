@@ -58,7 +58,7 @@ public class CoreProviderTemplateValidationHandler extends ExceptionCatcherEvent
                     payload.getSize()
             );
         } catch (Exception e) {
-            LOGGER.warn("Exception while updating Provider Template - " + e.getMessage());
+            LOGGER.warn("Exception while updating Provider Template - {}", e.getMessage());
             throw new RuntimeException(e);
         }
         return new CoreProviderTemplateUpdateEvent(

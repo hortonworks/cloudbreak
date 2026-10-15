@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.grpc.service;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
-import static java.lang.String.format;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -173,7 +172,7 @@ public class CcmV2Service extends ClusterConnectivityManagementV2Grpc.ClusterCon
             return cipher.doFinal(privateKeyInBytes);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException |
                  InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException e) {
-            LOGGER.error(format("Problem encrypting key: %s", e.getMessage()));
+            LOGGER.error("Problem encrypting key: {}", e.getMessage());
         }
         return new byte[0];
     }
@@ -207,7 +206,7 @@ public class CcmV2Service extends ClusterConnectivityManagementV2Grpc.ClusterCon
             agentBuilder.setHmacForPrivateKey(hmacForTheEncryptedPrivateKey);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException |
                  InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException e) {
-            LOGGER.error(format("Problem encrypting key: %s", e.getMessage()));
+            LOGGER.error("Problem encrypting key: {}", e.getMessage());
         }
     }
 

@@ -101,7 +101,7 @@ public class DatalakeRestoreAwaitServicesStoppedHandler extends ExceptionCatcher
             LOGGER.info("Restore services stopped polling failed for cluster: {}", sdxId);
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
         } catch (CloudbreakServiceException exception) {
-            LOGGER.info("Data Lake restore failed. Reason: " + exception.getMessage());
+            LOGGER.info("Data Lake restore failed. Reason: {}", exception.getMessage());
             response = new DatalakeRestoreFailedEvent(sdxId, userId, exception);
         }
 

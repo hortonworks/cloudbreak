@@ -53,7 +53,7 @@ public class CoreModifySeLinuxHandler extends ExceptionCatcherEventHandler<CoreM
     public Selectable doAccept(HandlerEvent<CoreModifySeLinuxHandlerEvent> enableSeLinuxEventEvent) {
         CoreModifySeLinuxHandlerEvent eventData = enableSeLinuxEventEvent.getData();
         try {
-            LOGGER.debug("Setting SELinux mode to " + eventData.getSelinuxMode());
+            LOGGER.debug("Setting SELinux mode to {}", eventData.getSelinuxMode());
             Stack stack = stackService.getByIdWithListsInTransaction(eventData.getResourceId());
             LOGGER.debug("Saving SeLinux as {} in stack security config.", eventData.getSelinuxMode());
             securityConfigService.updateSeLinuxSecurityConfig(stack.getSecurityConfig().getId(), eventData.getSelinuxMode());
@@ -65,7 +65,7 @@ public class CoreModifySeLinuxHandler extends ExceptionCatcherEventHandler<CoreM
             return new CoreModifySeLinuxEvent(CoreModifySeLinuxStateSelectors.FINISH_MODIFY_SELINUX_CORE_EVENT.selector(), eventData.getResourceId(),
                     eventData.getSelinuxMode());
         } catch (CloudbreakOrchestratorException e) {
-            LOGGER.warn("Exception while setting SELinux to " + eventData.getSelinuxMode() + ", exception: ", e);
+            LOGGER.warn("Exception while setting SELinux to {}, exception: ", eventData.getSelinuxMode(), e);
             return new CoreModifySeLinuxFailedEvent(eventData.getResourceId(), "SELINUX_MODE_CHANGE_FAILED", e);
         }
     }

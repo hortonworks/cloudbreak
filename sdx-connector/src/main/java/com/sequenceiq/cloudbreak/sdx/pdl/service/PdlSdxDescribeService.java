@@ -116,7 +116,7 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
                         .build());
             }
         } catch (RuntimeException exception) {
-            LOGGER.error(String.format("Exception while fetching CRN for private Data Lake with Environment: %s.", environmentCrn), exception);
+            LOGGER.error("Exception while fetching CRN for private Data Lake with Environment: {}.", environmentCrn, exception);
             if (exception instanceof BadRequestException) {
                 throw exception;
             }

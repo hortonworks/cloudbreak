@@ -51,7 +51,7 @@ public class YarnAppBootstrap implements OrchestratorBootstrap {
 
                 // Validate the application is "RUNNING"
                 if (!applicationDetailResponse.getState().equals(ApplicationState.READY.name())) {
-                    LOGGER.debug(String.format("Application %s not ready, in %s state, sleeping 1000 ms", appName, applicationDetailResponse.getState()));
+                    LOGGER.debug("Application {} not ready, in {} state, sleeping 1000 ms", appName, applicationDetailResponse.getState());
                     throw new CloudbreakOrchestratorFailedException(String.format("Application %s not ready, in %s state, sleeping 1000 ms", appName,
                             applicationDetailResponse.getState()));
                 } else {

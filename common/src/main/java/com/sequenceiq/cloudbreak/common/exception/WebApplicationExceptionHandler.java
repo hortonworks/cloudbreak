@@ -20,7 +20,7 @@ public class WebApplicationExceptionHandler {
 
     public WebApplicationException handleException(WebApplicationException e) {
         String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-        LOGGER.warn("Handling WebApplicationException with message: " + errorMessage, e);
+        LOGGER.warn("Handling WebApplicationException with message: {}", errorMessage, e);
         if (e.getResponse().getStatusInfo().getFamily() == Family.CLIENT_ERROR) {
             throw new BadRequestException(errorMessage);
         }

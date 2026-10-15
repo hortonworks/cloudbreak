@@ -88,13 +88,13 @@ public class TerminateExternalDatabaseHandler implements EventHandler<TerminateE
             LOGGER.info("Database termination polling exited before timeout. Cause: ", e);
             result = terminateFailedEvent(stack, e);
         } catch (PollerStoppedException e) {
-            LOGGER.info(String.format("Database termination poller stopped for stack: %s", stack.getName()), e);
+            LOGGER.info("Database termination poller stopped for stack: {}", stack.getName(), e);
             result = terminateFailedEvent(stack, e);
         } catch (PollerException e) {
-            LOGGER.info(String.format("Database termination polling failed for stack: %s", stack.getName()), e);
+            LOGGER.info("Database termination polling failed for stack: {}", stack.getName(), e);
             result = terminateFailedEvent(stack, e);
         } catch (Exception e) {
-            LOGGER.error(String.format("Exception during DB termination for stack/cluster: %s", stack.getName()), e);
+            LOGGER.error("Exception during DB termination for stack/cluster: {}", stack.getName(), e);
             result = terminateFailedEvent(stack, e);
         }
         LOGGER.debug("Sending reactor notification for selector {}", result.selector());

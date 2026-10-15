@@ -1041,7 +1041,7 @@ public class ClusterHostServiceRunner {
 
     private void saveIdBrokerPillar(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar) {
         IdBroker clusterIdBroker = idBrokerService.getByCluster(cluster.getId());
-        LOGGER.info("Put idbroker keys/secrets to salt pillar for cluster: " + cluster.getName());
+        LOGGER.info("Put idbroker keys/secrets to salt pillar for cluster: {}", cluster.getName());
         servicePillar.put(IDBROKER_PILLAR_KEY, getIdBrokerPillarProperties(clusterIdBroker));
     }
 

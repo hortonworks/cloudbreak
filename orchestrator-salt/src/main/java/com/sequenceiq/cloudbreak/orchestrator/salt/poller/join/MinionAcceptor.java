@@ -109,8 +109,7 @@ public class MinionAcceptor {
         List<String> minionIdsInBothDeniedAndUnacceptedState = deniedMinions.stream().distinct()
                 .filter(unacceptedMinions::contains).collect(Collectors.toList());
         if (!minionIdsInBothDeniedAndUnacceptedState.isEmpty()) {
-            LOGGER.info("There are minions in denied and unaccepted state at the same time, lets remove them: " +
-                    minionIdsInBothDeniedAndUnacceptedState);
+            LOGGER.info("There are minions in denied and unaccepted state at the same time, lets remove them: {}", minionIdsInBothDeniedAndUnacceptedState);
             deleteSaltKey(sc, minionIdsInBothDeniedAndUnacceptedState);
         }
         return minionIdsInBothDeniedAndUnacceptedState;

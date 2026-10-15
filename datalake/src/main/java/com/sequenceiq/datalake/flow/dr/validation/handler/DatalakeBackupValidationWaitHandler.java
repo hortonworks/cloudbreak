@@ -74,7 +74,7 @@ public class DatalakeBackupValidationWaitHandler extends ExceptionCatcherEventHa
             LOGGER.info("Backup validation polling failed for cluster: {}", sdxId);
             response = new DatalakeBackupValidationFailedEvent(sdxId, userId, exception);
         } catch (CloudbreakServiceException exception) {
-            LOGGER.info("Data Lake backup validation failed. Reason: " + exception.getMessage());
+            LOGGER.info("Data Lake backup validation failed. Reason: {}", exception.getMessage());
             response = new DatalakeBackupValidationFailedEvent(sdxId, userId, exception);
         }
         return response;
