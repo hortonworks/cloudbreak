@@ -12,7 +12,6 @@ import jakarta.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -24,6 +23,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvail
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDatabaseServerAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDatabaseServerAction;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -41,7 +41,7 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeDatabaseTestUtil;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -59,7 +59,7 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
     private EnvironmentTestClient environmentTestClient;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private SshJClientActions sshJClientActions;
 
     @Inject
     private SdxDatabaseServerAction sdxDatabaseServerAction;
@@ -173,15 +173,16 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
     }
 
     private void validateDbSslMode(List<InstanceGroupV4Response> instanceGroups) {
-        Map<String, Pair<Integer, String>> dbSslModeConnectionMap = sshJUtil.getSSLModeForExternalDBByIp(instanceGroups, List.of("master"),
-                commonCloudProperties().getDefaultPrivateKeyFile());
-
-        for (String ip : dbSslModeConnectionMap.keySet()) {
-            Pair<Integer, String> connectionUrlPair = dbSslModeConnectionMap.get(ip);
-            if (!connectionUrlPair.getValue().contains("verify-ca")) {
-                throw new TestFailException("Connection URL for external database has SSL Mode set to 'verify-full' for instance ip: " + ip);
-            }
-        }
+        String dbSslConnectionUrlCmd = "sudo cat /srv/pillar/cloudera-manager/database.sls | grep -E 'connectionURL\":'";
+        List<String> masterIps = InstanceIPCollectorUtil.getInstanceGroupIps(instanceGroups, List.of("master"), false);
+        sshJClientActions.executeSshCommandOnHosts(masterIps, dbSslConnectionUrlCmd)
+                .requireAllSucceeded("Reading the connection URL of the external database")
+                .forEach(outcome -> {
+                    if (!outcome.commandOutput().contains("verify-ca")) {
+                        throw new TestFailException("Connection URL for external database has SSL Mode set to 'verify-full' for instance ip: "
+                                + outcome.instanceIp());
+                    }
+                });
     }
 
     private void validateAz(List<InstanceGroupV4Response> instanceGroups, TestContext tc, String clusterName) {

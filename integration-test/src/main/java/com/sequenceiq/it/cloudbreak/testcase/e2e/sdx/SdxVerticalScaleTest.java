@@ -6,14 +6,12 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 
@@ -27,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -36,6 +35,8 @@ import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -142,7 +143,7 @@ public class SdxVerticalScaleTest extends PreconditionSdxE2ETest {
                 .filter(ig -> ig.getName().equals(TEST_INSTANCE_GROUP))
                 .findFirst().orElseThrow();
         List<String> updatedInstances = InstanceUtil.getInstanceIds(List.of(instanceGroup), TEST_INSTANCE_GROUP);
-        Set<String> instanceIps = InstanceUtil.getInstancePrivateIps(List.of(instanceGroup), TEST_INSTANCE_GROUP);
+        List<String> instanceIps = InstanceIPCollectorUtil.getInstanceGroupIps(List.of(instanceGroup), List.of(TEST_INSTANCE_GROUP), false);
         Map<String, String> instanceIpIdsMap = InstanceUtil.getInstanceIpIdMap(List.of(instanceGroup), TEST_INSTANCE_GROUP);
         validateFstab(sdxClusterDetailResponse.getStackV4Response(), instanceIps, instanceIpIdsMap);
         CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
@@ -208,19 +209,20 @@ public class SdxVerticalScaleTest extends PreconditionSdxE2ETest {
         }
     }
 
-    private void validateFstab(StackV4Response stackV4Response, Set<String> instanceIps, Map<String, String> instanceIpIdsMap) {
+    private void validateFstab(StackV4Response stackV4Response, List<String> instanceIps, Map<String, String> instanceIpIdsMap) {
         Map<String, String> attributesByInstanceId = stackV4Response.getResources().stream()
                 .filter(res -> instanceIpIdsMap.containsKey(res.getInstanceId()) && res.getResourceType().toString().contains("_VOLUMESET"))
                 .collect(Collectors.toMap(res -> instanceIpIdsMap.get(res.getInstanceId()),
                         ResourceV4Response::getAttributes));
-        Map<String, Pair<Integer, String>> fstabInfo = sshJClientActions.executeCommands(instanceIps, "sudo cat /etc/fstab");
+        SshCommandOutcomes fstabInfo = sshJClientActions.executeSshCommandOnHosts(instanceIps, "sudo cat /etc/fstab").requireAllExecuted();
         StringBuilder exceptionMessage = new StringBuilder();
-        for (String instanceIp : fstabInfo.keySet()) {
-            validateNoDuplicateMounts(fstabInfo.get(instanceIp).getRight());
+        for (SshCommandOutcome fstab : fstabInfo) {
+            String instanceIp = fstab.instanceIp();
+            validateNoDuplicateMounts(fstab.commandOutput());
             if (attributesByInstanceId.containsKey(instanceIp)) {
                 try {
                     String savedFstab = normalizeFstab(new Json(attributesByInstanceId.get(instanceIp)).get(VolumeSetAttributes.class).getFstab());
-                    String fstabFromSsh = normalizeFstab(fstabInfo.get(instanceIp).getRight());
+                    String fstabFromSsh = normalizeFstab(fstab.commandOutput());
                     if (!savedFstab.equalsIgnoreCase(fstabFromSsh)) {
                         exceptionMessage.append("Add Volumes Flow failed: Saved fstab information doesn't match what is present " +
                                         "in the cloud provider for instance Id ")

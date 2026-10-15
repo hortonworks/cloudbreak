@@ -6,8 +6,6 @@ import java.util.Arrays;
 
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -16,11 +14,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 
-@ExtendWith(MockitoExtension.class)
-public class InstanceUtilTest {
+class InstanceUtilTest {
 
     @Test
-    public void testGetInstanceStatusMap() {
+    void testGetInstanceStatusMap() {
         assertEquals(0, getInstanceStatusMapSize(getResponse()));
         assertEquals(0, getInstanceStatusMapSize(getResponse(emptyInstanceGroup(), emptyInstanceGroup())));
         assertEquals(1, getInstanceStatusMapSize(getResponse(emptyInstanceGroup(), emptyInstanceGroup(), instanceGroup())));

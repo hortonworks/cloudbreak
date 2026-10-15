@@ -13,20 +13,21 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.AmazonEC2Util;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonrgt.AmazonResourceGroupTaggingUtil;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshEnaDriverCheckActions;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 @Component
 public class AwsCloudFunctionality implements CloudFunctionality {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCloudFunctionality.class);
+
+    private static final String EPHEMERAL_MOUNT_DIR_PREFIX = "ephfs";
 
     @Inject
     private AmazonEC2Util amazonEC2Util;
@@ -41,7 +42,7 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     private SshEnaDriverCheckActions sshEnaDriverCheckActions;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private SshJClientActions sshJClientActions;
 
     @Override
     public List<String> listInstancesVolumeIds(String clusterName, List<String> instanceIds) {
@@ -140,12 +141,12 @@ public class AwsCloudFunctionality implements CloudFunctionality {
 
     @Override
     public void checkMountedDisks(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
-        sshJUtil.checkAwsMountedDisks(instanceGroups, hostGroupNames);
+        sshJClientActions.checkAwsEphemeralDisksMounted(instanceGroups, hostGroupNames, EPHEMERAL_MOUNT_DIR_PREFIX);
     }
 
     @Override
     public Set<String> getVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
-        return sshJUtil.getAwsVolumeMountPoints(instanceGroups, hostGroupNames);
+        return sshJClientActions.getAwsEphemeralVolumeMountPoints(instanceGroups, hostGroupNames);
     }
 
     @Override
@@ -170,12 +171,6 @@ public class AwsCloudFunctionality implements CloudFunctionality {
 
     public String calculateDevicePath(VolumeSetAttributes.Volume volume) {
         return volume.getId() != null ? "/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_" + volume.getId().replace("-", "") : "";
-    }
-
-    @Override
-    public List<String> executeSshCommandsOnInstances(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
-            String command) {
-        return sshJUtil.executeSshCommandsOnInstances(instanceGroups, hostGroupNames, privateKeyFilePath, command);
     }
 
     @Override

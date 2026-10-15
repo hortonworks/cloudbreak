@@ -216,7 +216,3 @@ configurations.configureEach {
     force "com.google.protobuf:protobuf-java-util:$e2eTestProtobufVersion"
   }
 }
-
-test {
-  useTestNG()
-}

@@ -602,8 +602,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     private void collectLogFiles() {
         try {
-            List<String> ipAddresses = getResponse().getInstanceGroups().stream().flatMap(ig -> ig.getMetaData().stream())
-                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+            List<String> ipAddresses = InstanceIPCollectorUtil.getAllReachableFreeIpaInstanceIps(getResponse().getInstanceGroups(), true);
             LOGGER.debug("Collected FreeIPA IP addresses: {}", ipAddresses);
             String statusReason = getResponse().getStatusReason();
             createSosReport(statusReason, ipAddresses);
@@ -616,8 +615,8 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     private void createSosReport(String statusReason, List<String> ipAddresses) {
         if (StringUtils.isNotBlank(statusReason) && statusReason.contains("CA server")) {
             try {
-                sshJClientActions.executeSshCommandOnHosts(ipAddresses, "sudo mkdir -p " + SOS_LOG
-                        + " && sudo sos report --batch --tmp-dir " + SOS_LOG);
+                sshJClientActions.executeSshCommandOnHosts(ipAddresses, "sudo mkdir -p " + SOS_LOG + " && sudo sos report --batch --tmp-dir " + SOS_LOG)
+                        .requireAllExecuted();
             } catch (Exception e) {
                 LOGGER.warn("Failed to create sos report from all hosts. Reason: {}", e.getMessage(), e);
             }

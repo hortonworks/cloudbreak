@@ -3,15 +3,12 @@ package com.sequenceiq.it.cloudbreak.assertion.freeipa;
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNING;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.doNotWaitForFlow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -19,7 +16,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +28,6 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -42,6 +37,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
@@ -49,6 +45,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
@@ -141,66 +138,46 @@ public class FreeIpaAvailabilityAssertion {
         }
     }
 
-    private void checkFreeipaRecordCname(Optional<SdxClusterDetailResponse> sdxClusterDetailResponse,
-        DescribeFreeIpaResponse describeFreeIpaResponse, String recordName) {
+    private void checkFreeipaRecordCname(Optional<SdxClusterDetailResponse> sdxClusterDetailResponse, DescribeFreeIpaResponse describeFreeIpaResponse,
+            String recordName) {
         String domain = describeFreeIpaResponse.getFreeIpa().getDomain();
-        Set<InstanceMetaDataResponse> freeIpaMetadata = describeFreeIpaResponse.getInstanceGroups()
-                .stream()
-                .flatMap(instanceGroup -> instanceGroup.getMetaData().stream())
-                .collect(Collectors.toSet());
+        List<String> freeIpaMetadata = InstanceIPCollectorUtil.getAllFreeIpaInstanceIps(describeFreeIpaResponse.getInstanceGroups(), false);
 
-        Map<String, Pair<Integer, String>> freeIpaRecordResults =
-                sshJClientActions.executeSshCommandOnHost(
-                        freeIpaMetadata, String.format(CHECK_RECORD, domain, recordName), false);
-        for (Pair<Integer, String> value : freeIpaRecordResults.values()) {
-            if (value.getLeft() != 0) {
-                throw new TestFailException("Command Run failed with error: " + value.getRight());
-            }
-            String[] rows = value.getRight().split(" ");
-            if (!rows[rows.length - 1].trim().equals(describeFreeIpaResponse.getLoadBalancer().getFqdn())) {
-                throw new TestFailException(String.format("Loadbalancer fqdn %s does not match with freeIpa fqdn: %s on freeIpa.",
-                        describeFreeIpaResponse.getLoadBalancer().getFqdn(), value.getRight()));
-            }
-        }
+        String loadBalancerFqdn = describeFreeIpaResponse.getLoadBalancer().getFqdn();
+        sshJClientActions.executeSshCommandOnHosts(freeIpaMetadata, String.format(CHECK_RECORD, domain, recordName))
+                .requireAllSucceeded("Checking the '" + recordName + "' record on FreeIPA")
+                .forEach(value -> requireLoadBalancerFqdnInRecord(value, loadBalancerFqdn));
+
         if (sdxClusterDetailResponse.isPresent()) {
-            List<String> sdxMetadata = sdxClusterDetailResponse.get().getStackV4Response().getInstanceGroups()
-                    .stream()
-                    .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
-                    .map(InstanceMetaDataV4Response::getPrivateIp)
-                    .collect(Collectors.toList());
+            List<String> sdxMetadata = InstanceIPCollectorUtil.getAllInstanceIps(
+                    sdxClusterDetailResponse.get().getStackV4Response().getInstanceGroups(), false);
 
-            Map<String, Pair<Integer, String>> sdxRecordResults =
-                    sshJClientActions.executeSshCommandOnHosts(
-                            sdxMetadata, String.format(CHECK_LB, describeFreeIpaResponse.getLoadBalancer().getFqdn()));
-
-            for (Pair<Integer, String> value : sdxRecordResults.values()) {
-                if (value.getLeft() != 0) {
-                    throw new TestFailException("Command Run failed with error: " + value.getRight());
-                }
-                for (String serverIp : describeFreeIpaResponse.getFreeIpa().getServerIp()) {
-                    if (!value.getRight().trim().contains(serverIp)) {
-                        throw new TestFailException(String.format("Loadbalancer fqdn %s does not match with freeIpa fqdn: %s on Data Lake.",
-                                value.getRight(),
-                                serverIp));
-                    }
-                }
-            }
+            Set<String> serverIps = describeFreeIpaResponse.getFreeIpa().getServerIp();
+            sshJClientActions.executeSshCommandOnHosts(sdxMetadata, String.format(CHECK_LB, describeFreeIpaResponse.getLoadBalancer().getFqdn()))
+                    .requireAllSucceeded("Checking the loadbalancer record on SDX")
+                    .forEach(value -> requireAllServerIpsInOutput(value, serverIps,
+                            "Loadbalancer fqdn %s does not match with freeIpa fqdn: %s on Data Lake."));
 
             String unboundCommand = String.format(CHECK_UNBOUND, describeFreeIpaResponse.getLoadBalancer().getFqdn());
-            Map<String, Pair<Integer, String>> sdxUnboundConfig =
-                    sshJClientActions.executeSshCommandOnHosts(sdxMetadata, unboundCommand);
+            sshJClientActions.executeSshCommandOnHosts(sdxMetadata, unboundCommand)
+                    .requireAllSucceeded("Checking the unbound config on SDX")
+                    .forEach(value -> requireAllServerIpsInOutput(value, serverIps,
+                            "Loadbalancer ip %s in unbound config does not match with freeIpa LB ip: %s on FreeIpa."));
+        }
+    }
 
-            for (Pair<Integer, String> value : sdxUnboundConfig.values()) {
-                if (value.getLeft() != 0) {
-                    throw new TestFailException("Unbound Command Run failed with error: " + value.getRight());
-                }
-                for (String serverIp : describeFreeIpaResponse.getFreeIpa().getServerIp()) {
-                    if (!value.getRight().trim().contains(serverIp)) {
-                        throw new TestFailException(String.format("Loadbalancer ip %s in unbound config does not match with freeIpa LB ip: %s on FreeIpa.",
-                                value.getRight(),
-                                serverIp));
-                    }
-                }
+    private void requireLoadBalancerFqdnInRecord(SshCommandOutcome outcome, String loadBalancerFqdn) {
+        String[] rows = outcome.commandOutput().split(" ");
+        if (!rows[rows.length - 1].trim().equals(loadBalancerFqdn)) {
+            throw new TestFailException(String.format("Loadbalancer fqdn %s does not match with freeIpa fqdn: %s on freeIpa.",
+                    loadBalancerFqdn, outcome.commandOutput()));
+        }
+    }
+
+    private void requireAllServerIpsInOutput(SshCommandOutcome outcome, Set<String> serverIps, String mismatchMessageFormat) {
+        for (String serverIp : serverIps) {
+            if (!outcome.commandOutput().trim().contains(serverIp)) {
+                throw new TestFailException(String.format(mismatchMessageFormat, outcome.commandOutput(), serverIp));
             }
         }
     }
@@ -369,7 +346,7 @@ public class FreeIpaAvailabilityAssertion {
     private void waitToCompleted(TestContext testContext, String operationId, String operationName) {
         testContext
                 .given(operationName, FreeIpaOperationStatusTestDto.class)
-                    .withOperationId(operationId)
+                .withOperationId(operationId)
                 .await(COMPLETED, doNotWaitForFlow().withTimeoutChecker(
                         new AbsolutTimeBasedTimeoutChecker(TimeUnit.MINUTES.toSeconds(operationTimeoutInMinutes))));
     }
@@ -399,9 +376,9 @@ public class FreeIpaAvailabilityAssertion {
                 .findFirst().orElseThrow(() -> new TestFailException("FreeIPA upgrade DNS lookups test failed, idbroker instance group was not found."));
         try {
             String cmd = String.format(CHECK_DNS_LOOKUPS_CMD, instanceGroupMetadata.getDiscoveryFQDN(), instanceGroupMetadata.getPrivateIp());
-            Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommandOnHost(
-                    sdxTestDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(HostGroupType.MASTER.getName()), cmd, false);
-            results.values().forEach(result -> assertEquals(0, result.getLeft()));
+            sshJClientActions.executeSshCommandOnHost(
+                            sdxTestDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(HostGroupType.MASTER.getName()), cmd, false)
+                    .requireAllSucceeded();
         } catch (Exception e) {
             LOGGER.error("FreeIPA upgrade DNS lookups test failed with unexpected error", e);
             throw new TestFailException("FreeIPA upgrade DNS lookups test failed with unexpected error: " + e.getMessage(), e);

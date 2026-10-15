@@ -1,15 +1,14 @@
 package com.sequenceiq.it.cloudbreak.assertion.safelogic;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.List;
 
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -47,7 +46,7 @@ public class SafeLogicAssertions {
         return stackV4Response != null && stackV4Response.getJavaVersion() == 8;
     }
 
-    private void validate(TestContext testContext, Set<String> ipAddresses) {
+    private void validate(TestContext testContext, Collection<String> ipAddresses) {
         boolean govCloud = testContext.getCloudProvider().getGovCloud();
         if (govCloud != sshSafeLogicActions.hasSafeLogicBinaries(ipAddresses)) {
             throw new TestFailException(govCloud ? "Expected SafeLogic binaries but not found all of them!" : "Expected no SafeLogic binaries but found them!");
@@ -60,23 +59,15 @@ public class SafeLogicAssertions {
         }
     }
 
-    private static Set<String> getSdxIpAddresses(SdxInternalTestDto testDto) {
-        return getStackIpAddresses(testDto.getResponse().getStackV4Response());
+    private static List<String> getSdxIpAddresses(SdxInternalTestDto testDto) {
+        return InstanceIPCollectorUtil.getGatewayIps(testDto.getResponse().getStackV4Response().getInstanceGroups(), false);
     }
 
-    private static Set<String> getSdxIpAddresses(SdxTestDto testDto) {
-        return getStackIpAddresses(testDto.getResponse().getStackV4Response());
+    private static List<String> getSdxIpAddresses(SdxTestDto testDto) {
+        return InstanceIPCollectorUtil.getGatewayIps(testDto.getResponse().getStackV4Response().getInstanceGroups(), false);
     }
 
-    private static Set<String> getDistroXIpAddresses(DistroXTestDto testDto) {
-        return getStackIpAddresses(testDto.getResponse());
-    }
-
-    private static Set<String> getStackIpAddresses(StackV4Response stack) {
-        return stack.getInstanceGroups().stream()
-                .filter(ig -> ig.getType().equals(InstanceGroupType.GATEWAY))
-                .flatMap(ig -> ig.getMetadata().stream())
-                .map(InstanceMetaDataV4Response::getPrivateIp)
-                .collect(Collectors.toSet());
+    private static List<String> getDistroXIpAddresses(DistroXTestDto testDto) {
+        return InstanceIPCollectorUtil.getGatewayIps(testDto.getResponse().getInstanceGroups(), false);
     }
 }

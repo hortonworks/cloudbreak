@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.assertion.proxy;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -10,12 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -40,7 +37,7 @@ class ProxyConfigFileAssertions {
     private SshProxyActions sshProxyActions;
 
     public Assertion<FreeIpaTestDto, FreeIpaClient> validateFreeIpaNoProxyConfigFile() {
-        return (testContext, testDto, client) -> validateNoProxyConfigFile(testDto, getFreeipaIpAddresses(testDto));
+        return (testContext, testDto, client) -> validateNoProxyConfigFile(testDto, InstanceIPCollectorUtil.getAllInstanceIps(testDto, false));
     }
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeNoProxyConfigFile() {
@@ -51,7 +48,7 @@ class ProxyConfigFileAssertions {
         return (testContext, testDto, client) -> validateNoProxyConfigFile(testDto, getDistroXIpAddresses(testDto));
     }
 
-    private <T extends AbstractTestDto<?, ?, ?, ?>> T validateNoProxyConfigFile(T testDto, Set<String> ipAddresses) {
+    private <T extends AbstractTestDto<?, ?, ?, ?>> T validateNoProxyConfigFile(T testDto, Collection<String> ipAddresses) {
         LOGGER.info("Validating {} has no proxy config file on node(s) {}", testDto.getCrn(), ipAddresses);
         Optional<String> proxySettings = sshProxyActions.getProxySettings(ipAddresses);
         if (proxySettings.isPresent()) {
@@ -61,7 +58,7 @@ class ProxyConfigFileAssertions {
     }
 
     public Assertion<FreeIpaTestDto, FreeIpaClient> validateFreeIpaProxyConfigFile(ProxyTestDto proxy) {
-        return (testContext, testDto, client) -> validateProxyConfigFile(testDto, getFreeipaIpAddresses(testDto), proxy);
+        return (testContext, testDto, client) -> validateProxyConfigFile(testDto, InstanceIPCollectorUtil.getAllInstanceIps(testDto, false), proxy);
     }
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeProxyConfigFile(ProxyTestDto proxy) {
@@ -72,7 +69,7 @@ class ProxyConfigFileAssertions {
         return (testContext, testDto, client) -> validateProxyConfigFile(testDto, getDistroXIpAddresses(testDto), proxy);
     }
 
-    private <T extends AbstractTestDto<?, ?, ?, ?>> T validateProxyConfigFile(T testDto, Set<String> ipAddresses, ProxyTestDto proxy) {
+    private <T extends AbstractTestDto<?, ?, ?, ?>> T validateProxyConfigFile(T testDto, Collection<String> ipAddresses, ProxyTestDto proxy) {
         LOGGER.info("Validating {} has {} proxy config file on node(s) {}", testDto.getCrn(), proxy.getName(), ipAddresses);
         String proxySettings = sshProxyActions.getProxySettings(ipAddresses)
                 .orElseThrow(() -> new TestFailException("Expected proxy settings but found none"));
@@ -91,26 +88,11 @@ class ProxyConfigFileAssertions {
         return proxySettings.replaceAll(PROXY_PASSWORD_PATTERN, PROXY_PASSWORD_REPLACED_VALUE);
     }
 
-    private static Set<String> getFreeipaIpAddresses(FreeIpaTestDto testDto) {
-        return testDto.getResponse().getInstanceGroups().stream()
-                .flatMap(ig -> ig.getMetaData().stream())
-                .map(InstanceMetaDataResponse::getPrivateIp)
-                .collect(Collectors.toSet());
+    private static List<String> getSdxIpAddresses(SdxInternalTestDto testDto) {
+        return InstanceIPCollectorUtil.getGatewayIps(testDto.getResponse().getStackV4Response().getInstanceGroups(), false);
     }
 
-    private static Set<String> getSdxIpAddresses(SdxInternalTestDto testDto) {
-        return getStackIpAddresses(testDto.getResponse().getStackV4Response());
-    }
-
-    private static Set<String> getDistroXIpAddresses(DistroXTestDto testDto) {
-        return getStackIpAddresses(testDto.getResponse());
-    }
-
-    private static Set<String> getStackIpAddresses(StackV4Response stack) {
-        return stack.getInstanceGroups().stream()
-                .filter(ig -> ig.getType().equals(InstanceGroupType.GATEWAY))
-                .flatMap(ig -> ig.getMetadata().stream())
-                .map(InstanceMetaDataV4Response::getPrivateIp)
-                .collect(Collectors.toSet());
+    private static List<String> getDistroXIpAddresses(DistroXTestDto testDto) {
+        return InstanceIPCollectorUtil.getGatewayIps(testDto.getResponse().getInstanceGroups(), false);
     }
 }

@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 
 @Component
 public class SshSudoCommandActions {
@@ -44,17 +44,18 @@ public class SshSudoCommandActions {
         });
     }
 
-    public List<SshCommandOutcome> executeCommandWithoutThrowing(Collection<String> ipAddresses, String... sudoCommands) {
+    public SshCommandOutcomes executeCommandWithoutThrowing(Collection<String> ipAddresses, String... sudoCommands) {
         return executeCommandWithoutThrowing(ipAddresses, Arrays.asList(sudoCommands));
     }
 
-    public List<SshCommandOutcome> executeCommandWithoutThrowing(Collection<String> ipAddresses, Collection<String> sudoCommands) {
+    public SshCommandOutcomes executeCommandWithoutThrowing(Collection<String> ipAddresses, Collection<String> sudoCommands) {
         String commandsAsSingleCommand = sudoCommands.stream()
                 .map(command -> getSudoCommand(null, command))
                 .collect(Collectors.joining(" && "));
-        return ipAddresses.parallelStream()
+        return new SshCommandOutcomes(ipAddresses.parallelStream()
+                .distinct()
                 .map(ipAddress -> sshJClientActions.executeCommand(ipAddress, null, null, null, commandsAsSingleCommand))
-                .toList();
+                .toList());
     }
 
     private String getSudoCommand(String password, String sudoCommand) {

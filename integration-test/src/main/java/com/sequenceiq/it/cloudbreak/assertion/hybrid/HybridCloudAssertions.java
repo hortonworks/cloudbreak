@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.assertion.hybrid;
 
 import java.io.IOException;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,9 +21,9 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 
 import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.UserAuthException;
 
 @Component
@@ -33,9 +35,8 @@ public class HybridCloudAssertions {
 
     private static final String MOCK_UMS_PASSWORD_INVALID = "Invalid password";
 
-    private static final int SSH_PORT = 22;
-
-    private static final int SSH_CONNECT_TIMEOUT = 120000;
+    @Inject
+    private SshJClientFactory sshJClientFactory;
 
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeSshAuthentication() {
         return (testContext, testDto, client) -> {
@@ -65,27 +66,18 @@ public class HybridCloudAssertions {
     }
 
     private void testShhAuthenticationSuccessful(TestContext testContext, String host) {
-        try (SSHClient client = getSshClient(host)) {
-            client.authPassword(testContext.getWorkloadUserName(), testContext.getWorkloadPassword());
+        try (SSHClient client = sshJClientFactory.createSshClient(host, testContext.getWorkloadUserName(), testContext.getWorkloadPassword(), null)) {
+            LOGGER.info("SSH authentication succeeded on host {} with workload user {}", host, testContext.getWorkloadUserName());
         } catch (IOException e) {
             throw new TestFailException(String.format("Failed to ssh into host %s with workload user %s", host, testContext.getWorkloadUserName()), e);
         }
     }
 
     private void testShhAuthenticationFailure(TestContext testContext, String host) throws IOException {
-        try (SSHClient client = getSshClient(host)) {
-            client.authPassword(testContext.getWorkloadUserName(), MOCK_UMS_PASSWORD_INVALID);
+        try (SSHClient client = sshJClientFactory.createSshClient(host, testContext.getWorkloadUserName(), MOCK_UMS_PASSWORD_INVALID, null)) {
             throw new TestFailException(String.format("SSH authentication passed with invalid password on host %s.", host));
         } catch (UserAuthException ex) {
-            LOGGER.info("Expected: SSH authentication failure has been happend!");
+            LOGGER.info("Expected: SSH authentication failure happened!");
         }
-    }
-
-    private SSHClient getSshClient(String host) throws IOException {
-        SSHClient client = new SSHClient();
-        client.addHostKeyVerifier(new PromiscuousVerifier());
-        client.setConnectTimeout(SSH_CONNECT_TIMEOUT);
-        client.connect(host, SSH_PORT);
-        return client;
     }
 }

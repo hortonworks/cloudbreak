@@ -12,7 +12,7 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.recipe.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.salt.SaltHighStateDurationAssertions;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -21,7 +21,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxRecipeTests extends PreconditionSdxE2ETest {
@@ -33,13 +32,13 @@ public class SdxRecipeTests extends PreconditionSdxE2ETest {
     private RecipeTestClient recipeTestClient;
 
     @Inject
-    private SshJUtil sshJUtil;
-
-    @Inject
     private RecipeUtil recipeUtil;
 
     @Inject
     private SaltHighStateDurationAssertions saltHighStateDurationAssertions;
+
+    @Inject
+    private RecipeTestAssertion recipeTestAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -70,7 +69,7 @@ public class SdxRecipeTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1, sshJUtil))
+                .then(recipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1))
                 .then(saltHighStateDurationAssertions::saltHighStateDurationLimits)
                 .when(sdxTestClient.delete())
                 .await(SdxClusterStatusResponse.DELETED)

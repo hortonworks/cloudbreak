@@ -5,7 +5,6 @@ import java.util.Locale;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -67,18 +66,9 @@ public class HybridTrustAssertions {
             List<String> freeIpaIps = testDto.getAllInstanceIps();
             TrustResponse trust = testDto.getResponse().getTrust();
             String command = String.format(FREEIPA_TRUST_VALIDATE_COMMAND, trust.getFqdn(), trust.getRealm().toUpperCase(Locale.ROOT));
-            executeFreeIpaCommand(freeIpaIps, command);
+            sshJClientActions.executeSshCommandOnHosts(freeIpaIps, command).requireAllSucceeded("The command execution of '" + command + "'");
             return testDto;
         };
-    }
-
-    private void executeFreeIpaCommand(List<String> freeIpaIps, String command) {
-        freeIpaIps.forEach(freeIpaIp -> {
-            Pair<Integer, String> result = sshJClientActions.executeSshCommand(freeIpaIp, command);
-            if (result.getKey() != 0) {
-                throw new TestFailException("The command execution of '" + command + "' failed with: " + result.getValue());
-            }
-        });
     }
 
     public Assertion<FreeIpaTestDto, FreeIpaClient> validateTrustOnActiveDirectory() {
@@ -100,11 +90,8 @@ public class HybridTrustAssertions {
 
     private void validateOneWayTrust(InstanceMetaDataV4Response gatewayInstance) {
         String realm = trustProperties.getActiveDirectoryRealm().toUpperCase(Locale.ROOT);
-        Pair<Integer, String> result =
-                sshJClientActions.executeSshCommand(gatewayInstance.getPrivateIp(), REMOTE_USER_LOCAL_HDFS_VALIDATE_COMMAND.formatted(realm));
-        if (result.getKey() != 0) {
-            throw new TestFailException("Failed to list HDFS of SDX with error: %s".formatted(result.getValue()));
-        }
+        sshJClientActions.executeSshCommand(gatewayInstance.getPrivateIp(), REMOTE_USER_LOCAL_HDFS_VALIDATE_COMMAND.formatted(realm))
+                .requireSuccess("Listing HDFS of SDX");
     }
 
     public Assertion<SdxInternalTestDto, SdxClient> validateTwoWayTrustOnSdx() {
@@ -125,11 +112,8 @@ public class HybridTrustAssertions {
 
     private void validateTwoWayTrust(InstanceMetaDataV4Response gatewayInstance) {
         String hdfsPath = trustProperties.getHdfsPath();
-        Pair<Integer, String> result =
-                sshJClientActions.executeSshCommand(gatewayInstance.getPrivateIp(), LOCAL_USER_REMOTE_HDFS_VALIDATE_COMMAND.formatted(hdfsPath));
-        if (result.getKey() != 0) {
-            throw new TestFailException("Failed to list HDFS of %s with error: %s".formatted(hdfsPath, result.getValue()));
-        }
+        sshJClientActions.executeSshCommand(gatewayInstance.getPrivateIp(), LOCAL_USER_REMOTE_HDFS_VALIDATE_COMMAND.formatted(hdfsPath))
+                .requireSuccess("Listing HDFS of %s".formatted(hdfsPath));
     }
 
     private InstanceMetaDataV4Response getGatewayInstance(StackV4Response stackV4Response) {

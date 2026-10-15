@@ -4,12 +4,9 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -19,6 +16,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -53,11 +52,11 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
-                    Map<String, Pair<Integer, String>> certValidityCmdResultByIpsMap =
+                    SshCommandOutcomes certValidityCmdResults =
                             sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                                    List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false);
-                    originalCertValidityOutput.addAll(certValidityCmdResultByIpsMap.values().stream()
-                            .map(Pair::getValue).collect(Collectors.toList()));
+                                            List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false)
+                                    .requireAllExecuted();
+                    originalCertValidityOutput.addAll(certValidityCmdResults.stream().map(SshCommandOutcome::commandOutput).toList());
                     return testDto;
                 })
                 .when(sdxTestClient.rotateAutotlsCertificates(), key(sdx))
@@ -65,11 +64,11 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
-                    Map<String, Pair<Integer, String>> certValidityCmdResultByIpsMap =
+                    SshCommandOutcomes certValidityCmdResults =
                             sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                                    List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false);
-                    renewedCertValidityOutput.addAll(certValidityCmdResultByIpsMap.entrySet().stream()
-                            .map(e -> e.getValue().getValue()).collect(Collectors.toList()));
+                                            List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false)
+                                    .requireAllExecuted();
+                    renewedCertValidityOutput.addAll(certValidityCmdResults.stream().map(SshCommandOutcome::commandOutput).toList());
                     return testDto;
                 })
                 .then((tc, testDto, client) -> compareCertValidityOutputs(testDto, originalCertValidityOutput, renewedCertValidityOutput))

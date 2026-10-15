@@ -15,7 +15,6 @@ import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
@@ -23,12 +22,14 @@ import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.azurerm.AzureResourceManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.azurevm.action.AzureClientActions;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 @Component
 public class AzureCloudFunctionality implements CloudFunctionality {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudFunctionality.class);
+
+    private static final String TEMPORARY_DISK_MOUNT_DIR = "ephfs1";
 
     @Inject
     private AzureClientActions azureClientActions;
@@ -40,7 +41,7 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     private AzureResourceManagerUtil azureResourceManagerUtil;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private SshJClientActions sshJClientActions;
 
     @Override
     public List<String> listInstancesVolumeIds(String clusterName, List<String> instanceIds) {
@@ -152,7 +153,7 @@ public class AzureCloudFunctionality implements CloudFunctionality {
 
     @Override
     public void checkMountedDisks(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
-        sshJUtil.checkAzureMountedDisks(instanceGroups, hostGroupNames);
+        sshJClientActions.checkAzureTemporalDisksMounted(instanceGroups, hostGroupNames, TEMPORARY_DISK_MOUNT_DIR);
     }
 
     @Override
@@ -187,12 +188,6 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public List<Volume> describeVolumes(List<String> volumeIds) {
         return azureClientActions.describeVolumes(volumeIds);
-    }
-
-    @Override
-    public List<String> executeSshCommandsOnInstances(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
-            String command) {
-        return sshJUtil.executeSshCommandsOnInstances(instanceGroups, hostGroupNames, privateKeyFilePath, command);
     }
 
     @Override

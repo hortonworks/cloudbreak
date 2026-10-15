@@ -12,22 +12,16 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_SIGN_KEY_PA
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -37,11 +31,10 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.SecretRotationCheckUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 public class FreeIpaRotationTests extends AbstractE2ETest {
-
-    private static final Status FREEIPA_AVAILABLE = Status.AVAILABLE;
 
     private static final String GET_PASSWORD_LAST_CHANGED_COMMAND = "export PASSWORD=$(sudo cat /srv/pillar/freeipa/init.sls | grep -i '\"password\"' | " +
             "awk -F'\"' '{print $4}'); kinit admin <<<$PASSWORD > /dev/null 2>&1; ipa user-show --all admin | grep krblastpwdchange: | awk -F': ' '{print $2}'";
@@ -93,10 +86,9 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
-                            testDto.getTestContext());
-                    getPasswordAndLastChangedFromPillar(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, instanceMetaDataResponses);
-                    checkDirectoryManagerPassword(instanceMetaDataResponses, originalPasswordsFromPillarMap);
+                    List<String> instanceIps = getInstanceIps(testDto.getRequest().getEnvironmentCrn(), client, testDto.getTestContext());
+                    getPasswordAndLastChangedFromPillar(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, instanceIps);
+                    checkDirectoryManagerPassword(instanceIps, originalPasswordsFromPillarMap);
                     return testDto;
                 })
                 .useAlternativeServiceEndpointIfConfigured()
@@ -123,9 +115,9 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
     }
 
     private void getPasswordAndLastChangedFromPillar(Map<String, String> originalPasswordLastChangedMap,
-            Map<String, String> originalPasswordsFromPillarMap, Set<InstanceMetaDataResponse> instanceMetaDataResponses) {
-        originalPasswordLastChangedMap.putAll(getPasswordLastChanged(instanceMetaDataResponses));
-        originalPasswordsFromPillarMap.putAll(getPasswordFromPillar(instanceMetaDataResponses));
+            Map<String, String> originalPasswordsFromPillarMap, List<String> instanceIps) {
+        originalPasswordLastChangedMap.putAll(getPasswordLastChanged(instanceIps));
+        originalPasswordsFromPillarMap.putAll(getPasswordFromPillar(instanceIps));
         if (originalPasswordsFromPillarMap.values().stream().distinct().count() != 1) {
             throw new TestFailException("The passwords are not the same on the instances");
         }
@@ -133,15 +125,15 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
 
     private FreeIpaRotationTestDto checkDirectoryManagerPasswordAfterRotation(Map<String, String> originalPasswordLastChangedMap,
             Map<String, String> originalPasswordsFromPillarMap, FreeIpaRotationTestDto testDto, FreeIpaClient client) {
-        Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getEnvironmentCrn(), client, testDto.getTestContext());
-        Map<String, String> passwordFromPillar = getPasswordFromPillar(instanceMetaDataResponses);
+        List<String> instanceIps = getInstanceIps(testDto.getEnvironmentCrn(), client, testDto.getTestContext());
+        Map<String, String> passwordFromPillar = getPasswordFromPillar(instanceIps);
         passwordFromPillar.forEach((key, value) -> {
             String originalPassword = originalPasswordsFromPillarMap.get(key);
             if (originalPassword.equals(value)) {
                 throw new TestFailException("Freeipa admin password remained the same in pillar on " + key);
             }
         });
-        Map<String, String> passwordLastChanged = getPasswordLastChanged(instanceMetaDataResponses);
+        Map<String, String> passwordLastChanged = getPasswordLastChanged(instanceIps);
         if (passwordLastChanged.values().size() != originalPasswordLastChangedMap.values().size()) {
             throw new TestFailException("The return size of the password last changed result is different");
         }
@@ -151,40 +143,37 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 throw new TestFailException("The password time for admin user is not different on " + key);
             }
         });
-        checkDirectoryManagerPassword(instanceMetaDataResponses, passwordFromPillar);
+        checkDirectoryManagerPassword(instanceIps, passwordFromPillar);
         return testDto;
     }
 
-    private Map<String, String> getPasswordLastChanged(Set<InstanceMetaDataResponse> instanceMetaDataResponses) {
-        Map<String, Pair<Integer, String>> sshCommandResponse = sshJClientActions.executeSshCommandOnHost(instanceMetaDataResponses,
-                GET_PASSWORD_LAST_CHANGED_COMMAND, false);
-        return sshCommandResponse.entrySet().stream()
-                .collect(Collectors.toMap(Entry::getKey, sshCommandResult -> sshCommandResult.getValue().getValue()));
+    private Map<String, String> getPasswordLastChanged(List<String> instanceIps) {
+        return sshJClientActions.executeSshCommandOnHosts(instanceIps, GET_PASSWORD_LAST_CHANGED_COMMAND)
+                .requireAllExecuted()
+                .toMapByInstanceIp(SshCommandOutcome::commandOutput);
     }
 
-    private Map<String, String> getPasswordFromPillar(Set<InstanceMetaDataResponse> instanceMetaDataResponses) {
-        Map<String, Pair<Integer, String>> sshCommandResponse = sshJClientActions.executeSshCommandOnHost(instanceMetaDataResponses,
-                GET_PASSWORD_FROM_PILLAR_COMMAND, false);
-        return sshCommandResponse.entrySet().stream()
-                .collect(Collectors.toMap(Entry::getKey, sshCommandResult -> sshCommandResult.getValue().getValue()));
+    private Map<String, String> getPasswordFromPillar(List<String> instanceIps) {
+        return sshJClientActions.executeSshCommandOnHosts(instanceIps, GET_PASSWORD_FROM_PILLAR_COMMAND)
+                .requireAllExecuted()
+                .toMapByInstanceIp(SshCommandOutcome::commandOutput);
     }
 
-    private void checkDirectoryManagerPassword(Set<InstanceMetaDataResponse> instanceMetaDataResponses, Map<String, String> passwordsFromPillar) {
+    private void checkDirectoryManagerPassword(List<String> instanceIps, Map<String, String> passwordsFromPillar) {
         String password = passwordsFromPillar.values().iterator().next().replaceAll("\\r\\n", "");
         String checkCommand = String.format(CHECK_DIRECTORY_MANAGER_PASSWORD_COMMAND, password);
-        Map<String, Pair<Integer, String>> sshCommandResponse = sshJClientActions.executeSshCommandOnHost(instanceMetaDataResponses, checkCommand, false);
-        Pair<Integer, String> response = sshCommandResponse.values().stream().findFirst().orElseThrow(() ->
-                new TestFailException("We can't check directory manager password through SSH"));
-        if (response.getValue().contains("Invalid credentials")) {
+        SshCommandOutcome response = sshJClientActions.executeSshCommandOnHosts(instanceIps, checkCommand)
+                .requireAllExecuted()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new TestFailException("We can't check directory manager password through SSH"));
+        if (response.commandOutput().contains("Invalid credentials")) {
             throw new TestFailException("Credentials are invalid for directory manager password!");
         }
     }
 
-    private Set<InstanceMetaDataResponse> getInstanceMetaDataResponses(String environmentCrn, FreeIpaClient<?> client, TestContext testContext) {
+    private List<String> getInstanceIps(String environmentCrn, FreeIpaClient<?> client, TestContext testContext) {
         DescribeFreeIpaResponse describeFreeIpaResponse = client.getDefaultClient(testContext).getFreeIpaV1Endpoint().describe(environmentCrn);
-        return describeFreeIpaResponse.getInstanceGroups().stream()
-                .map(InstanceGroupResponse::getMetaData)
-                .flatMap(Set::stream)
-                .collect(Collectors.toSet());
+        return InstanceIPCollectorUtil.getAllFreeIpaInstanceIps(describeFreeIpaResponse.getInstanceGroups(), false);
     }
 }

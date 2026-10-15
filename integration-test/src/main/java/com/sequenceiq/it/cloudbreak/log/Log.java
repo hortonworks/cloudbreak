@@ -14,9 +14,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 
-public class Log<T extends CloudbreakTestDto> {
+public class Log {
 
     public static final String TEST_CONTEXT_REPORTER = "testContextReporter";
 

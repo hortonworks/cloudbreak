@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
-import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil.getFreeIpaMasterInstanceIps;
+import static com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil.getPrimaryGatewayIps;
 import static java.lang.String.format;
 
 import java.io.BufferedWriter;
@@ -15,14 +15,12 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +29,7 @@ import java.util.zip.ZipInputStream;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,10 +40,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -55,6 +50,8 @@ import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.salt.SaltFunctionReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltHighstateReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltStateReport;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 
 import net.schmizz.sshj.SSHClient;
@@ -75,6 +72,9 @@ public class SshSaltExecutionMetricsActions {
     @Inject
     private SshJClientFactory sshJClientFactory;
 
+    @Inject
+    private SshJClient sshJClient;
+
     public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName,
             TestContext testContext) {
         return getSaltExecutionMetrics(environmentCrn, resourceName, client, saltMetricsWorkingDirectory, serviceName, testContext);
@@ -82,13 +82,13 @@ public class SshSaltExecutionMetricsActions {
 
     public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client,
             String workingDirectoryLocation, String serviceName, TestContext testContext) {
-        String saltMasterIp = getSaltMasterIp(environmentCrn, resourceName, client, serviceName, testContext);
         List<SaltHighstateReport> saltHighstateReports = new ArrayList<>();
         try {
-            if (!saltMasterIp.isBlank()) {
+            String saltMasterIp = getSaltMasterIp(environmentCrn, resourceName, client, serviceName, testContext);
+            if (StringUtils.isNotBlank(saltMasterIp)) {
                 String extractSaltMetricsCommand = getExtractSaltMetricsCommand(serviceName);
-                Pair<Integer, String> cmdOut = sshJClientActions.executeSshCommand(saltMasterIp, extractSaltMetricsCommand);
-                LOGGER.info("SSH test result on IP: [{}]: Return code: [{}], Result: {}", saltMasterIp, cmdOut.getLeft(), cmdOut.getRight());
+                SshCommandOutcome cmdOut = sshJClientActions.executeSshCommand(saltMasterIp, extractSaltMetricsCommand).requireExecuted();
+                LOGGER.info("SSH test result on IP: [{}]: Return code: [{}], Result: {}", saltMasterIp, cmdOut.returnCode(), cmdOut.commandOutput());
 
                 downloadSaltExecutionMetrics(saltMasterIp, workingDirectoryLocation, serviceName);
                 unzipArchive(format("%s/salt_execution_metrics_%s.zip", workingDirectoryLocation, serviceName), new File(workingDirectoryLocation));
@@ -98,8 +98,8 @@ public class SshSaltExecutionMetricsActions {
                         resourceName));
             }
         } catch (Exception e) {
-            Log.warn(LOGGER, format(" Error occurred while try to retrieve Salt execution metrics then generating reports! Instance: %s | Exception: %s ",
-                    saltMasterIp, e.getMessage()));
+            Log.warn(LOGGER, format(" Error occurred while try to retrieve Salt execution metrics then generating reports! Resource: %s | Exception: %s ",
+                    resourceName, e.getMessage()));
         }
         return saltHighstateReports;
     }
@@ -119,16 +119,15 @@ public class SshSaltExecutionMetricsActions {
     }
 
     private void downloadSaltExecutionMetrics(String instanceIp, String workingDirectoryLocation, String serviceName) throws IOException {
-        SSHClient sshClient = sshJClientFactory.createSshClient(instanceIp, null, null, null);
-        sshClient.newSCPFileTransfer().download(format("/home/cloudbreak/salt_execution_metrics_%s.zip", serviceName), workingDirectoryLocation);
+        try (SSHClient sshClient = sshJClientFactory.createSshClient(instanceIp, null, null, null)) {
+            sshJClient.download(sshClient, format("/home/cloudbreak/salt_execution_metrics_%s.zip", serviceName), workingDirectoryLocation);
+        }
 
         if (Files.exists(Path.of(format("%s/salt_execution_metrics_%s.zip", workingDirectoryLocation, serviceName)))) {
             LOGGER.info("Salt execution metrics successfully downloaded from instance [{}]", instanceIp);
         } else {
             LOGGER.info("Salt execution metrics could not be downloaded from instance [{}]", instanceIp);
         }
-
-        sshClient.close();
     }
 
     private String getExtractSaltMetricsCommand(String serviceName) {
@@ -167,28 +166,14 @@ public class SshSaltExecutionMetricsActions {
     }
 
     private String getFreeIpaGatewayPrivateIp(String environmentCrn, FreeIpaClient freeIpaClient, TestContext testContext) {
-        return freeIpaClient.getDefaultClient(testContext).getFreeIpaV1Endpoint()
-                .describe(environmentCrn).getInstanceGroups().stream()
-                .filter(instanceGroup -> instanceGroup.getType().equals(InstanceGroupType.MASTER))
-                .map(InstanceGroupResponse::getMetaData)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .filter(instanceMetaData -> instanceMetaData.getInstanceType().equals(InstanceMetadataType.GATEWAY_PRIMARY))
-                .map(InstanceMetaDataResponse::getPrivateIp)
-                .filter(Objects::nonNull)
+        return getFreeIpaMasterInstanceIps(freeIpaClient.getDefaultClient(testContext).getFreeIpaV1Endpoint()
+                .describe(environmentCrn).getInstanceGroups(), InstanceMetadataType.GATEWAY_PRIMARY, false).stream()
                 .findFirst()
                 .orElse(null);
     }
 
     private String getGatewayPrivateIp(List<InstanceGroupV4Response> instanceGroups) {
-        return instanceGroups.stream()
-                .filter(instanceGroup -> instanceGroup.getType().equals(GATEWAY))
-                .map(InstanceGroupV4Response::getMetadata)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .filter(instanceMetaData -> instanceMetaData.getInstanceType().equals(GATEWAY_PRIMARY))
-                .map(InstanceMetaDataV4Response::getPrivateIp)
-                .filter(Objects::nonNull)
+        return getPrimaryGatewayIps(instanceGroups, false).stream()
                 .findFirst()
                 .orElse(null);
     }

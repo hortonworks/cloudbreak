@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -14,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -69,7 +68,8 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
         }
 
         createDatalakeWithoutDatabase(testContext);
-        Map<String, Integer> javaMajorVersions = sshJavaVersionActions.getJavaMajorVersions(getSdxPrivateIpAddresses(testContext));
+        Map<String, Integer> javaMajorVersions = sshJavaVersionActions.getJavaMajorVersions(
+                InstanceIPCollectorUtil.getAllInstanceIps(testContext.get(SdxInternalTestDto.class), false));
         validateJavaVersions(sdxJavaVersion, javaMajorVersions);
 
         // create and validate distrox with all remaining supported java versions, but use the same java as sdx if only a single version is supported
@@ -79,14 +79,6 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
         Map<Integer, DistroXTestDto> distroXTestDtos = getDistroxTestDtos(testContext, supportedJavaVersions);
         distroXTestDtos.forEach(this::createDistroxWithJavaVersion);
         distroXTestDtos.forEach(this::awaitAndValidateDistroxWithJavaVersion);
-    }
-
-    private Set<String> getSdxPrivateIpAddresses(TestContext context) {
-        SdxInternalTestDto dto = context.get(SdxInternalTestDto.class);
-        return dto.getResponse().getStackV4Response().getInstanceGroups().stream()
-                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
-                .map(InstanceMetaDataV4Response::getPrivateIp)
-                .collect(Collectors.toSet());
     }
 
     private Map<Integer, DistroXTestDto> getDistroxTestDtos(TestContext testContext, List<Integer> supportedJavaVersions) {
@@ -114,15 +106,8 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
                 .await(STACK_AVAILABLE, getDistroxKey(javaVersion))
                 .awaitForHealthyInstances()
                 .validate();
-        Map<String, Integer> javaMajorVersions = sshJavaVersionActions.getJavaMajorVersions(getDatahubPrivateIpAddresses(distroXTestDto));
+        Map<String, Integer> javaMajorVersions = sshJavaVersionActions.getJavaMajorVersions(InstanceIPCollectorUtil.getAllInstanceIps(distroXTestDto, false));
         validateJavaVersions(javaVersion, javaMajorVersions);
-    }
-
-    private Set<String> getDatahubPrivateIpAddresses(DistroXTestDto dto) {
-        return dto.getResponse().getInstanceGroups().stream()
-                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
-                .map(InstanceMetaDataV4Response::getPrivateIp)
-                .collect(Collectors.toSet());
     }
 
     private void validateJavaVersions(Integer expectedVersion, Map<String, Integer> javaVersionByInstanceIps) {

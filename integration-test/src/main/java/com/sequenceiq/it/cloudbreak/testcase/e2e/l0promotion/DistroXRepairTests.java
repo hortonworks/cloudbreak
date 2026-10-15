@@ -26,12 +26,12 @@ import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 /**
  * Based on the [CB-15474 removed ephemeral disk tests from azure-longrunning-e2e-tests]:
- *  Mitigation plan is to have only 1 testcase with this type of instance (preferably repair due to mounting)
- *  and move it to the mow-dev test suite which will only run once a week.
+ * Mitigation plan is to have only 1 testcase with this type of instance (preferably repair due to mounting)
+ * and move it to the mow-dev test suite which will only run once a week.
  */
 public class DistroXRepairTests extends AbstractE2ETest {
 
@@ -45,7 +45,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
     private ClouderaManagerUtil clouderaManagerUtil;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private SshJClientActions sshJClientActions;
 
     @Inject
     private UmsTestClient umsTestClient;
@@ -67,7 +67,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
     @Description(
             given = "there is a running environment with FreeIPA and Data Lake in available state",
             when = "a new DistroX should be created",
-                and = "MASTER host group should be recovered, where the instance had been terminated",
+            and = "MASTER host group should be recovered, where the instance had been terminated",
             then = "DistroX recovery should be successful, the cluster should be up and running with same volumes")
     public void testEphemeralDistroXMasterRepairWithTerminatedInstances(TestContext testContext) {
         String distrox = resourcePropertyProvider().getName();
@@ -80,9 +80,12 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.get())
                 .then(this::verifyMountedDisks)
-                .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
-                .then((tc, testDto, client) -> sshJUtil.checkLoggingAgentStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
-                .then((tc, testDto, client) -> sshJUtil.checkCdpServiceStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) ->
+                        sshJClientActions.checkNetworkStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) ->
+                        sshJClientActions.checkLoggingAgentStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) ->
+                        sshJClientActions.checkCdpServiceStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     List<String> instancesToDelete = distroxUtil.getInstanceIds(testDto, client, MASTER.getName());

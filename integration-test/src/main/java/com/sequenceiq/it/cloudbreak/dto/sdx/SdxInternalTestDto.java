@@ -687,8 +687,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     private void collectLogFiles(StackV4Response stackResponse) {
         try {
-            List<String> ipAddresses = stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream())
-                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+            List<String> ipAddresses = InstanceIPCollectorUtil.getAllReachableInstanceIps(stackResponse.getInstanceGroups(), true);
             logCollectorUtil.collectLogFiles(stackResponse.getStatusReason(), ipAddresses);
         } catch (Exception e) {
             LOGGER.warn("Failed to collect Data Lake log files for investigation.", e);

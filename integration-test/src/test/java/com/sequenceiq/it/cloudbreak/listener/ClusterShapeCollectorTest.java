@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.listener;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -9,8 +8,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.json.JSONObject;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -30,39 +32,37 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
-public class ClusterShapeCollectorTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterShapeCollectorTest {
 
     private static final String TEST_METHOD = "testSomething";
 
+    @InjectMocks
     private ClusterShapeCollector underTest;
 
+    @Mock
     private TestContext testContext;
 
+    @Mock
     private DistroXTestDto distroXTestDto;
 
+    @Mock
     private SdxInternalTestDto sdxInternalTestDto;
 
+    @Mock
     private FreeIpaTestDto freeIpaTestDto;
 
+    @Mock
     private EnvironmentTestDto environmentTestDto;
 
+    @Mock
     private RedbeamsDatabaseServerTestDto databaseServerTestDto;
 
-    @BeforeMethod
-    public void setUp() {
-        underTest = new ClusterShapeCollector();
-        testContext = mock(TestContext.class);
-        distroXTestDto = mock(DistroXTestDto.class);
-        sdxInternalTestDto = mock(SdxInternalTestDto.class);
-        freeIpaTestDto = mock(FreeIpaTestDto.class);
-        environmentTestDto = mock(EnvironmentTestDto.class);
-        databaseServerTestDto = mock(RedbeamsDatabaseServerTestDto.class);
-    }
-
     @Test
-    public void testCollectReadsDataHubShapeFromTheStackResponse() throws Exception {
+    void testCollectReadsDataHubShapeFromTheStackResponse() throws Exception {
         when(distroXTestDto.getResponse()).thenReturn(stack("my-dh", "eu-central-1", "worker", 3, "m5.2xlarge"));
         givenResources(Map.of("dh", distroXTestDto));
+        givenTestMethodAndCloudPlatform();
 
         JSONObject group = firstGroupOf(underTest.collect(testContext), 0);
 
@@ -72,12 +72,13 @@ public class ClusterShapeCollectorTest {
     }
 
     @Test
-    public void testCollectLabelsAWrappedStackAsDataLakeRatherThanDataHub() throws Exception {
+    void testCollectLabelsAWrappedStackAsDataLakeRatherThanDataHub() throws Exception {
         SdxClusterDetailResponse sdx = new SdxClusterDetailResponse();
         sdx.setName("my-dl");
         sdx.setStackV4Response(stack("my-dl", "eu-west-1", "master", 2, "r5.4xlarge"));
         when(sdxInternalTestDto.getResponse()).thenReturn(sdx);
         givenResources(Map.of("dl", sdxInternalTestDto));
+        givenTestMethodAndCloudPlatform();
 
         JSONObject result = underTest.collect(testContext);
 
@@ -88,9 +89,10 @@ public class ClusterShapeCollectorTest {
     }
 
     @Test
-    public void testCollectReadsFreeIpaShapeFromItsOwnApiHierarchy() throws Exception {
+    void testCollectReadsFreeIpaShapeFromItsOwnApiHierarchy() throws Exception {
         when(freeIpaTestDto.getResponse()).thenReturn(freeIpa("my-ipa", "m5.large", 3));
         givenResources(Map.of("ipa", freeIpaTestDto));
+        givenTestMethodAndCloudPlatform();
 
         JSONObject result = underTest.collect(testContext);
 
@@ -100,7 +102,7 @@ public class ClusterShapeCollectorTest {
     }
 
     @Test
-    public void testCollectReturnsNullWhenNothingWasProvisioned() throws Exception {
+    void testCollectReturnsNullWhenNothingWasProvisioned() throws Exception {
         when(environmentTestDto.getResponse()).thenReturn(null);
         givenResources(Map.of("env", environmentTestDto));
 
@@ -108,7 +110,7 @@ public class ClusterShapeCollectorTest {
     }
 
     @Test
-    public void testCollectSkipsAStackWithoutInstanceGroupsInsteadOfFailing() throws Exception {
+    void testCollectSkipsAStackWithoutInstanceGroupsInsteadOfFailing() throws Exception {
         StackV4Response empty = new StackV4Response();
         empty.setName("half-created");
         when(distroXTestDto.getResponse()).thenReturn(empty);
@@ -118,10 +120,11 @@ public class ClusterShapeCollectorTest {
     }
 
     @Test
-    public void testCollectKeepsEveryClusterTheTestCreated() throws Exception {
+    void testCollectKeepsEveryClusterTheTestCreated() throws Exception {
         when(distroXTestDto.getResponse()).thenReturn(stack("my-dh", "eu-central-1", "worker", 3, "m5.2xlarge"));
         when(freeIpaTestDto.getResponse()).thenReturn(freeIpa("my-ipa", "m5.large", 3));
         givenResources(Map.of("dh", distroXTestDto, "ipa", freeIpaTestDto));
+        givenTestMethodAndCloudPlatform();
 
         JSONObject result = underTest.collect(testContext);
 
@@ -130,13 +133,14 @@ public class ClusterShapeCollectorTest {
     }
 
     @Test
-    public void testCollectReadsTheDatabaseServerWhichHasNoInstanceGroups() throws Exception {
+    void testCollectReadsTheDatabaseServerWhichHasNoInstanceGroups() throws Exception {
         DatabaseServerV4Response database = new DatabaseServerV4Response();
         database.setName("my-db");
         database.setInstanceType("db.m5.xlarge");
         database.setStorageSize(100L);
         when(databaseServerTestDto.getResponse()).thenReturn(database);
         givenResources(Map.of("db", databaseServerTestDto));
+        givenTestMethodAndCloudPlatform();
 
         JSONObject result = underTest.collect(testContext);
 
@@ -150,6 +154,9 @@ public class ClusterShapeCollectorTest {
 
     private void givenResources(Map<String, CloudbreakTestDto> resources) {
         when(testContext.getResourceNames()).thenReturn(resources);
+    }
+
+    private void givenTestMethodAndCloudPlatform() {
         when(testContext.getTestMethodName()).thenReturn(Optional.of(TEST_METHOD));
         when(testContext.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
     }

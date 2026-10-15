@@ -1,31 +1,27 @@
 package com.sequenceiq.it.cloudbreak.preflight;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.it.cloudbreak.config.database.DatabaseProperties;
 
-public class PostgresAvailabilityCheckTest {
+@ExtendWith(MockitoExtension.class)
+class PostgresAvailabilityCheckTest {
 
+    @Mock
     private DatabaseProperties databaseProperties;
 
+    @InjectMocks
     private PostgresAvailabilityCheck underTest;
 
-    @BeforeMethod
-    public void setUp() {
-        databaseProperties = mock(DatabaseProperties.class);
-
-        underTest = new PostgresAvailabilityCheck();
-        ReflectionTestUtils.setField(underTest, "databaseProperties", databaseProperties);
-    }
-
     @Test
-    public void testCheckFailsWhenConnectionUnreachable() {
+    void testCheckFailsWhenConnectionUnreachable() {
         when(databaseProperties.getConnectionUrl()).thenReturn("jdbc:postgresql://localhost:1/nonexistent");
         when(databaseProperties.getUsername()).thenReturn("postgres");
         when(databaseProperties.getPassword()).thenReturn("postgres");

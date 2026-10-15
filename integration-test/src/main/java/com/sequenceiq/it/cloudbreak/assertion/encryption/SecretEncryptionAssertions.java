@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.assertion.encryption;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -126,10 +125,8 @@ public class SecretEncryptionAssertions {
     }
 
     private Map<String, String> getFailedInstancesWithCommandOutput(List<String> instanceIps) {
-        List<SshCommandOutcome> outcomes = sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, ALL_COMMANDS);
-        return outcomes.stream()
-                .filter(outcome -> !outcome.executed() || !outcome.returnCodeSuccess())
-                .collect(Collectors.toMap(SshCommandOutcome::instanceIp, SecretEncryptionAssertions::describeOutcome));
+        return sshSudoCommandActions.executeCommandWithoutThrowing(instanceIps, ALL_COMMANDS)
+                .toMapByInstanceIp(outcome -> !outcome.executed() || !outcome.returnCodeSuccess(), SecretEncryptionAssertions::describeOutcome);
     }
 
     private static String describeOutcome(SshCommandOutcome outcome) {

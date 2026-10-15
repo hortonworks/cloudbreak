@@ -484,8 +484,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private void collectLogFiles() {
         try {
-            List<String> ipAddresses = getResponse().getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream())
-                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+            List<String> ipAddresses = InstanceIPCollectorUtil.getAllReachableInstanceIps(getResponse().getInstanceGroups(), true);
             logCollectorUtil.collectLogFiles(getResponse().getStatusReason(), ipAddresses);
         } catch (Exception e) {
             LOGGER.warn("Failed to collect datahub log files for investigation.", e);

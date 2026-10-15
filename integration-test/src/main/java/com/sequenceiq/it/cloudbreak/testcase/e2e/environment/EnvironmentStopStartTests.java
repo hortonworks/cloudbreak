@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
-import static com.sequenceiq.it.cloudbreak.assertion.freeipa.RecipeTestAssertion.validateFilesOnFreeIpa;
 import static java.lang.String.format;
 
 import java.util.List;
@@ -26,6 +25,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseReque
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.it.cloudbreak.assertion.recipe.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.util.CloudProviderSideTagAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -53,7 +53,6 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -92,9 +91,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
     private RecipeTestClient recipeTestClient;
 
     @Inject
-    private SshJUtil sshJUtil;
-
-    @Inject
     private RecipeUtil recipeUtil;
 
     @Inject
@@ -102,6 +98,9 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
 
     @Inject
     private DistroxUtil distroxUtil;
+
+    @Inject
+    private RecipeTestAssertion recipeTestAssertion;
 
     private String freeipaRequestedInstanceType;
 
@@ -169,7 +168,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .then(cloudProviderSideTagAssertion.verifyEnvironmentTags(ENV_TAGS))
                 .init(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
-                .then(validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
+                .then(recipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1))
                 .given(SdxInternalTestDto.class)
                     .withTelemetry("telemetry")
                 .await(SdxClusterStatusResponse.RUNNING)

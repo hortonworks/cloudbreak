@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -39,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 @Service
@@ -172,10 +172,10 @@ public class ClusterVolumeValidationService {
 
     private Map<String, String> getUuidByDevicePathMap(String ip, List<VolumeSetAttributes.Volume> volumes, CloudFunctionality cloudFunctionality) {
         if (CollectionUtils.isNotEmpty(volumes)) {
-            Pair<Integer, String> blkidResult = sshJClientActions.executeCommand(ip, "sudo blkid -s UUID " + volumes.stream()
+            SshCommandOutcome blkidResult = sshJClientActions.executeSshCommand(ip, "sudo blkid -s UUID " + volumes.stream()
                     .map(v -> getDevicePath(cloudFunctionality, v))
-                    .collect(Collectors.joining(" ")));
-            return blkidResult.getRight().lines()
+                    .collect(Collectors.joining(" "))).requireExecuted();
+            return blkidResult.commandOutput().lines()
                     .map(String::trim)
                     .map(UUID_RESULT_REGEX_PATTERN::matcher)
                     .filter(Matcher::matches)
@@ -190,8 +190,8 @@ public class ClusterVolumeValidationService {
     }
 
     private Map<String, Integer> getLsblkSizesByUuid(String ip) {
-        Pair<Integer, String> result = sshJClientActions.executeCommand(ip, "lsblk -b -n -o UUID,SIZE");
-        return result.getRight().lines()
+        SshCommandOutcome result = sshJClientActions.executeSshCommand(ip, "lsblk -b -n -o UUID,SIZE").requireExecuted();
+        return result.commandOutput().lines()
                 .map(String::trim)
                 .map(LSBLK_UUID_SIZE_PATTERN::matcher)
                 .filter(Matcher::matches)

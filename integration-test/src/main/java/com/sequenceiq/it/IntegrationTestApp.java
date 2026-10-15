@@ -33,6 +33,8 @@ import com.sequenceiq.it.util.TestNGUtil;
 import com.sequenceiq.it.util.cleanup.CleanupUtil;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 
+import net.schmizz.sshj.common.SecurityUtils;
+
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
 @ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util", "com.sequenceiq.cloudbreak.auth.crn",
@@ -95,6 +97,8 @@ public class IntegrationTestApp implements CommandLineRunner {
         springApp.setWebApplicationType(WebApplicationType.NONE);
         springApp.setDefaultProperties(ImmutableMap.of("spring.main.allow-bean-definition-overriding", "true"));
         try {
+            // Keep SSHJ from registering the non-FIPS BouncyCastle provider, so that BouncyCastleFipsProviderLoader loads the provider instead.
+            SecurityUtils.setRegisterBouncyCastle(false);
             BouncyCastleFipsProviderLoader.load();
             ConfigurableApplicationContext context = springApp.run(args);
             LOG.info("Closing Spring test context.");

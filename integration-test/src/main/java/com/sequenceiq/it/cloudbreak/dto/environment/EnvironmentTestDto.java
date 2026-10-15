@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -57,6 +56,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -676,9 +676,7 @@ public class EnvironmentTestDto
         try {
             DescribeFreeIpaResponse freeIpaResponse = getTestContext().getMicroserviceClient(FreeIpaClient.class)
                     .getDefaultClient(getTestContext()).getFreeIpaV1Endpoint().describe(getResourceCrn());
-            List<String> freeipaIpAddresses = freeIpaResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetaData().stream())
-                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ?
-                            imd.getPublicIp() : imd.getPrivateIp()).toList();
+            List<String> freeipaIpAddresses = InstanceIPCollectorUtil.getAllReachableFreeIpaInstanceIps(freeIpaResponse.getInstanceGroups(), true);
             LOGGER.debug("Collected Environment's FreeIPA IP addresses for '{}': {}", getResourceCrn(), freeipaIpAddresses);
             logCollectorUtil.collectLogFiles(getResponse().getStatusReason(), freeipaIpAddresses);
         } catch (Exception e) {

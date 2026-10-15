@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.assertion.datalake;
 
 import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertEquals;
-import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
@@ -19,20 +18,6 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
 public class SdxUpgradeTestAssertion {
 
     private SdxUpgradeTestAssertion() {
-
-    }
-
-    public static Assertion<SdxInternalTestDto, SdxClient> validateUnsuccessfulUpgrade(String reason) {
-        return (testContext, entity, sdxClient) -> {
-            SdxUpgradeRequest request = new SdxUpgradeRequest();
-            request.setLockComponents(true);
-            request.setDryRun(true);
-            SdxUpgradeResponse upgradeResponse =
-                    sdxClient.getDefaultClient(testContext).sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
-            assertNotNull(upgradeResponse);
-            assertTrue("Expected: " + reason + " Actual: " + upgradeResponse.getReason(), upgradeResponse.getReason().contains(reason));
-            return entity;
-        };
     }
 
     public static Assertion<SdxInternalTestDto, SdxClient> validateUpgradeCandidateWithLockedComponentIsAvailable() {

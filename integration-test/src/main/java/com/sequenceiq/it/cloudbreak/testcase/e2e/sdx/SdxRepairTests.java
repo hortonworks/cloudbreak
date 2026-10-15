@@ -8,14 +8,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -37,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ClusterVolumeValidation
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -250,12 +248,12 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     }
 
     private SdxTestDto assertCronCreatedOnMasterNodesForUserHomeCreation(SdxTestDto testDto) {
-        Map<String, Pair<Integer, String>> crontabListResultByIpsMap =
-                sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                        List.of(MASTER.getName()), CRONTAB_LIST, false);
-        Set<String> nodesWithoutCrontabForUserHomeCreation = crontabListResultByIpsMap.entrySet().stream()
-                .filter(entry -> !entry.getValue().getValue().contains("createuserhome.sh"))
-                .map(Entry::getKey)
+        Set<String> nodesWithoutCrontabForUserHomeCreation = sshJClientActions.executeSshCommandOnHost(
+                        testDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(MASTER.getName()), CRONTAB_LIST, false)
+                .requireAllExecuted()
+                .stream()
+                .filter(result -> !result.commandOutput().contains("createuserhome.sh"))
+                .map(SshCommandOutcome::instanceIp)
                 .collect(Collectors.toSet());
         if (!nodesWithoutCrontabForUserHomeCreation.isEmpty()) {
             throw new TestFailException("Missing crontab for user home creation for nodes: " + nodesWithoutCrontabForUserHomeCreation);
@@ -264,12 +262,12 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     }
 
     private SdxInternalTestDto assertCronCreatedOnMasterNodesForUserHomeCreation(SdxInternalTestDto testDto) {
-        Map<String, Pair<Integer, String>> crontabListResultByIpsMap =
-                sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                        List.of(MASTER.getName()), CRONTAB_LIST, false);
-        Set<String> nodesWithoutCrontabForUserHomeCreation = crontabListResultByIpsMap.entrySet().stream()
-                .filter(entry -> !entry.getValue().getValue().contains("createuserhome.sh"))
-                .map(Entry::getKey)
+        Set<String> nodesWithoutCrontabForUserHomeCreation = sshJClientActions.executeSshCommandOnHost(
+                        testDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(MASTER.getName()), CRONTAB_LIST, false)
+                .requireAllExecuted()
+                .stream()
+                .filter(result -> !result.commandOutput().contains("createuserhome.sh"))
+                .map(SshCommandOutcome::instanceIp)
                 .collect(Collectors.toSet());
         if (!nodesWithoutCrontabForUserHomeCreation.isEmpty()) {
             throw new TestFailException("Missing crontab for user home creation for nodes: " + nodesWithoutCrontabForUserHomeCreation);

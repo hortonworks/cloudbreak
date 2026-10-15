@@ -1,48 +1,48 @@
 package com.sequenceiq.it.cloudbreak.preflight;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
-import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.it.cloudbreak.config.VaultProperties;
 import com.sun.net.httpserver.HttpServer;
 
-public class VaultAvailabilityCheckTest {
+@ExtendWith(MockitoExtension.class)
+class VaultAvailabilityCheckTest {
 
+    @Mock
     private VaultProperties vaultProperties;
 
+    @Spy
+    private ReachabilityRestTemplateFactory reachabilityRestTemplateFactory = new ReachabilityRestTemplateFactory();
+
+    @InjectMocks
     private VaultAvailabilityCheck underTest;
 
     private HttpServer httpServer;
 
-    @BeforeMethod
-    public void setUp() {
-        vaultProperties = mock(VaultProperties.class);
-
-        underTest = new VaultAvailabilityCheck();
-        ReflectionTestUtils.setField(underTest, "vaultProperties", vaultProperties);
-        ReflectionTestUtils.setField(underTest, "reachabilityRestTemplateFactory", new ReachabilityRestTemplateFactory());
-    }
-
-    @AfterMethod
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (httpServer != null) {
             httpServer.stop(0);
         }
     }
 
     @Test
-    public void testCheckPassesOnHealthyResponse() throws IOException {
+    void testCheckPassesOnHealthyResponse() throws IOException {
         startServerReturning(200);
 
         PreflightCheckResult result = underTest.check();
@@ -50,19 +50,15 @@ public class VaultAvailabilityCheckTest {
         assertThat(result.isPassed()).isTrue();
     }
 
-    @Test(dataProvider = "unhealthyStatuses")
-    public void testCheckFailsOnUnhealthyResponse(int status) throws IOException {
+    @ParameterizedTest
+    @ValueSource(ints = {501, 503})
+    void testCheckFailsOnUnhealthyResponse(int status) throws IOException {
         startServerReturning(status);
 
         PreflightCheckResult result = underTest.check();
 
         assertThat(result.isPassed()).isFalse();
         assertThat(result.isSkipped()).isFalse();
-    }
-
-    @DataProvider(name = "unhealthyStatuses")
-    public Object[][] unhealthyStatuses() {
-        return new Object[][]{{501}, {503}};
     }
 
     private void startServerReturning(int status) throws IOException {
@@ -76,7 +72,7 @@ public class VaultAvailabilityCheckTest {
     }
 
     @Test
-    public void testCheckFailsOnConnectionFailure() throws IOException {
+    void testCheckFailsOnConnectionFailure() throws IOException {
         int closedPort;
         try (ServerSocket serverSocket = new ServerSocket()) {
             serverSocket.bind(new InetSocketAddress("localhost", 0));

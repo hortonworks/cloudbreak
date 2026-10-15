@@ -2,44 +2,47 @@ package com.sequenceiq.it.cloudbreak.preflight;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
-public class DependencyPreflightServiceTest {
+@ExtendWith(MockitoExtension.class)
+class DependencyPreflightServiceTest {
 
+    @Mock
     private PreflightCheck passingCheck;
 
+    @Mock
     private PreflightCheck failingCheck;
 
+    @Mock
     private PreflightCheck secondFailingCheck;
 
+    @Mock
     private PreflightCheck skippedCheck;
 
+    @InjectMocks
     private DependencyPreflightService underTest;
 
-    @BeforeMethod
-    public void setUp() {
-        passingCheck = mock(PreflightCheck.class);
-        failingCheck = mock(PreflightCheck.class);
-        secondFailingCheck = mock(PreflightCheck.class);
-        skippedCheck = mock(PreflightCheck.class);
-
-        underTest = new DependencyPreflightService();
+    @BeforeEach
+    void setUp() {
         ReflectionTestUtils.setField(underTest, "enabled", true);
     }
 
     @Test
-    public void testRunPreflightChecksOrFailDoesNotThrowWhenAllPass() {
+    void testRunPreflightChecksOrFailDoesNotThrowWhenAllPass() {
         when(passingCheck.check()).thenReturn(PreflightCheckResult.pass("passing", "ok"));
         ReflectionTestUtils.setField(underTest, "preflightChecks", List.of(passingCheck));
 
@@ -47,7 +50,7 @@ public class DependencyPreflightServiceTest {
     }
 
     @Test
-    public void testRunPreflightChecksOrFailDoesNotThrowWhenAllSkipped() {
+    void testRunPreflightChecksOrFailDoesNotThrowWhenAllSkipped() {
         when(skippedCheck.check()).thenReturn(PreflightCheckResult.skip("skipped", "not applicable"));
         ReflectionTestUtils.setField(underTest, "preflightChecks", List.of(skippedCheck));
 
@@ -55,7 +58,7 @@ public class DependencyPreflightServiceTest {
     }
 
     @Test
-    public void testRunPreflightChecksOrFailThrowsWithAggregatedMessageWhenAnyFails() {
+    void testRunPreflightChecksOrFailThrowsWithAggregatedMessageWhenAnyFails() {
         when(passingCheck.check()).thenReturn(PreflightCheckResult.pass("passing", "ok"));
         when(failingCheck.check()).thenReturn(PreflightCheckResult.fail("failing", "unreachable"));
         when(secondFailingCheck.check()).thenReturn(PreflightCheckResult.fail("second-failing", "quota exceeded"));
@@ -71,7 +74,7 @@ public class DependencyPreflightServiceTest {
     }
 
     @Test
-    public void testRunPreflightChecksOrFailRunsEachCheckBeforeLaterCheckThrows() {
+    void testRunPreflightChecksOrFailRunsEachCheckBeforeLaterCheckThrows() {
         when(passingCheck.check()).thenReturn(PreflightCheckResult.pass("passing", "ok"));
         when(failingCheck.check()).thenThrow(new IllegalStateException("sdk error"));
         ReflectionTestUtils.setField(underTest, "preflightChecks", List.of(passingCheck, failingCheck, secondFailingCheck));
@@ -84,9 +87,8 @@ public class DependencyPreflightServiceTest {
     }
 
     @Test
-    public void testRunPreflightChecksOrFailDoesNothingWhenDisabled() {
+    void testRunPreflightChecksOrFailDoesNothingWhenDisabled() {
         ReflectionTestUtils.setField(underTest, "enabled", false);
-        when(failingCheck.check()).thenReturn(PreflightCheckResult.fail("failing", "unreachable"));
         ReflectionTestUtils.setField(underTest, "preflightChecks", List.of(failingCheck));
 
         assertThatCode(underTest::runPreflightChecksOrFail).doesNotThrowAnyException();

@@ -1,9 +1,13 @@
 package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
+import static com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil.getAllInstanceIps;
+import static com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil.getFreeIpaMasterInstanceIps;
+import static com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil.getInstanceGroupIps;
+import static com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil.getPrimaryGatewayIps;
 import static java.lang.String.format;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,10 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -24,20 +25,15 @@ import jakarta.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.it.cloudbreak.assertion.encryptionprofile.EncryptionProfileAssertions;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -51,6 +47,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 
@@ -60,8 +57,6 @@ import net.schmizz.sshj.userauth.UserAuthException;
 @Component
 public class SshJClientActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshJClientActions.class);
-
-    private static final String NOT_AVAILABLE = "N/A";
 
     private static final Set<String> AZURE_SKIPPED_FREEIPA_LOGGING_AGENT_STATUSES = Set.of("s3Accessible", "databusS3Accessible");
 
@@ -77,84 +72,10 @@ public class SshJClientActions {
     @Inject
     private EncryptionProfileAssertions encryptionProfileAssertions;
 
-    private List<String> getInstanceMetadataIps(Collection<InstanceMetaDataResponse> instanceMetaDatas, boolean publicIp) {
-        return instanceMetaDatas.stream().map(instanceMetaDataResponse -> {
-            if (publicIp) {
-                return instanceMetaDataResponse.getPublicIp();
-            } else {
-                return instanceMetaDataResponse.getPrivateIp();
-            }
-        }).collect(Collectors.toList());
-    }
-
-    private List<String> getInstanceIpsFromGroups(Collection<InstanceGroupV4Response> instanceGroups, boolean publicIp) {
-        List<String> instanceGroupIpList = instanceGroups.stream()
-                .map(InstanceGroupV4Response::getMetadata)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .map(x -> {
-                    LOGGER.info("For instance [{}] Private IP [{}] and Public IP [{}] are available. {} ip will be used!",
-                            x.getInstanceId(), x.getPrivateIp(), x.getPublicIp(), publicIp && isPublicIpAvailable(x) ? "Public" : "Private");
-                    return publicIp && isPublicIpAvailable(x) ? x.getPublicIp() : x.getPrivateIp();
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        assert !instanceGroupIpList.isEmpty();
-        return instanceGroupIpList;
-    }
-
     private List<String> getFreeIpaInstanceGroupIps(InstanceMetadataType istanceMetadataType, String environmentCrn, FreeIpaClient freeipaClient,
             boolean publicIp, TestContext testContext) {
-        return freeipaClient.getDefaultClient(testContext).getFreeIpaV1Endpoint()
-                .describe(environmentCrn).getInstanceGroups().stream()
-                .filter(instanceGroup -> instanceGroup.getType().equals(InstanceGroupType.MASTER))
-                .map(InstanceGroupResponse::getMetaData)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .filter(instanceMetaData -> instanceMetaData.getInstanceType().equals(istanceMetadataType))
-                .map(instanceMetaData -> {
-                    LOGGER.info("The selected Instance Type [{}] and the available Private IP [{}] and Public IP [{}]. {} ip will be used!",
-                            instanceMetaData.getInstanceType(), instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(),
-                            publicIp && isPublicIpAvailable(instanceMetaData) ? "Public" : "Private");
-                    return publicIp && isPublicIpAvailable(instanceMetaData) ? instanceMetaData.getPublicIp() : instanceMetaData.getPrivateIp();
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    private List<String> getPrimaryGatewayIps(Collection<InstanceGroupV4Response> instanceGroups, boolean publicIp) {
-        return instanceGroups.stream()
-                .filter(ig -> com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY == ig.getType())
-                .map(InstanceGroupV4Response::getMetadata)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .filter(imd -> GATEWAY_PRIMARY == imd.getInstanceType())
-                .map(imd -> publicIp && isPublicIpAvailable(imd) ? imd.getPublicIp() : imd.getPrivateIp())
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    private List<String> getInstanceGroupIps(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, boolean publicIp) {
-        List<String> instanceIPs = new ArrayList<>();
-
-        hostGroupNames.forEach(hostGroupName -> {
-            List<String> instanceGroupIpList = instanceGroups.stream()
-                    .filter(instanceGroup -> instanceGroup.getName().equals(hostGroupName))
-                    .map(InstanceGroupV4Response::getMetadata)
-                    .filter(Objects::nonNull)
-                    .flatMap(Collection::stream)
-                    .map(x -> {
-                        LOGGER.info("For instance [{}] in host group [{}], Private IP [{}] and Public IP [{}] are available. {} IP will be used!",
-                                x.getInstanceId(), hostGroupName, x.getPrivateIp(), x.getPublicIp(), publicIp && isPublicIpAvailable(x) ? "Public" : "Private");
-                        return publicIp && isPublicIpAvailable(x) ? x.getPublicIp() : x.getPrivateIp();
-                    })
-                    .filter(Objects::nonNull)
-                    .toList();
-            assert !instanceGroupIpList.isEmpty();
-            instanceIPs.addAll(instanceGroupIpList);
-        });
-
-        return instanceIPs;
+        return getFreeIpaMasterInstanceIps(freeipaClient.getDefaultClient(testContext).getFreeIpaV1Endpoint()
+                .describe(environmentCrn).getInstanceGroups(), istanceMetadataType, publicIp);
     }
 
     private void validateRequiredNumberOfFiles(Map<String, Long> filesByIp, String filePath, long requiredNumberOfFiles) {
@@ -191,53 +112,54 @@ public class SshJClientActions {
     }
 
     public void checkAwsEphemeralDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, String mountDirPrefix) {
-        Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames, "hadoopfs");
-        Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
+        Map<String, SshCommandOutcome> deviceMountPointMappingsByIp =
+                getDeviceMountPointMappings(instanceGroups, hostGroupNames, "hadoopfs").toMapByInstanceIp();
 
-        for (Entry<String, Pair<Integer, String>> node : deviceDiskTypeMappingsByIp.entrySet()) {
-            Map<String, String> ephemeralDisks = new Json(node.getValue().getValue()).getMap().entrySet().stream()
+        for (SshCommandOutcome node : getDeviceDiskTypeMappings(instanceGroups, hostGroupNames)) {
+            Map<String, String> ephemeralDisks = new Json(node.commandOutput()).getMap().entrySet().stream()
                     .filter(e -> String.valueOf(e.getValue()).contains("Amazon EC2 NVMe Instance Storage"))
                     .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
 
             if (ephemeralDisks.isEmpty()) {
-                LOGGER.error("Instance store volume missing from node with IP {}!", node.getKey());
-                throw new TestFailException(format("Instance store volume missing from node with IP %s!", node.getKey()));
+                LOGGER.error("Instance store volume missing from node with IP {}!", node.instanceIp());
+                throw new TestFailException(format("Instance store volume missing from node with IP %s!", node.instanceIp()));
             }
 
-            if (deviceMountPointMappingsByIp.get(node.getKey()) == null) {
-                LOGGER.error("No device mount point mappings found for node with IP {}!", node.getKey());
-                throw new TestFailException(format("No device mount point mappings found for node with IP %s!", node.getKey()));
+            if (deviceMountPointMappingsByIp.get(node.instanceIp()) == null) {
+                LOGGER.error("No device mount point mappings found for node with IP {}!", node.instanceIp());
+                throw new TestFailException(format("No device mount point mappings found for node with IP %s!", node.instanceIp()));
             }
-            Map<String, String> mountPoints = new Json(deviceMountPointMappingsByIp.get(node.getKey()).getValue()).getMap().entrySet().stream()
+            Map<String, String> mountPoints = new Json(deviceMountPointMappingsByIp.get(node.instanceIp()).commandOutput()).getMap().entrySet().stream()
                     .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
 
             for (String device : ephemeralDisks.keySet()) {
                 String mountPoint = mountPoints.get(device);
                 if (mountPoint == null) {
-                    LOGGER.error("No mount point found for ephemeral device {} on node with IP {}!", device, node.getKey());
-                    throw new TestFailException(format("No mount point found for device %s on node with IP %s!", device, node.getKey()));
+                    LOGGER.error("No mount point found for ephemeral device {} on node with IP {}!", device, node.instanceIp());
+                    throw new TestFailException(format("No mount point found for device %s on node with IP %s!", device, node.instanceIp()));
                 } else if (!mountPoint.contains(mountDirPrefix)) {
-                    LOGGER.error("Ephemeral device {} incorrectly mounted to {} on node with IP {}!", device, mountPoint, node.getKey());
+                    LOGGER.error("Ephemeral device {} incorrectly mounted to {} on node with IP {}!", device, mountPoint, node.instanceIp());
                     throw new TestFailException(format("Ephemeral device %s incorrectly mounted to %s on node with IP %s!",
-                            device, mountPoint, node.getKey()));
+                            device, mountPoint, node.instanceIp()));
                 }
             }
         }
     }
 
     public Set<String> getAwsEphemeralVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
-        Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames, "hadoopfs");
-        Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
+        Map<String, SshCommandOutcome> deviceMountPointMappingsByIp =
+                getDeviceMountPointMappings(instanceGroups, hostGroupNames, "hadoopfs").toMapByInstanceIp();
+        SshCommandOutcomes deviceDiskTypeMappings = getDeviceDiskTypeMappings(instanceGroups, hostGroupNames);
 
-        Map<String, String> mountPoints = deviceDiskTypeMappingsByIp.entrySet().stream().findFirst()
+        Map<String, String> mountPoints = deviceDiskTypeMappings.stream().findFirst()
                 .stream()
-                .map(node -> new Json(deviceMountPointMappingsByIp.get(node.getKey()).getValue()).getMap().entrySet())
+                .map(node -> new Json(deviceMountPointMappingsByIp.get(node.instanceIp()).commandOutput()).getMap().entrySet())
                 .flatMap(Set::stream)
                 .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
 
-        return deviceDiskTypeMappingsByIp.entrySet().stream().findFirst()
+        return deviceDiskTypeMappings.stream().findFirst()
                 .stream()
-                .map(node -> new Json(node.getValue().getValue()).getMap().entrySet().stream()
+                .map(node -> new Json(node.commandOutput()).getMap().entrySet().stream()
                         .filter(e -> String.valueOf(e.getValue()).contains("Amazon EC2 NVMe Instance Storage"))
                         .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue()))))
                 .map(Map::keySet)
@@ -247,66 +169,53 @@ public class SshJClientActions {
     }
 
     public void checkAzureTemporalDisksMounted(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, String mountDir) {
-        Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames, mountDir);
-        deviceMountPointMappingsByIp.forEach((ip, outPair) -> {
-            if (StringUtils.isBlank(outPair.getValue()) || outPair.getKey() != 0) {
-                LOGGER.error("No mount point found '{}' on node with IP {}!", mountDir, ip);
-                throw new TestFailException(format("No mount point found '%s' on node with IP %s!", mountDir, ip));
-            } else if (!StringUtils.containsIgnoreCase(outPair.getValue(), mountDir)) {
-                LOGGER.error("Device incorrectly mounted to '{}' on node with IP {}!", mountDir, ip);
-                throw new TestFailException(format("Device incorrectly mounted to '%s' on node with IP %s!", mountDir, ip));
+        getDeviceMountPointMappings(instanceGroups, hostGroupNames, mountDir).forEach(outcome -> {
+            if (StringUtils.isBlank(outcome.commandOutput()) || !outcome.returnCodeSuccess()) {
+                LOGGER.error("No mount point found '{}' on node with IP {}!", mountDir, outcome.instanceIp());
+                throw new TestFailException(format("No mount point found '%s' on node with IP %s!", mountDir, outcome.instanceIp()));
+            } else if (!StringUtils.containsIgnoreCase(outcome.commandOutput(), mountDir)) {
+                LOGGER.error("Device incorrectly mounted to '{}' on node with IP {}!", mountDir, outcome.instanceIp());
+                throw new TestFailException(format("Device incorrectly mounted to '%s' on node with IP %s!", mountDir, outcome.instanceIp()));
             }
         });
     }
 
-    private Map<String, Pair<Integer, String>> getDeviceMountPointMappingsByIp(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+    private SshCommandOutcomes getDeviceMountPointMappings(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
             String mountDir) {
         String diskMountPointListCmd =
                 "df | grep " + mountDir + " | awk '{print $1,$6}' | " +
                         "sed -e \"s/\\(.*\\) \\(.*\\)/\\\"\\1\\\":\\\"\\2\\\"/\" | paste -s -d ',' | sed 's/.*/{\\0}/'";
-        return getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, diskMountPointListCmd)));
+        return executeOnIps(getInstanceGroupIps(instanceGroups, hostGroupNames, false), diskMountPointListCmd).requireAllExecuted();
     }
 
-    private Map<String, Pair<Integer, String>> getDeviceDiskTypeMappingsByIp(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+    private SshCommandOutcomes getDeviceDiskTypeMappings(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         String diskTypeListCmd =
                 "sudo nvme list -o json | jq -cM '[.Devices[] | {(.DevicePath): .ModelNumber}] | add // {}'";
-        return getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, diskTypeListCmd)));
+        return executeOnIps(getInstanceGroupIps(instanceGroups, hostGroupNames, false), diskTypeListCmd).requireAllExecuted();
     }
 
-    public Map<String, Pair<Integer, String>> executeSshCommandOnHost(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+    public SshCommandOutcomes executeSshCommandOnHost(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
             String sshCommand, boolean publicIp) {
-        return getInstanceGroupIps(instanceGroups, hostGroupNames, publicIp).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
+        return executeOnIps(getInstanceGroupIps(instanceGroups, hostGroupNames, publicIp), sshCommand);
     }
 
-    public Map<String, Pair<Integer, String>> executeSshCommandOnHost(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+    public SshCommandOutcomes executeSshCommandOnHost(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
             String user, String password, String privateKeyFilePath, String sshCommand, boolean publicIp) {
-        return getInstanceGroupIps(instanceGroups, hostGroupNames, publicIp).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, user, password, privateKeyFilePath, sshCommand)));
+        return executeOnIps(getInstanceGroupIps(instanceGroups, hostGroupNames, publicIp), user, password, privateKeyFilePath, sshCommand);
     }
 
-    public Map<String, Pair<Integer, String>> executeSshCommandOnAllHosts(Collection<InstanceGroupV4Response> instanceGroups,
+    public SshCommandOutcomes executeSshCommandOnAllHosts(Collection<InstanceGroupV4Response> instanceGroups,
             String sshCommand, boolean publicIp, String privateKeyFilePath) {
-        return getInstanceIpsFromGroups(instanceGroups, publicIp).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, sshCommand)));
+        return executeOnIps(getAllInstanceIps(instanceGroups, publicIp), "cloudbreak", null, privateKeyFilePath, sshCommand);
     }
 
-    public Map<String, Pair<Integer, String>> executeSshCommandOnHosts(List<String> ipAddresses, String sshCommand) {
-        return ipAddresses.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
+    public SshCommandOutcomes executeSshCommandOnHosts(Collection<String> ipAddresses, String sshCommand) {
+        return executeOnIps(ipAddresses, sshCommand);
     }
 
-    public Map<String, Pair<Integer, String>> executeSshCommandOnHost(Set<InstanceMetaDataResponse> instanceMetaDatas, String sshCommand, boolean publicIp) {
-        return getInstanceMetadataIps(instanceMetaDatas, publicIp).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
-    }
-
-    public Map<String, Pair<Integer, String>> executeSshCommandOnPrimaryGateways(Collection<InstanceGroupV4Response> instanceGroups, String sshCommand,
+    public SshCommandOutcomes executeSshCommandOnPrimaryGateways(Collection<InstanceGroupV4Response> instanceGroups, String sshCommand,
             boolean publicIp) {
-        return getPrimaryGatewayIps(instanceGroups, publicIp).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
+        return executeOnIps(getPrimaryGatewayIps(instanceGroups, publicIp), sshCommand);
     }
 
     public SdxTestDto checkNoOutboundInternetTraffic(SdxTestDto testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
@@ -322,8 +231,8 @@ public class SshJClientActions {
     }
 
     private void checkNoOutboundInternetTraffic(String instanceIp) {
-        Pair<Integer, String> cmdOut = executeSshCommand(instanceIp, "curl --max-time 30 cloudera.com");
-        if (cmdOut.getKey() == 0) {
+        SshCommandOutcome cmdOut = executeSshCommand(instanceIp, "curl --max-time 30 cloudera.com").requireExecuted();
+        if (cmdOut.returnCodeSuccess()) {
             throw new TestFailException("Instance [" + instanceIp + "] has internet connection but shouldn't have!");
         }
     }
@@ -338,21 +247,29 @@ public class SshJClientActions {
 
     private void checkKinitDuringFreeipaUpgrade(String instanceIp) {
         // TODO remove sleep 31 after unbound removal has been done, this is because unbound cached for 30 sec the dns records
-        Pair<Integer, String> cmdOut = executeSshCommand(instanceIp,
+        executeSshCommand(instanceIp,
                 "set -x kdestroy && echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0 " +
-                        "|| sleep 31 && kdestroy && echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0 && klist | grep fakemockuser0");
-        if (cmdOut.getKey() != 0) {
-            String errorMsg = "Kinit wasn't successful on instance [" +
-                    instanceIp + "] during freeipa upgrade! Cmd exit code: " + cmdOut.getKey() + ", Cmd output: " + cmdOut.getValue();
-            LOGGER.error(errorMsg);
-            throw new TestFailException(errorMsg);
-        }
+                        "|| sleep 31 && kdestroy && echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0 && klist | grep fakemockuser0")
+                .requireSuccess("Kinit during freeipa upgrade");
     }
 
+    /**
+     * Executes the command on the instance. SSH connection and authentication failures are returned as an {@link SshCommandOutcome} instead
+     * of being thrown, so the caller decides how to handle them, e.g. with {@link SshCommandOutcome#requireSuccess(String)}.
+     */
     public SshCommandOutcome executeCommand(String instanceIp, String user, String password, String privateKeyFilePath, String command) {
+        if (StringUtils.isBlank(instanceIp)) {
+            throw new TestFailException(format("SSH command [%s] cannot be executed, because the instance IP is blank", command));
+        }
         try (SSHClient sshClient = sshJClientFactory.createSshClient(instanceIp, user, password, privateKeyFilePath)) {
-            Pair<Integer, String> cmdOut = sshJClient.execute(sshClient, command, SshJClient.DEFAULT_COMMAND_TIMEOUT_SEC);
-            return SshCommandOutcome.executed(instanceIp, cmdOut.getKey(), cmdOut.getValue());
+            try {
+                SshCommandOutcome outcome = sshJClient.execute(sshClient, instanceIp, command);
+                Log.log(LOGGER, " Command exit status '%s' and result '%s'. ", outcome.returnCode(), outcome.commandOutput());
+                return outcome;
+            } catch (SocketTimeoutException e) {
+                LOGGER.warn("SSH command [{}] timed out on [{}]. {}", command, instanceIp, e.getMessage());
+                return SshCommandOutcome.timedOut(instanceIp, e);
+            }
         } catch (UserAuthException e) {
             LOGGER.warn("SSH authentication failed on [{}]. {}", instanceIp, e.getMessage());
             return SshCommandOutcome.authFailure(instanceIp, e);
@@ -363,79 +280,47 @@ public class SshJClientActions {
         }
     }
 
-    public Map<String, Pair<Integer, String>> executeCommands(Set<String> ipAddresses, String command) {
-        return ipAddresses.stream()
-                .collect(Collectors.toMap(Function.identity(), ip -> executeCommand(ip, command)));
+    public SshCommandOutcome executeSshCommand(String instanceIp, String command) {
+        return executeCommand(instanceIp, null, null, null, command);
     }
 
-    public Pair<Integer, String> executeCommand(String instanceIP, String command) {
-        try (SSHClient sshClient = sshJClientFactory.createSshClient(instanceIP, null, null, null)) {
-            Pair<Integer, String> cmdOut = sshJClient.execute(sshClient, command, SshJClient.DEFAULT_COMMAND_TIMEOUT_SEC);
-            Log.log(LOGGER, format("Command exit status [%s] and result [%s].", cmdOut.getKey(), cmdOut.getValue()));
-            return cmdOut;
-        } catch (Exception e) {
-            LOGGER.error("SSH fail on [{}] while executing command [{}]. {}", instanceIP, command, e.getMessage());
-            throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + command + "].", e);
-        }
+    private SshCommandOutcomes executeOnIps(Collection<String> instanceIps, String command) {
+        return executeOnIps(instanceIps, null, null, null, command);
     }
 
-    public Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
-        return executeSshCommand(instanceIp, null, null, null, command);
-    }
-
-    private Pair<Integer, String> executeSshCommand(String instanceIp, String user, String password, String command) {
-        return executeSshCommand(instanceIp, user, password, null, command);
-    }
-
-    private Pair<Integer, String> executeSshCommand(String instanceIp, String user, String password, String privateKeyFilePath, String command) {
-        try (SSHClient sshClient = sshJClientFactory.createSshClient(instanceIp, user, password, privateKeyFilePath)) {
-            Pair<Integer, String> cmdOut = sshJClient.execute(sshClient, command, SshJClient.DEFAULT_COMMAND_TIMEOUT_SEC);
-            Log.log(LOGGER, " Command exit status '%s' and result '%s'. ", cmdOut.getKey(), cmdOut.getValue());
-            return cmdOut;
-        } catch (Exception e) {
-            LOGGER.error("SSH fail on [{}] while executing command [{}]", instanceIp, command);
-            throw new TestFailException(" SSH fail on [" + instanceIp + "] while executing command [" + command + "].", e);
-        }
+    private SshCommandOutcomes executeOnIps(Collection<String> instanceIps, String user, String password, String privateKeyFilePath, String command) {
+        return new SshCommandOutcomes(instanceIps.stream()
+                .distinct()
+                .map(ip -> executeCommand(ip, user, password, privateKeyFilePath, command))
+                .toList());
     }
 
     private long executefileListCommand(String instanceIP, String user, String password, String fileListCommand) {
-        AtomicLong quantity = new AtomicLong(0);
+        SshCommandOutcome cmdOut = executeCommand(instanceIP, user, password, null, fileListCommand).requireExecuted("Listing files");
 
-        try {
-            Pair<Integer, String> cmdOut = executeSshCommand(instanceIP, user, password, fileListCommand);
-
-            List<String> cmdOutputValues = Stream.of(cmdOut.getValue().split("[\\r\\n\\t]")).filter(Objects::nonNull).toList();
-            boolean fileFound = cmdOutputValues.stream()
-                    .anyMatch(outputValue -> outputValue.strip().startsWith("/"));
-            String foundFilePath = cmdOutputValues.stream()
-                    .filter(outputValue -> outputValue.strip().startsWith("/")).findFirst().orElse(null);
-            Log.log(LOGGER, format(" The file is present '%s' at '%s' path. ", fileFound, foundFilePath));
-
-            quantity.set(cmdOutputValues.stream()
-                    .filter(outputValue -> outputValue.strip().startsWith("/")).count());
-        } catch (Exception e) {
-            LOGGER.error("SSH fail on '{}' host while running command: [{}]", instanceIP, fileListCommand);
-            throw new TestFailException(format(" SSH fail on '%s' host while running command: [%s]! ", instanceIP, fileListCommand), e);
-        }
-        return quantity.get();
+        List<String> foundFilePaths = Stream.of(cmdOut.commandOutput().split("[\\r\\n\\t]"))
+                .filter(outputValue -> outputValue.strip().startsWith("/"))
+                .toList();
+        Log.log(LOGGER, format(" The file is present '%s' at '%s' path. ", !foundFilePaths.isEmpty(), foundFilePaths.stream().findFirst().orElse(null)));
+        return foundFilePaths.size();
     }
 
-    private <T extends CloudbreakTestDto> T eventStatusesNotOkValidation(T testDto, Map<String, Pair<Integer, String>> statusReportByIp,
+    private <T extends CloudbreakTestDto> T eventStatusesNotOkValidation(T testDto, SshCommandOutcomes statusReports,
             String acceptableNokEventName) {
-        for (Entry<String, Pair<Integer, String>> statusReport : statusReportByIp.entrySet()) {
-            List<String> statusesNotOk = new Json(statusReport.getValue().getValue()).getMap().entrySet().stream()
+        for (SshCommandOutcome statusReport : statusReports) {
+            List<String> statusesNotOk = new Json(statusReport.commandOutput()).getMap().entrySet().stream()
                     .filter(status -> String.valueOf(status.getValue()).contains("NOK"))
                     .map(Entry::getKey).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(statusesNotOk)) {
                 statusesNotOk.forEach(event -> {
                     if (StringUtils.isNotBlank(acceptableNokEventName) && StringUtils.containsIgnoreCase(event, acceptableNokEventName)) {
                         Log.log(LOGGER, format(" Found '%s' status is not OK at '%s' instance. However this is acceptable!", acceptableNokEventName,
-                                statusReport.getKey()));
+                                statusReport.instanceIp()));
                     } else {
                         Log.error(LOGGER, format(" There is 'Not OK' status %s is present on '%s' instance! ", event,
-                                statusReport.getKey()));
+                                statusReport.instanceIp()));
                         throw new TestFailException(format("There is 'Not OK' status %s is present on '%s' instance!", event,
-                                statusReport.getKey()));
+                                statusReport.instanceIp()));
                     }
                 });
             }
@@ -460,12 +345,10 @@ public class SshJClientActions {
             List<String> acceptableNokNames) {
 
         String monitoringStatusCommand = format("sudo cdp-doctor monitoring status -m %s --format json", StringUtils.join(verifyMetricNames, ","));
-        Map<String, Pair<Integer, String>> monitoringStatusReportByIp = instanceIps.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, monitoringStatusCommand)));
-        for (Entry<String, Pair<Integer, String>> monitoringStatusReport : monitoringStatusReportByIp.entrySet()) {
+        for (SshCommandOutcome monitoringStatusReport : executeOnIps(instanceIps, monitoringStatusCommand).requireAllExecuted()) {
             try {
                 List<String> statusCategories = List.of("services", "scrapping", "metrics");
-                Map<String, Map<String, String>> fetchedMonitoringStatus = JsonUtil.readValue(monitoringStatusReport.getValue().getValue(),
+                Map<String, Map<String, String>> fetchedMonitoringStatus = JsonUtil.readValue(monitoringStatusReport.commandOutput(),
                         new TypeReference<Map<String, Map<String, String>>>() {
                         });
                 statusCategories.forEach(statusCategory -> {
@@ -479,12 +362,12 @@ public class SshJClientActions {
                             if (acceptableNokNames.stream()
                                     .anyMatch(nokAccepted -> nokAccepted.equalsIgnoreCase(service))) {
                                 Log.log(LOGGER, format(" Found Monitoring '%s' where %s' is 'Not OK' at '%s' instance. " +
-                                        "However this is acceptable! ", statusCategory.toUpperCase(Locale.ROOT), service, monitoringStatusReport.getKey()));
+                                        "However this is acceptable! ", statusCategory.toUpperCase(Locale.ROOT), service, monitoringStatusReport.instanceIp()));
                             } else {
                                 Log.error(LOGGER, format(" Found Monitoring '%s' where '%s' is 'Not OK' at '%s' instance! ",
-                                        statusCategory.toUpperCase(Locale.ROOT), service, monitoringStatusReport.getKey()));
+                                        statusCategory.toUpperCase(Locale.ROOT), service, monitoringStatusReport.instanceIp()));
                                 throw new TestFailException(format("Found Monitoring '%s' where '%s' is 'Not OK' at '%s' instance!",
-                                        statusCategory.toUpperCase(Locale.ROOT), service, monitoringStatusReport.getKey()));
+                                        statusCategory.toUpperCase(Locale.ROOT), service, monitoringStatusReport.instanceIp()));
                             }
                         });
                     }
@@ -499,11 +382,9 @@ public class SshJClientActions {
 
     private void createHugheFilesForFilesystemFreeBytesMetric(List<String> instanceIps) {
         String listDisk = "sudo df -h /";
-        String allocateBigFiles = "sudo seq -f %%04.0f 4 | xargs -I '{}' fallocate -l 5G test_file'{}'.txt";
+        String allocateBigFiles = "sudo seq -f %04.0f 4 | xargs -I '{}' fallocate -l 5G test_file'{}'.txt";
 
-        instanceIps.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip,
-                        StringUtils.join(List.of(listDisk, allocateBigFiles, listDisk), " && "))));
+        executeOnIps(instanceIps, StringUtils.join(List.of(listDisk, allocateBigFiles, listDisk), " && ")).requireAllExecuted();
 
         waitingFor(Duration.ofMinutes(1), "Waiting for Monitoring 'node_filesystem_free_bytes' metric to be generated has been interrupted");
     }
@@ -512,9 +393,7 @@ public class SshJClientActions {
         String removeAllocatedFiles = "sudo rm -rf test_file{0001..0004}.txt";
         String listDisk = "sudo df -h /";
 
-        instanceIps.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip,
-                        StringUtils.join(List.of(listDisk, removeAllocatedFiles, listDisk), " && "))));
+        executeOnIps(instanceIps, StringUtils.join(List.of(listDisk, removeAllocatedFiles, listDisk), " && ")).requireAllExecuted();
 
         waitingFor(Duration.ofMinutes(1), "Waiting for Monitoring 'node_filesystem_free_bytes' metric to be generated has been interrupted");
     }
@@ -545,12 +424,10 @@ public class SshJClientActions {
     private List<String> checkRequestSignerSuccessCount(List<String> instanceIps) {
         List<String> requestSignerSuccessCount = new ArrayList<>();
         String monitoringStatusCommand = "sudo cdp-doctor monitoring status -m node_filesystem_free_bytes --format json";
-        Map<String, Pair<Integer, String>> monitoringStatusReportByIp = instanceIps.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, monitoringStatusCommand)));
-        for (Entry<String, Pair<Integer, String>> monitoringStatusReport : monitoringStatusReportByIp.entrySet()) {
+        for (SshCommandOutcome monitoringStatusReport : executeOnIps(instanceIps, monitoringStatusCommand).requireAllExecuted()) {
             try {
                 String requestSignerCategory = "request-signer";
-                Map<String, Map<String, String>> fetchedMonitoringStatus = JsonUtil.readValue(monitoringStatusReport.getValue().getValue(),
+                Map<String, Map<String, String>> fetchedMonitoringStatus = JsonUtil.readValue(monitoringStatusReport.commandOutput(),
                         new TypeReference<Map<String, Map<String, String>>>() {
                         });
                 List<String> successCount = fetchedMonitoringStatus.entrySet().stream()
@@ -561,23 +438,23 @@ public class SshJClientActions {
                         .toList();
                 if (!successCount.isEmpty()) {
                     Log.log(LOGGER, format(" Monitoring Request Signer success count is '%s' at '%s' instance. ", successCount,
-                            monitoringStatusReport.getKey()));
+                            monitoringStatusReport.instanceIp()));
                     successCount.forEach(count -> {
                         if (Integer.parseInt(count) > 0) {
                             Log.log(LOGGER, format(" Found Monitoring Request Signer success count is '%s' at '%s' instance! ", count,
-                                    monitoringStatusReport.getKey()));
+                                    monitoringStatusReport.instanceIp()));
                             requestSignerSuccessCount.add(count);
                         } else {
                             Log.error(LOGGER, format(" Monitoring Request Signer success count has not been generated at '%s' instance! ",
-                                    monitoringStatusReport.getKey()));
+                                    monitoringStatusReport.instanceIp()));
                             throw new TestFailException(format("Monitoring Request Signer success count has not been generated at '%s' instance!",
-                                    monitoringStatusReport.getKey()));
+                                    monitoringStatusReport.instanceIp()));
                         }
                     });
                 } else {
-                    Log.error(LOGGER, format(" Cannot find Monitoring Request Signer success count at '%s' instance! ", monitoringStatusReport.getKey()));
+                    Log.error(LOGGER, format(" Cannot find Monitoring Request Signer success count at '%s' instance! ", monitoringStatusReport.instanceIp()));
                     throw new TestFailException(format("Cannot find Monitoring Request Signer success count at '%s' instance!",
-                            monitoringStatusReport.getKey()));
+                            monitoringStatusReport.instanceIp()));
                 }
             } catch (IOException | IllegalStateException e) {
                 Log.error(LOGGER, " Cannot parse Common Monitoring Status Report JSON! ");
@@ -616,21 +493,13 @@ public class SshJClientActions {
             String configFilePath = service.getValue();
             String readConfigCommand = "sudo cat " + configFilePath;
 
-            Map<String, Pair<Integer, String>> configContentByIp = instanceIps.stream()
-                    .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, readConfigCommand)));
+            SshCommandOutcomes configContents = executeOnIps(instanceIps, readConfigCommand)
+                    .requireAllSucceeded(format("Reading '%s' config file", serviceName));
 
-            for (Entry<String, Pair<Integer, String>> configEntry : configContentByIp.entrySet()) {
-                String instanceIp = configEntry.getKey();
-                Pair<Integer, String> result = configEntry.getValue();
+            for (SshCommandOutcome result : configContents) {
+                String instanceIp = result.instanceIp();
 
-                if (result.getKey() != 0) {
-                    Log.error(LOGGER, format("Failed to read '%s' config file at '%s' instance! Exit code: %d, Error: %s",
-                            serviceName, instanceIp, result.getKey(), result.getValue()));
-                    throw new TestFailException(format("Failed to read '%s' config file at '%s' instance!",
-                            serviceName, instanceIp));
-                }
-
-                String configContent = result.getValue();
+                String configContent = result.commandOutput();
                 encryptionProfileAssertions.validateCipherSuitesConfiguration(serviceName, configContent, instanceIp);
                 Log.log(LOGGER, format("%s cipher suites configuration validated successfully at '%s' instance!", serviceName, instanceIp));
             }
@@ -657,10 +526,9 @@ public class SshJClientActions {
 
     private <T extends CloudbreakTestDto> T checkCdpNetworkStatus(T testDto, List<String> instanceIps) {
         String networkStatusCommand = "sudo cdp-doctor network status --format json";
-        Map<String, Pair<Integer, String>> networkStatusReportByIp = instanceIps.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, networkStatusCommand)));
+        SshCommandOutcomes networkStatusReports = executeOnIps(instanceIps, networkStatusCommand).requireAllExecuted();
 
-        eventStatusesNotOkValidation(testDto, networkStatusReportByIp, null);
+        eventStatusesNotOkValidation(testDto, networkStatusReports, null);
         return testDto;
     }
 
@@ -697,8 +565,8 @@ public class SshJClientActions {
                 fi; \
                 echo "$STATUS" | jq -r '.. | objects | to_entries | map(select(.value == "NOK"))[] | .key'\
                 """;
-        Map<String, Pair<Integer, String>> loggingAgentNokStatusReportByIp = instanceIps.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, loggingAgentNokStatusCommand)));
+        SshCommandOutcomes loggingAgentNokStatusReports = executeOnIps(instanceIps, loggingAgentNokStatusCommand)
+                .requireAllSucceeded("Logging agent status check");
 
         // CB-34157: the FreeIPA instances of our Azure E2E environments cannot reach public endpoints, so the S3 addresses that cdp-doctor probes for
         // these two statuses are unreachable on them. The Data Lake and the Data Hub instances of the same environments do reach those addresses, so
@@ -706,21 +574,17 @@ public class SshJClientActions {
         Set<String> skippedStatuses = freeIpaInstances && CloudPlatform.AZURE.name().equalsIgnoreCase(commonCloudProperties.getCloudProvider())
                 ? AZURE_SKIPPED_FREEIPA_LOGGING_AGENT_STATUSES
                 : Set.of();
-        for (Entry<String, Pair<Integer, String>> statusReport : loggingAgentNokStatusReportByIp.entrySet()) {
-            if (statusReport.getValue().getKey() != 0) {
-                throw new TestFailException(format("Logging agent status cannot be checked on '%s' instance: %s", statusReport.getKey(),
-                        statusReport.getValue().getValue()));
-            }
-            String loggingAgentNotOkStatuses = StringUtils.defaultString(statusReport.getValue().getValue()).lines()
+        for (SshCommandOutcome statusReport : loggingAgentNokStatusReports) {
+            String loggingAgentNotOkStatuses = StringUtils.defaultString(statusReport.commandOutput()).lines()
                     .map(StringUtils::trimToEmpty)
                     .filter(StringUtils::isNotEmpty)
                     .filter(status -> !skippedStatuses.contains(status))
                     .collect(Collectors.joining(", "));
             if (StringUtils.isNotBlank(loggingAgentNotOkStatuses)) {
                 Log.error(LOGGER, format(" There is 'Not OK' logging agent status %s is present on '%s' instance! ", loggingAgentNotOkStatuses,
-                        statusReport.getKey()));
+                        statusReport.instanceIp()));
                 throw new TestFailException(format("There is 'Not OK' logging agent status %s is present on '%s' instance!",
-                        loggingAgentNotOkStatuses, statusReport.getKey()));
+                        loggingAgentNotOkStatuses, statusReport.instanceIp()));
             }
         }
         return testDto;
@@ -741,16 +605,17 @@ public class SshJClientActions {
         statusCategories.forEach(statusCategory -> {
             String cdpServiceStatusCommand =
                     format("sudo cdp-doctor service status --format json | jq -r '.%s[] | \"\\(.name) \\(.status)\"'", statusCategory);
-            Map<String, Pair<Integer, String>> cdpServiceStatusReportByIp = instanceIps.stream()
-                    .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, cdpServiceStatusCommand)));
-
-            for (Entry<String, Pair<Integer, String>> statusReport : cdpServiceStatusReportByIp.entrySet()) {
-                String servicesStatuses = statusReport.getValue().getValue();
-                if (StringUtils.containsIgnoreCase(" NOK", servicesStatuses)) {
+            for (SshCommandOutcome statusReport : executeOnIps(instanceIps, cdpServiceStatusCommand).requireAllExecuted()) {
+                String servicesStatuses = statusReport.commandOutput();
+                if (!statusReport.returnCodeSuccess() || StringUtils.isBlank(servicesStatuses)) {
+                    throw new TestFailException(format("CDP Services '%s' status cannot be checked on '%s' instance: %s", statusCategory,
+                            statusReport.instanceIp(), servicesStatuses));
+                }
+                if (StringUtils.containsIgnoreCase(servicesStatuses, " NOK")) {
                     Log.error(LOGGER, format(" There is 'Not OK' CDP Services status %s is present on '%s' instance! ", servicesStatuses,
-                            statusReport.getKey()));
+                            statusReport.instanceIp()));
                     throw new TestFailException(format("There is 'Not OK' CDP Services status %s is present on '%s' instance!", servicesStatuses,
-                            statusReport.getKey()));
+                            statusReport.instanceIp()));
                 }
             }
         });
@@ -779,68 +644,18 @@ public class SshJClientActions {
     private <T extends CloudbreakTestDto> T checkSystemctlServiceStatus(T testDto, List<String> instanceIps, Map<String, Boolean> serviceStatusesByName) {
         serviceStatusesByName.forEach((serviceName, serviceStatus) -> {
             String systemctlServiceStatusCommand = format("systemctl is-active %s", serviceName);
-            Map<String, Pair<Integer, String>> systemctlServiceStatusByIp = instanceIps.stream()
-                    .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, systemctlServiceStatusCommand)));
-            systemctlServiceStatusByIp.forEach((ip, result) -> {
-                String status = result.getValue().trim();
+            SshCommandOutcomes systemctlServiceStatuses = executeOnIps(instanceIps, systemctlServiceStatusCommand).requireAllExecuted();
+            systemctlServiceStatuses.forEach(result -> {
+                String status = result.commandOutput().trim();
                 if (serviceStatus != "active".equals(status)) {
                     String message = format(" systemctl service %s status on node %s is %s, but expected to be %s ",
-                            serviceName, ip, status, serviceStatus ? "active" : "not active");
+                            serviceName, result.instanceIp(), status, serviceStatus ? "active" : "not active");
                     Log.error(LOGGER, message);
                     throw new TestFailException(message);
                 }
             });
         });
         return testDto;
-    }
-
-    public Map<String, Pair<Integer, String>> getSSLModeForExternalDBByIp(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
-            String privateKeyFilePath) {
-        String dbSslConnectionUrlCmd = "sudo cat /srv/pillar/cloudera-manager/database.sls | grep -E 'connectionURL\":'";
-        return getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, dbSslConnectionUrlCmd)));
-    }
-
-    public List<String> executeSshCommandsOnInstances(List<?> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
-            String command) {
-        List<String> instanceIps = new ArrayList<>();
-        if (!instanceGroups.isEmpty() && instanceGroups.getFirst() instanceof InstanceGroupResponse) {
-            instanceIps = getInstanceGroupIps((List<InstanceGroupResponse>) instanceGroups, hostGroupNames);
-        } else if (!instanceGroups.isEmpty() && instanceGroups.getFirst() instanceof InstanceGroupV4Response) {
-            instanceIps = getInstanceGroupIps((List<InstanceGroupV4Response>) instanceGroups, hostGroupNames, false);
-        }
-        return instanceIps.stream()
-                .map(ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, command).getValue().toLowerCase(Locale.ROOT))
-                .toList();
-    }
-
-    private List<String> getInstanceGroupIps(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames) {
-        List<String> instanceIPs = new ArrayList<>();
-
-        hostGroupNames.forEach(hostGroupName -> {
-            List<String> instanceGroupIpList = instanceGroups.stream()
-                    .filter(instanceGroup -> instanceGroup.getName().contains(hostGroupName.toLowerCase(Locale.ROOT)))
-                    .map(InstanceGroupResponse::getMetaData)
-                    .filter(Objects::nonNull)
-                    .flatMap(Collection::stream)
-                    .map(x -> isPublicIpAvailable(x) ? x.getPublicIp() : x.getPrivateIp())
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            assert !instanceGroupIpList.isEmpty();
-            LOGGER.info("The selected Instance Group [{}] and the available IPs [{}].",
-                    hostGroupName, instanceGroupIpList);
-            instanceIPs.addAll(instanceGroupIpList);
-        });
-
-        return instanceIPs;
-    }
-
-    private boolean isPublicIpAvailable(InstanceMetaDataResponse instanceMetaData) {
-        return StringUtils.isNotEmpty(instanceMetaData.getPublicIp()) && !NOT_AVAILABLE.equals(instanceMetaData.getPublicIp());
-    }
-
-    private boolean isPublicIpAvailable(InstanceMetaDataV4Response instanceMetaData) {
-        return StringUtils.isNotEmpty(instanceMetaData.getPublicIp()) && !NOT_AVAILABLE.equals(instanceMetaData.getPublicIp());
     }
 
     public void validateDnsZoneAndCnameEntryInFreeIpa(FreeIpaTestDto freeIpaTestDto, TestContext tc, FreeIpaClient freeipaClient, String dnsZone,
@@ -854,15 +669,8 @@ public class SshJClientActions {
         List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
                 freeIpaTestDto.getTestContext());
 
-        for (String ip : instanceIps) {
-            for (String cmd : cmds) {
-                Pair<Integer, String> results = executeSshCommand(ip, "cloudbreak", null, commonCloudProperties.getDefaultPrivateKeyFile(), cmd);
-                LOGGER.info("Result of ssh: {}", results);
-                if (results.getKey() != 0) {
-                    throw new TestFailException(String.format("[%s] Failure after 'ipa dnsrecord-find %s %s' command:\n%s", ip, dnsZone, cName,
-                            results.getValue()));
-                }
-            }
+        for (String cmd : cmds) {
+            executeOnIps(instanceIps, cmd).requireAllSucceeded(format("'ipa dnsrecord-find %s %s' check", dnsZone, cName));
         }
     }
 }

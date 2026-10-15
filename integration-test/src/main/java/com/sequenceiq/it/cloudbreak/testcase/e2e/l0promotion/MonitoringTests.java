@@ -31,7 +31,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -49,7 +49,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
     private DistroXTestClient distroXTestClient;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private SshJClientActions sshJClientActions;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -95,10 +95,10 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                     .withEnvironment()
                 .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> {
-                    sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
+                    sshJClientActions.checkMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
                             List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
-                    sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getEnvironmentCrn(), client);
-                    sshJUtil.checkCipherSuiteConfiguration(testDto, testDto.getEnvironmentCrn(), client);
+                    sshJClientActions.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getEnvironmentCrn(), client);
+                    sshJClientActions.checkCipherSuiteConfiguration(testDto, testDto.getEnvironmentCrn(), client);
                     return testDto;
                 })
                 .given(EnvironmentTestDto.class)
@@ -142,13 +142,13 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
-                .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getEnvironmentCrn(), client))
-                .then((tc, testDto, client) -> sshJUtil.checkLoggingAgentStatus(testDto, testDto.getEnvironmentCrn(), client))
-                .then((tc, testDto, client) -> sshJUtil.checkCdpServiceStatus(testDto, testDto.getEnvironmentCrn(), client))
+                .then((tc, testDto, client) -> sshJClientActions.checkNetworkStatus(testDto, testDto.getEnvironmentCrn(), client))
+                .then((tc, testDto, client) -> sshJClientActions.checkLoggingAgentStatus(testDto, testDto.getEnvironmentCrn(), client))
+                .then((tc, testDto, client) -> sshJClientActions.checkCdpServiceStatus(testDto, testDto.getEnvironmentCrn(), client))
                 .then((tc, testDto, client) -> {
-                    sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
+                    sshJClientActions.checkMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
                             List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
-                    sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getEnvironmentCrn(), client);
+                    sshJClientActions.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getEnvironmentCrn(), client);
                     return testDto;
                 })
                 .given(FreeIpaRotationTestDto.class)
@@ -164,16 +164,16 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
-                .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                        List.of(MASTER.getName())))
-                .then((tc, testDto, client) -> sshJUtil.checkLoggingAgentStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                        List.of(MASTER.getName())))
-                .then((tc, testDto, client) -> sshJUtil.checkCdpServiceStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                        List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJClientActions.checkNetworkStatus(testDto,
+                        testDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJClientActions.checkLoggingAgentStatus(testDto,
+                        testDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJClientActions.checkCdpServiceStatus(testDto,
+                        testDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
-                    sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                    sshJClientActions.checkMonitoringStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
                             List.of(MASTER.getName()), List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
-                    sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                    sshJClientActions.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
                             List.of(MASTER.getName()));
                     return testDto;
                 })
@@ -186,13 +186,16 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get())
-                .then((tc, testDto, client) -> sshJUtil.checkNetworkStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
-                .then((tc, testDto, client) -> sshJUtil.checkLoggingAgentStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
-                .then((tc, testDto, client) -> sshJUtil.checkCdpServiceStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJClientActions.checkNetworkStatus(testDto, testDto.getResponse().getInstanceGroups(),
+                        List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJClientActions.checkLoggingAgentStatus(testDto, testDto.getResponse().getInstanceGroups(),
+                        List.of(MASTER.getName())))
+                .then((tc, testDto, client) -> sshJClientActions.checkCdpServiceStatus(testDto, testDto.getResponse().getInstanceGroups(),
+                        List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
-                    sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getInstanceGroups(),
+                    sshJClientActions.checkMonitoringStatus(testDto, testDto.getResponse().getInstanceGroups(),
                             List.of(MASTER.getName()), List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
-                    sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getResponse().getInstanceGroups(),
+                    sshJClientActions.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getResponse().getInstanceGroups(),
                             List.of(MASTER.getName()));
                     return testDto;
                 })

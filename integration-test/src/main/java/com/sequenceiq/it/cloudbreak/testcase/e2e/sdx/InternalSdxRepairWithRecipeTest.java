@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.recipe.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -47,7 +47,6 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.SecretRotationCheckUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -76,9 +75,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     private RecipeTestClient recipeTestClient;
 
     @Inject
-    private SshJUtil sshJUtil;
-
-    @Inject
     private SdxUtil sdxUtil;
 
     @Inject
@@ -86,6 +82,9 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
     @Inject
     private SecretRotationCheckUtil secretRotationCheckUtil;
+
+    @Inject
+    private RecipeTestAssertion recipeTestAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -146,7 +145,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), FILEPATH, FILENAME, 1, sshJUtil));
+                .then(recipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), FILEPATH, FILENAME, 1));
     }
 
     private void secretRotation(TestContext testContext, String cloudProvider) {
@@ -208,7 +207,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), FILEPATH, FILENAME, 1, sshJUtil))
+                .then(recipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), FILEPATH, FILENAME, 1))
                 .validate();
     }
 }

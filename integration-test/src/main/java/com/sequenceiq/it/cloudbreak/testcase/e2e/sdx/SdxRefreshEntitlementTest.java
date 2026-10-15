@@ -3,11 +3,9 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Collection;
-import java.util.Map;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -24,6 +22,8 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -101,14 +101,14 @@ public class SdxRefreshEntitlementTest extends PreconditionSdxE2ETest {
     }
 
     private void checkPrometheusServiceStatus(Collection<InstanceGroupV4Response> instanceGroupV4Responses, String serviceStatus) {
-        Map<String, Pair<Integer, String>> sshCommandResponse = sshJClientActions.executeSshCommandOnPrimaryGateways(instanceGroupV4Responses,
-                PROMETHEUS_SERVICE_STATUS_COMMAND, false);
-        boolean prometheusServiceStatusMatch = sshCommandResponse.values().stream()
-                .map(Map.Entry::getValue)
+        SshCommandOutcomes sshCommandOutcomes = sshJClientActions.executeSshCommandOnPrimaryGateways(
+                instanceGroupV4Responses, PROMETHEUS_SERVICE_STATUS_COMMAND, false).requireAllExecuted();
+        boolean prometheusServiceStatusMatch = sshCommandOutcomes.stream()
+                .map(SshCommandOutcome::commandOutput)
                 .allMatch(status -> status.startsWith(serviceStatus));
         if (!prometheusServiceStatusMatch) {
             throw new TestFailException(String.format("Prometheus service is not '%s' on all gateway nodes. " +
-                    "Checks: %s", serviceStatus, sshCommandResponse));
+                    "Checks: %s", serviceStatus, sshCommandOutcomes));
         }
     }
 }

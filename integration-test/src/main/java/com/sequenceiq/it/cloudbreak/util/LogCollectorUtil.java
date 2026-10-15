@@ -72,8 +72,14 @@ public class LogCollectorUtil {
             if (!StringUtils.isEmpty(statusReason) && statusReason.contains(issue)) {
                 for (String logFilePath : LOG_FILES_TO_COLLECT_ON_ISSUE.get(issue)) {
                     for (String ipAddress : ipAddresses) {
-                        sshJClientActions.executeSshCommand(ipAddress, "sudo mkdir -p " + TMP_LOGS
-                                + "; sudo rsync -aR " + logFilePath + " " + TMP_LOGS + "/" + "; sudo chown -R cloudbreak:cloudbreak " + TMP_LOGS);
+                        try {
+                            sshJClientActions.executeSshCommand(ipAddress, "sudo mkdir -p " + TMP_LOGS
+                                    + "; sudo rsync -aR " + logFilePath + " " + TMP_LOGS + "/" + "; sudo chown -R cloudbreak:cloudbreak " + TMP_LOGS)
+                                    .requireExecuted("Staging " + logFilePath + " for download");
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to collect {} from host {}. Reason: {}", logFilePath, ipAddress, e.getMessage(), e);
+                            continue;
+                        }
                         try (SSHClient sshClient = sshJClientFactory.createSshClient(ipAddress, null, null, null)) {
                             String downloadPath = workingDirectory + "/debug-logs/" + ipAddress + logFilePath;
                             FileUtils.createParentDirectories(new File(downloadPath));

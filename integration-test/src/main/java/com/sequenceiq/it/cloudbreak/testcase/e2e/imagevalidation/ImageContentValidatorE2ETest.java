@@ -5,14 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -22,14 +20,13 @@ import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2EWithReusableResourcesTest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
@@ -49,9 +46,6 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
 
     @Inject
     private SdxTestClient sdxTestClient;
-
-    @Inject
-    private CommonCloudProperties commonCloudProperties;
 
     @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
@@ -142,14 +136,12 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
 
         testContext.given(SdxTestDto.class)
             .then((tc, testDto, client) -> {
-                Map<String, Pair<Integer, String>> results = executeCommandOnInstanceGroup(
-                        testContext.get(SdxTestDto.class), "python3 --version");
+                SshCommandOutcomes results = executeCommandOnInstanceGroup(testContext.get(SdxTestDto.class), "python3 --version");
 
                 LOGGER.info("Python Versions reported by hosts:");
-                results.forEach((key, value) -> {
-                    assertEquals(0, value.getLeft());
-                    LOGGER.info("Host {} has {}", key, value.getRight());
-                    assertEquals(getDefaultPythonForOS(), extractSemanticVersion(value.getRight()));
+                results.forEach(result -> {
+                    LOGGER.info("Host {} has {}", result.instanceIp(), result.commandOutput());
+                    assertEquals(getDefaultPythonForOS(), extractSemanticVersion(result.commandOutput()));
                 });
 
                 return testDto;
@@ -160,14 +152,12 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
 
         testContext.given(SdxTestDto.class)
                 .then((tc, testDto, client) -> {
-                    Map<String, Pair<Integer, String>> results = executeCommandOnInstanceGroup(
-                            testContext.get(SdxTestDto.class), "java -version");
+                    SshCommandOutcomes results = executeCommandOnInstanceGroup(testContext.get(SdxTestDto.class), "java -version");
 
                     LOGGER.info("Java Versions reported by hosts:");
-                    results.forEach((key, value) -> {
-                        assertEquals(0, value.getLeft());
-                        LOGGER.info("Host {} has {}", key, value.getRight());
-                        String javaVersion = extractSemanticVersion(value.getRight());
+                    results.forEach(result -> {
+                        LOGGER.info("Host {} has {}", result.instanceIp(), result.commandOutput());
+                        String javaVersion = extractSemanticVersion(result.commandOutput());
                         assertNotNull(javaVersion);
                         assertThat(javaVersion).startsWith(getDefaultJavaForImage());
                     });
@@ -180,14 +170,12 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
 
         testContext.given(SdxTestDto.class)
                 .then((tc, testDto, client) -> {
-                    Map<String, Pair<Integer, String>> results = executeCommandOnInstanceGroup(
-                            testContext.get(SdxTestDto.class), "cat /etc/redhat-release");
+                    SshCommandOutcomes results = executeCommandOnInstanceGroup(testContext.get(SdxTestDto.class), "cat /etc/redhat-release");
 
                     LOGGER.info("OS versions reported by hosts:");
-                    results.forEach((key, value) -> {
-                        assertEquals(0, value.getLeft());
-                        LOGGER.info("Host {} has {}", key, value.getRight());
-                        String osVersion = extractSemanticVersion(value.getRight());
+                    results.forEach(result -> {
+                        LOGGER.info("Host {} has {}", result.instanceIp(), result.commandOutput());
+                        String osVersion = extractSemanticVersion(result.commandOutput());
                         assertNotNull(osVersion);
                         assertThat(osVersion).startsWith(getExpectedOsVersionForImage());
                     });
@@ -238,31 +226,10 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
         };
     }
 
-    // Note: right now this is not working on FreeIPA instances, but fixing it is low priority, so for now this is left
-    // as is.
-    private void executeCommandOnInstances(FreeIpaTestDto freeIpaTestDto, String cmd) {
-
-        for (String ip : freeIpaTestDto.getAllInstanceIps()) {
-            LOGGER.info("Executing command on instance with IP {}", ip);
-            LOGGER.info("Python version on host {} is {}.", ip, sshJClientActions.executeSshCommand(ip, cmd));
-        }
-    }
-
     // Note: sshjClientActions has a lot of utility methods to check stuff - new functions should be probably
     // added there too instead of implementing them here. That way they could be reusable...
-    private Map<String, Pair<Integer, String>> executeCommandOnInstanceGroup(SdxTestDto sdxTestDto, String cmd) {
-        try {
-            Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommandOnHost(
-                    sdxTestDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(HostGroupType.MASTER.getName()),
-                    "cloudbreak", null, commonCloudProperties.getDefaultPrivateKeyFile(), cmd, false);
-            // We're validation that none of the hosts has returned a non-0 error code for the command
-            results.forEach((key, value) -> {
-                assertEquals(0, value.getLeft());
-            });
-            return results;
-        } catch (Exception e) {
-            LOGGER.error("Command execution failed with unexpected error", e);
-            throw new TestFailException("Command execution failed with unexpected error: " + e.getMessage(), e);
-        }
+    private SshCommandOutcomes executeCommandOnInstanceGroup(SdxTestDto sdxTestDto, String cmd) {
+        return sshJClientActions.executeSshCommandOnHost(sdxTestDto.getResponse().getStackV4Response().getInstanceGroups(),
+                List.of(HostGroupType.MASTER.getName()), cmd, false).requireAllSucceeded("Executing '" + cmd + "'");
     }
 }

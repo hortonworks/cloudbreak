@@ -8,7 +8,7 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.recipe.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -16,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
 public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
 
@@ -27,10 +26,10 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
     private UmsTestClient umsTestClient;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private ClouderaManagerUtil clouderaManagerUtil;
 
     @Inject
-    private ClouderaManagerUtil clouderaManagerUtil;
+    private RecipeTestAssertion recipeTestAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -56,7 +55,7 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
 
         testContext
                 .given(SdxInternalTestDto.class)
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1, sshJUtil))
+                .then(recipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1))
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerKnoxIDBrokerRoleConfigGroups(testDto, tc))
                 .validate();
     }

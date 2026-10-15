@@ -1,48 +1,48 @@
 package com.sequenceiq.it.cloudbreak.preflight;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
-import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sun.net.httpserver.HttpServer;
 
-public class FreeipaCatalogAvailabilityCheckTest {
+@ExtendWith(MockitoExtension.class)
+class FreeipaCatalogAvailabilityCheckTest {
 
+    @Mock
     private CommonCloudProperties commonCloudProperties;
 
+    @Spy
+    private ReachabilityRestTemplateFactory reachabilityRestTemplateFactory = new ReachabilityRestTemplateFactory();
+
+    @InjectMocks
     private FreeipaCatalogAvailabilityCheck underTest;
 
     private HttpServer httpServer;
 
-    @BeforeMethod
-    public void setUp() {
-        commonCloudProperties = mock(CommonCloudProperties.class);
-
-        underTest = new FreeipaCatalogAvailabilityCheck();
-        ReflectionTestUtils.setField(underTest, "commonCloudProperties", commonCloudProperties);
-        ReflectionTestUtils.setField(underTest, "reachabilityRestTemplateFactory", new ReachabilityRestTemplateFactory());
-    }
-
-    @AfterMethod
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         if (httpServer != null) {
             httpServer.stop(0);
         }
     }
 
     @Test
-    public void testCheckSkippedWhenCatalogUrlBlank() {
+    void testCheckSkippedWhenCatalogUrlBlank() {
         when(commonCloudProperties.getFreeipaImageCatalogUrl()).thenReturn(" ");
 
         PreflightCheckResult result = underTest.check();
@@ -51,7 +51,7 @@ public class FreeipaCatalogAvailabilityCheckTest {
     }
 
     @Test
-    public void testCheckPassesOnSuccessfulResponse() throws IOException {
+    void testCheckPassesOnSuccessfulResponse() throws IOException {
         startServerReturning(200);
 
         PreflightCheckResult result = underTest.check();
@@ -59,19 +59,15 @@ public class FreeipaCatalogAvailabilityCheckTest {
         assertThat(result.isPassed()).isTrue();
     }
 
-    @Test(dataProvider = "unhealthyStatuses")
-    public void testCheckFailsOnNon2xxHttpResponse(int status) throws IOException {
+    @ParameterizedTest
+    @ValueSource(ints = {404, 503})
+    void testCheckFailsOnNon2xxHttpResponse(int status) throws IOException {
         startServerReturning(status);
 
         PreflightCheckResult result = underTest.check();
 
         assertThat(result.isPassed()).isFalse();
         assertThat(result.isSkipped()).isFalse();
-    }
-
-    @DataProvider(name = "unhealthyStatuses")
-    public Object[][] unhealthyStatuses() {
-        return new Object[][]{{404}, {503}};
     }
 
     private void startServerReturning(int status) throws IOException {
@@ -86,7 +82,7 @@ public class FreeipaCatalogAvailabilityCheckTest {
     }
 
     @Test
-    public void testCheckFailsOnConnectionFailure() throws IOException {
+    void testCheckFailsOnConnectionFailure() throws IOException {
         int closedPort;
         try (ServerSocket serverSocket = new ServerSocket()) {
             serverSocket.bind(new InetSocketAddress("localhost", 0));

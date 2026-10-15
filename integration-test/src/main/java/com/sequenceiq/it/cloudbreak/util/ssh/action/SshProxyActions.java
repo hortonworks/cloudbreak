@@ -1,18 +1,19 @@
 package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 
 @Component
 public class SshProxyActions {
@@ -24,13 +25,13 @@ public class SshProxyActions {
     @Inject
     private SshJClientActions sshJClientActions;
 
-    public Optional<String> getProxySettings(Set<String> ipAddresses) {
+    public Optional<String> getProxySettings(Collection<String> ipAddresses) {
         LOGGER.info("Getting proxy settings on instances {}", ipAddresses);
-        Map<String, Pair<Integer, String>> results = sshJClientActions.executeCommands(ipAddresses, PROXY_SETTINGS_COMMAND);
+        SshCommandOutcomes results = sshJClientActions.executeSshCommandOnHosts(ipAddresses, PROXY_SETTINGS_COMMAND).requireAllExecuted();
         LOGGER.info("Proxy settings output on instances: {}", results);
-        Set<String> proxySettings = results.values().stream()
-                .filter(result -> result.getKey() == 0)
-                .map(Pair::getValue)
+        Set<String> proxySettings = results.stream()
+                .filter(SshCommandOutcome::returnCodeSuccess)
+                .map(SshCommandOutcome::commandOutput)
                 .collect(Collectors.toSet());
         if (proxySettings.size() > 1) {
             String message = String.format("Found different proxy settings on instances: %s", proxySettings);

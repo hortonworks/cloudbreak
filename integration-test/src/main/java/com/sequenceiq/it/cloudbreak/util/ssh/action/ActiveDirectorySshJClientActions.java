@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.config.TrustProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClientFactory;
 import com.sequenceiq.it.util.SimpleRetryWrapper;
@@ -41,6 +41,8 @@ public class ActiveDirectorySshJClientActions {
 
     private static final String BATCH_FILENAME = "trustsetup-%s.bat";
 
+    private static final long EXIT_STATUS_WAIT_SEC = 120L;
+
     @Inject
     private TrustProperties trustProperties;
 
@@ -62,13 +64,15 @@ public class ActiveDirectorySshJClientActions {
             String batchFileName = String.format(BATCH_FILENAME, name);
             String uploadBatchCommand = "powershell -EncodedCommand " + Base64.getEncoder().encodeToString(
                     String.format(SET_CONTENT_COMMAND, batchFileName, batchCommands).getBytes(StandardCharsets.UTF_16LE));
-            Pair<Integer, String> createScriptResult = sshJClient.execute(sshClient, uploadBatchCommand, 120L);
+            SshCommandOutcome createScriptResult = sshJClient.execute(sshClient, trustProperties.getActiveDirectoryIp(), uploadBatchCommand,
+                    EXIT_STATUS_WAIT_SEC);
             validateCommandResult(uploadBatchCommand, createScriptResult, validateError);
 
             SimpleRetryWrapper.create(() -> {
                 try {
                     String executeBatchCommand = String.format(EXECUTE_BATCH_COMMAND, batchFileName);
-                    Pair<Integer, String> executeScriptResult = sshJClient.execute(sshClient, executeBatchCommand, 120L);
+                    SshCommandOutcome executeScriptResult = sshJClient.execute(sshClient, trustProperties.getActiveDirectoryIp(), executeBatchCommand,
+                            EXIT_STATUS_WAIT_SEC);
                     validateCommandResult(executeBatchCommand, executeScriptResult, validateError);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -76,7 +80,8 @@ public class ActiveDirectorySshJClientActions {
             }).withName(String.format("execute %s batch commands", name)).withRetryWaitSeconds(30).run();
 
             String deleteBatchCommand = String.format(DELETE_BATCH_COMMAND, batchFileName);
-            Pair<Integer, String> deleteScriptResult = sshJClient.execute(sshClient, deleteBatchCommand, 120L);
+            SshCommandOutcome deleteScriptResult = sshJClient.execute(sshClient, trustProperties.getActiveDirectoryIp(), deleteBatchCommand,
+                    EXIT_STATUS_WAIT_SEC);
             validateCommandResult(deleteBatchCommand, deleteScriptResult, false);
         } catch (IOException ex) {
             String errorMessage = String.format("Exception during ssh to active directory %s", trustProperties.getActiveDirectoryIp());
@@ -85,11 +90,10 @@ public class ActiveDirectorySshJClientActions {
         }
     }
 
-    private void validateCommandResult(String command, Pair<Integer, String> sshResult, boolean validateError) {
-        Integer returnCode = sshResult.getLeft();
-        String output = sshResult.getRight();
-        LOGGER.info("Result of the {} command:\nReturn code: {}\nOutput: {}", command, returnCode, output);
-        if (validateError && (returnCode != 0 || containsFailureToken(output))) {
+    private void validateCommandResult(String command, SshCommandOutcome sshResult, boolean validateError) {
+        String output = sshResult.commandOutput();
+        LOGGER.info("Result of the {} command:\nReturn code: {}\nOutput: {}", command, sshResult.returnCode(), output);
+        if (validateError && (!sshResult.returnCodeSuccess() || containsFailureToken(output))) {
             throw new TestFailException("The command execution of '" + command + "' failed.");
         }
     }

@@ -1,34 +1,33 @@
 package com.sequenceiq.it.cloudbreak.preflight;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
-public class CloudProviderConnectivityCheckTest {
+@ExtendWith(MockitoExtension.class)
+class CloudProviderConnectivityCheckTest {
 
+    @Mock
     private CloudProviderEndpointResolver endpointResolver;
 
+    @Spy
+    private ReachabilityRestTemplateFactory reachabilityRestTemplateFactory = new ReachabilityRestTemplateFactory();
+
+    @InjectMocks
     private CloudProviderConnectivityCheck underTest;
 
-    @BeforeMethod
-    public void setUp() {
-        endpointResolver = mock(CloudProviderEndpointResolver.class);
-
-        underTest = new CloudProviderConnectivityCheck();
-        ReflectionTestUtils.setField(underTest, "endpointResolver", endpointResolver);
-        ReflectionTestUtils.setField(underTest, "reachabilityRestTemplateFactory", new ReachabilityRestTemplateFactory());
-    }
-
     @Test
-    public void testCheckSkippedWhenNoHostnamesToCheck() {
+    void testCheckSkippedWhenNoHostnamesToCheck() {
         when(endpointResolver.resolveActiveProviderHostnames()).thenReturn(List.of());
         when(endpointResolver.activeCloudPlatform()).thenReturn(CloudPlatform.MOCK);
 
@@ -38,7 +37,7 @@ public class CloudProviderConnectivityCheckTest {
     }
 
     @Test
-    public void testCheckFailsWhenHostUnreachable() {
+    void testCheckFailsWhenHostUnreachable() {
         when(endpointResolver.resolveActiveProviderHostnames()).thenReturn(List.of("this-host-does-not-exist.invalid"));
 
         PreflightCheckResult result = underTest.check();

@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.util.NullUtil;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
@@ -219,15 +218,6 @@ public interface CloudFunctionality {
 
     default String calculateDevicePath(VolumeSetAttributes.Volume volume) {
         return NullUtil.getIfNotNullOtherwise(volume.getDevice(), "");
-    }
-
-    @Retryable(
-            maxAttempts = ATTEMPTS,
-            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
-    )
-    default List<String> executeSshCommandsOnInstances(List<InstanceGroupResponse> instanceGroups, List<String> hostGroupNames, String privateKeyFilePath,
-            String command) {
-        throw new TestFailException("Not implemented for Cloud Provider!");
     }
 
     default Map<String, Map<String, String>> getAllResourcesAndTagsForEnvironment(String envCrn) {

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 
 @Component
 public class SshEnaDriverCheckActions {
@@ -36,13 +36,13 @@ public class SshEnaDriverCheckActions {
     private void checkEnaDriver(String instanceIp) {
         String modinfoEnaCmd = "/usr/sbin/modinfo ena";
         String wrongResult = "modinfo: ERROR: Module ena not found.";
-        Pair<Integer, String> result = sshJClientActions.executeCommand(instanceIp, modinfoEnaCmd);
-        if (result.getValue().startsWith(wrongResult)) {
+        SshCommandOutcome result = sshJClientActions.executeSshCommand(instanceIp, modinfoEnaCmd).requireExecuted();
+        if (result.commandOutput().startsWith(wrongResult)) {
             LOGGER.error("ENA driver is not available at '{}' instance!", instanceIp);
             throw new TestFailException(format("ENA driver is not available at '%s' instance!", instanceIp));
         } else {
-            LOGGER.info("ENA driver is available at '{}' instance: [{}]", instanceIp, result.getValue());
-            Log.then(LOGGER, format(" ENA driver is available at '%s' instance: [%s] ", instanceIp, result.getValue()));
+            LOGGER.info("ENA driver is available at '{}' instance: [{}]", instanceIp, result.commandOutput());
+            Log.then(LOGGER, format(" ENA driver is available at '%s' instance: [%s] ", instanceIp, result.commandOutput()));
         }
     }
 

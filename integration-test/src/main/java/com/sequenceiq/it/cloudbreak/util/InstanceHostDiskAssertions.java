@@ -5,13 +5,13 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 /**
@@ -40,20 +40,20 @@ public class InstanceHostDiskAssertions {
             long minBytes = Math.round(gib * MIN_FRACTION * 1024L * 1024L * 1024L);
             String cmd = shellCommand(mount);
             sshJClientActions.executeSshCommandOnHost(instanceGroups, List.of(hostGroupName), cmd, false)
-                    .forEach((ip, result) -> {
-                        assertSize(ip, mount, gib, minBytes, result, validationContext);
+                    .forEach(result -> {
+                        assertSize(result.instanceIp(), mount, gib, minBytes, result, validationContext);
                     });
         }
     }
 
     private boolean isSshReachable(List<InstanceGroupV4Response> instanceGroups, String hostGroupName) {
-        try {
-            sshJClientActions.executeSshCommandOnHost(instanceGroups, List.of(hostGroupName), "true", false);
-            return true;
-        } catch (TestFailException e) {
-            LOGGER.warn("SSH not reachable for host group '{}': {}", hostGroupName, e.getMessage());
-            return false;
+        for (SshCommandOutcome outcome : sshJClientActions.executeSshCommandOnHost(instanceGroups, List.of(hostGroupName), "true", false)) {
+            if (!outcome.executed()) {
+                LOGGER.warn("SSH not reachable for host group '{}': {}", hostGroupName, outcome.exceptionMessage().orElse(null));
+                return false;
+            }
         }
+        return true;
     }
 
     private static String shellCommand(String mountPoint) {
@@ -64,13 +64,11 @@ public class InstanceHostDiskAssertions {
                 + "echo DF=$df_sz LSBLK=$lb_sz";
     }
 
-    private static void assertSize(String ip, String mount, int expectedGiB, long minBytes, Pair<Integer, String> result, String ctx) {
-        if (result.getKey() != 0) {
-            throw new TestFailException(String.format("%s: %s %s probe exit %d: %s", ctx, ip, mount, result.getKey(), result.getValue()));
-        }
+    private static void assertSize(String ip, String mount, int expectedGiB, long minBytes, SshCommandOutcome result, String ctx) {
+        result.requireSuccess(String.format("%s: %s probe", ctx, mount));
         long df = -1;
         long lsblk = -1;
-        for (String part : result.getValue().trim().split("\\s+")) {
+        for (String part : result.commandOutput().trim().split("\\s+")) {
             if (part.startsWith("DF=")) {
                 df = Long.parseLong(part.substring(3));
             } else if (part.startsWith("LSBLK=")) {
@@ -78,7 +76,7 @@ public class InstanceHostDiskAssertions {
             }
         }
         if (df < 0 || lsblk < 0) {
-            throw new TestFailException(String.format("%s: %s %s unparseable: %s", ctx, ip, mount, result.getValue()));
+            throw new TestFailException(String.format("%s: %s %s unparseable: %s", ctx, ip, mount, result.commandOutput()));
         }
         if (df < minBytes) {
             throw new TestFailException(String.format("%s: %s %s df %d < %d bytes (~%d GiB)", ctx, ip, mount, df, minBytes, expectedGiB));

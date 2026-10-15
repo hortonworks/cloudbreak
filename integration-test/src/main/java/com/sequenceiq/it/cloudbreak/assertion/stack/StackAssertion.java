@@ -1,15 +1,11 @@
 package com.sequenceiq.it.cloudbreak.assertion.stack;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,13 +14,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 @Component
@@ -65,13 +62,11 @@ public class StackAssertion {
         try {
             String resolveTo = stackV4Response.getCloudPlatform().equals(CloudPlatform.AWS) ? loadBalancerResponse.getCloudDns() : loadBalancerResponse.getIp();
             String cmd = String.format(VALIDATE_LOAD_BALANCER_CMD, loadBalancerResponse.getFqdn(), resolveTo, resolveTo);
-            Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommandOnAllHosts(
-                    stackV4Response.getInstanceGroups(), cmd, false, commonCloudProperties.getDefaultPrivateKeyFile());
-
-            List<String> errors = results
-                    .values()
+            List<String> errors = sshJClientActions.executeSshCommandOnAllHosts(
+                            stackV4Response.getInstanceGroups(), cmd, false, commonCloudProperties.getDefaultPrivateKeyFile())
+                    .requireAllExecuted()
                     .stream()
-                    .map(Pair::getValue)
+                    .map(SshCommandOutcome::commandOutput)
                     .filter(value -> value != null && value.contains("Failure"))
                     .toList();
 
@@ -94,12 +89,9 @@ public class StackAssertion {
     }
 
     public void validateFileContentExists(FreeIpaTestDto freeIpaTestDto, String fileName, String fileContent) {
-        Set<InstanceMetaDataResponse> instanceMetaDatas = freeIpaTestDto.getResponse().getInstanceGroups().stream()
-                .map(InstanceGroupResponse::getMetaData)
-                .flatMap(Set::stream)
-                .collect(Collectors.toSet());
+        List<String> instanceIps = InstanceIPCollectorUtil.getAllFreeIpaInstanceIps(freeIpaTestDto.getResponse().getInstanceGroups(), false);
         String cmd = String.format(VALIDATE_FILE_CONTENT_CMD, fileContent, fileName);
-        assertSshResult(() -> sshJClientActions.executeSshCommandOnHost(instanceMetaDatas, cmd, false), cmd,
+        assertSshResult(() -> sshJClientActions.executeSshCommandOnHosts(instanceIps, cmd), cmd,
                 () -> "Pattern '" + fileContent + "' not found in " + fileName,
                 "Error trying to check file content exists on FreeIPA");
     }
@@ -136,15 +128,12 @@ public class StackAssertion {
                 cmd, assertionErrorMessage, testFailureContext);
     }
 
-    private void assertSshResult(Supplier<Map<String, Pair<Integer, String>>> sshExecutor, String cmd, Supplier<String> assertionErrorMessage,
-            String testFailureContext) {
+    private void assertSshResult(Supplier<SshCommandOutcomes> sshExecutor, String cmd, Supplier<String> assertionErrorMessage, String testFailureContext) {
         try {
-            Map<String, Pair<Integer, String>> results = sshExecutor.get();
-
-            boolean anyFailure = results
-                    .values()
+            boolean anyFailure = sshExecutor.get()
+                    .requireAllExecuted()
                     .stream()
-                    .map(Pair::getValue)
+                    .map(SshCommandOutcome::commandOutput)
                     .anyMatch(value -> value != null && value.contains("Failure"));
 
             if (anyFailure) {

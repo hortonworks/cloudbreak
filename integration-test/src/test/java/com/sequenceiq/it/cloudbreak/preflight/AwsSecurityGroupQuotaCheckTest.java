@@ -1,31 +1,27 @@
 package com.sequenceiq.it.cloudbreak.preflight;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
-public class AwsSecurityGroupQuotaCheckTest {
+@ExtendWith(MockitoExtension.class)
+class AwsSecurityGroupQuotaCheckTest {
 
+    @Mock
     private CloudProviderEndpointResolver endpointResolver;
 
+    @InjectMocks
     private AwsSecurityGroupQuotaCheck underTest;
 
-    @BeforeMethod
-    public void setUp() {
-        endpointResolver = mock(CloudProviderEndpointResolver.class);
-
-        underTest = new AwsSecurityGroupQuotaCheck();
-        ReflectionTestUtils.setField(underTest, "endpointResolver", endpointResolver);
-    }
-
     @Test
-    public void testCheckSkippedWhenNotAws() {
+    void testCheckSkippedWhenNotAws() {
         when(endpointResolver.activeCloudPlatform()).thenReturn(CloudPlatform.GCP);
 
         PreflightCheckResult result = underTest.check();
@@ -34,12 +30,12 @@ public class AwsSecurityGroupQuotaCheckTest {
     }
 
     @Test
-    public void testIsHeadroomBelowThresholdFlagsLowHeadroom() {
+    void testIsHeadroomBelowThresholdFlagsLowHeadroom() {
         assertThat(AwsSecurityGroupQuotaCheck.isHeadroomBelowThreshold(2500, 2480, 25)).isTrue();
     }
 
     @Test
-    public void testIsHeadroomBelowThresholdPassesWithEnoughHeadroom() {
+    void testIsHeadroomBelowThresholdPassesWithEnoughHeadroom() {
         assertThat(AwsSecurityGroupQuotaCheck.isHeadroomBelowThreshold(2500, 1000, 25)).isFalse();
     }
 }

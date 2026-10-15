@@ -2,17 +2,17 @@ package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collection;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 
 @Component
 public class SshSaltPasswordActions {
@@ -30,34 +30,32 @@ public class SshSaltPasswordActions {
     @Inject
     private SshJClientActions sshJClientActions;
 
-    public void setPasswordChangeDate(Set<String> ipAddresses, LocalDate date) {
+    public void setPasswordChangeDate(Collection<String> ipAddresses, LocalDate date) {
         String command = String.format(PASSWORD_CHANGE_SET_COMMAND_PATTERN, CHAGE_DATE_PATTERN.format(date));
         LOGGER.info("Setting password expiry date on nodes {} to {} with command {}", ipAddresses, date, command);
-        Map<String, Pair<Integer, String>> results = sshJClientActions.executeCommands(ipAddresses, command);
+        SshCommandOutcomes results = sshJClientActions.executeSshCommandOnHosts(ipAddresses, command);
         LOGGER.debug("Password expiry set results: {}", results);
-        if (results.values().stream().anyMatch(result -> result.getLeft() != 0)) {
-            throw new TestFailException("Failed to set saltuser password change date");
-        }
+        results.requireAllSucceeded("Setting saltuser password change date");
     }
 
-    public String getShadowLine(Set<String> ipAddresses) {
+    public String getShadowLine(Collection<String> ipAddresses) {
         LOGGER.info("Getting saltuser shadow line on nodes {}", ipAddresses);
-        Map<String, Pair<Integer, String>> results = sshJClientActions.executeCommands(ipAddresses, SALTUSER_SHADOW_LINE_COMMAND);
+        SshCommandOutcomes results = sshJClientActions.executeSshCommandOnHosts(ipAddresses, SALTUSER_SHADOW_LINE_COMMAND);
         LOGGER.debug("Saltuser shadow line result: {}", results);
-        return results.values().stream()
-                .filter(result -> result.getKey() == 0)
-                .map(Pair::getValue)
+        return results.requireAllExecuted().stream()
+                .filter(SshCommandOutcome::returnCodeSuccess)
+                .map(SshCommandOutcome::commandOutput)
                 .findFirst()
                 .orElseThrow(() -> new TestFailException("Failed to get saltuser shadow file line on nodes " + ipAddresses));
     }
 
-    public LocalDate getPasswordChangeDate(Set<String> ipAddresses) {
+    public LocalDate getPasswordChangeDate(Collection<String> ipAddresses) {
         LOGGER.info("Getting saltuser password expiry date on nodes {}", ipAddresses);
-        Map<String, Pair<Integer, String>> results = sshJClientActions.executeCommands(ipAddresses, PASSWORD_CHANGE_GET_COMMAND);
+        SshCommandOutcomes results = sshJClientActions.executeSshCommandOnHosts(ipAddresses, PASSWORD_CHANGE_GET_COMMAND);
         LOGGER.debug("Saltuser password expiry date results: {}", results);
-        return results.values().stream()
-                .filter(result -> result.getKey() == 0)
-                .map(result -> LocalDate.parse(result.getValue().trim(), CHAGE_DATE_PATTERN))
+        return results.requireAllExecuted().stream()
+                .filter(SshCommandOutcome::returnCodeSuccess)
+                .map(result -> LocalDate.parse(result.commandOutput().trim(), CHAGE_DATE_PATTERN))
                 .min(LocalDate::compareTo)
                 .orElseThrow(() -> new TestFailException("Failed to get password expiry date on nodes " + ipAddresses));
     }

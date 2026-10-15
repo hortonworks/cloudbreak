@@ -5,7 +5,6 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,6 +16,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -90,9 +91,9 @@ public class SdxUpgradeDatabaseTestUtil {
 
     private <T extends CloudbreakTestDto> T checkDatabaseVersionFromPrimaryGateway(T testDto, List<InstanceGroupV4Response> instanceGroups,
             String databaseMajorVersion, String command) {
-        Map<String, Pair<Integer, String>> dbVersions = sshJClientActions.executeSshCommandOnPrimaryGateways(instanceGroups, command, false);
-        List<Pair<Integer, String>> wrongVersions = dbVersions.values().stream()
-                .filter(ssh -> !extractVersion(ssh.getValue()).startsWith(databaseMajorVersion))
+        SshCommandOutcomes dbVersions = sshJClientActions.executeSshCommandOnPrimaryGateways(instanceGroups, command, false).requireAllExecuted();
+        List<SshCommandOutcome> wrongVersions = dbVersions.stream()
+                .filter(ssh -> !extractVersion(ssh.commandOutput()).startsWith(databaseMajorVersion))
                 .toList();
         if (!wrongVersions.isEmpty()) {
             String errorMsg = String.format("Data Lake's database engine version check is wrong on primary gateways: %s, expected: %s",

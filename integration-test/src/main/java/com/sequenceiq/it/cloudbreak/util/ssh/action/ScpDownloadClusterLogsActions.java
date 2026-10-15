@@ -73,11 +73,11 @@ public class ScpDownloadClusterLogsActions {
 
     private void copyLogsToCloudbreak(String instanceIp, String sourceFilePath, String destinationDirectory) {
         String mkdirLogsDirectoryCommand = format("mkdir -p %s", destinationDirectory);
-        sshJClientActions.executeSshCommand(instanceIp, mkdirLogsDirectoryCommand);
+        sshJClientActions.executeSshCommand(instanceIp, mkdirLogsDirectoryCommand).requireExecuted();
         sshJClientActions.executeSshCommand(instanceIp, format("sudo cp -ru %s %s/ && sudo chown -R cloudbreak:cloudbreak %s", sourceFilePath,
-                destinationDirectory, destinationDirectory));
+                destinationDirectory, destinationDirectory)).requireExecuted();
         sshJClientActions.executeSshCommand(instanceIp, format("tar -czf %s.tar.gz %s && rm -rf %s", destinationDirectory, destinationDirectory,
-                destinationDirectory));
+                destinationDirectory)).requireExecuted();
     }
 
     private void download(String instanceIp, String sourceFilePath, String destinationPath) {

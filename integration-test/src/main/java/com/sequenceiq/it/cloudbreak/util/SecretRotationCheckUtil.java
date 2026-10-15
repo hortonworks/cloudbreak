@@ -3,24 +3,18 @@ package com.sequenceiq.it.cloudbreak.util;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -30,6 +24,8 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcome;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshCommandOutcomes;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshSaltPasswordActions;
 
@@ -77,10 +73,10 @@ public class SecretRotationCheckUtil {
     }
 
     private void checkLdapLogin(Collection<InstanceGroupV4Response> instanceGroupV4Responses) {
-        Map<String, Pair<Integer, String>> sshCommandResponse = sshJClientActions.executeSshCommandOnPrimaryGateways(instanceGroupV4Responses,
-                LDAP_CHECK_COMMAND, false);
-        boolean ldapSearchWasSuccessful = sshCommandResponse.values().stream()
-                .map(Map.Entry::getKey)
+        SshCommandOutcomes sshCommandResponse = sshJClientActions.executeSshCommandOnPrimaryGateways(
+                instanceGroupV4Responses, LDAP_CHECK_COMMAND, false).requireAllExecuted();
+        boolean ldapSearchWasSuccessful = sshCommandResponse.stream()
+                .map(SshCommandOutcome::returnCode)
                 .allMatch(exitCode -> exitCode.equals(0) || exitCode.equals(4));
         if (!ldapSearchWasSuccessful) {
             throw new TestFailException(String.format("LDAP login check with new password was not successful on all gateway nodes. " +
@@ -95,13 +91,12 @@ public class SecretRotationCheckUtil {
                     "(integrationtest.rotationSshPublicKey, integrationtest.rotationPrivateKeyFile).");
         } else {
             String checkCommand = "echo \"SSH login check\"";
-            Map<String, Pair<Integer, String>> sshCommandResponse =
-                    sshJClientActions.executeSshCommandOnAllHosts(
-                            instanceGroupV4Responses,
-                            checkCommand, false,
-                            commonCloudProperties.getRotationPrivateKeyFile());
-            boolean keyChangeWasSuccessfulOnAllNodes = sshCommandResponse.values().stream()
-                    .map(Map.Entry::getValue)
+            SshCommandOutcomes sshCommandResponse = sshJClientActions.executeSshCommandOnAllHosts(
+                    instanceGroupV4Responses,
+                    checkCommand, false,
+                    commonCloudProperties.getRotationPrivateKeyFile()).requireAllExecuted();
+            boolean keyChangeWasSuccessfulOnAllNodes = sshCommandResponse.stream()
+                    .map(SshCommandOutcome::commandOutput)
                     .allMatch(value -> value.contains("SSH login check"));
             if (!keyChangeWasSuccessfulOnAllNodes) {
                 throw new TestFailException(String.format("SSH login check was not successful on all nodes. Checks: %s", sshCommandResponse));
@@ -125,42 +120,42 @@ public class SecretRotationCheckUtil {
     }
 
     public FreeIpaTestDto preSaltPasswordRotation(FreeIpaTestDto testDto) {
-        Set<String> ipAddresses = getFreeipaIpAddresses(testDto);
+        List<String> ipAddresses = InstanceIPCollectorUtil.getAllInstanceIps(testDto, false);
         return preSaltPasswordRotation(testDto, ipAddresses);
     }
 
     public SdxInternalTestDto preSaltPasswordRotation(SdxInternalTestDto testDto) {
-        Set<String> ipAddresses = getSdxIpAddresses(testDto);
+        List<String> ipAddresses = getSdxIpAddresses(testDto);
         return preSaltPasswordRotation(testDto, ipAddresses);
     }
 
     public DistroXTestDto preSaltPasswordRotation(DistroXTestDto testDto) {
-        Set<String> ipAddresses = getDistroXIpAddresses(testDto);
+        List<String> ipAddresses = getDistroXIpAddresses(testDto);
         return preSaltPasswordRotation(testDto, ipAddresses);
     }
 
-    private <T> T preSaltPasswordRotation(T testDto, Set<String> ipAddresses) {
+    private <T> T preSaltPasswordRotation(T testDto, Collection<String> ipAddresses) {
         sshSaltPasswordActions.setPasswordChangeDate(ipAddresses, PAST_DATE);
         SHADOW_LINE_REFERENCE.set(sshSaltPasswordActions.getShadowLine(ipAddresses));
         return testDto;
     }
 
     public FreeIpaTestDto validateSaltPasswordRotation(FreeIpaTestDto testDto) {
-        Set<String> ipAddresses = getFreeipaIpAddresses(testDto);
+        List<String> ipAddresses = InstanceIPCollectorUtil.getAllInstanceIps(testDto, false);
         return validateSaltPasswordRotation(testDto, ipAddresses);
     }
 
     public SdxInternalTestDto validateSaltPasswordRotation(SdxInternalTestDto testDto) {
-        Set<String> ipAddresses = getSdxIpAddresses(testDto);
+        List<String> ipAddresses = getSdxIpAddresses(testDto);
         return validateSaltPasswordRotation(testDto, ipAddresses);
     }
 
     public DistroXTestDto validateSaltPasswordRotation(DistroXTestDto testDto) {
-        Set<String> ipAddresses = getDistroXIpAddresses(testDto);
+        List<String> ipAddresses = getDistroXIpAddresses(testDto);
         return validateSaltPasswordRotation(testDto, ipAddresses);
     }
 
-    private <T> T validateSaltPasswordRotation(T testDto, Set<String> ipAddresses) {
+    private <T> T validateSaltPasswordRotation(T testDto, Collection<String> ipAddresses) {
         String shadowLine = sshSaltPasswordActions.getShadowLine(ipAddresses);
         if (shadowLine.equals(SHADOW_LINE_REFERENCE.get())) {
             throw new TestFailException("Saltuser shadow line was not changed after password rotation");
@@ -174,26 +169,11 @@ public class SecretRotationCheckUtil {
         return testDto;
     }
 
-    private Set<String> getFreeipaIpAddresses(FreeIpaTestDto testDto) {
-        return testDto.getResponse().getInstanceGroups().stream()
-                .flatMap(ig -> ig.getMetaData().stream())
-                .map(InstanceMetaDataResponse::getPrivateIp)
-                .collect(Collectors.toSet());
+    private List<String> getSdxIpAddresses(SdxInternalTestDto testDto) {
+        return InstanceIPCollectorUtil.getGatewayIps(testDto.getResponse().getStackV4Response().getInstanceGroups(), false);
     }
 
-    private Set<String> getSdxIpAddresses(SdxInternalTestDto testDto) {
-        return getStackIpAddresses(testDto.getResponse().getStackV4Response());
-    }
-
-    private Set<String> getDistroXIpAddresses(DistroXTestDto testDto) {
-        return getStackIpAddresses(testDto.getResponse());
-    }
-
-    private Set<String> getStackIpAddresses(StackV4Response stack) {
-        return stack.getInstanceGroups().stream()
-                .filter(ig -> ig.getType().equals(InstanceGroupType.GATEWAY))
-                .flatMap(ig -> ig.getMetadata().stream())
-                .map(InstanceMetaDataV4Response::getPrivateIp)
-                .collect(Collectors.toSet());
+    private List<String> getDistroXIpAddresses(DistroXTestDto testDto) {
+        return InstanceIPCollectorUtil.getGatewayIps(testDto.getResponse().getInstanceGroups(), false);
     }
 }

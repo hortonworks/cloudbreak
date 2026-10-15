@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -498,8 +499,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     private void collectLogFiles(StackV4Response stackResponse) {
         try {
-            List<String> ipAddresses = stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream())
-                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+            List<String> ipAddresses = InstanceIPCollectorUtil.getAllReachableInstanceIps(stackResponse.getInstanceGroups(), true);
             logCollectorUtil.collectLogFiles(stackResponse.getStatusReason(), ipAddresses);
         } catch (Exception e) {
             LOGGER.warn("Failed to collect Data Lake log files for investigation.", e);

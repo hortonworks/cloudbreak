@@ -15,13 +15,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
 import net.schmizz.sshj.DefaultConfig;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
+import net.schmizz.sshj.userauth.UserAuthException;
 
 @Component
 public class SshJClientFactory {
@@ -29,6 +29,11 @@ public class SshJClientFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshJClientFactory.class);
 
     private static final int TIMEOUT = 120000;
+
+    /**
+     * How long a command may run without producing any output before it is considered hanging.
+     */
+    private static final int COMMAND_OUTPUT_IDLE_TIMEOUT_MS = 10 * 60 * 1000;
 
     @Value("${integrationtest.defaultPrivateKeyFile}")
     private String defaultPrivateKeyFilePath;
@@ -46,18 +51,24 @@ public class SshJClientFactory {
         }
     }
 
-    @Retryable(retryFor = IOException.class)
+    /**
+     * Retries transient connection failures. Authentication failures are not retried: a rejected credential stays rejected, so retrying only
+     * delays the failure.
+     */
+    @Retryable(retryFor = IOException.class, noRetryFor = UserAuthException.class)
     public SSHClient createSshClient(String host, String user, String password, String privateKeyFilePath) throws IOException {
-        LOGGER.info("Initializing SSHJ Client!");
+        DefaultConfig config = new DefaultConfig();
+        config.setChannelReadTimeoutMs(COMMAND_OUTPUT_IDLE_TIMEOUT_MS);
+        SSHClient client = new SSHClient(config);
         try {
-            BouncyCastleFipsProviderLoader.load();
-            LOGGER.info("Injected BouncyCastle-FIPS provider as a workaround for SSHJ... Fingers crossed!");
-        } catch (Exception e) {
-            LOGGER.warn("Exception during the attempt to initialize BouncyCastle FIPS - the test case will probably fail.", e);
+            return connectAndAuthenticate(client, host, user, password, privateKeyFilePath);
+        } catch (IOException | RuntimeException e) {
+            closeQuietly(client, host);
+            throw e;
         }
+    }
 
-        SSHClient client = new SSHClient(new DefaultConfig());
-
+    private SSHClient connectAndAuthenticate(SSHClient client, String host, String user, String password, String privateKeyFilePath) throws IOException {
         client.addHostKeyVerifier(new PromiscuousVerifier());
         client.setConnectTimeout(TIMEOUT);
         client.setTimeout(TIMEOUT);
@@ -76,16 +87,23 @@ public class SshJClientFactory {
             Log.log(LOGGER, format(" SSH client has been authenticated with user (%s) and key file: [%s] at [%s] host. ", user, client.isAuthenticated(),
                     client.getRemoteHostname()));
         } else if (StringUtils.isNotBlank(user) && StringUtils.isNotBlank(password)) {
-            LOGGER.info("Creating SSH client on '{}' host with user: '{}' and password: '{}'.", host, user, password);
+            LOGGER.info("Creating SSH client on '{}' host with user: '{}' and a password.", host, user);
             client.authPassword(user, password);
             Log.log(LOGGER, format(" SSH client has been authenticated with user (%s) and password: [%s] at [%s] host. ", user, client.isAuthenticated(),
                     client.getRemoteHostname()));
         } else {
-            LOGGER.error("Creating SSH client is not possible, because of host: '{}', user: '{}', password: '{}' and privateKey: '{}' are missing!",
-                    host, user, password, privateKeyFilePath);
-            throw new TestFailException(format("Creating SSH client is not possible, because of host: '%s', user: '%s', password: '%s'" +
-                    " and privateKey: '%s' are missing!", host, user, password, privateKeyFilePath));
+            LOGGER.error("Creating SSH client is not possible on host '{}': neither a private key nor a password is given for user '{}'!", host, user);
+            throw new TestFailException(format("Creating SSH client is not possible on host '%s': neither a private key nor a password is given " +
+                    "for user '%s'!", host, user));
         }
         return client;
+    }
+
+    private void closeQuietly(SSHClient client, String host) {
+        try {
+            client.close();
+        } catch (IOException e) {
+            LOGGER.debug("Failed to close the SSH client of host '{}' after a failed connection attempt.", host, e);
+        }
     }
 }

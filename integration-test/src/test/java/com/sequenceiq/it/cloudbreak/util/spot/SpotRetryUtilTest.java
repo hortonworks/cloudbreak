@@ -1,36 +1,41 @@
 package com.sequenceiq.it.cloudbreak.util.spot;
 
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.testng.ITestNGMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import org.testng.internal.ConstructorOrMethod;
 
-public class SpotRetryUtilTest {
+@ExtendWith(MockitoExtension.class)
+class SpotRetryUtilTest {
 
     private Method method;
 
+    @Mock
     private SpotUtil spotUtil;
 
+    @Mock
     private ITestNGMethod testMethod;
+
+    @Mock
+    private ConstructorOrMethod constructorOrMethod;
 
     private SpotRetryUtil underTest;
 
-    @BeforeMethod
-    public void setUp() throws NoSuchMethodException {
-        ConstructorOrMethod constructorOrMethod = mock(ConstructorOrMethod.class);
+    @BeforeEach
+    void setUp() throws NoSuchMethodException {
         method = ExampleTest.class.getDeclaredMethod("exampleMethod");
         when(constructorOrMethod.getMethod()).thenReturn(method);
-        testMethod = mock(ITestNGMethod.class);
         when(testMethod.getConstructorOrMethod()).thenReturn(constructorOrMethod);
 
-        spotUtil = mock(SpotUtil.class);
         underTest = new SpotRetryUtil(spotUtil, true);
     }
 

@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
-import org.testng.annotations.Test;
 
-public class UniqueTestMethodNameTest {
+class UniqueTestMethodNameTest {
 
     private static final String DUPLICATE_METHOD_NAME_ERROR_MESSAGE = "Method name [%s] is present in more than one classes: %s";
 
@@ -19,9 +19,9 @@ public class UniqueTestMethodNameTest {
      * As we are using test method names as tags on cloud resources, we must be sure that they are unique.
      */
     @Test
-    public void testMethodNamesShouldBeUnique() {
+    void testMethodNamesShouldBeUnique() {
         Reflections reflections = new Reflections(UniqueTestMethodNameTest.class.getPackageName(), new MethodAnnotationsScanner());
-        Map<String, List<Method>> methodsByName = reflections.getMethodsAnnotatedWith(Test.class).stream()
+        Map<String, List<Method>> methodsByName = reflections.getMethodsAnnotatedWith(org.testng.annotations.Test.class).stream()
                 .collect(Collectors.groupingBy(Method::getName));
 
         String errorMessage = methodsByName.entrySet()

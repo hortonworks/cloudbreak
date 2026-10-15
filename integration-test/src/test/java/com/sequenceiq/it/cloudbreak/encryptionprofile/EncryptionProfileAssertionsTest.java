@@ -5,16 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Set;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.it.cloudbreak.assertion.encryptionprofile.EncryptionProfileAssertions;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
-public class EncryptionProfileAssertionsTest {
+class EncryptionProfileAssertionsTest {
 
     @Test
-    public void testValidateCipherSuitesConfigurationWithValidConfig() {
+    void testValidateCipherSuitesConfigurationWithValidConfig() {
         EncryptionProfileAssertions underTest = new EncryptionProfileAssertions();
         String serviceName = "cdp-prometheus";
         String instanceIp = "192.168.1.100";
@@ -39,7 +39,7 @@ public class EncryptionProfileAssertionsTest {
     }
 
     @Test
-    public void testValidateComplianceStandardsWithMatchingStandards() {
+    void testValidateComplianceStandardsWithMatchingStandards() {
         EncryptionProfileAssertions underTest = new EncryptionProfileAssertions();
         EncryptionProfileResponse response = new EncryptionProfileResponse();
         response.setName("profile");
@@ -49,7 +49,7 @@ public class EncryptionProfileAssertionsTest {
     }
 
     @Test
-    public void testValidateComplianceStandardsWithMismatchingStandards() {
+    void testValidateComplianceStandardsWithMismatchingStandards() {
         EncryptionProfileAssertions underTest = new EncryptionProfileAssertions();
         EncryptionProfileResponse response = new EncryptionProfileResponse();
         response.setName("profile");

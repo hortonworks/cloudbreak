@@ -1,16 +1,17 @@
 package com.sequenceiq.it.cloudbreak.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackRepoDetailsV4Response;
@@ -19,14 +20,14 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
-public class TestUpgradeCandidateProviderTest {
+class TestUpgradeCandidateProviderTest {
 
     private static final String RUNTIME_731 = "7.3.1";
 
     private TestUpgradeCandidateProvider underTest;
 
-    @BeforeMethod
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         underTest = new TestUpgradeCandidateProvider();
         CommonClusterManagerProperties properties = new CommonClusterManagerProperties();
         properties.getUpgrade().setRuntimeImageRepositoryVersionExclusions(Map.of("7.3.1", List.of(".p900.")));
@@ -34,7 +35,7 @@ public class TestUpgradeCandidateProviderTest {
     }
 
     @Test
-    public void testHasDifferentBuildNumberSameCmTargetHasHigherCdhBuild() {
+    void testHasDifferentBuildNumberSameCmTargetHasHigherCdhBuild() {
         ImageV4Response source = createImage("02e1ac9c", "7.13.1.706", "76410574", "76397095", 1779357927L);
         ImageV4Response target = createImage("cdc4ace6", "7.13.1.706", "76410574", "78150083", 1778051478L);
 
@@ -42,7 +43,7 @@ public class TestUpgradeCandidateProviderTest {
     }
 
     @Test
-    public void testHasDifferentBuildNumberSameCmTargetHasLowerCdhBuild() {
+    void testHasDifferentBuildNumberSameCmTargetHasLowerCdhBuild() {
         ImageV4Response source = createImage("cdc4ace6", "7.13.1.706", "76410574", "78150083", 1778051478L);
         ImageV4Response target = createImage("02e1ac9c", "7.13.1.706", "76410574", "76397095", 1779357927L);
 
@@ -50,7 +51,7 @@ public class TestUpgradeCandidateProviderTest {
     }
 
     @Test
-    public void testHasDifferentBuildNumberSameCmSameCdhBuild() {
+    void testHasDifferentBuildNumberSameCmSameCdhBuild() {
         ImageV4Response source = createImage("image-1", "7.13.1.706", "76410574", "76397095", 1779357927L);
         ImageV4Response target = createImage("image-2", "7.13.1.706", "76410574", "76397095", 1779357928L);
 
@@ -58,7 +59,7 @@ public class TestUpgradeCandidateProviderTest {
     }
 
     @Test
-    public void testHasDifferentBuildNumberNewerCmHigherCdhBuild() {
+    void testHasDifferentBuildNumberNewerCmHigherCdhBuild() {
         ImageV4Response source = createImage("image-1", "7.13.1.706", "76410574", "76397095", 1779357927L);
         ImageV4Response target = createImage("image-2", "7.13.2.0", "77000000", "78150083", 1779400000L);
 
@@ -66,7 +67,7 @@ public class TestUpgradeCandidateProviderTest {
     }
 
     @Test
-    public void testHasDifferentBuildNumberOlderCmHigherCdhBuild() {
+    void testHasDifferentBuildNumberOlderCmHigherCdhBuild() {
         ImageV4Response source = createImage("image-1", "7.13.1.706", "76410574", "76397095", 1779357927L);
         ImageV4Response target = createImage("image-2", "7.13.0.0", "75000000", "78150083", 1779400000L);
 
@@ -74,7 +75,7 @@ public class TestUpgradeCandidateProviderTest {
     }
 
     @Test
-    public void testFindUpgradePairRealCatalogScenario() {
+    void testFindUpgradePairRealCatalogScenario() {
         ImageV4Response osUpdateRelease = createImage("02e1ac9c", "7.13.1.706", "76410574", "76397095", 1779357927L);
         ImageV4Response emergencyRelease = createImage("cdc4ace6", "7.13.1.706", "76410574", "78150083", 1778051478L);
 
@@ -83,12 +84,12 @@ public class TestUpgradeCandidateProviderTest {
 
         Pair<String, String> result = underTest.findUpgradePair(sourceImages, targetImages, underTest::hasDifferentBuildNumber, RUNTIME_731);
 
-        assertEquals(result.getLeft(), "02e1ac9c");
-        assertEquals(result.getRight(), "cdc4ace6");
+        assertEquals("02e1ac9c", result.getLeft());
+        assertEquals("cdc4ace6", result.getRight());
     }
 
     @Test
-    public void testFindUpgradePairNoValidPairFallsBackToNewerCdhBuild() {
+    void testFindUpgradePairNoValidPairFallsBackToNewerCdhBuild() {
         ImageV4Response osUpdate = createImage("os-update", "7.13.1.706", "76410574", "76397095", 1779357979L);
         ImageV4Response emergency = createImage("emergency", "7.13.1.706", "76410574", "78150083", 1778051561L);
 
@@ -97,38 +98,38 @@ public class TestUpgradeCandidateProviderTest {
 
         Pair<String, String> result = underTest.findUpgradePair(sourceImages, targetImages, underTest::hasSameBuildNumber, RUNTIME_731);
 
-        assertEquals(result.getLeft(), "os-update");
-        assertEquals(result.getRight(), "emergency");
+        assertEquals("os-update", result.getLeft());
+        assertEquals("emergency", result.getRight());
     }
 
-    @Test(expectedExceptions = TestFailException.class)
-    public void testFindUpgradePairNoValidPairSameCdhBuildFallbackThrows() {
+    @Test
+    void testFindUpgradePairNoValidPairSameCdhBuildFallbackThrows() {
         ImageV4Response image1 = createImage("image-1", "7.13.1.706", "76410574", "76397095", 1779357927L);
         ImageV4Response image2 = createImage("image-2", "7.13.1.706", "76410574", "76397095", 1779357928L);
 
         List<ImageV4Response> sourceImages = List.of(image1, image2);
         List<ImageV4Response> targetImages = List.of(image1, image2);
 
-        underTest.findUpgradePair(sourceImages, targetImages, underTest::hasDifferentBuildNumber, RUNTIME_731);
+        assertThrows(TestFailException.class, () -> underTest.findUpgradePair(sourceImages, targetImages, underTest::hasDifferentBuildNumber, RUNTIME_731));
     }
 
-    @Test(expectedExceptions = TestFailException.class)
-    public void testFindUpgradePairSingleImage() {
+    @Test
+    void testFindUpgradePairSingleImage() {
         ImageV4Response image = createImage("02e1ac9c", "7.13.1.706", "76410574", "76397095", 1779357927L);
 
         List<ImageV4Response> sourceImages = List.of(image);
         List<ImageV4Response> targetImages = List.of(image);
 
-        underTest.findUpgradePair(sourceImages, targetImages, underTest::hasDifferentBuildNumber, RUNTIME_731);
-    }
-
-    @Test(expectedExceptions = TestFailException.class)
-    public void testFindUpgradePairEmptyLists() {
-        underTest.findUpgradePair(List.of(), List.of(), underTest::hasDifferentBuildNumber, RUNTIME_731);
+        assertThrows(TestFailException.class, () -> underTest.findUpgradePair(sourceImages, targetImages, underTest::hasDifferentBuildNumber, RUNTIME_731));
     }
 
     @Test
-    public void testFindUpgradePairMultipleCandidatesReturnsFirstMatch() {
+    void testFindUpgradePairEmptyLists() {
+        assertThrows(TestFailException.class, () -> underTest.findUpgradePair(List.of(), List.of(), underTest::hasDifferentBuildNumber, RUNTIME_731));
+    }
+
+    @Test
+    void testFindUpgradePairMultipleCandidatesReturnsFirstMatch() {
         ImageV4Response oldImage = createImage("old-image", "7.13.1.0", "60343691", "60371244", 1733695711L);
         ImageV4Response midImage = createImage("mid-image", "7.13.1.706", "76410574", "76397095", 1779357927L);
         ImageV4Response newImage = createImage("new-image", "7.13.1.706", "76410574", "78150083", 1778051478L);
@@ -138,12 +139,12 @@ public class TestUpgradeCandidateProviderTest {
 
         Pair<String, String> result = underTest.findUpgradePair(sourceImages, targetImages, underTest::hasDifferentBuildNumber, RUNTIME_731);
 
-        assertEquals(result.getLeft(), "mid-image");
-        assertEquals(result.getRight(), "new-image");
+        assertEquals("mid-image", result.getLeft());
+        assertEquals("new-image", result.getRight());
     }
 
     @Test
-    public void testExcludedByRuntimeRuleWhenRuntimeRuleMatchesRepositoryVersion() {
+    void testExcludedByRuntimeRuleWhenRuntimeRuleMatchesRepositoryVersion() {
         ImageV4Response image = createImage("service-pack", "7.13.1.706", "76410574", "80138085", 1779357927L);
         image.setStackDetails(createStackDetailsWithRepositoryVersion("7.3.1-1.cdh7.3.1.p900.80138085"));
 
@@ -151,7 +152,7 @@ public class TestUpgradeCandidateProviderTest {
     }
 
     @Test
-    public void testExcludedByRuntimeRuleWhenRuntimeHasNoRules() {
+    void testExcludedByRuntimeRuleWhenRuntimeHasNoRules() {
         ImageV4Response image = createImage("service-pack", "7.13.1.706", "76410574", "80138085", 1779357927L);
         image.setStackDetails(createStackDetailsWithRepositoryVersion("7.3.1-1.cdh7.3.1.p900.80138085"));
 
@@ -159,7 +160,7 @@ public class TestUpgradeCandidateProviderTest {
     }
 
     @Test
-    public void testExcludedByRuntimeRuleWhenRepositoryVersionMissing() {
+    void testExcludedByRuntimeRuleWhenRepositoryVersionMissing() {
         ImageV4Response image = createImage("service-pack", "7.13.1.706", "76410574", "80138085", 1779357927L);
 
         assertFalse(underTest.excludedByRuntimeRule("7.3.1", image));

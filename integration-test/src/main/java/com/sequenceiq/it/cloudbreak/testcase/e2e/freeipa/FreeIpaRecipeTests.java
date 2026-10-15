@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
-import com.sequenceiq.it.cloudbreak.assertion.freeipa.RecipeTestAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.recipe.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -27,7 +27,6 @@ import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
 public class FreeIpaRecipeTests extends AbstractE2ETest {
 
@@ -53,7 +52,7 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
     private RecipeUtil recipeUtil;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private RecipeTestAssertion recipeTestAssertion;
 
     public static String recipePattern(String recipePath) {
         return String.format("Required number [(]1[)] of files are NOT available at '%s' on '.*' instance!", recipePath);
@@ -98,8 +97,8 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnFreeIpa(PRE_RECIPE_FILEPATH, PRE_RECIPE_FILENAME, 1, sshJUtil))
-                .then(RecipeTestAssertion.validateFilesOnFreeIpa(POST_INSTALL_FILEPATH, POST_INSTALL_FILENAME, 1, sshJUtil))
+                .then(recipeTestAssertion.validateFilesOnFreeIpa(PRE_RECIPE_FILEPATH, PRE_RECIPE_FILENAME, 1))
+                .then(recipeTestAssertion.validateFilesOnFreeIpa(POST_INSTALL_FILEPATH, POST_INSTALL_FILENAME, 1))
                 .validate();
     }
 
@@ -107,7 +106,7 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
     @Description(
             given = "a default environment is available with no freeIPA",
             when = "creating a freeIPA for the environment with recipes",
-                and = "freeipa should be up and running furthermore recipes should be available and executed on the freeIPA",
+            and = "freeipa should be up and running furthermore recipes should be available and executed on the freeIPA",
             then = "detached recipes should not be available and executed on the new freeIPA instances")
     public void testDetachFreeIpaRecipes(TestContext testContext) {
         String preRecipeName = testContext
@@ -131,8 +130,8 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.describe())
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnFreeIpa(PRE_RECIPE_FILEPATH, PRE_RECIPE_FILENAME, 1, sshJUtil))
-                .then(RecipeTestAssertion.validateFilesOnFreeIpa(POST_INSTALL_FILEPATH, POST_INSTALL_FILENAME, 1, sshJUtil))
+                .then(recipeTestAssertion.validateFilesOnFreeIpa(PRE_RECIPE_FILEPATH, PRE_RECIPE_FILENAME, 1))
+                .then(recipeTestAssertion.validateFilesOnFreeIpa(POST_INSTALL_FILEPATH, POST_INSTALL_FILENAME, 1))
                 .when(freeIpaTestClient.detachRecipes(List.of(preRecipeName, postInstallRecipeName)))
                 .given(FreeIpaUpscaleTestDto.class)
                     .withAvailabilityType(AvailabilityType.TWO_NODE_BASED)
@@ -140,12 +139,10 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                 .await(Status.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .awaitForHealthyInstances()
-                .thenException(RecipeTestAssertion.validateFilesOnFreeIpa(InstanceMetadataType.GATEWAY, PRE_RECIPE_FILEPATH, PRE_RECIPE_FILENAME,
-                                1, sshJUtil), TestFailException.class,
-                        expectedMessage(recipePattern(PRE_RECIPE_FILEPATH)))
-                .thenException(RecipeTestAssertion.validateFilesOnFreeIpa(InstanceMetadataType.GATEWAY, POST_INSTALL_FILEPATH, POST_INSTALL_FILENAME,
-                                1, sshJUtil), TestFailException.class,
-                        expectedMessage(recipePattern(POST_INSTALL_FILEPATH)))
+                .thenException(recipeTestAssertion.validateFilesOnFreeIpa(InstanceMetadataType.GATEWAY, PRE_RECIPE_FILEPATH, PRE_RECIPE_FILENAME, 1),
+                        TestFailException.class, expectedMessage(recipePattern(PRE_RECIPE_FILEPATH)))
+                .thenException(recipeTestAssertion.validateFilesOnFreeIpa(InstanceMetadataType.GATEWAY, POST_INSTALL_FILEPATH, POST_INSTALL_FILENAME, 1),
+                        TestFailException.class, expectedMessage(recipePattern(POST_INSTALL_FILEPATH)))
                 .validate();
     }
 }

@@ -6,12 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,7 +19,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +26,14 @@ import java.util.Map;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ProcessingException;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -45,78 +45,42 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.client.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
-import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
-import com.sequenceiq.sdx.client.SdxClient;
 
-public class CleanupUtilTest {
+@ExtendWith(MockitoExtension.class)
+class CleanupUtilTest {
 
+    @TempDir
+    Path outputDir;
+
+    @Mock
     private EnvironmentClient environmentClient;
 
+    @Mock
     private CloudbreakClient cloudbreakClient;
 
-    private SdxClient sdxClient;
-
+    @Mock
     private EnvironmentEndpoint environmentEndpoint;
 
+    @Mock
     private CredentialEndpoint credentialEndpoint;
 
+    @Mock
     private DistroXV1Endpoint distroXEndpoint;
 
-    private SdxEndpoint sdxEndpoint;
-
+    @Mock
     private CleanupWaitUtil waitUtil;
 
-    private Path outputDir;
-
+    @InjectMocks
     private CleanupUtil underTest;
 
-    @BeforeMethod
-    public void setUp() throws IOException {
-        environmentClient = mock(EnvironmentClient.class);
-        cloudbreakClient = mock(CloudbreakClient.class);
-        sdxClient = mock(SdxClient.class);
-        environmentEndpoint = mock(EnvironmentEndpoint.class);
-        credentialEndpoint = mock(CredentialEndpoint.class);
-        distroXEndpoint = mock(DistroXV1Endpoint.class);
-        sdxEndpoint = mock(SdxEndpoint.class);
-        waitUtil = mock(CleanupWaitUtil.class);
-
-        outputDir = Files.createTempDirectory("cleanup-util-test");
-
-        // Spy the SUT so cleanupXxx() paths that call createEnvironmentClient()/createCloudbreakClient()/createSdxClient()
-        // pick up our mocks instead of building real HTTP clients.
-        underTest = spy(new CleanupUtil());
-        underTest.setEnvironmentClient(environmentClient);
-        underTest.setCloudbreakClient(cloudbreakClient);
-        underTest.setSdxClient(sdxClient);
-
-        ReflectionTestUtils.setField(underTest, "waitUtil", waitUtil);
+    @BeforeEach
+    void setUp() {
         ReflectionTestUtils.setField(underTest, "outputDirectory", outputDir.toString());
         ReflectionTestUtils.setField(underTest, "cleanupAfterAbort", false);
 
-        doReturn(environmentClient).when(underTest).createEnvironmentClient();
-        lenient().doReturn(cloudbreakClient).when(underTest).createCloudbreakClient();
-        lenient().doReturn(sdxClient).when(underTest).createSdxClient();
-
-        // Endpoint wiring — lenient because not every test hits every endpoint.
         lenient().when(environmentClient.environmentV1Endpoint()).thenReturn(environmentEndpoint);
         lenient().when(environmentClient.credentialV1Endpoint()).thenReturn(credentialEndpoint);
         lenient().when(cloudbreakClient.distroXV1Endpoint()).thenReturn(distroXEndpoint);
-        lenient().when(sdxClient.sdxEndpoint()).thenReturn(sdxEndpoint);
-    }
-
-    @AfterMethod
-    public void tearDown() throws IOException {
-        if (outputDir != null && Files.exists(outputDir)) {
-            try (var stream = Files.walk(outputDir)) {
-                stream.sorted(Comparator.reverseOrder()).forEach(p -> {
-                    try {
-                        Files.deleteIfExists(p);
-                    } catch (IOException ignored) {
-                    }
-                });
-            }
-        }
     }
 
     /**
@@ -127,7 +91,7 @@ public class CleanupUtilTest {
     void deleteResourcesAllDeletesSucceedNoException() throws Exception {
         writeResourceFile("resource_names_1.json", "{\"distroxName\": [\"distroA\"]}");
 
-        lenient().when(waitUtil.waitForDistroxCleanup(cloudbreakClient, "distroA")).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForDistroxCleanup(cloudbreakClient, "distroA")).thenReturn(WaitResult.SUCCESSFUL);
         // Re-list: no environments → getDistroxes() sees no distroxes → no leftovers.
         when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
 
@@ -183,7 +147,7 @@ public class CleanupUtilTest {
         // First delete blows up → deleteDistrox rewraps as RuntimeException.
         doThrow(new RuntimeException("boom")).when(distroXEndpoint).deleteByName(eq("distroA"), anyBoolean());
         // Second delete succeeds. Wait returns SUCCESSFUL.
-        lenient().when(waitUtil.waitForDistroxCleanup(cloudbreakClient, "distroB")).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForDistroxCleanup(cloudbreakClient, "distroB")).thenReturn(WaitResult.SUCCESSFUL);
         // Re-list: no environments so no leftovers found.
         when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
 
@@ -202,7 +166,7 @@ public class CleanupUtilTest {
     void deleteResourcesResourceNotInFoundListSkipped() throws Exception {
         writeResourceFile("resource_names_1.json", "{\"credentialName\": [\"credA\", \"credB\"]}");
 
-        lenient().when(credentialEndpoint.list()).thenReturn(emptyCredResponses());
+        when(credentialEndpoint.list()).thenReturn(emptyCredResponses());
 
         assertThatCode(() -> invokeDeleteResources(List.of("credA"), "credentialName", new CleanupReport()))
                 .doesNotThrowAnyException();

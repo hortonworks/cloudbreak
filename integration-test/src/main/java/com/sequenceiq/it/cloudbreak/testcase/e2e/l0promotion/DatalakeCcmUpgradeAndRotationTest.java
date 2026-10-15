@@ -47,7 +47,7 @@ import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -75,7 +75,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
     private SdxUtil sdxUtil;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private SshJClientActions sshJClientActions;
 
     @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
@@ -132,7 +132,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
                             "ccm-tunnel@KNOX", false,
                             "jumpgate-agent", ccmVersion.useCcmV2OrJumpgate()
                     );
-                    return sshJUtil.checkSystemctlServiceStatus(testDto, testDto.getEnvironmentCrn(), client, serviceStatusesByName);
+                    return sshJClientActions.checkSystemctlServiceStatus(testDto, testDto.getEnvironmentCrn(), client, serviceStatusesByName);
                 })
                 .given(SdxInternalTestDto.class)
                 .then((tc, testDto, client) -> {
@@ -142,7 +142,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
                             "jumpgate-agent", ccmVersion.useCcmV2()
                     );
                     List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getStackV4Response().getInstanceGroups();
-                    return sshJUtil.checkSystemctlServiceStatus(testDto, instanceGroups, List.of(MASTER.getName()), serviceStatusesByName);
+                    return sshJClientActions.checkSystemctlServiceStatus(testDto, instanceGroups, List.of(MASTER.getName()), serviceStatusesByName);
                 })
                 .validate();
     }

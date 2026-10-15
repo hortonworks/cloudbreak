@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,9 +16,13 @@ import java.util.Map;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ProcessingException;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -35,32 +38,32 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.client.SdxClient;
 
-public class CleanupWaitUtilTest {
+@ExtendWith(MockitoExtension.class)
+class CleanupWaitUtilTest {
 
+    @Mock
     private CloudbreakClient cloudbreakClient;
 
+    @Mock
     private SdxClient sdxClient;
 
+    @Mock
     private EnvironmentClient environmentClient;
 
+    @Mock
     private DistroXV1Endpoint distroXEndpoint;
 
+    @Mock
     private SdxEndpoint sdxEndpoint;
 
+    @Mock
     private EnvironmentEndpoint environmentEndpoint;
 
+    @InjectMocks
     private CleanupWaitUtil underTest;
 
-    @BeforeMethod
-    public void setUp() {
-        cloudbreakClient = mock(CloudbreakClient.class);
-        sdxClient = mock(SdxClient.class);
-        environmentClient = mock(EnvironmentClient.class);
-        distroXEndpoint = mock(DistroXV1Endpoint.class);
-        sdxEndpoint = mock(SdxEndpoint.class);
-        environmentEndpoint = mock(EnvironmentEndpoint.class);
-
-        underTest = new CleanupWaitUtil();
+    @BeforeEach
+    void setUp() {
         // Keep the poll loops (not exercised here) from being slow if they ever run.
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1L);
         ReflectionTestUtils.setField(underTest, "maxRetry", 1);
