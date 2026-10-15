@@ -114,10 +114,11 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_IMAGE_CATALOG)
     public CustomImageCatalogV4CreateResponse create(CustomImageCatalogV4CreateRequest request, @AccountId String accountId) {
+        String callerAccountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         ImageCatalog imageCatalog = customImageCatalogV4CreateRequestToImageCatalogConverter.convert(request);
         ImageCatalog savedImageCatalog = customImageCatalogService
-                .create(imageCatalog, restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, creator);
+                .create(imageCatalog, restRequestThreadLocalService.getRequestedWorkspaceId(), callerAccountId, creator);
 
         return imageCatalogToCustomImageCatalogV4CreateResponseConverter.convert(savedImageCatalog);
     }
@@ -146,9 +147,10 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public CustomImageCatalogV4CreateImageResponse createCustomImage(@ResourceName String name,
             CustomImageCatalogV4CreateImageRequest request, @AccountId String accountId) {
+        String callerAccountId = ThreadBasedUserCrnProvider.getAccountId();
         CustomImage customImage = customImageCatalogV4CreateImageRequestToCustomImageConverter.convert(request);
         CustomImage savedCustomImage = customImageCatalogService
-                .createOrUpdateCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, name, customImage);
+                .createOrUpdateCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), callerAccountId, name, customImage);
 
         return customImageToCustomImageCatalogV4CreateImageResponseConverter.convert(savedCustomImage);
     }

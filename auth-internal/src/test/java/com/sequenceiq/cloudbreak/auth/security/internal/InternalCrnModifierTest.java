@@ -187,6 +187,30 @@ class InternalCrnModifierTest {
     }
 
     @Test
+    void testModificationIfUserCrnIsInternalAndAccountIdParameterPresent() {
+        when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.of("1234"));
+        doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
+
+        AtomicBoolean assertationHappened = new AtomicBoolean(false);
+        when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
+            assertEquals(EXPECTED_INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertationHappened.set(true);
+            return null;
+        });
+
+        ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> {
+            underTest.changeInternalCrn(proceedingJoinPoint);
+        });
+
+        ArgumentCaptor<CrnUser> newUserCaptor = ArgumentCaptor.forClass(CrnUser.class);
+        verify(internalUserModifier, times(1)).persistModifiedInternalUser(newUserCaptor.capture());
+        assertEquals("1234", newUserCaptor.getValue().getTenant());
+        verify(reflectionUtil, times(0)).getParameter(any(), any(), eq(ResourceCrn.class));
+        verify(reflectionUtil, times(1)).proceed(any());
+        assertTrue(assertationHappened.get());
+    }
+
+    @Test
     void testModificationIfUserCrnIsInternalAndTenantAwareObjectPresent() {
         when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(ResourceCrn.class))).thenReturn(Optional.empty());

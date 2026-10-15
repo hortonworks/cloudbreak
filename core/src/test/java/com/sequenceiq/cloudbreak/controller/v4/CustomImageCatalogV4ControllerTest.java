@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +9,9 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,6 +61,8 @@ public class CustomImageCatalogV4ControllerTest {
     private static final String USER_CRN = "crn:altus:iam:us-west-1:1:user:2";
 
     private static final String ACCOUNT_ID = "123";
+
+    private static final String USER_ACCOUNT_ID = "1";
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -134,8 +138,10 @@ public class CustomImageCatalogV4ControllerTest {
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void testCreate() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = ACCOUNT_ID)
+    public void testCreateUsesTheAccountOfTheCaller(String requestedAccountId) {
         CustomImageCatalogV4CreateRequest request = new CustomImageCatalogV4CreateRequest();
         ImageCatalog imageCatalog = new ImageCatalog();
         ImageCatalog savedImageCatalog = new ImageCatalog();
@@ -143,11 +149,11 @@ public class CustomImageCatalogV4ControllerTest {
 
         when(customImageCatalogV4CreateRequestToImageCatalogConverter.convert(request)).thenReturn(imageCatalog);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(customImageCatalogService.create(eq(imageCatalog), eq(WORKSPACE_ID), anyString(), eq(USER_CRN))).thenReturn(savedImageCatalog);
+        when(customImageCatalogService.create(imageCatalog, WORKSPACE_ID, USER_ACCOUNT_ID, USER_CRN)).thenReturn(savedImageCatalog);
         when(imageCatalogToCustomImageCatalogV4CreateResponseConverter.convert(savedImageCatalog)).thenReturn(expected);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            CustomImageCatalogV4CreateResponse actual = victim.create(request, ACCOUNT_ID);
+            CustomImageCatalogV4CreateResponse actual = victim.create(request, requestedAccountId);
 
             assertEquals(expected, actual);
         });
@@ -185,8 +191,10 @@ public class CustomImageCatalogV4ControllerTest {
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void testCreateCustomImage() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = ACCOUNT_ID)
+    public void testCreateCustomImageUsesTheAccountOfTheCaller(String requestedAccountId) {
         CustomImageCatalogV4CreateImageRequest request = new CustomImageCatalogV4CreateImageRequest();
         CustomImage customImage = new CustomImage();
         CustomImage savedCustomImage = new CustomImage();
@@ -194,13 +202,15 @@ public class CustomImageCatalogV4ControllerTest {
 
         when(customImageCatalogV4CreateImageRequestToCustomImageConverter.convert(request)).thenReturn(customImage);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(customImageCatalogService.createOrUpdateCustomImage(eq(WORKSPACE_ID), anyString(), eq(IMAGE_CATALOG_NAME), eq(customImage)))
+        when(customImageCatalogService.createOrUpdateCustomImage(WORKSPACE_ID, USER_ACCOUNT_ID, IMAGE_CATALOG_NAME, customImage))
                 .thenReturn(savedCustomImage);
         when(customImageToCustomImageCatalogV4CreateImageResponseConverter.convert(savedCustomImage)).thenReturn(expected);
 
-        CustomImageCatalogV4CreateImageResponse actual = victim.createCustomImage(IMAGE_CATALOG_NAME, request, ACCOUNT_ID);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            CustomImageCatalogV4CreateImageResponse actual = victim.createCustomImage(IMAGE_CATALOG_NAME, request, requestedAccountId);
 
-        assertEquals(expected, actual);
+            assertEquals(expected, actual);
+        });
     }
 
     @Test
