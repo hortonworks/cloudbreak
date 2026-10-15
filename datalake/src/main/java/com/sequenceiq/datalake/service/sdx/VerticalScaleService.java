@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
@@ -43,6 +42,8 @@ public class VerticalScaleService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VerticalScaleService.class);
 
+    private static final Long WORKSPACE_ID = 0L;
+
     @Inject
     private SdxService sdxService;
 
@@ -60,9 +61,6 @@ public class VerticalScaleService {
 
     @Inject
     private SdxReactorFlowManager sdxReactorFlowManager;
-
-    @Inject
-    private DiskUpdateEndpoint diskUpdateEndpoint;
 
     @Inject
     private SdxWaitService sdxWaitService;
@@ -92,12 +90,20 @@ public class VerticalScaleService {
     }
 
     private void validateVerticalScale(SdxCluster sdxCluster, StackVerticalScaleV4Request request, String userCrn) {
+        validateOnCore(sdxCluster, "Vertical scale",
+                () -> stackV4Endpoint.verticalScalingValidateByName(WORKSPACE_ID, sdxCluster.getClusterName(), userCrn, request));
+    }
+
+    /**
+     * Runs a core validation endpoint as the internal actor and normalizes any {@link WebApplicationException} the core
+     * raised into a {@link BadRequestException} carrying the extracted error message, so the caller returns 400 to the user.
+     */
+    private void validateOnCore(SdxCluster sdxCluster, String operation, Runnable validation) {
         try {
-            ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> stackV4Endpoint.verticalScalingValidateByName(0L, sdxCluster.getClusterName(), userCrn, request));
+            ThreadBasedUserCrnProvider.doAsInternalActor(validation::run);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.info("Vertical scale validation failed for Data Lake {}: {}", sdxCluster.getClusterName(), errorMessage, e);
+            LOGGER.info("{} validation failed for Data Lake {}: {}", operation, sdxCluster.getClusterName(), errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }
     }
@@ -113,7 +119,7 @@ public class VerticalScaleService {
         try {
             LOGGER.debug("Vertical scale starts in group of {} with instanceType: {}", request.getGroup(), request.getTemplate().getInstanceType());
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> stackV4Endpoint.verticalScalingByName(0L, sdxCluster.getClusterName(), initiatorUserCrn, request));
+                    () -> stackV4Endpoint.verticalScalingByName(WORKSPACE_ID, sdxCluster.getClusterName(), initiatorUserCrn, request));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
                     "Data Lake vertical scale in progress", sdxCluster);
@@ -134,15 +140,18 @@ public class VerticalScaleService {
         LOGGER.debug("Waiting for vertical scale flow");
         sdxWaitService.waitForCloudbreakFlow(id, pollingConfig, "Polling stack vertical scale flow");
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
+                () -> stackV4Endpoint.get(WORKSPACE_ID, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
     }
 
     public FlowIdentifier updateDisksDatalake(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        validateDatalakeDiskUpdate(sdxCluster, updateRequest);
         return sdxReactorFlowManager.triggerDatalakeDiskUpdate(sdxCluster, updateRequest, userCrn);
     }
 
-    public boolean getDiskTypeChangeSupported(String cloudPlatform) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> diskUpdateEndpoint.isDiskTypeChangeSupported(cloudPlatform));
+    private void validateDatalakeDiskUpdate(SdxCluster sdxCluster, DiskUpdateRequest updateRequest) {
+        validateOnCore(sdxCluster, "Disk update",
+                () -> stackV4Endpoint.validateDiskUpdateByCrnInternal(WORKSPACE_ID, sdxCluster.getStackCrn(), updateRequest));
     }
 
     public FlowIdentifier addVolumesDatalake(SdxCluster sdxCluster, StackAddVolumesRequest addVolumesRequest, String userCrn) {
@@ -150,6 +159,13 @@ public class VerticalScaleService {
     }
 
     public FlowIdentifier updateRootVolumeDatalake(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        validateDatalakeRootVolumeUpdate(sdxCluster, updateRequest);
         return sdxReactorFlowManager.triggerDatalakeRootVolumeUpdate(sdxCluster, updateRequest, userCrn);
+    }
+
+    private void validateDatalakeRootVolumeUpdate(SdxCluster sdxCluster, DiskUpdateRequest updateRequest) {
+        validateOnCore(sdxCluster, "Root volume update",
+                () -> stackV4Endpoint.validateRootVolumeUpdateByCrnInternal(WORKSPACE_ID, sdxCluster.getStackCrn(), updateRequest));
     }
 }

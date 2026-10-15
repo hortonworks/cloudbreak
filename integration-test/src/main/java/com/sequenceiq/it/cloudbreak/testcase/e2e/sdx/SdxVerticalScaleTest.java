@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
@@ -145,7 +146,7 @@ public class SdxVerticalScaleTest extends PreconditionSdxE2ETest {
         Map<String, String> instanceIpIdsMap = InstanceUtil.getInstanceIpIdMap(List.of(instanceGroup), TEST_INSTANCE_GROUP);
         validateFstab(sdxClusterDetailResponse.getStackV4Response(), instanceIps, instanceIpIdsMap);
         CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
-        List<String> attachedVolumes = cloudFunctionality.listInstancesVolumeIds(sdxTestDto.getName(), updatedInstances);
+        List<String> attachedVolumes = getAttachedVolumeIdsFromResourceFilterOutDatabaseDisk(sdxClusterDetailResponse, updatedInstances);
         List<Volume> attachedVolumesAttributes = cloudFunctionality.describeVolumes(attachedVolumes);
         AtomicInteger cbVolumesCount = new AtomicInteger();
         instanceGroup.getTemplate().getAttachedVolumes().forEach(vol -> {
@@ -169,6 +170,22 @@ public class SdxVerticalScaleTest extends PreconditionSdxE2ETest {
             validateOrThrow(cbVolumesCount.get(), "DATABASE");
             validateOrThrow(cbVolumesCount.get(), "CLOUD_PROVIDER");
         }
+    }
+
+    @NotNull
+    private static List<String> getAttachedVolumeIdsFromResourceFilterOutDatabaseDisk(SdxClusterDetailResponse sdxClusterDetailResponse,
+        List<String> updatedInstances) {
+        return sdxClusterDetailResponse.getStackV4Response().getResources().stream()
+                .filter(res -> updatedInstances.contains(res.getInstanceId()) && (res.getResourceType().toString().contains("_VOLUMESET")
+                        || res.getResourceType().toString().contains("_DISKSET")))
+                .map(res -> {
+                    try {
+                        return new Json(res.getAttributes()).get(VolumeSetAttributes.class).getVolumes();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).flatMap(List::stream).filter(vol -> vol.getCloudVolumeUsageType() != CloudVolumeUsageType.DATABASE)
+                .map(VolumeSetAttributes.Volume::getId).toList();
     }
 
     private String getExceptionMessage(CloudPlatform cloudPlatform, int size, String volumeType, String expectedVolumeType, boolean cloudProviderException) {

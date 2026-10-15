@@ -284,6 +284,22 @@ class StackV4ControllerTest {
     }
 
     @Test
+    void testDiskUpdateValidateByCrnInternal() {
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        doAs(USER_CRN, () -> underTest.validateDiskUpdateByCrnInternal(WORKSPACE_ID, STACK_CRN, diskUpdateRequest));
+
+        verify(stackOperationService).validateStackDiskUpdate(NameOrCrn.ofCrn(STACK_CRN), diskUpdateRequest, ACCOUNT_ID);
+    }
+
+    @Test
+    void testValidateRootVolumeUpdateByCrnInternal() {
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        doAs(USER_CRN, () -> underTest.validateRootVolumeUpdateByCrnInternal(WORKSPACE_ID, STACK_CRN, diskUpdateRequest));
+
+        verify(stackOperationService).validateRootVolumeDiskUpdate(NameOrCrn.ofCrn(STACK_CRN), diskUpdateRequest, ACCOUNT_ID);
+    }
+
+    @Test
     void testMigrateDatabaseByCrnInternal() {
         doAs(USER_CRN, () -> {
             underTest.migrateDatabaseByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN);
