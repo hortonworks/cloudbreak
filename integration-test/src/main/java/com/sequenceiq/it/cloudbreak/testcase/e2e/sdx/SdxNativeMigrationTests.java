@@ -13,6 +13,7 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
@@ -86,6 +87,7 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
         String freeIpaImageCatalogUrl = commonCloudProperties().getFreeipaImageCatalogUrl();
         LastAndNewestImage images = freeIpaImageUtil.getLastAndNewestImageByOs(
                 freeIpaImageCatalogUrl,
+                Architecture.X86_64,
                 testContext.getCloudProvider().getCloudPlatform().name(),
                 testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
                 testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS()

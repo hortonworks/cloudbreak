@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -91,6 +92,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
         String freeIpaImageCatalogUrl = commonCloudProperties().getFreeipaImageCatalogUrl();
         LastAndNewestImage images = freeIpaImageUtil.getLastAndNewestImageByOs(
                 freeIpaImageCatalogUrl,
+                Architecture.X86_64,
                 testContext.getCloudProvider().getCloudPlatform().name(),
                 testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
                 testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS()

@@ -371,11 +371,13 @@ integrationtest:
       instanceType: Standard_D8s_v5
       arm64InstanceType:
       upgrade:
-        sourceOs: CENTOS7
-        destinationOs: RHEL8
+        sourceOs: RHEL8
+        destinationOs: RHEL9
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
       marketplace:
         upgrade:
+            sourceOs: CENTOS7
+            destinationOs: CENTOS7
             imageId: 5cc93573-4bf2-49f3-927b-b12a52f72dba
             catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/v3-mp-freeipa-image-catalog.json
       rebuild:

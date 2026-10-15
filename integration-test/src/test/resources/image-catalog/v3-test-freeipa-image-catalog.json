@@ -1,0 +1,1166 @@
+{
+  "images": {
+    "freeipa-images": [
+      {
+        "created": 1688049314,
+        "published": 1688052047,
+        "date": "2023-06-29",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws_gov": {
+            "us-gov-east-1": "ami-08b0aff26c8269277",
+            "us-gov-west-1": "ami-0f19a0b4b3d129f3e"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "799f9cbb-7ff6-4b21-bbd5-3da063f54b65",
+        "tags": {
+          "fips-mode": "enabled"
+        }
+      },
+      {
+        "created": 1688948119,
+        "published": 1688950122,
+        "date": "2023-07-10",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "asia-east1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "asia-east2": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "asia-northeast1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "asia-northeast2": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "asia-northeast3": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "asia-south1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "asia-south2": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "asia-southeast1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "asia-southeast2": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "australia-southeast1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "australia-southeast2": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "europe-central2": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "europe-north1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "europe-west1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "europe-west2": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "europe-west3": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "europe-west4": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "europe-west6": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "northamerica-northeast1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "northamerica-northeast2": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "southamerica-east1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "southamerica-west1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "us-central1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "us-east1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "us-east4": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "us-west1": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "us-west2": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "us-west3": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz",
+            "us-west4": "cloudera-freeipa-images/freeipa-cdh--1688948109.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "f8218b08-a933-49bd-bcf7-49c043843867"
+      },
+      {
+        "created": 1700612385,
+        "published": 1700614469,
+        "date": "2023-11-22",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "asia-east1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "asia-east2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "asia-northeast1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "asia-northeast2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "asia-northeast3": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "asia-south1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "asia-south2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "asia-southeast1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "asia-southeast2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "australia-southeast1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "australia-southeast2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "europe-central2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "europe-north1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "europe-west1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "europe-west2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "europe-west3": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "europe-west4": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "europe-west6": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "me-central1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "me-central2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "northamerica-northeast1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "northamerica-northeast2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "southamerica-east1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "southamerica-west1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "us-central1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "us-east1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "us-east4": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "us-west1": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "us-west2": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "us-west3": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz",
+            "us-west4": "cloudera-freeipa-images/freeipa-cdh--1700612361.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "3187a7d0-8ff2-401f-93ad-fa8813298216",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1700612365,
+        "published": 1700614865,
+        "date": "2023-11-22",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia Central": "https://cldraustraliacentral.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Australia East": "https://cldraustraliaeast.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Australia Southeast": "https://cldraustralisoutheast.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Brazil South": "https://cldrbrazilsouth.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Canada Central": "https://cldrcanadacentral.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Canada East": "https://cldrcanadaeast.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Central India": "https://cldrcentralindia.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Central US": "https://cldrcentralus.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "East Asia": "https://cldreastasia.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "East US": "https://cldreastus.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "East US 2": "https://cldreastus2.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "France Central": "https://cldrfrancecentral.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Germany West Central": "https://cldrgermanywestcentral.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Japan East": "https://cldrjapaneast.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Japan West": "https://cldrjapanwest.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Korea Central": "https://cldrkoreacentral.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Korea South": "https://cldrkoreasouth.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "North Central US": "https://cldrnorthcentralus.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "North Europe": "https://cldrnortheurope.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Norway East": "https://cldrnorwayeast.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Qatar Central": "https://cldrqatarcentral.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "South Africa North": "https://cldrsouthafricanorth.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "South Central US": "https://cldrsouthcentralus.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "South India": "https://cldrsouthindia.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Southeast Asia": "https://cldrsoutheastasia.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "Switzerland North": "https://cldrswitzerlandnorth.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "UAE North": "https://cldruaenorth.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "UK South": "https://cldruksouth.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "UK West": "https://cldrukwest.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "West Central US": "https://cldrwestcentralus.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "West Europe": "https://cldrwesteurope.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "West India": "https://cldrwestindia.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "West US 2": "https://cldrwestus2.blob.core.windows.net/images/freeipa-cdh--1700612301.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1700612301"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "b0b763f2-7bc5-4154-9717-09306ade60c1",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1702553325,
+        "published": 1702555200,
+        "date": "2023-12-14",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia Central": "https://cldraustraliacentral.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Australia East": "https://cldraustraliaeast.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Australia Southeast": "https://cldraustralisoutheast.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Brazil South": "https://cldrbrazilsouth.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Canada Central": "https://cldrcanadacentral.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Canada East": "https://cldrcanadaeast.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Central India": "https://cldrcentralindia.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Central US": "https://cldrcentralus.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "East Asia": "https://cldreastasia.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "East US": "https://cldreastus.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "East US 2": "https://cldreastus2.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "France Central": "https://cldrfrancecentral.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Germany West Central": "https://cldrgermanywestcentral.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Japan East": "https://cldrjapaneast.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Japan West": "https://cldrjapanwest.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Korea Central": "https://cldrkoreacentral.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Korea South": "https://cldrkoreasouth.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "North Central US": "https://cldrnorthcentralus.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "North Europe": "https://cldrnortheurope.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Norway East": "https://cldrnorwayeast.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Qatar Central": "https://cldrqatarcentral.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "South Africa North": "https://cldrsouthafricanorth.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "South Central US": "https://cldrsouthcentralus.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "South India": "https://cldrsouthindia.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Southeast Asia": "https://cldrsoutheastasia.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "Switzerland North": "https://cldrswitzerlandnorth.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "UAE North": "https://cldruaenorth.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "UK South": "https://cldruksouth.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "UK West": "https://cldrukwest.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "West Central US": "https://cldrwestcentralus.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "West Europe": "https://cldrwesteurope.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "West India": "https://cldrwestindia.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "West US 2": "https://cldrwestus2.blob.core.windows.net/images/freeipa-cdh--1702553263.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1702553263"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "3dd14b63-6dd8-455a-8979-006fa8904316",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1704799484,
+        "published": 1704801748,
+        "date": "2024-01-09",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia Central": "https://cldraustraliacentral.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Australia East": "https://cldraustraliaeast.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Australia Southeast": "https://cldraustralisoutheast.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Brazil South": "https://cldrbrazilsouth.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Canada Central": "https://cldrcanadacentral.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Canada East": "https://cldrcanadaeast.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Central India": "https://cldrcentralindia.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Central US": "https://cldrcentralus.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "East Asia": "https://cldreastasia.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "East US": "https://cldreastus.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "East US 2": "https://cldreastus2.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "France Central": "https://cldrfrancecentral.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Germany West Central": "https://cldrgermanywestcentral.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Japan East": "https://cldrjapaneast.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Japan West": "https://cldrjapanwest.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Korea Central": "https://cldrkoreacentral.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Korea South": "https://cldrkoreasouth.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "North Central US": "https://cldrnorthcentralus.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "North Europe": "https://cldrnortheurope.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Norway East": "https://cldrnorwayeast.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Qatar Central": "https://cldrqatarcentral.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "South Africa North": "https://cldrsouthafricanorth.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "South Central US": "https://cldrsouthcentralus.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "South India": "https://cldrsouthindia.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Southeast Asia": "https://cldrsoutheastasia.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "Switzerland North": "https://cldrswitzerlandnorth.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "UAE North": "https://cldruaenorth.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "UK South": "https://cldruksouth.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "UK West": "https://cldrukwest.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "West Central US": "https://cldrwestcentralus.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "West Europe": "https://cldrwesteurope.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "West India": "https://cldrwestindia.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "West US 2": "https://cldrwestus2.blob.core.windows.net/images/freeipa-cdh--1704799346.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1704799346"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "a65e7c6b-68ab-49bc-9753-f7d858ded2e6",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1704799390,
+        "published": 1704801571,
+        "date": "2024-01-09",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "asia-east1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "asia-east2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "asia-northeast1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "asia-northeast2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "asia-northeast3": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "asia-south1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "asia-south2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "asia-southeast1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "asia-southeast2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "australia-southeast1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "australia-southeast2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "europe-central2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "europe-north1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "europe-west1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "europe-west2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "europe-west3": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "europe-west4": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "europe-west6": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "me-central1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "me-central2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "northamerica-northeast1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "northamerica-northeast2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "southamerica-east1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "southamerica-west1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "us-central1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "us-east1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "us-east4": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "us-west1": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "us-west2": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "us-west3": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz",
+            "us-west4": "cloudera-freeipa-images/freeipa-cdh--1704799355.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "4315d763-4b47-4f79-b138-e526d4a4f8c9",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1709851964,
+        "published": 1709855628,
+        "date": "2024-03-07",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "af-south-1": "ami-0e1a2a6ddfee4c02f",
+            "ap-east-1": "ami-0cc246c539db44939",
+            "ap-northeast-1": "ami-026f5f3805a93eef4",
+            "ap-northeast-2": "ami-032f2a659afeb0fc0",
+            "ap-south-1": "ami-0fd88ab9a0ef7e534",
+            "ap-southeast-1": "ami-0e4bdf646d335b471",
+            "ap-southeast-2": "ami-07a79cdc490c79f16",
+            "ap-southeast-3": "ami-00ddc1845867e03fd",
+            "ca-central-1": "ami-0f226008deb8dce13",
+            "eu-central-1": "ami-0b1fbb345dee3ff53",
+            "eu-central-2": "ami-0db1a7f12d8bdae3d",
+            "eu-north-1": "ami-08741b182cbf88df9",
+            "eu-south-1": "ami-0b7d82a2b9507d3fc",
+            "eu-south-2": "ami-0984b6c6d9df878fd",
+            "eu-west-1": "ami-03fa9d627229154a6",
+            "eu-west-2": "ami-0f692c7621d2dd343",
+            "eu-west-3": "ami-05f39704a3494761f",
+            "il-central-1": "ami-04c53251ad6fd5c0e",
+            "me-central-1": "ami-0caa80b0c63ea9e70",
+            "me-south-1": "ami-02a2f9129ea51b2b6",
+            "sa-east-1": "ami-0608c814f8f8d4cfe",
+            "us-east-1": "ami-073bfc2e10adf1302",
+            "us-east-2": "ami-0513c89632adfaebd",
+            "us-west-1": "ami-095ad859014fffab0",
+            "us-west-2": "ami-00924e41853ad46fb"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "5e7ac669-c352-4f02-b900-dfc3ab90a8c1",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1710323037,
+        "published": 1710325374,
+        "date": "2024-03-13",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "af-south-1": "ami-07ed20bab8c5e6bd7",
+            "ap-east-1": "ami-049e1cabec0c35e74",
+            "ap-northeast-1": "ami-04395fdf9159bb91d",
+            "ap-northeast-2": "ami-06b5b55ca71c9ce1a",
+            "ap-south-1": "ami-0587213215e671f32",
+            "ap-southeast-1": "ami-0eccec72fb0fe6919",
+            "ap-southeast-2": "ami-0fe6b929b73f2dba6",
+            "ap-southeast-3": "ami-01f811b79d2b26c2a",
+            "ca-central-1": "ami-01a51f0550841f6dc",
+            "eu-central-1": "ami-02d1ab4f0e0bac111",
+            "eu-central-2": "ami-03145fe700e17acf9",
+            "eu-north-1": "ami-0aca163eac9197b4c",
+            "eu-south-1": "ami-0c16ee3bcd6f4fc1f",
+            "eu-south-2": "ami-0d60063a471a5f7fd",
+            "eu-west-1": "ami-0d2b6c8cd9112edfe",
+            "eu-west-2": "ami-0c9c6ed87b69bc8fc",
+            "eu-west-3": "ami-0dd6dc9bf4cac6ce8",
+            "il-central-1": "ami-00fc072ea513a46fd",
+            "me-central-1": "ami-0abbe58c8b4360df6",
+            "me-south-1": "ami-08806bf8724f347ff",
+            "sa-east-1": "ami-07ba72efc00b2e8f4",
+            "us-east-1": "ami-07ba5988632a49e47",
+            "us-east-2": "ami-087a6967de6f04db5",
+            "us-west-1": "ami-07e8243dbbd5a5909",
+            "us-west-2": "ami-070fee442766990d3"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "6714460f-d71b-4a4b-a07d-0022ea096967",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1710323032,
+        "published": 1710327082,
+        "date": "2024-03-13",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "af-south-1": "ami-08b51faa114231986",
+            "ap-east-1": "ami-05c669e1a6b020ad6",
+            "ap-northeast-1": "ami-0dac4081602746a0f",
+            "ap-northeast-2": "ami-0e528b1665ff4d5db",
+            "ap-south-1": "ami-051cb339a02a4dda8",
+            "ap-southeast-1": "ami-04c660d3186669fdb",
+            "ap-southeast-2": "ami-0dd5f00c4cc6c6af6",
+            "ap-southeast-3": "ami-0d6fff4e830d8d63b",
+            "ca-central-1": "ami-0cf5fc7dd393ee9cd",
+            "eu-central-1": "ami-045bee879d5f09419",
+            "eu-central-2": "ami-013c61941e3bc4590",
+            "eu-north-1": "ami-0f305324858b7a0b7",
+            "eu-south-1": "ami-03e07790115757da4",
+            "eu-south-2": "ami-08ed6d115d03c9af9",
+            "eu-west-1": "ami-0a2166d310e98517f",
+            "eu-west-2": "ami-075567ecb56ed5cc4",
+            "eu-west-3": "ami-03138ad7e22318031",
+            "il-central-1": "ami-079bb7bceb192f788",
+            "me-central-1": "ami-0970a6e9fc3900d40",
+            "me-south-1": "ami-0f0d63f695f9dd5c2",
+            "sa-east-1": "ami-0d9ec5bf6809bcbe1",
+            "us-east-1": "ami-0d407b7a0b076157d",
+            "us-east-2": "ami-0a3fd6d25611cf789",
+            "us-west-1": "ami-07367cc0ef8209d45",
+            "us-west-2": "ami-0360e781e75eff34a"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "7484b7d1-f0da-4dfe-9cfb-a1f557b43302",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1714954629,
+        "published": 1714957254,
+        "date": "2024-05-06",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "af-south-1": "ami-00533e64ff78e1a5a",
+            "ap-east-1": "ami-060a74bcc22941345",
+            "ap-northeast-1": "ami-0b71a2ec4034c26b4",
+            "ap-northeast-2": "ami-060cc64d00be9fa94",
+            "ap-south-1": "ami-0ed7e81aba8b46a26",
+            "ap-south-2": "ami-07550544233ddee72",
+            "ap-southeast-1": "ami-034a56903f6beb8c2",
+            "ap-southeast-2": "ami-0687ab65b79c49be2",
+            "ap-southeast-3": "ami-0b7042a079063d3da",
+            "ca-central-1": "ami-0dd42d48691b9783c",
+            "ca-west-1": "ami-05ebdf096129670ae",
+            "eu-central-1": "ami-041635ee59a0d8d2f",
+            "eu-central-2": "ami-0b433f1a2faec96e8",
+            "eu-north-1": "ami-09f244c9cf5611a08",
+            "eu-south-1": "ami-061d292d911c637fd",
+            "eu-south-2": "ami-0537dbce6994e295d",
+            "eu-west-1": "ami-0b2095d0b2abb71fb",
+            "eu-west-2": "ami-02d854a8d7e6061a1",
+            "eu-west-3": "ami-043d2344440e65528",
+            "il-central-1": "ami-053bb667a72f65b0b",
+            "me-central-1": "ami-0c96a1621e6aa049b",
+            "me-south-1": "ami-0f378c0ceb845dfb8",
+            "sa-east-1": "ami-0ca632971258061c0",
+            "us-east-1": "ami-02c36632cd1a4f743",
+            "us-east-2": "ami-0100636aac595ff91",
+            "us-west-1": "ami-082e8bfc2b418641d",
+            "us-west-2": "ami-0ff529dc3caf55957"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "1015105b-4c87-43be-98fd-561e578d158b",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1717201035,
+        "published": 1717240317,
+        "date": "2024-06-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-06fea2b6994c7136f",
+            "us-west-1": "ami-09f85f936936820b2",
+            "us-west-2": "ami-0f32afb3591aeb563"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "b35e513c-7065-496b-9774-f439781735b5",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1717201098,
+        "published": 1717240322,
+        "date": "2024-06-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Central US": "https://cldrcentralus.blob.core.windows.net/images/freeipa-cdh--1717201018.vhd",
+            "East US": "https://cldreastus.blob.core.windows.net/images/freeipa-cdh--1717201018.vhd",
+            "East US 2": "https://cldreastus2.blob.core.windows.net/images/freeipa-cdh--1717201018.vhd",
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-cdh--1717201018.vhd",
+            "West US 2": "https://cldrwestus2.blob.core.windows.net/images/freeipa-cdh--1717201018.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1717201018"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "0d437323-87df-4867-a154-cf9e278cce54",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1717201084,
+        "published": 1717240327,
+        "date": "2024-06-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "cloudera-freeipa-images/freeipa-cdh--1717201050.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "78a376af-f892-488c-ac9e-d11368f05c7c",
+        "tags": {
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1717201195,
+        "published": 1717240336,
+        "date": "2024-06-01",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Central US": "https://cldrcentralus.blob.core.windows.net/images/freeipa-cdh--1717201102.vhd",
+            "East US": "https://cldreastus.blob.core.windows.net/images/freeipa-cdh--1717201102.vhd",
+            "East US 2": "https://cldreastus2.blob.core.windows.net/images/freeipa-cdh--1717201102.vhd",
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-cdh--1717201102.vhd",
+            "West US 2": "https://cldrwestus2.blob.core.windows.net/images/freeipa-cdh--1717201102.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1717201102"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "48946b1f-4ee3-4584-9c02-15f8d3c883c5",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1755613927,
+        "published": 1755617240,
+        "date": "2025-08-19",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-0b6ce139ccb284562",
+            "eu-west-1": "ami-0e2fc64c2dbfa8c5d",
+            "us-west-1": "ami-05fc810cf86b93933",
+            "us-west-2": "ami-087db8d8a568353aa"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "arm64",
+        "uuid": "3da40411-37fa-47ca-9479-96f0e1e771e6",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "reducer-ignore": "true"
+        }
+      },
+      {
+        "created": 1783210639,
+        "published": 1783261162,
+        "date": "2026-07-05",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-09ab24a7cce558046",
+            "eu-west-1": "ami-0f9c06e6724844002",
+            "us-west-1": "ami-0698edbf6e13aee0e",
+            "us-west-2": "ami-0a6f44b0fb2a7ad7a"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "x86_64",
+        "uuid": "a29beacc-954e-4f33-99bb-1019b8076356",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-169",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1783212103,
+        "published": 1783261170,
+        "date": "2026-07-05",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-07a2ae10ca95f8c99",
+            "eu-west-1": "ami-0e386c1e2b8c222b1",
+            "us-west-1": "ami-0dcf5afb66e3a8746",
+            "us-west-2": "ami-0bd68db0ca900ecad"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "arm64",
+        "uuid": "d7d4fe65-09d8-487f-85ff-68027960f219",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-169",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1783210543,
+        "published": 1783261178,
+        "date": "2026-07-05",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "cloudera-freeipa-images/freeipa-1783210531503.tar.gz"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "x86_64",
+        "uuid": "bbfbedf0-093c-439b-80be-b61eb8e22b80",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-169",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1783212115,
+        "published": 1783261186,
+        "date": "2026-07-05",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-0baadafd5f8a43d0e",
+            "eu-west-1": "ami-0ec050bb1d09adbf8",
+            "us-west-1": "ami-024cc9300ccbda8a4",
+            "us-west-2": "ami-05d8c809e9a790674"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "x86_64",
+        "uuid": "f6782285-4b6b-47d7-a3a4-9066fc7a092e",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-169",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1783214230,
+        "published": 1783261194,
+        "date": "2026-07-05",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-1783214190901.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1783214190"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "x86_64",
+        "uuid": "49338b5c-b346-4b75-835a-d309302ffe94",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-169",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1783210546,
+        "published": 1783261202,
+        "date": "2026-07-05",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-1783210505009.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1783210505"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "x86_64",
+        "uuid": "8ba83255-e31b-41b9-9d15-a819e9fb95d5",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-169",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1783210644,
+        "published": 1783261211,
+        "date": "2026-07-05",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "cloudera-freeipa-images/freeipa-1783210632312.tar.gz"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "x86_64",
+        "uuid": "cbb74f57-c4b4-462e-8e35-a0feee2239fd",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-169",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1783211009,
+        "published": 1783261219,
+        "date": "2026-07-05",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-05f043e3194e4d5c9",
+            "eu-west-1": "ami-001cc1f1493828ba8",
+            "us-west-1": "ami-0c595defa1a028604",
+            "us-west-2": "ami-0498c769b44f6f23a"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "arm64",
+        "uuid": "05d9122d-6a57-49e9-a16f-814273ab85cc",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-169",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785222805,
+        "published": 1785266421,
+        "date": "2026-07-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-0640a773f881ba85d",
+            "eu-west-1": "ami-0e1e1871dabf6c268",
+            "us-west-1": "ami-0a2aa959c5d1e5cda",
+            "us-west-2": "ami-04bc50f5810560975"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "x86_64",
+        "uuid": "6476d59f-291e-4afa-9918-2d175ced4d1f",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-176",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785226480,
+        "published": 1785266429,
+        "date": "2026-07-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-1785226442857.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1785226442"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "x86_64",
+        "uuid": "7d359c1d-cb1a-491b-a558-d446589996f8",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-176",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785222831,
+        "published": 1785266438,
+        "date": "2026-07-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-1785222790260.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1785222790"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "x86_64",
+        "uuid": "6842b86b-7653-4fbd-badd-39692a4c9120",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-176",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785222814,
+        "published": 1785266447,
+        "date": "2026-07-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-09ef5dd810829b7f0",
+            "eu-west-1": "ami-04cef9fdd80a08d0f",
+            "us-west-1": "ami-0f4720990847d56d1",
+            "us-west-2": "ami-021ac331f96c5e7cf"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "x86_64",
+        "uuid": "6e3398cb-912c-4a23-8592-4dad38ba5e76",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-176",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785222806,
+        "published": 1785266456,
+        "date": "2026-07-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "cloudera-freeipa-images/freeipa-1785222793456.tar.gz"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "x86_64",
+        "uuid": "cc0df40f-464a-4478-a191-516c22ee6f8c",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-176",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785222845,
+        "published": 1785266464,
+        "date": "2026-07-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-068168c707cd8baf1",
+            "eu-west-1": "ami-0781e2b9cafaad2ef",
+            "us-west-1": "ami-094786a786182ce0c",
+            "us-west-2": "ami-06cdc6dea33d250fd"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "arm64",
+        "uuid": "42dfd65b-2cea-4de3-9ef6-2be5a4a5e29f",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-176",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785222830,
+        "published": 1785266472,
+        "date": "2026-07-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-0b2c11b17fc027a72",
+            "eu-west-1": "ami-0d6013169fedb0465",
+            "us-west-1": "ami-09f9f9195f39e8893",
+            "us-west-2": "ami-0f33860f23ea43bd2"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "arm64",
+        "uuid": "197e293a-d8a8-4e8b-93ad-20803aa01708",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-176",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785222827,
+        "published": 1785266481,
+        "date": "2026-07-28",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "cloudera-freeipa-images/freeipa-1785222815904.tar.gz"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "x86_64",
+        "uuid": "0c8079c5-d997-4fb1-b7f7-98239bd52c51",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-176",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785400893,
+        "published": 1785443063,
+        "date": "2026-07-30",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "cloudera-freeipa-images/freeipa-1785400880586.tar.gz"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "x86_64",
+        "uuid": "7d429933-cb39-44e0-a3ba-fa03f8850d8a",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-177",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785400925,
+        "published": 1785443072,
+        "date": "2026-07-30",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-0c3190b52eb00baca",
+            "eu-west-1": "ami-02720382858a08c77",
+            "us-west-1": "ami-0b9c34d9decd52700",
+            "us-west-2": "ami-0de8c8828d9e7f082"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "x86_64",
+        "uuid": "7960fdd1-6798-47b7-98e3-9ad0b0a87ef6",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-177",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785400895,
+        "published": 1785443081,
+        "date": "2026-07-30",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-006cd86d80d10ff67",
+            "eu-west-1": "ami-0f16e2507a29458c7",
+            "us-west-1": "ami-04fbfff69a4d28199",
+            "us-west-2": "ami-0b0de957e64d97f57"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "arm64",
+        "uuid": "f6d1d145-0f04-44d6-98c5-780e00844c5e",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-177",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785400924,
+        "published": 1785443090,
+        "date": "2026-07-30",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-096049374d83f5f86",
+            "eu-west-1": "ami-04f8cc1088c89db4d",
+            "us-west-1": "ami-03529f9e8e3cecebc",
+            "us-west-2": "ami-011e218a9083dc1d5"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "arm64",
+        "uuid": "fbed1019-4940-4063-8a67-9ddaf4a78ed8",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-177",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785400922,
+        "published": 1785443099,
+        "date": "2026-07-30",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-1785400884464.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1785400884"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "x86_64",
+        "uuid": "c93d121f-a929-46c2-a2bf-c98a3786147e",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-177",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785400906,
+        "published": 1785443108,
+        "date": "2026-07-30",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "eu-central-1": "ami-099537aa85abda844",
+            "eu-west-1": "ami-095bfc03655ebe05c",
+            "us-west-1": "ami-0dd5584bb50f91194",
+            "us-west-2": "ami-087e07c325f3a0ad6"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "x86_64",
+        "uuid": "4dc6eb19-60da-4f5e-a4bc-6addaf8f5790",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-177",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785400907,
+        "published": 1785443118,
+        "date": "2026-07-30",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "gcp": {
+            "default": "cloudera-freeipa-images/freeipa-1785400894687.tar.gz"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "architecture": "x86_64",
+        "uuid": "656a4e4e-d184-49cb-804c-e3d726fccafd",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-177",
+          "release-type": "OS Update Release"
+        }
+      },
+      {
+        "created": 1785403894,
+        "published": 1785443127,
+        "date": "2026-07-30",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "West US": "https://cldrwestus.blob.core.windows.net/images/freeipa-1785403857643.vhd",
+            "default": "cloudera:freeipa-1_0:freeipa:1.0.1785403857"
+          }
+        },
+        "os": "redhat9",
+        "os_type": "redhat9",
+        "architecture": "x86_64",
+        "uuid": "c85624b7-5da0-4509-84ab-77d4926f441f",
+        "tags": {
+          "fips-mode": "disabled",
+          "hardening": "cis_server_l1",
+          "release-id": "UNIREL-177",
+          "release-type": "OS Update Release"
+        }
+      }
+    ]
+  },
+  "versions": {
+    "freeipa": [
+      {
+        "images": [
+          "799f9cbb-7ff6-4b21-bbd5-3da063f54b65",
+          "b35e513c-7065-496b-9774-f439781735b5",
+          "0d437323-87df-4867-a154-cf9e278cce54",
+          "78a376af-f892-488c-ac9e-d11368f05c7c",
+          "3da40411-37fa-47ca-9479-96f0e1e771e6",
+          "7d429933-cb39-44e0-a3ba-fa03f8850d8a",
+          "7960fdd1-6798-47b7-98e3-9ad0b0a87ef6",
+          "f6d1d145-0f04-44d6-98c5-780e00844c5e",
+          "fbed1019-4940-4063-8a67-9ddaf4a78ed8",
+          "c93d121f-a929-46c2-a2bf-c98a3786147e",
+          "4dc6eb19-60da-4f5e-a4bc-6addaf8f5790",
+          "656a4e4e-d184-49cb-804c-e3d726fccafd",
+          "c85624b7-5da0-4509-84ab-77d4926f441f"
+        ],
+        "defaults": []
+      }
+    ]
+  }
+}

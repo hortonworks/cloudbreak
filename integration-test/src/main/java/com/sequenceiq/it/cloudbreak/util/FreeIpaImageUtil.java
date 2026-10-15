@@ -50,12 +50,13 @@ public class FreeIpaImageUtil {
         }
     }
 
-    public LastAndNewestImage getLastAndNewestImageByOs(String catalogUrl, String cloudProvider, OsType sourceOS, OsType destinationOS) {
+    public LastAndNewestImage getLastAndNewestImageByOs(String catalogUrl, Architecture architecture,
+            String cloudProvider, OsType sourceOS, OsType destinationOS) {
         String body = RestClientUtil.get().target(catalogUrl).request().get().readEntity(String.class);
         try {
             ImageCatalog imageCatalog = objectMapper.readValue(body, ImageCatalog.class);
             List<Image> providerImages = imageCatalog.getImages().getFreeipaImages().stream()
-                    .filter(image -> hasImageOnCloudProvider(image, cloudProvider))
+                    .filter(image -> hasImageOnCloudProvider(image, cloudProvider) && hasArchitecture(image, architecture))
                     .sorted(Comparator.comparing(Image::getDate).reversed())
                     .toList();
             if (sourceOS.getOs().equalsIgnoreCase(destinationOS.getOs())) {
@@ -88,8 +89,7 @@ public class FreeIpaImageUtil {
     }
 
     private boolean hasImageOnCloudProvider(Image image, String cloudProvider) {
-        return image.getImageSetsByProvider().containsKey(cloudProvider.toLowerCase())
-                && Architecture.X86_64.name().equalsIgnoreCase(image.getArchitecture());
+        return image.getImageSetsByProvider().containsKey(cloudProvider.toLowerCase());
     }
 
     private List<Image> filterPublished(ImageCatalog imageCatalog, List<Image> images) {
@@ -103,8 +103,7 @@ public class FreeIpaImageUtil {
 
     private boolean hasImageOnClouderProvider(Image image, String cloudProvider, String region) {
         return image.getImageSetsByProvider().containsKey(cloudProvider.toLowerCase())
-                && image.getImageSetsByProvider().get(cloudProvider.toLowerCase()).containsKey(region)
-                && Architecture.X86_64.name().equalsIgnoreCase(image.getArchitecture());
+                && image.getImageSetsByProvider().get(cloudProvider.toLowerCase()).containsKey(region);
     }
 
     private boolean hasArchitecture(Image image, Architecture architecture) {

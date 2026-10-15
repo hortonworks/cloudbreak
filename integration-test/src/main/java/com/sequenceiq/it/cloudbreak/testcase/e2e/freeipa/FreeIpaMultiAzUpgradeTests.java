@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -42,6 +43,7 @@ public class FreeIpaMultiAzUpgradeTests extends AbstractFreeipaE2ETest {
         String freeIpaImageCatalogUrl = commonCloudProperties().getFreeipaImageCatalogUrl();
         LastAndNewestImage images = freeIpaImageUtil.getLastAndNewestImageByOs(
                 freeIpaImageCatalogUrl,
+                Architecture.X86_64,
                 testContext.getCloudProvider().getCloudPlatform().name(),
                 testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
                 testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS()
