@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.stack.CmRepoOsValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackCreationRuntimeVersionValidator;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.DistroXHyperVGenerationValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -197,6 +198,9 @@ class StackCreatorServiceJavaVersionTest {
     @Mock
     private StackParametersService stackParametersService;
 
+    @Mock
+    private DistroXHyperVGenerationValidator distroXHyperVGenerationValidator;
+
     @InjectMocks
     private StackCreatorService underTest;
 
@@ -244,8 +248,8 @@ class StackCreatorServiceJavaVersionTest {
         lenient().when(entitlementService.isEntitledToUseOS(anyString(), any())).thenReturn(true);
         when(blueprintService.getAllAvailableInWorkspace(any())).thenReturn(Set.of(blueprint));
         when(stackV4RequestToStackConverter.convert(any(), any())).thenReturn(stack);
-        when(stackDecorator.decorate(any(), any(), any(), any(), any())).thenReturn(stack);
-        when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
+        lenient().when(stackDecorator.decorate(any(), any(), any(), any(), any())).thenReturn(stack);
+        lenient().when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> {
             Supplier<?> supplier = invocation.getArgument(0);
             return supplier.get();
         });
@@ -509,6 +513,25 @@ class StackCreatorServiceJavaVersionTest {
         callCreateStack(stackRequest);
         verify(stackParametersService, times(1)).setStackParameter(
                 stack.getId(), PlatformParametersConsts.RAZ_AUTHENTICATION_TYPE, RAZ_AUTHENTICATION_TYPE_HMAC);
+    }
+
+    @Test
+    void testCreateStackWhenHyperVGenerationValidationFailsThenNoTransactionIsStartedAndOwnerIsReleased() throws Exception {
+        Image image = mock(Image.class);
+        StatedImage statedImage = StatedImage.statedImage(image, "url", "catalog");
+        setupImageFuture(statedImage);
+        StackV4Request stackRequest = createStackRequest("7.3.2");
+        doThrow(new BadRequestException("Hyper-V generation mismatch")).when(distroXHyperVGenerationValidator)
+                .validate(stackRequest, stack, environment, statedImage, null);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> callCreateStack(stackRequest));
+
+        assertEquals("Hyper-V generation mismatch", exception.getMessage());
+        verify(transactionService, never()).required(any(Supplier.class));
+        verify(stackDecorator, never()).decorate(any(), any(), any(), any(), any());
+        verify(stackService, never()).create(any(Stack.class), any(StatedImage.class), any(User.class), any(Workspace.class));
+        verify(flowManager, never()).triggerProvisioning(anyLong());
+        verify(ownerAssignmentService).notifyResourceDeleted(STACK_CRN);
     }
 
     private StackV4Response callCreateStack(StackV4Request stackRequest) {

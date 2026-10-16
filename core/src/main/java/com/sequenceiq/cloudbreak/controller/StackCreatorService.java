@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.stack.CmRepoOsValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackCreationRuntimeVersionValidator;
+import com.sequenceiq.cloudbreak.controller.validation.template.azure.DistroXHyperVGenerationValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -228,6 +229,9 @@ public class StackCreatorService {
     @Inject
     private DatabaseInstanceTypeRequestValidator databaseInstanceTypeRequestValidator;
 
+    @Inject
+    private DistroXHyperVGenerationValidator distroXHyperVGenerationValidator;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         long start = System.currentTimeMillis();
@@ -286,6 +290,7 @@ public class StackCreatorService {
                     "Blueprint determined in {} ms for stack {}", stackName);
             Future<StatedImage> imgFromCatalogFuture = determineImage(stackName, platformString, stackRequest, blueprint, user, workspace);
             hueWorkaroundValidatorService.validateForStackRequest(getHueHostGroups(blueprint.getBlueprintJsonText()), stackStub.getName());
+            StatedImage imgFromCatalog = resolveAndValidateImage(imgFromCatalogFuture, stackRequest, stackStub, environment, stackType, crn);
 
             savedStack = transactionService.required(() -> {
                 Stack stack = measure(
@@ -315,11 +320,6 @@ public class StackCreatorService {
                         LOGGER,
                         "Fill up instance metadata took {} ms");
 
-
-                StatedImage imgFromCatalog = measure(() -> getImageFromCatalog(imgFromCatalogFuture),
-                        LOGGER,
-                        "Select the correct image took {} ms");
-                validateImageAndInstanceTypeArchitectureForAws(stackRequest, imgFromCatalog);
                 String imageRuntimeVersion = imgFromCatalog.getImage().getRuntimeVersion()
                         .or(() -> getCdhFullVersionFromRequest(stackRequest))
                         .orElseGet(blueprint::getStackVersion);
@@ -646,6 +646,21 @@ public class StackCreatorService {
                         .filter(product -> "CDH".equalsIgnoreCase(product.getName()))
                         .findFirst())
                 .map(ClouderaManagerProductV4Request::getVersion);
+    }
+
+    private StatedImage resolveAndValidateImage(Future<StatedImage> imgFromCatalogFuture, StackV4Request stackRequest, Stack stackStub,
+            DetailedEnvironmentResponse environment, StackType stackType, String crn) {
+        try {
+            StatedImage imgFromCatalog = measure(() -> getImageFromCatalog(imgFromCatalogFuture),
+                    LOGGER,
+                    "Select the correct image took {} ms");
+            validateImageAndInstanceTypeArchitectureForAws(stackRequest, imgFromCatalog);
+            distroXHyperVGenerationValidator.validate(stackRequest, stackStub, environment, imgFromCatalog, stackType);
+            return imgFromCatalog;
+        } catch (RuntimeException e) {
+            ownerAssignmentService.notifyResourceDeleted(crn);
+            throw e;
+        }
     }
 
     private StatedImage getImageFromCatalog(Future<StatedImage> imgFromCatalogFuture) {

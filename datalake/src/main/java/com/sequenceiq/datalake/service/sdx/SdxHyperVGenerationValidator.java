@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,20 +9,18 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.AzureHyperVGenerationUtil;
+import com.sequenceiq.cloudbreak.validation.HyperVGenerationCompatibilityUtil;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.VmTypeMetaJson;
@@ -61,12 +58,8 @@ public class SdxHyperVGenerationValidator {
         try {
             Map<String, VmTypeResponse> vmTypesByName = getVmTypesByName(environment, availableVmTypes);
             boolean fallbackEnabled = entitlementService.isFallbackInstanceTypeEnabled(environment.getAccountId());
-            List<String> offenders = collectOffenders(stackRequest, generation, vmTypesByName, fallbackEnabled);
-            if (!offenders.isEmpty()) {
-                throw new BadRequestException(String.format("The selected image is Hyper-V generation %s, but the following instance types do not support "
-                        + "it: %s. Choose a %s compatible instance type or an image of the matching generation.",
-                        generation, String.join(", ", offenders), generation));
-            }
+            HyperVGenerationCompatibilityUtil.validate(stackRequest, generation, instanceType -> getSupportedGenerations(vmTypesByName.get(instanceType)),
+                    fallbackEnabled);
         } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
@@ -87,44 +80,11 @@ public class SdxHyperVGenerationValidator {
                 Architecture.ALL_ARCHITECTURE);
     }
 
-    private List<String> collectOffenders(StackV4Request stackRequest, String imageGeneration, Map<String, VmTypeResponse> vmTypesByName,
-            boolean fallbackEnabled) {
-        List<String> offenders = new ArrayList<>();
-        for (InstanceGroupV4Request instanceGroup : stackRequest.getInstanceGroups()) {
-            InstanceTemplateV4Base template = instanceGroup.getTemplate();
-            if (template == null) {
-                continue;
-            }
-            String instanceType = template.getInstanceType();
-            if (StringUtils.isNotBlank(instanceType)) {
-                addIfIncompatible(offenders, instanceType, instanceGroup.getName(), imageGeneration, vmTypesByName);
-            }
-            if (fallbackEnabled) {
-                Optional.ofNullable(template.getFallbackInstanceTypes()).orElse(List.of()).stream()
-                        .filter(StringUtils::isNotBlank)
-                        .filter(fallback -> !fallback.equals(instanceType))
-                        .distinct()
-                        .forEach(fallback -> addIfIncompatible(offenders, fallback, instanceGroup.getName() + " fallback", imageGeneration,
-                                vmTypesByName));
-            }
-        }
-        return offenders;
-    }
-
-    private void addIfIncompatible(List<String> offenders, String instanceType, String label, String imageGeneration,
-            Map<String, VmTypeResponse> vmTypesByName) {
-        String supportedGenerations = getSupportedGenerations(vmTypesByName.get(instanceType));
-        if (supportedGenerations != null && !supportedGenerations.contains(imageGeneration)) {
-            offenders.add(String.format("%s (%s, supports %s)", instanceType, label, supportedGenerations));
-        }
-    }
-
-    private String getSupportedGenerations(VmTypeResponse vmType) {
+    private Optional<String> getSupportedGenerations(VmTypeResponse vmType) {
         return Optional.ofNullable(vmType)
                 .map(VmTypeResponse::getVmTypeMetaJson)
                 .map(VmTypeMetaJson::getProperties)
                 .map(properties -> properties.get(VmTypeMeta.HYPER_V_GENERATIONS))
-                .map(Object::toString)
-                .orElse(null);
+                .map(Object::toString);
     }
 }
