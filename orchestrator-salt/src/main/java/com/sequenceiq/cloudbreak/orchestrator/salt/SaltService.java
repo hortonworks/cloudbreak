@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.orchestrator.salt;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
@@ -18,6 +17,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnectorExecutor;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnectorTimeouts;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.GatewayConfigComparator;
 import com.sequenceiq.cloudbreak.service.sslcontext.SSLContextProvider;
 
@@ -32,6 +33,9 @@ public class SaltService {
     @Inject
     private SSLContextProvider sslContextProvider;
 
+    @Inject
+    private SaltConnectorExecutor saltConnectorExecutor;
+
     @Value("${rest.debug}")
     private boolean restDebug;
 
@@ -42,27 +46,26 @@ public class SaltService {
     private boolean saltLoggerResponseBodyEnabled;
 
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig) {
-        SSLContext sslContext = sslContextProvider.getSSLContext(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
-                gatewayConfig.getClientCert(), gatewayConfig.getClientKey());
-        return new SaltConnector(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled);
+        return createSaltConnector(gatewayConfig, SaltConnectorTimeouts.defaults());
     }
 
     public SaltConnector createSaltConnectorWithCustomTimeout(GatewayConfig gatewayConfig, int connectTimeoutMs, int readTimeoutMs, int proxyTimeoutMs) {
-        SSLContext sslContext = sslContextProvider.getSSLContext(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
-                gatewayConfig.getClientCert(), gatewayConfig.getClientKey());
-        return new SaltConnector(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled,
-                connectTimeoutMs, OptionalInt.of(readTimeoutMs), OptionalInt.of(proxyTimeoutMs));
+        return createSaltConnector(gatewayConfig, SaltConnectorTimeouts.of(connectTimeoutMs, readTimeoutMs, proxyTimeoutMs));
     }
 
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig, int connectTimeoutMs, int readTimeout) {
-        SSLContext sslContext = sslContextProvider.getSSLContext(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
-                gatewayConfig.getClientCert(), gatewayConfig.getClientKey());
-        return new SaltConnector(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled,
-                connectTimeoutMs, OptionalInt.of(readTimeout));
+        return createSaltConnector(gatewayConfig, SaltConnectorTimeouts.of(connectTimeoutMs, readTimeout));
     }
 
     public List<SaltConnector> createSaltConnector(Collection<GatewayConfig> gatewayConfigs) {
         return gatewayConfigs.stream().map(this::createSaltConnector).collect(Collectors.toList());
+    }
+
+    private SaltConnector createSaltConnector(GatewayConfig gatewayConfig, SaltConnectorTimeouts timeouts) {
+        SSLContext sslContext = sslContextProvider.getSSLContext(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
+                gatewayConfig.getClientCert(), gatewayConfig.getClientKey());
+        return new SaltConnector(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled, timeouts,
+                saltConnectorExecutor);
     }
 
     /**

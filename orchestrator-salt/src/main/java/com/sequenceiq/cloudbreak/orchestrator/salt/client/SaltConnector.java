@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 import javax.net.ssl.SSLContext;
 
@@ -30,17 +29,13 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.DisableProxyAuthFeature;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.client.SetProxyTimeoutFeature;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyWebApplicationException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -69,10 +64,6 @@ public class SaltConnector implements Closeable {
 
     private static final String SIGN_HEADER = "signature";
 
-    private static final int PROXY_TIMEOUT = 90000;
-
-    private static final int CONNECT_TIMEOUT_MS = 20_000;
-
     private final Client restClient;
 
     private final WebTarget saltTarget;
@@ -87,9 +78,10 @@ public class SaltConnector implements Closeable {
 
     private final String saltVersion;
 
+    private final SaltConnectorExecutor executor;
+
     public SaltConnector(GatewayConfig gatewayConfig, SSLContext sslContext, SaltErrorResolver saltErrorResolver, boolean restDebug,
-            boolean saltLoggerEnabled, boolean saltLoggerResponseBodyEnabled, int connectTimeoutMs, OptionalInt readTimeout,
-            OptionalInt proxyTimeoutMs) {
+            boolean saltLoggerEnabled, boolean saltLoggerResponseBodyEnabled, SaltConnectorTimeouts timeouts, SaltConnectorExecutor executor) {
         try {
             Collection<Object> saltFilters = Collections.emptySet();
             if (saltLoggerEnabled) {
@@ -98,36 +90,70 @@ public class SaltConnector implements Closeable {
                     saltFilters.add(new SaltReaderInterceptor());
                 }
             }
-            restClient = RestClientUtil.createClient(sslContext, connectTimeoutMs, readTimeout, restDebug, saltFilters);
+            restClient = RestClientUtil.createClient(sslContext, timeouts.connectTimeoutMs(), timeouts.readTimeoutMs(), restDebug, saltFilters);
             this.hostname = gatewayConfig.getHostname();
             String saltBootPasswd = Optional.ofNullable(gatewayConfig.getSaltBootPassword()).orElse(SALT_BOOT_PASSWORD);
             saltTarget = restClient.target(gatewayConfig.getGatewayUrl())
                     .register(HttpAuthenticationFeature.basic(SALT_BOOT_USER, saltBootPasswd))
                     .register(new DisableProxyAuthFeature())
-                    .register(new SetProxyTimeoutFeature(proxyTimeoutMs.orElse(PROXY_TIMEOUT)));
+                    .register(new SetProxyTimeoutFeature(timeouts.proxyTimeoutMs()));
             saltPassword = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
             signatureKey = gatewayConfig.getSignatureKey();
             this.saltErrorResolver = saltErrorResolver;
             this.saltVersion = gatewayConfig.getSaltVersion().orElse(null);
+            this.executor = executor;
         } catch (Exception e) {
             throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
         }
     }
 
-    public SaltConnector(GatewayConfig gatewayConfig, SSLContext sslContext, SaltErrorResolver saltErrorResolver, boolean restDebug,
-            boolean saltLoggerEnabled, boolean saltLoggerResponseBodyEnabled, int connectTimeoutMs, OptionalInt readTimeout) {
-        this(gatewayConfig, sslContext, saltErrorResolver, restDebug, saltLoggerEnabled, saltLoggerResponseBodyEnabled, connectTimeoutMs, readTimeout,
-                OptionalInt.of(PROXY_TIMEOUT));
-    }
-
-    public SaltConnector(GatewayConfig gatewayConfig, SSLContext sslContext, SaltErrorResolver saltErrorResolver, boolean debug, boolean saltLogger,
-            boolean saltLoggerResponseBodyEnabled) {
-        this(gatewayConfig, sslContext, saltErrorResolver, debug, saltLogger, saltLoggerResponseBodyEnabled, CONNECT_TIMEOUT_MS, OptionalInt.empty());
-    }
-
-    @Measure(SaltConnector.class)
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponse health() {
+        return executor.health(this);
+    }
+
+    public GenericResponses pillar(Iterable<String> targets, Pillar pillar) {
+        return executor.pillar(this, targets, pillar);
+    }
+
+    public GenericResponses action(SaltAction saltAction) {
+        return executor.action(this, saltAction);
+    }
+
+    public <T> T run(String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
+        return run(null, fun, clientType, clazz, null, arg);
+    }
+
+    public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
+        return run(target, fun, clientType, clazz, null, arg);
+    }
+
+    public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, Long timeout, String... arg) {
+        if (SaltClientType.LOCAL_ASYNC.equals(clientType)) {
+            return executor.runAsync(this, target, fun, clientType, clazz, timeout, arg);
+        }
+        return executor.run(this, target, fun, clientType, clazz, timeout, arg);
+    }
+
+    public <T> T runWithLimitedRetry(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
+        if (SaltClientType.LOCAL_ASYNC.equals(clientType)) {
+            return executor.runAsync(this, target, fun, clientType, clazz, null, arg);
+        }
+        return executor.runWithLimitedRetry(this, target, fun, clientType, clazz, arg);
+    }
+
+    public <T> T wheel(String fun, Collection<String> match, Class<T> clazz) {
+        return executor.wheel(this, fun, match, clazz);
+    }
+
+    public GenericResponses upload(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
+        return executor.upload(this, targets, path, fileName, content);
+    }
+
+    public GenericResponses upload(Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
+        return executor.upload(this, targets, path, fileName, permission, content);
+    }
+
+    GenericResponse doHealth() {
         LOGGER.debug("Sending request to salt endpoint {}", SaltEndpoint.BOOT_HEALTH.getContextPath());
         Response response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).request().get();
         GenericResponse responseEntity = JaxRSUtil.response(response, GenericResponse.class);
@@ -135,9 +161,7 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
-    @Measure(SaltConnector.class)
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
-    public GenericResponses pillar(Iterable<String> targets, Pillar pillar) {
+    GenericResponses doPillar(Iterable<String> targets, Pillar pillar) {
         LOGGER.debug("Executing salt pillar targets: {}", targets);
         Response distributeResponse = postSignedJsonSaltRequest(SaltEndpoint.BOOT_PILLAR_DISTRIBUTE, pillar);
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
@@ -155,9 +179,7 @@ public class SaltConnector implements Closeable {
         return JaxRSUtil.response(distributeResponse, GenericResponses.class);
     }
 
-    @Measure(SaltConnector.class)
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
-    public GenericResponses action(SaltAction saltAction) {
+    GenericResponses doAction(SaltAction saltAction) {
         LOGGER.debug("Executing salt action {}", saltAction);
         Response response = postSignedJsonSaltRequest(SaltEndpoint.BOOT_ACTION_DISTRIBUTE, saltAction);
         GenericResponses responseEntity = JaxRSUtil.response(response, GenericResponses.class);
@@ -165,24 +187,7 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
-    public <T> T run(String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
-        return run(null, fun, clientType, clazz, arg);
-    }
-
-    @Retryable(maxAttempts = 2, value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 500))
-    public <T> T runWithLimitedRetry(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
-        return run(target, fun, clientType, clazz, null, arg);
-    }
-
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
-    public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
-        return run(target, fun, clientType, clazz, null, arg);
-    }
-
-    @Measure(SaltConnector.class)
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
-    public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, Long timeout, String... arg) {
+    <T> T doRun(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, Long timeout, String... arg) {
         LOGGER.debug("Executing salt run. target: {}, fun: {}, clientType: {}, class: {}, timeout: {}, arg: {}",
                 target, fun, clientType.toString(), clazz, timeout, arg);
         Form form = new Form();
@@ -221,9 +226,7 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
-    @Measure(SaltConnector.class)
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
-    public <T> T wheel(String fun, Collection<String> match, Class<T> clazz) {
+    <T> T doWheel(String fun, Collection<String> match, Class<T> clazz) {
         LOGGER.debug("Executing salt wheel. fun: {}, match: {}, class: {}", fun, match, clazz);
         Form form = new Form();
         form = addAuth(form)
@@ -239,17 +242,13 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
-    @Measure(SaltConnector.class)
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
-    public GenericResponses upload(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
+    GenericResponses doUpload(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
         LOGGER.debug("Executing salt upload. targets: {}, path: {}, fileName: {}", targets, path, fileName);
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, content);
         return getGenericResponses(targets, path, fileName, content, distributeResponse);
     }
 
-    @Measure(SaltConnector.class)
-    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
-    public GenericResponses upload(Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
+    GenericResponses doUpload(Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
         LOGGER.debug("Executing salt upload with permission. targets: {}, path: {}, fileName: {}, permission: {}", targets, path, fileName, permission);
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, permission, content);
         return getGenericResponses(targets, path, fileName, content, distributeResponse);
