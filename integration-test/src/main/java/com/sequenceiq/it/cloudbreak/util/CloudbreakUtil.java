@@ -109,7 +109,7 @@ public class CloudbreakUtil {
 
     public static void sleep(long millis) {
         try {
-            Thread.sleep(pollingInterval);
+            Thread.sleep(millis);
         } catch (InterruptedException e) {
             LOGGER.warn("Ex during wait", e);
         }

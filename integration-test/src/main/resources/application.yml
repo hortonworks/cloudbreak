@@ -67,6 +67,10 @@ integrationtest:
         server: http://localhost
   environment:
     server: http://localhost
+    createJitter:
+      # Random 0..maxSeconds delay before the env create POSTs requested within windowSeconds after the first one (CB-35055). 0 = off.
+      maxSeconds: 0
+      windowSeconds: 120
     alternative:
         server: http://localhost
   sdx:
