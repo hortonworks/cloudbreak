@@ -5,3 +5,4 @@
 - /opt/salt/scripts/add_dns_record.sh
 - /opt/salt/scripts/check_db_connection.sh
 - /opt/salt/scripts/freeipa_replica_install.sh
+- /opt/salt/scripts/check_kraft_acls.sh

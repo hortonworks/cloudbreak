@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.migration.kraft;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_IN_PROGRESS;
+
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -69,12 +71,17 @@ public class KraftMigrationService {
 
     private KraftMigrationStatus getKraftMigrationStatus(StackDto stack, boolean kraftMigrationSupported) {
         KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.NOT_APPLICABLE;
-        boolean clusterAvailable = stack.getStatus().isAvailable();
-        if (kraftMigrationSupported && clusterAvailable) {
+        boolean clusterSideMigrationStatusCheckTriggerable = stack.getStatus().isAvailable() || isKraftMigrationValidationInProgress(stack);
+        if (kraftMigrationSupported && clusterSideMigrationStatusCheckTriggerable) {
             kraftMigrationStatus = clusterApiConnectors.getConnector(stack).clusterKraftMigrationStatusService().getKraftMigrationStatus();
             LOGGER.info("Kraft migration status based on the actual Cluster configs: {}", kraftMigrationStatus);
         }
         return kraftMigrationStatus;
+    }
+
+    // The migration flow sets this in progress status before it validates the KRaft migration status of the cluster
+    private boolean isKraftMigrationValidationInProgress(StackDto stack) {
+        return ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_IN_PROGRESS == stack.getStack().getDetailedStatus();
     }
 
     private KraftMigrationAction getKraftMigrationAction(StackDto stack, boolean kraftMigrationSupported,

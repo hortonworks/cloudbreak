@@ -49,6 +49,12 @@ public class SaltStateParamsService {
         return getOrchestratorStateParams(stack, saltState, maxRetry, maxRetryOnError, -1, primaryGatewayConfig, reachableNodes);
     }
 
+    public OrchestratorStateParams createStateParamsForTargetNodes(StackDto stack, String saltState, Set<Node> targetNodes, int maxRetry,
+            int maxRetryOnError) {
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        return getOrchestratorStateParams(stack, saltState, maxRetry, maxRetryOnError, -1, primaryGatewayConfig, targetNodes);
+    }
+
     public OrchestratorStateParams createStateParams(Stack stack, String saltState, int maxRetry, int maxRetryOnError, GatewayConfig primaryGatewayConfig,
             Set<Node> targetNodes) {
         return getOrchestratorStateParams(saltState, maxRetry, maxRetryOnError, -1, primaryGatewayConfig, targetNodes,
