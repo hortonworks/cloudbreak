@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_COMPLETE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
@@ -61,6 +62,7 @@ public class MigrateZookeeperToKraftConfigurationActions {
             protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftConfigurationTriggerEvent payload,
                     Map<Object, Object> variables) {
                 LOGGER.debug("Migrate Zookeeper to KRaft configuration validation state started {}", payload);
+                stackUpdater.updateStackStatus(payload.getResourceId(), ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_IN_PROGRESS);
                 String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT.event();
                 sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId(), context.isKraftInstallNeeded()));
             }
