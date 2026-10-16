@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
@@ -33,9 +35,11 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.authorization.utils.CrnAccountValidator;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
@@ -66,6 +70,9 @@ public class PermissionCheckServiceTest {
 
     @Mock
     private ResourceAuthorizationService resourceAuthorizationService;
+
+    @Spy
+    private CrnAccountValidator crnAccountValidator;
 
     @InjectMocks
     private PermissionCheckService underTest;
@@ -286,7 +293,76 @@ public class PermissionCheckServiceTest {
                 resourceAuthorizationService);
     }
 
+    @Test
+    public void testAccountIdParameterFromDifferentAccount() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountBasedMethodWithAccountId", String.class));
+        stubAccountIdParameter("otheraccount");
+
+        assertThrows(ForbiddenException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint)));
+
+        verifyNoInteractions(
+                accountAuthorizationService,
+                resourceAuthorizationService,
+                commonPermissionCheckingUtils);
+    }
+
+    @Test
+    public void testAccountIdParameterFromDifferentAccountWhenPermissionCheckDisabled() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("disabledAuthorizationWithAccountId", String.class));
+        stubAccountIdParameter("otheraccount");
+
+        assertThrows(ForbiddenException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint)));
+
+        verifyNoInteractions(commonPermissionCheckingUtils);
+    }
+
+    @Test
+    public void testAccountIdParameterFromSameAccount() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountBasedMethodWithAccountId", String.class));
+        stubAccountIdParameter("1234");
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+    }
+
+    @Test
+    public void testAccountIdParameterNotProvided() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountBasedMethodWithAccountId", String.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+    }
+
+    @Test
+    public void testAccountIdParameterNotValidatedForInternalActor() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountBasedMethodWithAccountId", String.class));
+
+        ThreadBasedUserCrnProvider.doAs(MODIFIED_INTERNAL_ACTOR, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(reflectionUtil, never()).getParameter(any(), any(), eq(AccountId.class));
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+    }
+
+    private void stubAccountIdParameter(String accountId) {
+        when(reflectionUtil.getParameter(eq(proceedingJoinPoint), eq(methodSignature), eq(InitiatorUserCrn.class))).thenReturn(Optional.empty());
+        when(reflectionUtil.getParameter(eq(proceedingJoinPoint), eq(methodSignature), eq(AccountId.class))).thenReturn(Optional.of(accountId));
+    }
+
     private static class ExampleClass {
+
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+        public void accountBasedMethodWithAccountId(@AccountId String accountId) {
+
+        }
+
+        @DisableCheckPermissions
+        public void disabledAuthorizationWithAccountId(@AccountId String accountId) {
+
+        }
 
         @DisableCheckPermissions
         public void disabledAuthorization() {

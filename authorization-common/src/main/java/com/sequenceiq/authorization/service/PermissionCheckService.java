@@ -19,11 +19,13 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.authorization.utils.CrnAccountValidator;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -51,6 +53,9 @@ public class PermissionCheckService {
     @Inject
     private ResourceAuthorizationService resourceAuthorizationService;
 
+    @Inject
+    private CrnAccountValidator crnAccountValidator;
+
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) {
         long startTime = System.currentTimeMillis();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
@@ -59,6 +64,7 @@ public class PermissionCheckService {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         boolean internalUser = userCrn != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn);
         Optional<String> initiatorUserCrnParameter = persistInitiatorUserIfParameterPresent(proceedingJoinPoint, methodSignature);
+        validateAccountIdParameterIfExternalUser(proceedingJoinPoint, methodSignature, userCrn, internalUser);
 
         if (!internalUser && !hasAnnotationOnClass(proceedingJoinPoint, DisableCheckPermissions.class)
                 && !hasAnyAnnotationOnMethod(methodSignature, DisableCheckPermissions.class, CustomPermissionCheck.class)) {
@@ -87,6 +93,16 @@ public class PermissionCheckService {
 
     private boolean accountIdNeeded(MethodSignature methodSignature) {
         return !hasAnnotationOnMethod(methodSignature, AccountIdNotNeeded.class);
+    }
+
+    private void validateAccountIdParameterIfExternalUser(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, String userCrn,
+            boolean internalUser) {
+        if (userCrn != null && !internalUser) {
+            reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, AccountId.class)
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .ifPresent(accountId -> crnAccountValidator.validateSameAccountId(userCrn, accountId));
+        }
     }
 
     private Optional<String> persistInitiatorUserIfParameterPresent(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {

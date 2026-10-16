@@ -53,6 +53,28 @@ public class CrnAccountValidatorTest {
                 "crn:cdp:environments:us-west-1:account1:environment:1 is not a valid user crn");
     }
 
+    @Test
+    public void validAccountIdIfUserIsInternal() {
+        assertDoesNotThrow(() -> underTest.validateSameAccountId("crn:cdp:iam:us-west-1:altus:user:__internal__actor__", ACCOUNT_1));
+    }
+
+    @Test
+    public void validAccountIdIfBlank() {
+        assertDoesNotThrow(() -> underTest.validateSameAccountId(userCrn(ACCOUNT_1), null));
+        assertDoesNotThrow(() -> underTest.validateSameAccountId(userCrn(ACCOUNT_1), " "));
+    }
+
+    @Test
+    public void validAccountIdIfMatches() {
+        assertDoesNotThrow(() -> underTest.validateSameAccountId(userCrn(ACCOUNT_1), ACCOUNT_1));
+    }
+
+    @Test
+    public void throwsAccessDeniedIfAccountIdNotMatch() {
+        ForbiddenException exception = assertThrows(ForbiddenException.class, () -> underTest.validateSameAccountId(userCrn(ACCOUNT_1), ACCOUNT_2));
+        assertEquals("Can't access resource from different account.", exception.getMessage());
+    }
+
     private String userCrn(String accountId) {
         return String.format("crn:cdp:iam:us-west-1:%s:user:1", accountId);
     }

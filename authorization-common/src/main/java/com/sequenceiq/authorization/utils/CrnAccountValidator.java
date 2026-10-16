@@ -7,6 +7,7 @@ import java.util.Objects;
 import jakarta.ws.rs.ForbiddenException;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,17 @@ public class CrnAccountValidator {
         Crn userCrn = Crn.ofUser(userCrnValue);
         for (String resourceCrn : resourceCrns) {
             validateSameAccount(userCrn, Crn.safeFromString(resourceCrn));
+        }
+    }
+
+    public void validateSameAccountId(String userCrnValue, String accountId) {
+        boolean internalUser = Crn.isCrn(userCrnValue) && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrnValue);
+        if (!internalUser && StringUtils.isNotBlank(accountId)) {
+            Crn userCrn = Crn.ofUser(userCrnValue);
+            if (!Objects.equals(userCrn.getAccountId(), accountId)) {
+                LOGGER.warn("User {} tried to access account {}.", userCrn, accountId);
+                throw new ForbiddenException("Can't access resource from different account.");
+            }
         }
     }
 
