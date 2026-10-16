@@ -22,12 +22,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDeploymentType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -117,11 +119,24 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
             cdpEnvironmentDetails.setComputeClusterDetails(convertComputeClusterDetails(srcEnvironmentDetails));
             cdpEnvironmentDetails.setEnvironmentDeletionType(
                     EnvironmentDeletionTypeToCDPEnvironmentDeletionType.convert(srcEnvironmentDetails.getEnvironmentDeletionTypeAsString()));
+            cdpEnvironmentDetails.setEnvironmentDeploymentType(convertEnvironmentDeploymentType(srcEnvironmentDetails.getEnvironmentType()));
         }
 
         CDPEnvironmentDetails ret = cdpEnvironmentDetails.build();
         LOGGER.debug("Converted CDPEnvironmentDetails event: {}", ret);
         return ret;
+    }
+
+    private CDPEnvironmentDeploymentType.Value convertEnvironmentDeploymentType(EnvironmentType srcEnvironmentType) {
+        try {
+            return Optional.ofNullable(srcEnvironmentType)
+                    .map(Enum::name)
+                    .map(CDPEnvironmentDeploymentType.Value::valueOf)
+                    .orElse(CDPEnvironmentDeploymentType.Value.UNSET);
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("Environment type not found: {}", srcEnvironmentType);
+            return CDPEnvironmentDeploymentType.Value.UNSET;
+        }
     }
 
     private CDPComputeClusterDetails convertComputeClusterDetails(EnvironmentDetails environmentDetails) {

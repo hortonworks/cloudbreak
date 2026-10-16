@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credentia
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.telemetry.EnvironmentTelemetryDetails;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
@@ -59,4 +60,5 @@ public interface EnvironmentDetails {
 
     String getEnvironmentDeletionTypeAsString();
 
+    EnvironmentType getEnvironmentType();
 }

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
@@ -72,6 +74,15 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         );
     }
 
+    private static Stream<Arguments> environmentTypes() {
+        return Stream.of(
+                Arguments.of(EnvironmentType.PUBLIC_CLOUD, UsageProto.CDPEnvironmentDeploymentType.Value.PUBLIC_CLOUD),
+                Arguments.of(EnvironmentType.HYBRID, UsageProto.CDPEnvironmentDeploymentType.Value.HYBRID),
+                Arguments.of(EnvironmentType.HYBRID_BASE, UsageProto.CDPEnvironmentDeploymentType.Value.HYBRID_BASE),
+                Arguments.of(null, UsageProto.CDPEnvironmentDeploymentType.Value.UNSET)
+        );
+    }
+
     @BeforeEach()
     void setUp() {
         underTest = new EnvironmentDetailsToCDPEnvironmentDetailsConverter();
@@ -92,6 +103,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         assertNotNull(cdpEnvironmentDetails.getAzureDetails());
         assertEquals("", cdpEnvironmentDetails.getUserTags());
         assertThat(cdpEnvironmentDetails.getSecretEncryptionEnabled()).isFalse();
+        assertEquals(UsageProto.CDPEnvironmentDeploymentType.Value.UNSET, cdpEnvironmentDetails.getEnvironmentDeploymentType());
     }
 
     @Test
@@ -108,6 +120,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         assertEquals("", cdpEnvironmentDetails.getUserTags());
         assertEquals(UsageProto.CDPCredentialType.Value.UNKNOWN, cdpEnvironmentDetails.getCredentialDetails().getCredentialType());
         assertThat(cdpEnvironmentDetails.getSecretEncryptionEnabled()).isFalse();
+        assertEquals(UsageProto.CDPEnvironmentDeploymentType.Value.UNSET, cdpEnvironmentDetails.getEnvironmentDeploymentType());
     }
 
     @Test
@@ -475,5 +488,25 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
         assertEquals(UsageProto.CDPEnvironmentDeletionType.Value.FORCE, cdpEnvironmentDetails.getEnvironmentDeletionType());
+    }
+
+    @ParameterizedTest
+    @MethodSource("environmentTypes")
+    void testEnvironmentDeploymentTypeConversion(EnvironmentType environmentType, UsageProto.CDPEnvironmentDeploymentType.Value expected) {
+        when(environmentDetails.getEnvironmentType()).thenReturn(environmentType);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        assertEquals(expected, cdpEnvironmentDetails.getEnvironmentDeploymentType());
+    }
+
+    @ParameterizedTest
+    @EnumSource(EnvironmentType.class)
+    void testEveryEnvironmentTypeHasDeploymentTypeCounterpart(EnvironmentType environmentType) {
+        when(environmentDetails.getEnvironmentType()).thenReturn(environmentType);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        assertEquals(environmentType.name(), cdpEnvironmentDetails.getEnvironmentDeploymentType().name());
     }
 }
