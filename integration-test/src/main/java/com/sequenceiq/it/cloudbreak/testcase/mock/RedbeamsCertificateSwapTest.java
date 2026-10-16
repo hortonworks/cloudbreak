@@ -17,7 +17,6 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCreateAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsCertificateSwapAction;
-import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStopAction;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -43,8 +42,6 @@ public class RedbeamsCertificateSwapTest extends AbstractMockTest {
     private static final Class<DistroXTestDto> A_DATAHUB = DistroXTestDto.class;
 
     private static final RedbeamsCertificateSwapAction REDBEAMS_CERTIFICATE_SWAP_REQUESTED = new RedbeamsCertificateSwapAction();
-
-    private static final EnvironmentCreateAction ENVIRONMENT_CREATE_REQUESTED = new EnvironmentCreateAction();
 
     private static final FreeIpaCreateAction FREEIPA_CREATE_REQUESTED = new FreeIpaCreateAction();
 
@@ -118,7 +115,7 @@ public class RedbeamsCertificateSwapTest extends AbstractMockTest {
                 .withNetwork()
                 .withCreateFreeIpa(FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
-                .when(ENVIRONMENT_CREATE_REQUESTED)
+                .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE);
     }
 

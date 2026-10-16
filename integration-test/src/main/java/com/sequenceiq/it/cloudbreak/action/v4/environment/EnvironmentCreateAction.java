@@ -15,10 +15,16 @@ import com.sequenceiq.it.cloudbreak.util.EnvironmentCreationJitter;
 
 public class EnvironmentCreateAction extends AbstractEnvironmentAction {
 
+    private final EnvironmentCreationJitter environmentCreationJitter;
+
+    public EnvironmentCreateAction(EnvironmentCreationJitter environmentCreationJitter) {
+        this.environmentCreationJitter = environmentCreationJitter;
+    }
+
     @Override
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
         if (!StringUtils.equals(testContext.getExistingResourceNames().get(EnvironmentTestDto.class), testDto.getName())) {
-            testContext.getApplicationContext().getBean(EnvironmentCreationJitter.class).delayIfNeeded(testDto.getName());
+            environmentCreationJitter.delayIfNeeded(testDto.getName());
             Log.whenJson("Environment post request: ", testDto.getRequest());
             CreateEnvironmentResponse createEnvironmentResponse = client.getDefaultClient(testContext).environmentV1Endpoint().post(testDto.getRequest());
             testDto.setResponse(createEnvironmentResponse);

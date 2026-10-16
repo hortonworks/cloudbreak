@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import java.util.Set;
 
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -40,12 +42,16 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentDirectionalTrustS
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTrustSetupDto;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.util.EnvironmentCreationJitter;
 
 @Service
 public class EnvironmentTestClient {
 
+    @Inject
+    private EnvironmentCreationJitter environmentCreationJitter;
+
     public Action<EnvironmentTestDto, EnvironmentClient> create() {
-        return new EnvironmentCreateAction();
+        return new EnvironmentCreateAction(environmentCreationJitter);
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> describe() {
