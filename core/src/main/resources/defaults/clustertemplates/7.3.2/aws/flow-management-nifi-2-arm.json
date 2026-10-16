@@ -19,8 +19,8 @@
         "type": "GATEWAY",
         "recoveryMode": "MANUAL",
         "template": {
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "attachedVolumes": [
             {
               "size": 100,
@@ -36,8 +36,8 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "rootVolume": {
             "size": 150
           },
@@ -56,8 +56,8 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.xlarge",
+          "fallbackInstanceTypes": ["m8g.xlarge", "m6g.xlarge"],
           "rootVolume": {
             "size": 100
           },

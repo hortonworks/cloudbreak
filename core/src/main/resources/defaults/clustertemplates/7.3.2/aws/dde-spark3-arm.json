@@ -27,8 +27,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "CORE"
@@ -50,8 +50,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "CORE"
@@ -73,8 +73,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "GATEWAY"
@@ -96,8 +96,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "CORE"
@@ -119,8 +119,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "cloudPlatform": "AWS"
         },
         "type": "CORE"

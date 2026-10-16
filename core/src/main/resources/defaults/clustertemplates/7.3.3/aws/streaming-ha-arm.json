@@ -29,8 +29,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"]
+          "instanceType": "m7g.4xlarge",
+          "fallbackInstanceTypes": ["m8g.4xlarge", "m6g.4xlarge"]
         },
         "nodeCount": 2,
         "type": "GATEWAY",
@@ -40,8 +40,8 @@
         "name": "master",
         "scalabilityOption": "FORBIDDEN",
         "template": {
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "r7g.4xlarge",
+          "fallbackInstanceTypes": ["r8g.4xlarge", "r6g.4xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -58,8 +58,8 @@
         "name": "core_zookeeper",
         "scalabilityOption": "FORBIDDEN",
         "template": {
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -78,8 +78,8 @@
         "name": "core_broker",
         "scalabilityOption": "FORBIDDEN",
         "template": {
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -97,8 +97,8 @@
       {
         "name": "broker",
         "template": {
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"],
           "attachedVolumes": [
             {
               "count": 1,
@@ -127,8 +127,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"]
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -149,8 +149,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"]
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -171,8 +171,8 @@
               "type": "NONE"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"]
+          "instanceType": "m7g.2xlarge",
+          "fallbackInstanceTypes": ["m8g.2xlarge", "m6g.2xlarge"]
         },
         "nodeCount": 0,
         "type": "CORE",

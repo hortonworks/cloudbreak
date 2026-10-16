@@ -24,8 +24,8 @@
             "strategy" : "PARTITION"
           }
         },
-        "instanceType": "r7gd.2xlarge",
-        "fallbackInstanceTypes": ["r8gd.2xlarge"],
+        "instanceType": "m7g.4xlarge",
+        "fallbackInstanceTypes": ["m8g.4xlarge", "m6g.4xlarge"],
         "rootVolume": {
           "size": 150
         },
@@ -45,13 +45,13 @@
         "recoveryMode": "MANUAL",
         "template": {
           "aws": {},
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "r7gd.4xlarge",
+          "fallbackInstanceTypes": ["r8gd.4xlarge", "r6gd.4xlarge"],
           "rootVolume": {
             "size": 150
           },
           "attachedVolumes": [{
-            "size": 474,
+            "size": 950,
             "count": 1,
             "type": "ephemeral"
           }],
@@ -66,8 +66,8 @@
         "recoveryMode": "MANUAL",
         "template": {
           "aws": {},
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.4xlarge",
+          "fallbackInstanceTypes": ["m8g.4xlarge", "m6g.4xlarge"],
           "rootVolume": {
             "size": 150
           },
@@ -91,8 +91,8 @@
               "strategy" : "PARTITION"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "r7gd.4xlarge",
+          "fallbackInstanceTypes": ["r8gd.4xlarge", "r6gd.4xlarge"],
           "rootVolume": {
             "size": 150
           },
@@ -117,8 +117,8 @@
               "strategy" : "PARTITION"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.4xlarge",
+          "fallbackInstanceTypes": ["m8g.4xlarge", "m6g.4xlarge"],
           "rootVolume": {
             "size": 150
           },
@@ -143,8 +143,8 @@
               "strategy" : "PARTITION"
             }
           },
-          "instanceType": "r7gd.2xlarge",
-          "fallbackInstanceTypes": ["r8gd.2xlarge"],
+          "instanceType": "m7g.4xlarge",
+          "fallbackInstanceTypes": ["m8g.4xlarge", "m6g.4xlarge"],
           "rootVolume": {
             "size": 150
           },
