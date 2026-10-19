@@ -516,18 +516,33 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public OsType getFreeIpaDestinationUpgradeImageOS() {
-        return awsProperties.getFreeipa().getUpgrade().getDestinationOs();
+    public OsType getFreeIpaHAUpgradeSourceImageOS() {
+        return awsProperties.getFreeipa().getUpgrade().getHA().getSourceOs();
     }
 
     @Override
-    public OsType getFreeIpaSourceUpgradeImageOS() {
-        return awsProperties.getFreeipa().getUpgrade().getSourceOs();
+    public OsType getFreeIpaHAUpgradeDestinationImageOS() {
+        return awsProperties.getFreeipa().getUpgrade().getHA().getDestinationOs();
     }
 
     @Override
-    public String getFreeIpaUpgradeImageCatalog() {
-        return awsProperties.getFreeipa().getUpgrade().getCatalog();
+    public String getFreeIpaHAUpgradeImageCatalog() {
+        return awsProperties.getFreeipa().getUpgrade().getHA().getCatalog();
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeSourceImageOS() {
+        return awsProperties.getFreeipa().getUpgrade().getSingle().getSourceOs();
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeDestinationImageOS() {
+        return awsProperties.getFreeipa().getUpgrade().getSingle().getDestinationOs();
+    }
+
+    @Override
+    public String getFreeIpaSingleUpgradeImageCatalog() {
+        return awsProperties.getFreeipa().getUpgrade().getSingle().getCatalog();
     }
 
     @Override

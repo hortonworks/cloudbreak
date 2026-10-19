@@ -489,18 +489,38 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public OsType getFreeIpaDestinationUpgradeImageOS() {
-        return azureProperties.getFreeipa().getUpgrade().getDestinationOs();
+    public OsType getFreeIpaHAUpgradeSourceImageOS() {
+        return azureProperties.getFreeipa().getUpgrade().getHA().getSourceOs();
     }
 
     @Override
-    public OsType getFreeIpaSourceUpgradeImageOS() {
-        return azureProperties.getFreeipa().getUpgrade().getSourceOs();
+    public OsType getFreeIpaHAUpgradeDestinationImageOS() {
+        return azureProperties.getFreeipa().getUpgrade().getHA().getDestinationOs();
     }
 
     @Override
-    public String getFreeIpaUpgradeImageCatalog() {
-        return azureProperties.getFreeipa().getUpgrade().getCatalog();
+    public String getFreeIpaHAUpgradeImageCatalog() {
+        return azureProperties.getFreeipa().getUpgrade().getHA().getCatalog();
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeSourceImageOS() {
+        return azureProperties.getFreeipa().getUpgrade().getSingle().getSourceOs();
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeDestinationImageOS() {
+        return azureProperties.getFreeipa().getUpgrade().getSingle().getDestinationOs();
+    }
+
+    @Override
+    public String getFreeIpaSingleUpgradeImageCatalog() {
+        return azureProperties.getFreeipa().getUpgrade().getSingle().getCatalog();
+    }
+
+    @Override
+    public String getFreeIpaMarketplaceUpgradeImageId() {
+        return azureProperties.getFreeipa().getMarketplace().getUpgrade().getImageId();
     }
 
     @Override

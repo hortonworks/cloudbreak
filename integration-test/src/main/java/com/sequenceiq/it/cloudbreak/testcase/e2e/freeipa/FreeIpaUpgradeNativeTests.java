@@ -73,8 +73,8 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
                 freeIpaImageCatalogUrl,
                 Architecture.X86_64,
                 testContext.getCloudProvider().getCloudPlatform().name(),
-                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
-                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS()
+                testContext.getCloudProvider().getFreeIpaSingleUpgradeSourceImageOS(),
+                testContext.getCloudProvider().getFreeIpaSingleUpgradeDestinationImageOS()
         );
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 1)
                 .withTelemetry("telemetry")

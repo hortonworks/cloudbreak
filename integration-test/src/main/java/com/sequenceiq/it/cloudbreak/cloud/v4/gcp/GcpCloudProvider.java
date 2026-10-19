@@ -476,18 +476,33 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public OsType getFreeIpaDestinationUpgradeImageOS() {
-        return gcpProperties.getFreeipa().getUpgrade().getDestinationOs();
+    public OsType getFreeIpaHAUpgradeSourceImageOS() {
+        return gcpProperties.getFreeipa().getUpgrade().getHA().getSourceOs();
     }
 
     @Override
-    public OsType getFreeIpaSourceUpgradeImageOS() {
-        return gcpProperties.getFreeipa().getUpgrade().getSourceOs();
+    public OsType getFreeIpaHAUpgradeDestinationImageOS() {
+        return gcpProperties.getFreeipa().getUpgrade().getHA().getDestinationOs();
     }
 
     @Override
-    public String getFreeIpaUpgradeImageCatalog() {
-        return gcpProperties.getFreeipa().getUpgrade().getCatalog();
+    public String getFreeIpaHAUpgradeImageCatalog() {
+        return gcpProperties.getFreeipa().getUpgrade().getHA().getCatalog();
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeSourceImageOS() {
+        return gcpProperties.getFreeipa().getUpgrade().getSingle().getSourceOs();
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeDestinationImageOS() {
+        return gcpProperties.getFreeipa().getUpgrade().getSingle().getDestinationOs();
+    }
+
+    @Override
+    public String getFreeIpaSingleUpgradeImageCatalog() {
+        return gcpProperties.getFreeipa().getUpgrade().getSingle().getCatalog();
     }
 
     @Override

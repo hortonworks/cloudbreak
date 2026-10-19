@@ -250,9 +250,14 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withMarketplaceUpgradeFreeIpaImage() {
+        String imageId = getCloudProvider().getFreeIpaMarketplaceUpgradeImageId();
+        if (Strings.isNullOrEmpty(imageId)) {
+            throw new IllegalStateException("FreeIPA marketplace upgrade image id is not configured for " + getCloudPlatform()
+                    + ", without it the newest image of the default OS would be selected instead of the marketplace one.");
+        }
         FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
         imageRequest.setCatalog(getCloudProvider().getFreeIpaMarketplaceUpgradeImageCatalog());
-        imageRequest.setId(getCloudProvider().getFreeIpaMarketplaceUpgradeImageId());
+        imageRequest.setId(imageId);
         getRequest().getFreeIpa().setImage(imageRequest);
         return this;
     }

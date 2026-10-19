@@ -89,8 +89,8 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
                 freeIpaImageCatalogUrl,
                 Architecture.X86_64,
                 testContext.getCloudProvider().getCloudPlatform().name(),
-                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
-                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS()
+                testContext.getCloudProvider().getFreeIpaHAUpgradeSourceImageOS(),
+                testContext.getCloudProvider().getFreeIpaHAUpgradeDestinationImageOS()
         );
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
                 .withFreeIpaImage(freeIpaImageCatalogUrl, images.newest().getUuid())

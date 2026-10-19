@@ -8,7 +8,7 @@ public class FreeIpaProperties {
 
     private String arm64InstanceType;
 
-    private Upgrade upgrade = new Upgrade();
+    private FreeIpaUpgrade upgrade = new FreeIpaUpgrade();
 
     private Marketplace marketplace = new Marketplace();
 
@@ -30,11 +30,11 @@ public class FreeIpaProperties {
         this.arm64InstanceType = arm64InstanceType;
     }
 
-    public Upgrade getUpgrade() {
+    public FreeIpaUpgrade getUpgrade() {
         return upgrade;
     }
 
-    public void setUpgrade(Upgrade upgrade) {
+    public void setUpgrade(FreeIpaUpgrade upgrade) {
         this.upgrade = upgrade;
     }
 
@@ -88,14 +88,36 @@ public class FreeIpaProperties {
 
     public static class Marketplace {
 
-        private Upgrade upgrade;
+        private MarketplaceUpgrade upgrade;
 
-        public Upgrade getUpgrade() {
+        public MarketplaceUpgrade getUpgrade() {
             return upgrade;
         }
 
-        public void setUpgrade(Upgrade upgrade) {
+        public void setUpgrade(MarketplaceUpgrade upgrade) {
             this.upgrade = upgrade;
+        }
+    }
+
+    public static class MarketplaceUpgrade {
+        private String imageId;
+
+        private String catalog;
+
+        public String getImageId() {
+            return imageId;
+        }
+
+        public void setImageId(String imageId) {
+            this.imageId = imageId;
+        }
+
+        public String getCatalog() {
+            return catalog;
+        }
+
+        public void setCatalog(String catalog) {
+            this.catalog = catalog;
         }
     }
 

@@ -66,9 +66,10 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
         testFreeIpaUpgrade(
                 testContext,
                 1,
-                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
-                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS(),
-                true
+                testContext.getCloudProvider().getFreeIpaSingleUpgradeImageCatalog(),
+                testContext.getCloudProvider().getFreeIpaSingleUpgradeSourceImageOS(),
+                testContext.getCloudProvider().getFreeIpaSingleUpgradeDestinationImageOS(),
+                false
         );
     }
 
@@ -82,20 +83,27 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
         testFreeIpaUpgrade(
                 testContext,
                 3,
-                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
-                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS(),
-                false
+                testContext.getCloudProvider().getFreeIpaHAUpgradeImageCatalog(),
+                testContext.getCloudProvider().getFreeIpaHAUpgradeSourceImageOS(),
+                testContext.getCloudProvider().getFreeIpaHAUpgradeDestinationImageOS(),
+                true
         );
     }
 
-    private void testFreeIpaUpgrade(TestContext testContext, int freeIpaInstances, OsType sourceOS, OsType destinationOS, boolean validateLB) {
-        String freeIpaImageCatalogUrl = commonCloudProperties().getFreeipaImageCatalogUrl();
+    private void testFreeIpaUpgrade(
+            TestContext testContext,
+            int freeIpaInstances,
+            String freeIpaImageCatalogUrl,
+            OsType sourceOS,
+            OsType destinationOS,
+            boolean validateLB
+    ) {
         LastAndNewestImage images = freeIpaImageUtil.getLastAndNewestImageByOs(
                 freeIpaImageCatalogUrl,
                 Architecture.X86_64,
                 testContext.getCloudProvider().getCloudPlatform().name(),
-                testContext.getCloudProvider().getFreeIpaSourceUpgradeImageOS(),
-                testContext.getCloudProvider().getFreeIpaDestinationUpgradeImageOS()
+                sourceOS,
+                destinationOS
         );
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, freeIpaInstances, Optional.of(FreeIpaLoadBalancerType.NONE))
                 .withFreeIpaImage(freeIpaImageCatalogUrl, images.last().getUuid())

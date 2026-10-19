@@ -531,23 +531,38 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public OsType getFreeIpaDestinationUpgradeImageOS() {
-        return delegate.getFreeIpaDestinationUpgradeImageOS();
+    public OsType getFreeIpaHAUpgradeSourceImageOS() {
+        return delegate.getFreeIpaHAUpgradeSourceImageOS();
     }
 
     @Override
-    public OsType getFreeIpaSourceUpgradeImageOS() {
-        return delegate.getFreeIpaSourceUpgradeImageOS();
+    public OsType getFreeIpaHAUpgradeDestinationImageOS() {
+        return delegate.getFreeIpaHAUpgradeDestinationImageOS();
+    }
+
+    @Override
+    public String getFreeIpaHAUpgradeImageCatalog() {
+        return delegate.getFreeIpaHAUpgradeImageCatalog();
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeSourceImageOS() {
+        return delegate.getFreeIpaSingleUpgradeSourceImageOS();
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeDestinationImageOS() {
+        return delegate.getFreeIpaSingleUpgradeDestinationImageOS();
+    }
+
+    @Override
+    public String getFreeIpaSingleUpgradeImageCatalog() {
+        return delegate.getFreeIpaSingleUpgradeImageCatalog();
     }
 
     @Override
     public String getFreeIpaMarketplaceUpgradeImageId() {
         return delegate.getFreeIpaMarketplaceUpgradeImageId();
-    }
-
-    @Override
-    public String getFreeIpaUpgradeImageCatalog() {
-        return delegate.getFreeIpaUpgradeImageCatalog();
     }
 
     @Override

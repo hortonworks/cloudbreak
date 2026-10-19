@@ -230,13 +230,19 @@ public interface CloudProvider {
 
     List<String> getDistroXVariants();
 
-    OsType getFreeIpaDestinationUpgradeImageOS();
+    OsType getFreeIpaHAUpgradeSourceImageOS();
 
-    OsType getFreeIpaSourceUpgradeImageOS();
+    OsType getFreeIpaHAUpgradeDestinationImageOS();
+
+    String getFreeIpaHAUpgradeImageCatalog();
+
+    OsType getFreeIpaSingleUpgradeSourceImageOS();
+
+    OsType getFreeIpaSingleUpgradeDestinationImageOS();
+
+    String getFreeIpaSingleUpgradeImageCatalog();
 
     String getFreeIpaMarketplaceUpgradeImageId();
-
-    String getFreeIpaUpgradeImageCatalog();
 
     String getFreeIpaMarketplaceUpgradeImageCatalog();
 

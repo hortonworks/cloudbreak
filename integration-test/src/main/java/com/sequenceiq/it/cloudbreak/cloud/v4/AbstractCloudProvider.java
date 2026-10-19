@@ -421,24 +421,40 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
-    public OsType getFreeIpaDestinationUpgradeImageOS() {
+    public OsType getFreeIpaHAUpgradeSourceImageOS() {
         return OsType.RHEL9;
     }
 
     @Override
-    public OsType getFreeIpaSourceUpgradeImageOS() {
+    public OsType getFreeIpaHAUpgradeDestinationImageOS() {
         return OsType.RHEL9;
+    }
+
+    @Override
+    public String getFreeIpaHAUpgradeImageCatalog() {
+        LOGGER.warn("'freeIpaHAUpgradeImageCatalog' is not implemented");
+        return null;
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeSourceImageOS() {
+        return OsType.RHEL9;
+    }
+
+    @Override
+    public OsType getFreeIpaSingleUpgradeDestinationImageOS() {
+        return OsType.RHEL9;
+    }
+
+    @Override
+    public String getFreeIpaSingleUpgradeImageCatalog() {
+        LOGGER.warn("'freeIpaSingleUpgradeImageCatalog' is not implemented");
+        return null;
     }
 
     @Override
     public String getFreeIpaMarketplaceUpgradeImageId() {
         LOGGER.warn("'freeIpaMarketplaceUpgradeImageId' is not implemented");
-        return null;
-    }
-
-    @Override
-    public String getFreeIpaUpgradeImageCatalog() {
-        LOGGER.warn("'freeIpaUpgradeImageCatalog' is not implemented");
         return null;
     }
 
