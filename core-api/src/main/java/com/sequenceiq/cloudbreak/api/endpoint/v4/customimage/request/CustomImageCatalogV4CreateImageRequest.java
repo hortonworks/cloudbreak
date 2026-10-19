@@ -35,7 +35,7 @@ public class CustomImageCatalogV4CreateImageRequest {
     private String sourceImageId;
 
     @Size(max = 255, min = 1, message = "The length of the baseParcelUrl must be between 1 and 255")
-    @Schema(description = BASE_PARCEL_URL, required = true)
+    @Schema(description = BASE_PARCEL_URL)
     private String baseParcelUrl;
 
     @NotNull
