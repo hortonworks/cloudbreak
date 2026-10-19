@@ -128,6 +128,8 @@ public class ImagesToImagesV4ResponseConverter {
         json.setCmBuildNumber(source.getCmBuildNumber());
         json.setPreWarmCsd(source.getPreWarmCsd());
         json.setPreWarmParcels(source.getPreWarmParcels());
+        json.setBaseParcelUrl(source.getBaseParcelUrl());
+        json.setSourceImageId(source.getSourceImageId());
     }
 
     private BaseStackDetailsV4Response convertStackDetailsToJson(ImageStackDetails stackDetails, String osType, StackType stackType) {

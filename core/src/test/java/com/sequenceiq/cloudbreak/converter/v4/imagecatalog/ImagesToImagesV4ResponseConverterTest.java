@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,6 +33,10 @@ class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConverterTest<
 
     public static final String REDHAT_7 = "redhat7";
 
+    private static final String SOURCE_IMAGE_ID = "949bffa3-17d4-4076-9d5a-bf3d23c1086b";
+
+    private static final String BASE_PARCEL_URL = "https://mirror.example.com/cloudera/p/";
+
     @Mock
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
@@ -51,6 +56,23 @@ class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConverterTest<
         setupStackEntries();
         ImagesV4Response result = underTest.convert(createSource());
         assertEquals(1, result.getCdhImages().size());
+    }
+
+    @Test
+    void testConvertKeepsSourceImageIdAndBaseParcelUrlOfBaseAndRuntimeImages() {
+        setupStackEntries();
+        Image customImage = Image.builder()
+                .copy(getImage(REDHAT_7))
+                .withSourceImageId(SOURCE_IMAGE_ID)
+                .withBaseParcelUrl(BASE_PARCEL_URL)
+                .build();
+
+        ImagesV4Response result = underTest.convert(new Images(List.of(customImage), List.of(customImage), Collections.emptyList()));
+
+        assertEquals(SOURCE_IMAGE_ID, result.getBaseImages().getFirst().getSourceImageId());
+        assertEquals(BASE_PARCEL_URL, result.getBaseImages().getFirst().getBaseParcelUrl());
+        assertEquals(SOURCE_IMAGE_ID, result.getCdhImages().getFirst().getSourceImageId());
+        assertEquals(BASE_PARCEL_URL, result.getCdhImages().getFirst().getBaseParcelUrl());
     }
 
     private Images getImages() {
