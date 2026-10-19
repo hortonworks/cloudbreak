@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -38,6 +41,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUpgradeCondition;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.SshPublicKeyUpgradeValidator;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.Architecture;
@@ -71,6 +75,9 @@ public class StackImageUpdateServiceTest {
 
     @Mock
     private OsChangeUpgradeCondition osChangeUpgradeCondition;
+
+    @Mock
+    private SshPublicKeyUpgradeValidator sshPublicKeyUpgradeValidator;
 
     @InjectMocks
     private StackImageUpdateService underTest;
@@ -192,10 +199,43 @@ public class StackImageUpdateServiceTest {
         underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
 
         verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspaceId());
+        verify(sshPublicKeyUpgradeValidator).validate(stack, OsType.RHEL8);
     }
 
     @Test
-    public void testGetNewImageIfCloudPlatformMatchFail() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public void testGetNewImageIfVersionsMatchShouldFailWhenSshPublicKeyIsNotAcceptableForRhel9Image()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        StatedImage targetStatedImage = StatedImage.statedImage(Image.builder()
+                        .withOs(OsType.RHEL9.getOs())
+                        .withOsType(OsType.RHEL9.getOsType())
+                        .withImageSetsByProvider(image.getImageSetsByProvider())
+                        .withStackDetails(image.getStackDetails()).build(),
+                statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName());
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs(OsType.RHEL8.getOs())
+                .withOsType(OsType.RHEL8.getOsType())
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
+        when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(targetStatedImage);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
+        when(osChangeUpgradeCondition.isNextMajorOsImage(stack.getId(), targetStatedImage.getImage())).thenReturn(true);
+        doThrow(new UpgradeValidationFailedException("RSA public key is 2047 bits, at least 2048 bits are required"))
+                .when(sshPublicKeyUpgradeValidator).validate(stack, OsType.RHEL9);
+
+        UpgradeValidationFailedException exception = assertThrows(UpgradeValidationFailedException.class,
+                () -> underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl"));
+
+        assertEquals("RSA public key is 2047 bits, at least 2048 bits are required", exception.getMessage());
+    }
+
+    @Test
+    public void testGetNewImageIfCloudPlatformMatchFail()throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         stack.setCloudPlatform("GCP");
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withImageName("imageOldName")

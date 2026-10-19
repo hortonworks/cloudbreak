@@ -75,6 +75,7 @@ import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.telemetry.AccountTelemetryService;
 import com.sequenceiq.freeipa.service.validation.FreeIpaHyperVGenerationValidator;
 import com.sequenceiq.freeipa.service.validation.SeLinuxValidationService;
+import com.sequenceiq.freeipa.service.validation.SshPublicKeyValidationService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
@@ -157,6 +158,9 @@ public class FreeIpaCreationService {
     @Inject
     private FreeIpaHyperVGenerationValidator freeIpaHyperVGenerationValidator;
 
+    @Inject
+    private SshPublicKeyValidationService sshPublicKeyValidationService;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -199,6 +203,7 @@ public class FreeIpaCreationService {
                 "Validating custom instance type took {} ms for {}", stack.getName());
         validateSeLinux(stack, imageWrapperStringPair.getLeft().getImage());
         freeIpaHyperVGenerationValidator.validate(stack, credential, imageWrapperStringPair.getLeft().getImage(), availableVmTypes.orElse(Set.of()));
+        sshPublicKeyValidationService.validateForCreation(stack, OsType.getByOsTypeString(imageWrapperStringPair.getLeft().getImage().getOsType()));
         try {
             Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 Stack savedStack = stackService.save(stack);

@@ -27,8 +27,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.util.PublicKeyReaderUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -254,13 +256,45 @@ public class EnvironmentValidatorService {
             if (isNotEmpty(publicKey)) {
                 ValidationResult validationResult = publicKeyValidator.validatePublicKey(publicKey);
                 validationResultBuilder.merge(validationResult);
+                validateNewRsaKeyLength(publicKey, environment, validationResultBuilder);
             }
         }
         return validationResultBuilder.build();
     }
 
+    // RHEL 9 is the default OS and rotating to a short RSA key would lock the user out of nodes that may already run it
+    private void validateNewRsaKeyLength(String publicKey, Environment environment, ValidationResultBuilder validationResultBuilder) {
+        PublicKeyReaderUtil.findTooShortRsaKeyMessage(publicKey).ifPresent(message -> {
+            LOGGER.info("Rejecting the new SSH public key of environment {}: {}", environment.getName(), message);
+            validationResultBuilder.error(String.format("The new SSH public key is not acceptable: %s.", message));
+        });
+    }
+
     public ValidationResult validatePublicKey(String publicKey) {
         return publicKeyValidator.validatePublicKey(publicKey);
+    }
+
+    // FreeIPA creation rejects short RSA keys for RHEL 9 images as well, this check fails the environment creation right away when it is known
+    // that FreeIPA will run on RHEL 9
+    public ValidationResult validatePublicKeyForFreeIpaCreation(String publicKey, FreeIpaCreationDto freeIpaCreation) {
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        if (isNotEmpty(publicKey) && freeIpaCreation != null && freeIpaCreation.isCreate() && isFreeIpaOnRhel9(freeIpaCreation)) {
+            PublicKeyReaderUtil.findTooShortRsaKeyMessage(publicKey).ifPresent(message -> {
+                LOGGER.info("Rejecting the SSH public key of the environment as FreeIPA will be created on RHEL 9: {}", message);
+                validationResultBuilder.error(String.format("The SSH public key is not acceptable, because FreeIPA will be created on %s: %s. " +
+                        "Please use an RSA key of at least 2048 bits or an Ed25519 key.", OsType.RHEL9.getShortName(), message));
+            });
+        }
+        return validationResultBuilder.build();
+    }
+
+    private boolean isFreeIpaOnRhel9(FreeIpaCreationDto freeIpaCreation) {
+        String imageOs = freeIpaCreation.getImageOs();
+        if (StringUtils.isBlank(imageOs)) {
+            // FreeIPA uses its default OS (RHEL 9) without a requested OS, unless a specific image is requested, its OS is not known here
+            return StringUtils.isBlank(freeIpaCreation.getImageId());
+        }
+        return OsType.getByOsOptional(imageOs).map(OsType.RHEL9::equals).orElse(false);
     }
 
     private void fetchSecurityGroup(EnvironmentEditDto editDto, Environment environment, String securityGroupId) {

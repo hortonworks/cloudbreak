@@ -8,6 +8,7 @@ import java.security.spec.KeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 import org.apache.commons.codec.binary.Base64;
@@ -33,7 +34,29 @@ public final class PublicKeyReaderUtil {
 
     private static final int NUM_BYTES_ED25519 = 32;
 
+    private static final int MIN_RSA_KEY_BITS = 2048;
+
     private PublicKeyReaderUtil() {
+    }
+
+    /**
+     * Checks only the RSA key length, any other problem with the key is logged and ignored, because it is reported by other validations.
+     *
+     * @return the error message if the key is an RSA key shorter than the minimum required by RHEL 9, empty otherwise
+     */
+    public static Optional<String> findTooShortRsaKeyMessage(String key) {
+        try {
+            // FIPS mode only restricts Ed25519 keys, which never fail the RSA length check
+            load(key, false);
+        } catch (PublicKeyParseException e) {
+            if (e.getErrorCode() == ErrorCode.RSA_KEY_TOO_SHORT) {
+                return Optional.of(e.getMessage());
+            }
+            LOGGER.info("Ignoring SSH public key parse problem during RSA key length check: {}", e.getMessage());
+        } catch (RuntimeException e) {
+            LOGGER.info("Ignoring SSH public key problem during RSA key length check", e);
+        }
+        return Optional.empty();
     }
 
     public static PublicKey load(String key, boolean fipsEnabled) throws PublicKeyParseException {
@@ -120,6 +143,12 @@ public final class PublicKeyReaderUtil {
         BigInteger e = buffer.readMPint();
         BigInteger n = buffer.readMPint();
 
+        // RHEL 9 OpenSSH (RequiredRSASize 2048) rejects e.g. 2047-bit moduli, so reject them before any provider-specific checks
+        if (n.bitLength() < MIN_RSA_KEY_BITS) {
+            throw new PublicKeyParseException(ErrorCode.RSA_KEY_TOO_SHORT,
+                    String.format("RSA public key is %d bits, at least %d bits are required", n.bitLength(), MIN_RSA_KEY_BITS));
+        }
+
         try {
             KeyFactory rsaKeyFact = KeyFactory.getInstance("RSA");
             KeySpec rsaPubSpec = new RSAPublicKeySpec(n, e);
@@ -190,10 +219,10 @@ public final class PublicKeyReaderUtil {
         }
 
         private int readUInt32BigEndian() {
-            int byte1 = data[pos++];
-            int byte2 = data[pos++];
-            int byte3 = data[pos++];
-            int byte4 = data[pos++];
+            int byte1 = data[pos++] & U_BYTE_MAX_VALUE;
+            int byte2 = data[pos++] & U_BYTE_MAX_VALUE;
+            int byte3 = data[pos++] & U_BYTE_MAX_VALUE;
+            int byte4 = data[pos++] & U_BYTE_MAX_VALUE;
             return (byte1 << INT1) + (byte2 << INT2) + (byte3 << INT3) + byte4;
         }
 
@@ -215,6 +244,11 @@ public final class PublicKeyReaderUtil {
 
         private PublicKeyParseException(ErrorCode errorCode) {
             super(errorCode.message);
+            this.errorCode = errorCode;
+        }
+
+        private PublicKeyParseException(ErrorCode errorCode, String message) {
+            super(message);
             this.errorCode = errorCode;
         }
 
@@ -242,7 +276,9 @@ public final class PublicKeyReaderUtil {
 
             SSH2ED25519_ERROR_DECODING_PUBLIC_KEY_BLOB("SSH2ED25519: error decoding public key blob"),
 
-            CORRUPT_BYTE_ARRAY_ON_READ("Public key length is shorter than 2048 bits or byte array is corrupt."),
+            CORRUPT_BYTE_ARRAY_ON_READ("Public key byte array is corrupt."),
+
+            RSA_KEY_TOO_SHORT("RSA public key is too short"),
 
             MALFORMED_ED25519_ED_EC_POINT("SSH2ED25519: byte array for EdECPoint must be " + NUM_BYTES_ED25519 + " bytes long");
 

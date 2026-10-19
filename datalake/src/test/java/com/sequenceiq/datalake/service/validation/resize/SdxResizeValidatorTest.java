@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.validation.resize;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -16,12 +17,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.RsaPublicKeyTestUtil;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.service.sdx.database.AzureDatabaseAttributesService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
@@ -96,6 +102,51 @@ class SdxResizeValidatorTest {
                 Arguments.of(SdxClusterShape.LIGHT_DUTY_PRO, SdxClusterShape.LIGHT_DUTY_PRO, false),
                 Arguments.of(SdxClusterShape.LIGHT_DUTY_PRO, SdxClusterShape.LIGHT_DUTY_PRO, true)
         );
+    }
+
+    @Test
+    void testValidateSshPublicKeyForResizeShouldThrowExceptionWhenRsaKeyIsTooShortForRhel9Image() {
+        assertThatThrownBy(() -> underTest.validateSshPublicKeyForResize(environmentWithPublicKey(RsaPublicKeyTestUtil.openSshRsaKey(2047)),
+                imageWithOs(OsType.RHEL9.getOs())))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageStartingWith("Resizing the Data Lake is not possible, because the new Data Lake would be created on RHEL 9, which rejects "
+                        + "the SSH public key of the environment: RSA public key is 2047 bits, at least 2048 bits are required.");
+    }
+
+    @ParameterizedTest(name = "[{index}] key bits: {0}, image OS: {1}")
+    @MethodSource("provideAcceptedSshPublicKeyForResizeParameters")
+    void testValidateSshPublicKeyForResizeShouldNotThrowException(int keyBits, String imageOs) {
+        underTest.validateSshPublicKeyForResize(environmentWithPublicKey(RsaPublicKeyTestUtil.openSshRsaKey(keyBits)), imageWithOs(imageOs));
+    }
+
+    @Test
+    void testValidateSshPublicKeyForResizeShouldNotThrowExceptionWithoutPublicKeyOrImage() {
+        underTest.validateSshPublicKeyForResize(new DetailedEnvironmentResponse(), imageWithOs(OsType.RHEL9.getOs()));
+        underTest.validateSshPublicKeyForResize(environmentWithPublicKey(null), imageWithOs(OsType.RHEL9.getOs()));
+        underTest.validateSshPublicKeyForResize(environmentWithPublicKey(RsaPublicKeyTestUtil.openSshRsaKey(2047)), null);
+    }
+
+    private static Stream<Arguments> provideAcceptedSshPublicKeyForResizeParameters() {
+        return Stream.of(
+                Arguments.of(2048, OsType.RHEL9.getOs()),
+                Arguments.of(2047, OsType.RHEL8.getOs()),
+                Arguments.of(2047, OsType.CENTOS7.getOs()),
+                Arguments.of(2047, null)
+        );
+    }
+
+    private DetailedEnvironmentResponse environmentWithPublicKey(String publicKey) {
+        EnvironmentAuthenticationResponse authentication = new EnvironmentAuthenticationResponse();
+        authentication.setPublicKey(publicKey);
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setAuthentication(authentication);
+        return environment;
+    }
+
+    private ImageSettingsV4Request imageWithOs(String os) {
+        ImageSettingsV4Request image = new ImageSettingsV4Request();
+        image.setOs(os);
+        return image;
     }
 
     private static Stream<Arguments> provideValidShapeTransitions() {

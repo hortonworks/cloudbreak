@@ -222,6 +222,8 @@ public class EnvironmentCreationService {
         LOGGER.info("Validating environment creation. CreationDto: '{}', Environment: '{}'.", creationDto, environment);
         ValidationResultBuilder validationBuilder = validatorService.validateNetworkCreation(environment, creationDto.getNetwork());
         validationBuilder.merge(validatorService.validatePublicKey(creationDto.getAuthentication().getPublicKey()));
+        validationBuilder.merge(validatorService.validatePublicKeyForFreeIpaCreation(creationDto.getAuthentication().getPublicKey(),
+                creationDto.getFreeIpaCreation()));
         validationBuilder.merge(validatorService.validateTags(creationDto));
         if (creationDto.getCloudPlatform() != null) {
             validationBuilder.merge(validateSecretEncryption(creationDto));

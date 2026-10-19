@@ -18,14 +18,21 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.SshPublicKeyUpgradeValidator;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -45,10 +52,17 @@ public class OSUpgradeByUpgradeSetsService {
     @Inject
     private StackUpgradeService stackUpgradeService;
 
+    @Inject
+    private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private SshPublicKeyUpgradeValidator sshPublicKeyUpgradeValidator;
+
     public FlowIdentifier osUpgradeByUpgradeSets(StackView stackView, ImageChangeDto imageChangeDto, List<OrderedOSUpgradeSet> upgradeSets) {
         LOGGER.info("OS upgrade by upgrade sets: {}", upgradeSets);
         validateOrderNumbers(upgradeSets);
-        validateInstanceIdsAndStack(stackView.getId(), upgradeSets);
+        StackDto stack = validateInstanceIdsAndStack(stackView.getId(), upgradeSets);
+        validateSshPublicKey(stack, imageChangeDto);
         String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stackView, ThreadBasedUserCrnProvider.getUserCrn(), false);
         return flowManager.triggerOsUpgradeByUpgradeSetsFlow(stackView.getId(), upgradeVariant, imageChangeDto, upgradeSets);
     }
@@ -64,7 +78,7 @@ public class OSUpgradeByUpgradeSetsService {
         }
     }
 
-    private void validateInstanceIdsAndStack(Long stackId, List<OrderedOSUpgradeSet> upgradeSets) {
+    private StackDto validateInstanceIdsAndStack(Long stackId, List<OrderedOSUpgradeSet> upgradeSets) {
         List<String> upgradeInstanceIdList = upgradeSets.stream()
                 .flatMap(numberedOsUpgradeSet -> numberedOsUpgradeSet.getInstanceIds().stream()).collect(toList());
         checkDuplicatedInstanceIds(upgradeInstanceIdList);
@@ -76,6 +90,22 @@ public class OSUpgradeByUpgradeSetsService {
             LOGGER.info("There are repair validation errors: {}", repairValidation.getValidationErrors());
             throw new BadRequestException(String.join(", ", repairValidation.getValidationErrors()));
         });
+        return stack;
+    }
+
+    // Early check to reject the request synchronously. The stack image update step of the flow validates the key again,
+    // so image catalog problems are not failing the request here, the flow reports them as before.
+    private void validateSshPublicKey(StackDto stack, ImageChangeDto imageChangeDto) {
+        try {
+            StatedImage targetImage = imageCatalogService.getImage(stack.getWorkspaceId(), imageChangeDto.getImageCatalogUrl(),
+                    imageChangeDto.getImageCatalogName(), imageChangeDto.getImageId());
+            sshPublicKeyUpgradeValidator.validate(stack, OsType.getByOsTypeString(targetImage.getImage().getOsType()));
+        } catch (UpgradeValidationFailedException e) {
+            LOGGER.info("SSH public key validation failed for OS upgrade by upgrade sets: {}", e.getMessage());
+            throw new BadRequestException(e.getMessage(), e);
+        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+            LOGGER.warn("Skipping the early SSH public key validation for OS upgrade by upgrade sets, the target image could not be fetched", e);
+        }
     }
 
     private void checkDuplicatedInstanceIds(List<String> upgradeInstanceIdList) {

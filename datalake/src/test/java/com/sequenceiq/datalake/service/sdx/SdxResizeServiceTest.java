@@ -540,6 +540,7 @@ class SdxResizeServiceTest {
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxReactorFlowManager, times(1)).triggerSdxResize(eq(SDX_ID), sdxClusterArgumentCaptor.capture(),
                 any(DatalakeDrSkipOptions.class), eq(false));
+        verify(sdxResizeValidator).validateSshPublicKeyForResize(eq(detailedEnvironmentResponse), any());
 
         SdxCluster createdSdxCluster = sdxClusterArgumentCaptor.getValue();
         assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());

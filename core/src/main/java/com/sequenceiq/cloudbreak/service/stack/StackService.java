@@ -142,6 +142,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
@@ -647,7 +648,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         if (!stack.getStackAuthentication().passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
             // FIPS mode if and only if using AWS GovCloud
             boolean fipsEnabled = CloudConstants.AWS_NATIVE_GOV.equals(stack.getPlatformVariant());
-            openSshPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey(), fipsEnabled);
+            OsType targetOsType = OsType.getByOsTypeString(imgFromCatalog.getImage().getOsType());
+            openSshPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey(), fipsEnabled, targetOsType);
         }
         if (stack.getOrchestrator() != null) {
             orchestratorService.save(stack.getOrchestrator());

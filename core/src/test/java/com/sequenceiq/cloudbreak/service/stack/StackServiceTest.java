@@ -43,6 +43,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -122,6 +123,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.stackpatcher.service.StackPatchService;
@@ -506,7 +508,7 @@ class StackServiceTest {
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());
         verify(stack).populateStackIdForComponents();
-        verify(openSshPublicKeyValidator, never()).validate(anyString(), anyBoolean());
+        verify(openSshPublicKeyValidator, never()).validate(anyString(), anyBoolean(), any());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -514,6 +516,7 @@ class StackServiceTest {
     void testCreatePublicKey(String platformVariant, boolean fipsEnabledExpected) {
         when(stack.getPlatformVariant()).thenReturn(platformVariant);
         when(stackAuthentication.getPublicKey()).thenReturn(PUBLIC_KEY);
+        when(image.getOsType()).thenReturn(OsType.RHEL9.getOsType());
         Database database = new Database();
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
@@ -523,7 +526,36 @@ class StackServiceTest {
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());
         verify(stack).populateStackIdForComponents();
-        verify(openSshPublicKeyValidator).validate(PUBLIC_KEY, fipsEnabledExpected);
+        verify(openSshPublicKeyValidator).validate(PUBLIC_KEY, fipsEnabledExpected, OsType.RHEL9);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = OsType.class, names = "RHEL9", mode = EnumSource.Mode.EXCLUDE)
+    void testCreatePublicKeyPassesNonRhel9TargetOs(OsType osType) {
+        when(stack.getPlatformVariant()).thenReturn(VARIANT_VALUE);
+        when(stackAuthentication.getPublicKey()).thenReturn(PUBLIC_KEY);
+        when(image.getOsType()).thenReturn(osType.getOsType());
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
+        when(stack.getDatabase()).thenReturn(database);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
+
+        verify(openSshPublicKeyValidator).validate(PUBLIC_KEY, false, osType);
+    }
+
+    @Test
+    void testCreatePublicKeyPassesNullTargetOsWhenImageHasNoOsType() {
+        when(stack.getPlatformVariant()).thenReturn(VARIANT_VALUE);
+        when(stackAuthentication.getPublicKey()).thenReturn(PUBLIC_KEY);
+        when(image.getOsType()).thenReturn(null);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
+        when(stack.getDatabase()).thenReturn(database);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
+
+        verify(openSshPublicKeyValidator).validate(PUBLIC_KEY, false, null);
     }
 
     @Test

@@ -165,6 +165,7 @@ class UpgradeServiceTest {
         assertTrue(upgradeEvent.getInstancesOnOldImage().containsAll(Set.of("pgw", "im2", "im3")));
 
         verify(validationService).validateStackForUpgrade(allInstances, stack);
+        verify(validationService).validateSshPublicKeyForSelectedImage(stack, selectedImage);
         verify(validationService).validateSelectedImageDifferentFromCurrent(eq(currentImage), eq(selectedImage), anySet());
         ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsArgumentCaptor = ArgumentCaptor.forClass(FreeIpaImageFilterSettings.class);
         verify(imageService).selectImage(imageFilterSettingsArgumentCaptor.capture());

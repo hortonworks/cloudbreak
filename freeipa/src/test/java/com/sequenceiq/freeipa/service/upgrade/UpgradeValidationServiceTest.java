@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
@@ -26,6 +27,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.image.SupportedOsService;
+import com.sequenceiq.freeipa.service.validation.SshPublicKeyValidationService;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeValidationServiceTest {
@@ -40,6 +42,9 @@ class UpgradeValidationServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private SshPublicKeyValidationService sshPublicKeyValidationService;
 
     @Test
     void testOsNotSupported() {
@@ -223,5 +228,20 @@ class UpgradeValidationServiceTest {
 
         assertEquals("Selected image using arm64 architecture and current image are using different x86_64 architecture.",
                 exception.getMessage());
+    }
+
+    @Test
+    void testValidateSshPublicKeyForSelectedImageDelegatesWithTargetOs() {
+        Stack stack = new Stack();
+
+        underTest.validateSshPublicKeyForSelectedImage(stack, imageWithOs("redhat9"));
+
+        verify(sshPublicKeyValidationService).validateForTargetOs(stack, OsType.RHEL9);
+    }
+
+    private ImageInfoResponse imageWithOs(String os) {
+        ImageInfoResponse image = new ImageInfoResponse();
+        image.setOs(os);
+        return image;
     }
 }

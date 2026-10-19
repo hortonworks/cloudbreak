@@ -99,6 +99,7 @@ public class UpgradeService {
         validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, instancesOnOldImage);
         validationService.validateSelectedImageEntitledFor(accountId, selectedImage);
         validationService.validateSelectedImageForArchitecture(currentImage, selectedImage);
+        validationService.validateSshPublicKeyForSelectedImage(stack, selectedImage);
         return new FreeIpaUpgradeValidationResult(stack, allInstances, currentImage, selectedImage);
     }
 

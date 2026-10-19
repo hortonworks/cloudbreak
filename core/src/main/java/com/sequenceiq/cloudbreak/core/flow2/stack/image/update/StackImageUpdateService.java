@@ -32,10 +32,12 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUpgradeCondition;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.SshPublicKeyUpgradeValidator;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.OsType;
 
 @Service
 public class StackImageUpdateService {
@@ -74,6 +76,9 @@ public class StackImageUpdateService {
     @Inject
     private OsChangeUpgradeCondition osChangeUpgradeCondition;
 
+    @Inject
+    private SshPublicKeyUpgradeValidator sshPublicKeyUpgradeValidator;
+
     public StatedImage getNewImageIfVersionsMatch(StackDtoDelegate stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         try {
             restRequestThreadLocalService.setWorkspaceId(stack.getWorkspaceId());
@@ -95,6 +100,9 @@ public class StackImageUpdateService {
                 LOGGER.debug("Image change not permitted because: {} Current image: {}, new image: {}", message, currentImage, newImage.getImage());
                 throw new OperationException(message);
             }
+
+            // new and repaired nodes are created from the stack image, so changing it to RHEL 9 must not leave them unreachable over SSH
+            sshPublicKeyUpgradeValidator.validate(stack, OsType.getByOsTypeString(newImage.getImage().getOsType()));
 
             if (!isStackMatchIfPrewarmed(newImage)) {
                 String message = "Stack versions don't match on prewarmed image with cluster's";

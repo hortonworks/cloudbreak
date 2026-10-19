@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
@@ -39,6 +42,7 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.image.change.action.ImageRevisionReaderService;
 import com.sequenceiq.freeipa.repository.ImageRepository;
+import com.sequenceiq.freeipa.service.validation.SshPublicKeyValidationService;
 
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
@@ -113,6 +117,9 @@ class ImageServiceTest {
 
     @Mock
     private PreferredOsService preferredOsService;
+
+    @Mock
+    private SshPublicKeyValidationService sshPublicKeyValidationService;
 
     @Captor
     private ArgumentCaptor<FreeIpaImageFilterSettings> imageFilterSettingsCaptor;
@@ -248,6 +255,27 @@ class ImageServiceTest {
         assertEquals(IMDS_VERSION, imageEntity.getImdsVersion());
         assertEquals(SALT_VERSION, imageEntity.getSaltVersion());
         assertEquals(HYPER_V_GENERATION_TAG_VALUE, imageEntity.getHyperVGenerationTag());
+        verify(sshPublicKeyValidationService).validateForTargetOs(stack, null);
+    }
+
+    @Test
+    void testImageChangeToRhel9ShouldNotSaveImageWhenSshPublicKeyIsNotAcceptable() {
+        Stack stack = new Stack();
+        stack.setCloudPlatform(DEFAULT_PLATFORM);
+        stack.setRegion(REGION);
+        stack.setAccountId(ACCOUNT_ID);
+        ImageSettingsRequest imageRequest = new ImageSettingsRequest();
+        when(imageProviderFactory.getImageProvider(any())).thenReturn(imageProvider);
+        when(imageProvider.getImage(any())).thenReturn(Optional.of(ImageWrapper.ofFreeipaImage(image, IMAGE_CATALOG_URL)));
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(DEFAULT_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
+        when(image.getOsType()).thenReturn(OsType.RHEL9.getOsType());
+        when(platformStringTransformer.getPlatformString(stack)).thenReturn("aws");
+        doThrow(new BadRequestException("RSA public key is 2047 bits, at least 2048 bits are required"))
+                .when(sshPublicKeyValidationService).validateForTargetOs(stack, OsType.RHEL9);
+
+        assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImage(stack, imageRequest)));
+
+        verify(imageRepository, never()).save(any(ImageEntity.class));
     }
 
     @Test

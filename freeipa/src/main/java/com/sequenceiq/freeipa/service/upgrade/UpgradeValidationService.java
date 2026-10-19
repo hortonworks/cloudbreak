@@ -21,6 +21,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.SupportedOsService;
+import com.sequenceiq.freeipa.service.validation.SshPublicKeyValidationService;
 
 @Service
 public class UpgradeValidationService {
@@ -34,6 +35,9 @@ public class UpgradeValidationService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private SshPublicKeyValidationService sshPublicKeyValidationService;
 
     public void validateUpgradeRequest(FreeIpaUpgradeRequest request) {
         if (request.getImage() != null && !supportedOsService.isSupported(request.getImage().getOs())) {
@@ -92,5 +96,8 @@ public class UpgradeValidationService {
                     + " architecture and current image are using different " + currentArch.getName() + " architecture.");
         }
     }
-}
 
+    public void validateSshPublicKeyForSelectedImage(Stack stack, ImageInfoResponse selectedImage) {
+        sshPublicKeyValidationService.validateForTargetOs(stack, OsType.getByOs(selectedImage.getOs()));
+    }
+}

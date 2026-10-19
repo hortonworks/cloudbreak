@@ -41,12 +41,7 @@ class PublicKeyReaderUtilTest {
         assertEquals("RSA", rsaKey.getAlgorithm());
         if (rsaKey instanceof RSAPublicKey rsaPublicKey) {
             assertThat(rsaPublicKey.getPublicExponent().toString()).isEqualTo("65537");
-            assertThat(rsaPublicKey.getModulus().toString()).isEqualTo(
-                    "15716563600099515211328423611954225824916533615230691376921478986333060601" +
-                    "57552226919808527872386330392237985485200227383711345332616167018657122816541835915" +
-                    "10152175666741773856946951958086291801538991290666845716385778192871160342792145141" +
-                    "097809456369701048006656617692262816450908563750970503449532801209031"
-            );
+            assertThat(rsaPublicKey.getModulus().bitLength()).isEqualTo(3072);
         } else {
             fail("PublicKey is not an instance of RSAPublicKey.");
         }
@@ -150,7 +145,7 @@ class PublicKeyReaderUtilTest {
     void loadTestMalformedTypeByteArray() {
         // echo -n 'foobar'
         PublicKeyParseException publicKeyParseException = assertThrows(PublicKeyParseException.class, () -> PublicKeyReaderUtil.load("ssh-rsa Zm9vYmFy", false));
-        assertThat(publicKeyParseException).hasMessage("Public key length is shorter than 2048 bits or byte array is corrupt.");
+        assertThat(publicKeyParseException).hasMessage("Public key byte array is corrupt.");
     }
 
     @Test
@@ -191,7 +186,7 @@ class PublicKeyReaderUtilTest {
         // echo -ne '\x00\x00\x00\x07ssh-rsa\x12\x13\x14\x15'
         PublicKeyParseException publicKeyParseException = assertThrows(PublicKeyParseException.class,
                 () -> PublicKeyReaderUtil.load("ssh-rsa AAAAB3NzaC1yc2ESExQV", false));
-        assertThat(publicKeyParseException).hasMessage("Public key length is shorter than 2048 bits or byte array is corrupt.");
+        assertThat(publicKeyParseException).hasMessage("Public key byte array is corrupt.");
     }
 
     @Test
@@ -199,7 +194,7 @@ class PublicKeyReaderUtilTest {
         // echo -ne '\x00\x00\x00\x07ssh-rsa\x00\x00\x00\x01\x00\x12\x13\x14\x15'
         PublicKeyParseException publicKeyParseException = assertThrows(PublicKeyParseException.class,
                 () -> PublicKeyReaderUtil.load("ssh-rsa AAAAB3NzaC1yc2EAAAABABITFBU=", false));
-        assertThat(publicKeyParseException).hasMessage("Public key length is shorter than 2048 bits or byte array is corrupt.");
+        assertThat(publicKeyParseException).hasMessage("Public key byte array is corrupt.");
     }
 
     @Test
@@ -208,7 +203,44 @@ class PublicKeyReaderUtilTest {
         PublicKeyParseException publicKeyParseException = assertThrows(PublicKeyParseException.class,
                 () -> PublicKeyReaderUtil.load("ssh-rsa AAAAB3NzaC1yc2EAAAABAAAAAAEA", false));
         assertThat(publicKeyParseException)
-                .hasMessage("SSH2RSA: error decoding public key blob: java.security.InvalidKeyException: RSA keys must be at least 512 bits long");
+                .hasMessage("RSA public key is 0 bits, at least 2048 bits are required");
+    }
+
+    @Test
+    void loadTestRsaKeyBitLengthBoundaries() throws Exception {
+        for (int bits : new int[]{2048, 3072, 4096}) {
+            RSAPublicKey key = (RSAPublicKey) PublicKeyReaderUtil.load(RsaPublicKeyTestUtil.openSshRsaKey(bits), false);
+            assertThat(key.getModulus().bitLength()).isEqualTo(bits);
+        }
+        String key2047 = RsaPublicKeyTestUtil.openSshRsaKey(2047);
+        PublicKeyParseException ex = assertThrows(PublicKeyParseException.class, () -> PublicKeyReaderUtil.load(key2047, false));
+        assertThat(ex.getErrorCode()).isEqualTo(PublicKeyParseException.ErrorCode.RSA_KEY_TOO_SHORT);
+        assertThat(ex).hasMessage("RSA public key is 2047 bits, at least 2048 bits are required");
+        String key1024 = RsaPublicKeyTestUtil.openSshRsaKey(1024);
+        PublicKeyParseException ex1024 = assertThrows(PublicKeyParseException.class, () -> PublicKeyReaderUtil.load(key1024, false));
+        assertThat(ex1024).hasMessage("RSA public key is 1024 bits, at least 2048 bits are required");
+    }
+
+    @Test
+    void findTooShortRsaKeyMessageReturnsMessageForShortRsaKey() {
+        assertThat(PublicKeyReaderUtil.findTooShortRsaKeyMessage(RsaPublicKeyTestUtil.openSshRsaKey(2047)))
+                .hasValue("RSA public key is 2047 bits, at least 2048 bits are required");
+    }
+
+    @Test
+    void findTooShortRsaKeyMessageReturnsEmptyForLongEnoughRsaKey() {
+        assertThat(PublicKeyReaderUtil.findTooShortRsaKeyMessage(RsaPublicKeyTestUtil.openSshRsaKey(2048))).isEmpty();
+    }
+
+    @Test
+    void findTooShortRsaKeyMessageReturnsEmptyForEd25519Key() {
+        assertThat(PublicKeyReaderUtil.findTooShortRsaKeyMessage("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMQltFutaGpkyuDLScqHRZtknBd4c/IJCkVsY7WFS+gK"))
+                .isEmpty();
+    }
+
+    @Test
+    void findTooShortRsaKeyMessageReturnsEmptyForUnparsableKey() {
+        assertThat(PublicKeyReaderUtil.findTooShortRsaKeyMessage("foo")).isEmpty();
     }
 
     @Test
@@ -216,7 +248,7 @@ class PublicKeyReaderUtilTest {
         // echo -ne '\x00\x00\x00\x0Bssh-ed25519\x12\x13\x14\x15'
         PublicKeyParseException publicKeyParseException = assertThrows(PublicKeyParseException.class,
                 () -> PublicKeyReaderUtil.load("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5EhMUFQ==", false));
-        assertThat(publicKeyParseException).hasMessageContaining("Public key length is shorter than 2048 bits or byte array is corrupt.");
+        assertThat(publicKeyParseException).hasMessageContaining("Public key byte array is corrupt.");
     }
 
     @Test

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.sequenceiq.cloudbreak.util.RsaPublicKeyTestUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
@@ -51,6 +52,15 @@ class EnvironmentAuthenticationValidatorTest {
     }
 
     @Test
+    void testValidateShouldReturnWithoutErrorWhenRsaKeyIsShorterThan2048BitsSinceTargetOsIsUnknown() {
+        EnvironmentValidationDto environmentValidationDto = createEnvironmentDto(RsaPublicKeyTestUtil.openSshRsaKey(2047), null);
+
+        ValidationResult actual = underTest.validate(environmentValidationDto);
+
+        assertFalse(actual.hasError());
+    }
+
+    @Test
     void testValidateShouldReturnWithoutErrorWhenPublicKeyIdIsPresent() {
         EnvironmentValidationDto environmentValidationDto = createEnvironmentDto(null, "public-key-id");
 
@@ -83,6 +93,22 @@ class EnvironmentAuthenticationValidatorTest {
     @MethodSource("ed25519AndNotAwsGovCloudDataProvider")
     void testValidateShouldReturnWithoutErrorWhenEd25519AndNotAwsGovCloud(String cloudPlatform, Boolean govCloud) {
         EnvironmentValidationDto environmentValidationDto = createEnvironmentDto(cloudPlatform, govCloud, VALID_PUBLIC_KEY_ED25519, null);
+
+        ValidationResult actual = underTest.validate(environmentValidationDto);
+
+        assertFalse(actual.hasError());
+    }
+
+    @Test
+    void testValidateShouldReturnWithoutErrorWhenCredentialIsNull() {
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
+                .withEnvironmentDto(EnvironmentDto.builder()
+                        .withCloudPlatform("AWS")
+                        .withAuthentication(AuthenticationDto.builder()
+                                .withPublicKey(VALID_PUBLIC_KEY_ED25519)
+                                .build())
+                        .build())
+                .build();
 
         ValidationResult actual = underTest.validate(environmentValidationDto);
 

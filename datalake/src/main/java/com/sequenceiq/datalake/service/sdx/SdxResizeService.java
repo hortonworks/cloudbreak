@@ -222,6 +222,7 @@ public class SdxResizeService {
 
         newSdxCluster.setStackRequest(stackRequest);
         sdxRecommendationService.validateVmTypeOverride(environment, newSdxCluster);
+        sdxResizeValidator.validateSshPublicKeyForResize(environment, stackRequest.getImage());
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
                 new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipValidation(), sdxClusterResizeRequest.isSkipAtlasMetadata(),
                         sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()),

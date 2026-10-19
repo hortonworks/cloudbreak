@@ -33,6 +33,7 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.image.change.action.ImageRevisionReaderService;
 import com.sequenceiq.freeipa.repository.ImageRepository;
+import com.sequenceiq.freeipa.service.validation.SshPublicKeyValidationService;
 
 @Service
 public class ImageService {
@@ -73,6 +74,9 @@ public class ImageService {
     @Inject
     private PreferredOsService preferredOsService;
 
+    @Inject
+    private SshPublicKeyValidationService sshPublicKeyValidationService;
+
     public ImageEntity create(Stack stack, Pair<ImageWrapper, String> imageWrapperAndNamePair) {
         ImageEntity imageEntity = createImageEntity(stack, imageWrapperAndNamePair);
         return imageRepository.save(imageEntity);
@@ -93,6 +97,8 @@ public class ImageService {
     public ImageEntity changeImage(Stack stack, ImageSettingsRequest imageRequest) {
         LOGGER.info("Change image using request: {}", imageRequest);
         Pair<ImageWrapper, String> imageWrapperAndNamePair = fetchImageWrapperAndName(stack, imageRequest);
+        // new and repaired instances are created from the stack image, so changing it to RHEL 9 must not leave them unreachable over SSH
+        sshPublicKeyValidationService.validateForTargetOs(stack, OsType.getByOsTypeString(imageWrapperAndNamePair.getLeft().getImage().getOsType()));
         ImageEntity imageEntity = updateImageWithNewValues(stack, imageWrapperAndNamePair.getLeft(), imageWrapperAndNamePair.getRight());
         LOGGER.info("New image entity: {}", imageEntity);
         return imageRepository.save(imageEntity);

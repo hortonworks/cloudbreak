@@ -1,17 +1,25 @@
 package com.sequenceiq.datalake.service.validation.resize;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.PublicKeyReaderUtil;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.service.sdx.database.AzureDatabaseAttributesService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
@@ -54,6 +62,22 @@ public class SdxResizeValidator {
             String message = String.format("Resizing to %s shape is not supported from %s shape.", SdxClusterShape.ENTERPRISE, currentShape);
             LOGGER.warn(message);
             throw new BadRequestException(message);
+        }
+    }
+
+    // the new Data Lake is created from the image of the current one and its creation rejects short RSA keys on RHEL 9, check it before the current
+    // Data Lake is stopped and detached
+    public void validateSshPublicKeyForResize(DetailedEnvironmentResponse environment, ImageSettingsV4Request image) {
+        String publicKey = Optional.ofNullable(environment.getAuthentication()).map(EnvironmentAuthenticationResponse::getPublicKey).orElse(null);
+        OsType targetOsType = Optional.ofNullable(image).map(ImageSettingsV4Request::getOs).flatMap(OsType::getByOsOptional).orElse(null);
+        if (OsType.RHEL9 == targetOsType && StringUtils.isNotBlank(publicKey)) {
+            PublicKeyReaderUtil.findTooShortRsaKeyMessage(publicKey).ifPresent(message -> {
+                String errorMessage = String.format("Resizing the Data Lake is not possible, because the new Data Lake would be created on %s, which rejects "
+                        + "the SSH public key of the environment: %s. Please create new SSH keys for the environment by editing 'Root SSH' on the "
+                        + "environment's Summary page or with this command: 'cdp environments update-ssh-key'", targetOsType.getShortName(), message);
+                LOGGER.warn(errorMessage);
+                throw new BadRequestException(errorMessage);
+            });
         }
     }
 

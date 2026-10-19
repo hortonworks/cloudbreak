@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.RsaPublicKeyTestUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -380,6 +381,87 @@ class EnvironmentValidatorServiceTest {
 
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
         assertEquals("The publicKeyId with name of 'pub-key-id' does not exist on the provider.", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testValidateAuthenticationModificationRejectsRsaKeyShorterThan2048Bits() {
+        ValidationResult validationResult = validateAuthenticationModificationWithPublicKey(RsaPublicKeyTestUtil.openSshRsaKey(2047));
+
+        assertEquals("The new SSH public key is not acceptable: RSA public key is 2047 bits, at least 2048 bits are required.",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void testValidateAuthenticationModificationAcceptsRsaKeyOf2048Bits() {
+        ValidationResult validationResult = validateAuthenticationModificationWithPublicKey(RsaPublicKeyTestUtil.openSshRsaKey(2048));
+
+        assertFalse(validationResult.hasError());
+    }
+
+    private ValidationResult validateAuthenticationModificationWithPublicKey(String publicKey) {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAuthentication(AuthenticationDto.builder().withPublicKey(publicKey).build())
+                .build();
+        when(environmentResourceService.getPublicKeyConnector(environment.getCloudPlatform())).thenReturn(Optional.of(mock(PublicKeyConnector.class)));
+        when(publicKeyValidator.validatePublicKey(anyString())).thenReturn(ValidationResult.empty());
+
+        return underTest.validateAuthenticationModification(environmentEditDto, environment);
+    }
+
+    @ParameterizedTest(name = "keyBits={0}, imageOs={1}, imageId={2}, create={3}")
+    @MethodSource("publicKeyForFreeIpaCreationRejectedArguments")
+    void testValidatePublicKeyForFreeIpaCreationRejectsShortRsaKeyWhenFreeIpaWillRunOnRhel9(int keyBits, String imageOs, String imageId, boolean create) {
+        ValidationResult validationResult = underTest.validatePublicKeyForFreeIpaCreation(RsaPublicKeyTestUtil.openSshRsaKey(keyBits),
+                freeIpaCreation(imageOs, imageId, create));
+
+        assertEquals("The SSH public key is not acceptable, because FreeIPA will be created on RHEL 9: RSA public key is 2047 bits, " +
+                "at least 2048 bits are required. Please use an RSA key of at least 2048 bits or an Ed25519 key.", validationResult.getFormattedErrors());
+    }
+
+    @ParameterizedTest(name = "keyBits={0}, imageOs={1}, imageId={2}, create={3}")
+    @MethodSource("publicKeyForFreeIpaCreationAcceptedArguments")
+    void testValidatePublicKeyForFreeIpaCreationAcceptsKey(int keyBits, String imageOs, String imageId, boolean create) {
+        ValidationResult validationResult = underTest.validatePublicKeyForFreeIpaCreation(RsaPublicKeyTestUtil.openSshRsaKey(keyBits),
+                freeIpaCreation(imageOs, imageId, create));
+
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidatePublicKeyForFreeIpaCreationAcceptsMissingPublicKey() {
+        ValidationResult validationResult = underTest.validatePublicKeyForFreeIpaCreation(null, freeIpaCreation(null, null, true));
+
+        assertFalse(validationResult.hasError());
+    }
+
+    private static Stream<Arguments> publicKeyForFreeIpaCreationRejectedArguments() {
+        return Stream.of(
+                Arguments.of(2047, null, null, true),
+                Arguments.of(2047, "", null, true),
+                Arguments.of(2047, "redhat9", null, true),
+                Arguments.of(2047, "REDHAT9", null, true)
+        );
+    }
+
+    private static Stream<Arguments> publicKeyForFreeIpaCreationAcceptedArguments() {
+        return Stream.of(
+                Arguments.of(2048, null, null, true),
+                Arguments.of(2048, "redhat9", null, true),
+                Arguments.of(2047, "redhat8", null, true),
+                Arguments.of(2047, "centos7", null, true),
+                Arguments.of(2047, null, "image-id", true),
+                Arguments.of(2047, null, null, false)
+        );
+    }
+
+    private FreeIpaCreationDto freeIpaCreation(String imageOs, String imageId, boolean create) {
+        return FreeIpaCreationDto.builder(2)
+                .withImageOs(imageOs)
+                .withImageId(imageId)
+                .withCreate(create)
+                .build();
     }
 
     @Test
