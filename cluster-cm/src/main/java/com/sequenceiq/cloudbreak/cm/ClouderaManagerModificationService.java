@@ -97,10 +97,10 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.cm.config.ClouderaManagerFlinkConfigurationService;
 import com.sequenceiq.cloudbreak.cm.config.modification.ClouderaManagerConfigModificationService;
 import com.sequenceiq.cloudbreak.cm.config.modification.CmConfig;
 import com.sequenceiq.cloudbreak.cm.config.modification.CmServiceType;
+import com.sequenceiq.cloudbreak.cm.config.upgrade.RuntimeUpgradeServiceConfigPatcherService;
 import com.sequenceiq.cloudbreak.cm.converter.ApiHostReallocateMemoryResponseConverter;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerParcelActivationTimeoutException;
@@ -208,7 +208,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
     @Inject
-    private ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
+    private RuntimeUpgradeServiceConfigPatcherService runtimeUpgradeServiceConfigPatcherService;
 
     @Inject
     private ClouderaManagerClientConfigDeployService clouderaManagerClientConfigDeployService;
@@ -378,7 +378,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 reallocateMemory(false);
             }
             restartMgmtServices();
-            addFlinkServiceConfigurationIfNecessary(products);
+            patchServiceConfigsForRuntimeUpgrade(products);
             downloadParcels(products, parcelResourceApi, parcelsResourceApi);
             distributeParcels(products, parcelResourceApi, parcelsResourceApi);
             LOGGER.debug("Starting the upgrade for the new components: {}", products);
@@ -404,8 +404,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private void addFlinkServiceConfigurationIfNecessary(Set<ClouderaManagerProduct> products) {
-        clouderaManagerFlinkConfigurationService.addServiceConfigurationIfNecessary(v31Client, stack, products);
+    private void patchServiceConfigsForRuntimeUpgrade(Set<ClouderaManagerProduct> products) {
+        runtimeUpgradeServiceConfigPatcherService.patchServiceConfigs(v31Client, stack, products);
     }
 
     private void enableKnoxAutoRestart() {

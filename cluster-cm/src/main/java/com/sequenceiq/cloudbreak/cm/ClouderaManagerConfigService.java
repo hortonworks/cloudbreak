@@ -113,6 +113,10 @@ public class ClouderaManagerConfigService {
         };
     }
 
+    public Optional<String> getServiceName(ApiClient client, String clusterName, String serviceType) {
+        return getServiceName(clusterName, serviceType, clouderaManagerApiFactory.getServicesResourceApi(client));
+    }
+
     Optional<String> getServiceName(String clusterName, String serviceType, ServicesResourceApi servicesResourceApi) {
         Objects.requireNonNull(serviceType);
         try {
@@ -277,8 +281,9 @@ public class ClouderaManagerConfigService {
             apiRoleConfigGroup.setConfig(apiConfigList);
             roleConfigGroupsResourceApi.updateRoleConfigGroup(clusterName, roleConfigGroupName, serviceName, apiRoleConfigGroup, "");
         } catch (ApiException e) {
-            LOGGER.error("Failed to update role group config [{}] for role group {} of service {}",
-                    Joiner.on(",").useForNull("null").withKeyValueSeparator("=").join(config), roleConfigGroupName, serviceName, e);
+            // only the keys are logged, the values (e.g. safety valves) may contain sensitive data
+            LOGGER.error("Failed to update role group configs [{}] for role group {} of service {}",
+                    Joiner.on(",").join(config.keySet()), roleConfigGroupName, serviceName, e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }

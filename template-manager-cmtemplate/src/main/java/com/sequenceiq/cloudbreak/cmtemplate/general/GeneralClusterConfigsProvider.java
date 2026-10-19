@@ -107,7 +107,7 @@ public class GeneralClusterConfigsProvider {
         return generalClusterConfigs;
     }
 
-    private Set<String> getOtherGatewayInstancesFqdns(InstanceMetadataView primaryGateway, List<InstanceMetadataView> allInstancesMetadata) {
+    public static Set<String> getOtherGatewayInstancesFqdns(InstanceMetadataView primaryGateway, List<InstanceMetadataView> allInstancesMetadata) {
         List<InstanceMetadataView> otherInstanceMetadata = new ArrayList<>(allInstancesMetadata);
         otherInstanceMetadata.remove(primaryGateway);
         return otherInstanceMetadata.stream().map(im -> im.getDiscoveryFQDN()).collect(Collectors.toSet());
