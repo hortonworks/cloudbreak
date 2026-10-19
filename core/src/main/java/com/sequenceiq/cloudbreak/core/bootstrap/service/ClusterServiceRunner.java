@@ -95,7 +95,7 @@ public class ClusterServiceRunner {
 
     public void redeployGatewayCertificate(Long stackId) {
         StackDto stackDto = stackDtoService.getById(stackId);
-        OrchestratorStateParams stateParams = saltStateParamsService.createStateParamsForReachableNodes(stackDto, NGINX_RENEWPUBLICCERT_STATE_NAME,
+        OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stackDto, NGINX_RENEWPUBLICCERT_STATE_NAME, false,
                 MAX_RETRY, MAX_RETRY_ON_ERROR);
         hostRunner.redeployGatewayCertificate(stackDto, stateParams);
     }

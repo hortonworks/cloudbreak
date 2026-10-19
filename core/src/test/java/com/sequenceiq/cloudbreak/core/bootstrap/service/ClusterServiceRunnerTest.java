@@ -67,7 +67,7 @@ class ClusterServiceRunnerTest {
     void testRedeployGatewayCertificateWhenRedeployOnHostRunnerThrowRuntimeException() {
         when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
         OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
-        when(saltStateParamsService.createStateParamsForReachableNodes(stackDto, "nginx/renewpubliccert", 100, 3))
+        when(saltStateParamsService.createStateParams(stackDto, "nginx/renewpubliccert", false, 100, 3))
                 .thenReturn(stateParams);
         doThrow(new RuntimeException("Stg. failed")).when(hostRunner).redeployGatewayCertificate(any(), eq(stateParams));
 
@@ -78,7 +78,7 @@ class ClusterServiceRunnerTest {
     void testRedeployGatewayCertificateHappyFlow() {
         when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
         OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
-        when(saltStateParamsService.createStateParamsForReachableNodes(stackDto, "nginx/renewpubliccert", 100, 3))
+        when(saltStateParamsService.createStateParams(stackDto, "nginx/renewpubliccert", false, 100, 3))
                 .thenReturn(stateParams);
 
         underTest.redeployGatewayCertificate(0L);
