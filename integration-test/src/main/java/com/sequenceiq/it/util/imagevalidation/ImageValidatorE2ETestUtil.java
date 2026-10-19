@@ -321,7 +321,7 @@ public class ImageValidatorE2ETestUtil {
                     });
                 }
             }
-            case PREWARM -> {
+            case RUNTIME -> {
                 addTestCase(basicTests);
                 if (!"none".equalsIgnoreCase(runAdditionalTests)) {
                     XmlTest additionalTests = testNGUtil.createTest(suite, "Additional Runtime tests", false);
