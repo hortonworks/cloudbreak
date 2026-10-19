@@ -45,7 +45,7 @@ remove-legacy-ssl-artifact-{{ loop.index }}:
 {%- for d in all_directives %}
 {%- do fingerprint_parts.append(d.key ~ '|' ~ d.apply ~ '|' ~ d.value) %}
 {%- endfor %}
-{%- set fingerprint = fingerprint_parts | join(';') | md5 %}
+{%- set fingerprint = fingerprint_parts | join(';') | sha256 %}
 {%- set unchanged_check = "grep -qxF '" ~ fingerprint ~ "' " ~ marker_file %}
 
 {%- for d in all_directives %}
