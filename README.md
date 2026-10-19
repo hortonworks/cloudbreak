@@ -74,10 +74,15 @@ mkdir cbd-local
 cd cbd-local
 ```
 
-The next step is to download the latest cloudbreak-deployer onto your machine:
+The next step is to download the latest cloudbreak-deployer onto your machine. The install script needs admin rights, so run it with `sudo`:
 ```
-curl -s https://github.infra.cloudera.com/raw/cloudbreak/cloudbreak-deployer/master/install-dev | sh && cbd --version
+curl -s https://github.infra.cloudera.com/raw/cloudbreak/cloudbreak-deployer/master/install | sudo sh && cbd --version
 ```
+
+On macOS the `cbd` binary is not signed in a way Gatekeeper recognizes, so the first run may be blocked with a warning that macOS cannot verify the app is free of malware. To allow it:
+1. Open `System Settings -> Privacy & Security`.
+2. Scroll down to the `Security` section, where `cbd` is listed as blocked, and click `Allow Anyway`.
+3. Run `cbd --version` again and confirm with `Open` when prompted.
 
 Add the following to the file named `Profile` under the `cbd-local` directory you have just created. Please note, when a `cbd` command is executed you should go to the deployment's directory where your `Profile` file is found (`cbd-local` in our example). The `CB_SCHEMA_SCRIPTS_LOCATION` environment variable configures the location of SQL scripts that are in the `core/src/main/resources/schema` directory in the cloned Cloudbreak git repository.
 In a similar fashion, the rest of the other `*_SCHEMA_SCRIPTS_LOCATION` environment variables configure the locations of SQL scripts that are associated with those respective services.

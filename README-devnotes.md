@@ -9,8 +9,10 @@ Do the following to install the CBD on local
 ```
 mkdir cbd-local
 cd cbd-local
-curl -s https://github.infra.cloudera.com/raw/cloudbreak/cloudbreak-deployer/master/install-dev | sh && cbd --version
+curl -s https://github.infra.cloudera.com/raw/cloudbreak/cloudbreak-deployer/master/install | sudo sh && cbd --version
 ```
+
+On macOS, if `cbd` is blocked because it cannot be verified, allow it under `System Settings -> Privacy & Security -> Allow Anyway`, then run `cbd --version` again (see [README.md](README.md#cloudbreak-deployer) for details).
 
 Then create a file Profile and copy the following content to it:
 
