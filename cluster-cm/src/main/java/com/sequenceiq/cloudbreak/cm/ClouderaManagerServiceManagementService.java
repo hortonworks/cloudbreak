@@ -258,9 +258,12 @@ public class ClouderaManagerServiceManagementService {
         if (apiService.isPresent() && acceptedStates.stream().noneMatch(acceptedState -> acceptedState.equals(apiService.get().getServiceState()))) {
             return apiService;
         } else {
-            LOGGER.debug(apiService.isPresent() ?
-                    String.format("Not necessary to %s the service because it is already in %s state.", operationName, apiService.get().getServiceState()) :
-                    String.format("Unable to %s %s service because is not present on the cluster", operationName, serviceType));
+            if (apiService.isPresent()) {
+                LOGGER.debug("Not necessary to {} the service because it is already in {} state.",
+                        operationName, apiService.get().getServiceState());
+            } else {
+                LOGGER.debug("Unable to {} {} service because is not present on the cluster", operationName, serviceType);
+            }
             return Optional.empty();
         }
     }

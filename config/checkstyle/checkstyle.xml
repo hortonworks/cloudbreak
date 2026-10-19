@@ -261,6 +261,16 @@
             <property name="query" value="//CLASS_DEF[./MODIFIERS/ANNOTATION/IDENT[@text='Service'] and ./OBJBLOCK/CTOR_DEF[./MODIFIERS/LITERAL_PUBLIC]]" />
             <message key="matchxpath.match" value="Constructor injection is disabled. Remove the bean from the constructor." />
         </module>
+        <module name="MatchXpath">
+            <property name="id" value="Slf4jStringConcatenation"/>
+            <property name="query" value="//METHOD_CALL[./DOT/IDENT[1][@text='LOGGER' or @text='LOG'] and ./DOT/IDENT[2][@text='trace' or @text='debug' or @text='info' or @text='warn' or @text='error'] and ./ELIST/EXPR[1]//PLUS[.//*[not(*) and not(self::STRING_LITERAL)]]]" />
+            <message key="matchxpath.match" value="Use SLF4J parameterized logging instead of string concatenation in the log message." />
+        </module>
+        <module name="MatchXpath">
+            <property name="id" value="Slf4jStringFormat"/>
+            <property name="query" value="//METHOD_CALL[./DOT/IDENT[1][@text='LOGGER' or @text='LOG'] and ./DOT/IDENT[2][@text='trace' or @text='debug' or @text='info' or @text='warn' or @text='error'] and ./ELIST/EXPR[1]//METHOD_CALL[./IDENT[@text='format'] or (./DOT/IDENT[1][@text='String'] and ./DOT/IDENT[2][@text='format'])]]" />
+            <message key="matchxpath.match" value="Use SLF4J parameterized logging instead of String.format in the log message." />
+        </module>
     </module>
 
 

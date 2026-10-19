@@ -112,10 +112,10 @@ public class HostDeletionService {
                 throw new DeleteException(HOST_DELETION_FAILED + ' ' + removeHostsResult.getSecond());
             }
         } catch (RetryableFreeIpaClientException e) {
-            LOGGER.error(HOST_DELETION_FAILED + " {}", e.getLocalizedMessage(), e);
+            LOGGER.error("{} {}", HOST_DELETION_FAILED, e.getLocalizedMessage(), e);
             throw new RetryableFreeIpaClientException(HOST_DELETION_FAILED, e, new DeleteException(HOST_DELETION_FAILED));
         } catch (FreeIpaClientException e) {
-            LOGGER.error(HOST_DELETION_FAILED + " {}", e.getLocalizedMessage(), e);
+            LOGGER.error("{} {}", HOST_DELETION_FAILED, e.getLocalizedMessage(), e);
             throw new DeleteException(HOST_DELETION_FAILED);
         }
     }

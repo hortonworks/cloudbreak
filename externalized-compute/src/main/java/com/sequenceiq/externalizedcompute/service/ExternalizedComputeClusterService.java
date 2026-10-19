@@ -196,8 +196,8 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
                     DescribeClusterResponse describeClusterResponse = liftieGrpcClient.describeCluster(liftieClusterCrn,
                             externalizedComputeCluster.getEnvironmentCrn(), internalCrn);
                     if (!DELETING_LIFTIE_STATUS.equals(describeClusterResponse.getStatus())) {
-                        LOGGER.error("Liftie cluster delete failed, there is a delete operation, but not in "
-                                + DELETING_LIFTIE_STATUS + "status: {}", describeClusterResponse);
+                        LOGGER.error("Liftie cluster delete failed, there is a delete operation, but not in {} status: {}",
+                                DELETING_LIFTIE_STATUS, describeClusterResponse);
                         throw new RuntimeException(e.getMessage());
                     }
                 } else if (!e.getMessage().contains("already deleted") && !e.getMessage().contains("not found in database")) {

@@ -67,9 +67,14 @@
     <suppress id="sysout" files="VersionedApplication.java"/>
     <suppress checks="VisibilityModifierCheck" files=".*Test\.java|.*TestBase\.java"/>
 
-    <suppress files="^((?!.*[/\\]com[/\\]sequenceiq[/\\]freeipa[/\\]).)*$" checks="MatchXpath"/>
-    <suppress files=".*FlowConfig" checks="MatchXpath"/>
-    <suppress files="DiagnosticsCollectionValidator" checks="MatchXpath"/>
-    <suppress files="FreeIpaEventParameterFactory" checks="MatchXpath"/>
-    <suppress files=".*Action" checks="MatchXpath"/>
+    <suppress files="^((?!.*[/\\]com[/\\]sequenceiq[/\\]freeipa[/\\]).)*$" id="NoInjectCtorComponent"/>
+    <suppress files="^((?!.*[/\\]com[/\\]sequenceiq[/\\]freeipa[/\\]).)*$" id="NoInjectCtorService"/>
+    <suppress files=".*FlowConfig" id="NoInjectCtorComponent"/>
+    <suppress files=".*FlowConfig" id="NoInjectCtorService"/>
+    <suppress files="DiagnosticsCollectionValidator" id="NoInjectCtorComponent"/>
+    <suppress files="DiagnosticsCollectionValidator" id="NoInjectCtorService"/>
+    <suppress files="FreeIpaEventParameterFactory" id="NoInjectCtorComponent"/>
+    <suppress files="FreeIpaEventParameterFactory" id="NoInjectCtorService"/>
+    <suppress files=".*Action" id="NoInjectCtorComponent"/>
+    <suppress files=".*Action" id="NoInjectCtorService"/>
 </suppressions>

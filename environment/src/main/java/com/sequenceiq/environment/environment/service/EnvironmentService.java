@@ -203,8 +203,11 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         }
         LOGGER.debug("About to collect connected experiences for environment: {}", environment.getName());
         Set<ExperienceCluster> connectedExperiences = experienceConnectorService.getConnectedExperiences(fromEnvironmentDto(environment));
-        LOGGER.debug(connectedExperiences.isEmpty() ? "No experience found for environment: " + environment.getName()
-                : connectedExperiences.size() + " experience(s) found for environment: " + environment.getName());
+        if (connectedExperiences.isEmpty()) {
+            LOGGER.debug("No experience found for environment: {}", environment.getName());
+        } else {
+            LOGGER.debug("{} experience(s) found for environment: {}", connectedExperiences.size(), environment.getName());
+        }
         Set<String> experienceTypes = connectedExperiences.stream().map(ExperienceCluster::getPublicName).collect(Collectors.toSet());
         LOGGER.debug("The following experiences are depending on the environment [{}]: {}", environment.getName(), String.join(",", experienceTypes));
         for (String experienceType : experienceTypes) {

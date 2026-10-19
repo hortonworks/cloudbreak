@@ -64,7 +64,7 @@ public class SetDefaultJavaVersionHandler extends ExceptionCatcherEventHandler<S
         try {
             LOGGER.info("Setting default java version for stack to {}", request.getDefaultJavaVersion());
             stackUpdater.updateJavaVersion(stackId, request.getDefaultJavaVersion());
-            LOGGER.info("Removing " + DEFAULT_JAVA_VERSION_EXECUTED_FILE + " file from all hosts");
+            LOGGER.info("Removing {} file from all hosts", DEFAULT_JAVA_VERSION_EXECUTED_FILE);
             hostOrchestrator.runCommandOnHosts(allGatewayConfigs, allNodes, "rm " + DEFAULT_JAVA_VERSION_EXECUTED_FILE);
         } catch (CloudbreakOrchestratorException e) {
             return new SetDefaultJavaVersionFailedEvent(

@@ -176,7 +176,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
                 int alreadyDeletedCount = notTerminatedForStack.size() - checkableInstances.size();
                 if (alreadyDeletedCount > 0) {
-                    LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Count of already in deleted on provider side state: {}", alreadyDeletedCount);
+                    LOGGER.info("{}Count of already in deleted on provider side state: {}", AUTO_SYNC_LOG_PREFIX, alreadyDeletedCount);
                 }
                 if (!checkableInstances.isEmpty()) {
                     Set<String> hostsWithSaltFailure = getHostsWithSaltFailure(stack);
@@ -192,7 +192,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                         if (!results.isEmpty()) {
                             updateStackStatus(stack, syncResult, results, alreadyDeletedCount, updateStatusFromFlow);
                         } else {
-                            LOGGER.debug(AUTO_SYNC_LOG_PREFIX + "results is empty, skip update");
+                            LOGGER.debug("{}results is empty, skip update", AUTO_SYNC_LOG_PREFIX);
                         }
                     }
                 } else if (alreadyDeletedCount > 0) {
@@ -203,7 +203,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 freeipaStatusInfoLogger.logFreeipaStatus(stack.getId(), checkableInstances);
             }, LOGGER, AUTO_SYNC_LOG_PREFIX + "freeipa stack sync in {}ms");
         } catch (Exception e) {
-            LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Error occurred during freeipa sync: {}", e.getMessage(), e);
+            LOGGER.info("{}Error occurred during freeipa sync: {}", AUTO_SYNC_LOG_PREFIX, e.getMessage(), e);
         }
     }
 
@@ -211,7 +211,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         Set<InstanceMetaData> unusableInstances = notTerminatedForStack.stream()
                 .filter(im -> StringUtils.isAnyBlank(im.getDiscoveryFQDN(), im.getPrivateIp()))
                 .collect(Collectors.toSet());
-        LOGGER.info(AUTO_SYNC_LOG_PREFIX + "Unusable instances due to missing FQDN or IP: {}", unusableInstances);
+        LOGGER.info("{}Unusable instances due to missing FQDN or IP: {}", AUTO_SYNC_LOG_PREFIX, unusableInstances);
         unusableInstances.forEach(im -> {
             if (StringUtils.isBlank(im.getInstanceId())) {
                 setStatusIfNotTheSame(im, InstanceStatus.TERMINATED);
@@ -234,7 +234,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 setStatusIfNotTheSame(instanceMetaData, InstanceStatus.UNREACHABLE);
                 break;
             default:
-                LOGGER.info(AUTO_SYNC_LOG_PREFIX + "the '{}' status is not converted", detailedStackStatus);
+                LOGGER.info("{}the '{}' status is not converted", AUTO_SYNC_LOG_PREFIX, detailedStackStatus);
         }
     }
 
@@ -251,8 +251,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     stackUpdater.updateStackStatus(stack, status, result.getMessage());
                 }
             } else {
-                LOGGER.info(AUTO_SYNC_LOG_PREFIX + "The stack status would be had to update from {} to {}",
-                        stack.getStackStatus().getDetailedStackStatus(), status);
+                LOGGER.info("{}The stack status would be had to update from {} to {}",
+                        AUTO_SYNC_LOG_PREFIX, stack.getStackStatus().getDetailedStackStatus(), status);
             }
         }
     }
@@ -301,10 +301,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         if (oldStatus != newStatus) {
             if (autoSyncConfig.isUpdateStatus()) {
                 instanceMetaData.setInstanceStatus(newStatus);
-                LOGGER.info(AUTO_SYNC_LOG_PREFIX + "The instance status updated from {} to {}", oldStatus, newStatus);
+                LOGGER.info("{}The instance status updated from {} to {}", AUTO_SYNC_LOG_PREFIX, oldStatus, newStatus);
             } else {
-                LOGGER.info(AUTO_SYNC_LOG_PREFIX + "The instance status would be had to update from {} to {}",
-                        oldStatus, newStatus);
+                LOGGER.info("{}The instance status would be had to update from {} to {}",
+                        AUTO_SYNC_LOG_PREFIX, oldStatus, newStatus);
             }
         }
     }

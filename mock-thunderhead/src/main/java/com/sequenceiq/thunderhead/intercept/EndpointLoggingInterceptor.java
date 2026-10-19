@@ -1,7 +1,5 @@
 package com.sequenceiq.thunderhead.intercept;
 
-import static java.lang.String.format;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -13,11 +11,9 @@ public class EndpointLoggingInterceptor implements HandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EndpointLoggingInterceptor.class);
 
-    private static final String ENDPOINT_CALL_LOG_FORMAT = "Endpoint called: %s";
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        LOGGER.info(format(ENDPOINT_CALL_LOG_FORMAT, request.getRequestURI()));
+        LOGGER.info("Endpoint called: {}", request.getRequestURI());
         return true;
     }
 
