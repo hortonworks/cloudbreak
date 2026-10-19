@@ -89,6 +89,18 @@ class CustomImageProviderTest {
         assertEquals("cloudera-freeipa-images/freeipa-cdh--2103081304.tar.gz", image.getImage().getImageSetsByProvider().get("aws").get("europe-west1"));
     }
 
+    @Test
+    void testMergeSourceImageAndCustomImagePropertiesKeepsArchitectureOfSourceImage() throws Exception {
+        Image catalogImage = getImageFromCatalog(V3_CB_CATALOG_FILE, "949bffa3-17d4-4076-9d5a-bf3d23c1086b");
+        Image arm64SourceImage = Image.builder().copy(catalogImage).withArchitecture("arm64").build();
+        StatedImage statedImage = StatedImage.statedImage(arm64SourceImage, CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
+        CustomImage customImage = getCustomImage(ImageType.RUNTIME, CUSTOM_IMAGE_ID, CUSTOM_BASE_PARCEL_URL);
+
+        StatedImage image = underTest.mergeSourceImageAndCustomImageProperties(statedImage, customImage, CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
+
+        assertEquals("arm64", image.getImage().getArchitecture());
+    }
+
     private void validateCommonParameters(StatedImage statedImage, CustomImage customImage, StatedImage result) {
         assertEquals(statedImage.getImage().getDate(), result.getImage().getDate());
         assertEquals(CUSTOM_IMAGE_CREATED_IN_EPOCH_SECONDS, result.getImage().getCreated());

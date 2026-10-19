@@ -35,6 +35,7 @@ public class CustomImageProvider {
                 .withDescription(customImage.getDescription())
                 .withOs(image.getOs())
                 .withOsType(image.getOsType())
+                .withArchitecture(image.getArchitecture())
                 .withUuid(customImage.getName())
                 .withVersion(image.getVersion())
                 .withRepo(getRepoWithCustomBaseUrl(image.getRepo(), customImage.getBaseParcelUrl()))
