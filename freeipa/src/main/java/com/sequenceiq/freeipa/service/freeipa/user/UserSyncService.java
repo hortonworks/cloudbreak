@@ -147,7 +147,7 @@ public class UserSyncService {
                                     stacks.forEach(stack -> updateUserSyncStatusForStack(operation, stack));
                                 }
                                 asyncSynchronizeUsers(operation.getOperationId(), accountId, stacks, userSyncFilter, options);
-                            }));
+                            }, accountId));
         }
 
         return operation;

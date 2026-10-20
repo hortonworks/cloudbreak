@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,7 +61,9 @@ public class UserSyncServiceTest {
     private static final String ACTOR_CRN = "crn:cdp:iam:us-west-1:"
             + ACCOUNT_ID + ":user:" + UUID.randomUUID();
 
-    private static final String INTERNAL_ACTOR = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
+    private static final String ALTUS_INTERNAL_ACTOR = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
+
+    private static final String INTERNAL_ACTOR = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:__internal__actor__";
 
     private static final Long TIMEOUT = 6L;
 
@@ -144,6 +147,35 @@ public class UserSyncServiceTest {
         assertTrue(userSyncOptions.isFullSync());
         assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
         assertTrue(userSyncOptions.isFmsToFreeIpaBatchCallEnabled());
+    }
+
+    @Test
+    public void testSyncUsersStartedByAltusInternalActorRunsAsInternalActorOfTheAccount() {
+        StackUserSyncView stack = mock(StackUserSyncView.class);
+        when(stack.environmentCrn()).thenReturn(ENV_CRN);
+        when(stack.id()).thenReturn(STACK_ID);
+        when(stackService.getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        Operation operation = createRunningOperation();
+        when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
+                .thenReturn(operation);
+        doAnswer(inv -> {
+            inv.getArgument(2, Runnable.class).run();
+            return null;
+        }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
+        when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(new UserSyncStatus());
+        AtomicReference<String> syncTaskActor = new AtomicReference<>();
+        doAnswer(inv -> {
+            syncTaskActor.set(ThreadBasedUserCrnProvider.getUserCrn());
+            return mock(Future.class);
+        }).when(asyncTaskExecutor).submit(any(Runnable.class));
+
+        ThreadBasedUserCrnProvider.doAs(ALTUS_INTERNAL_ACTOR, () -> {
+            underTest.synchronizeUsers(ACCOUNT_ID, ALTUS_INTERNAL_ACTOR, Set.of(), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+
+            assertEquals(ALTUS_INTERNAL_ACTOR, ThreadBasedUserCrnProvider.getUserCrn());
+        });
+
+        assertEquals(INTERNAL_ACTOR, syncTaskActor.get());
     }
 
     @Test

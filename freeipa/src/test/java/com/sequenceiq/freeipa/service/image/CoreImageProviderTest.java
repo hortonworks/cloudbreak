@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.Test;
@@ -77,6 +80,19 @@ class CoreImageProviderTest {
         Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
 
         assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    void shouldThrowImageNotFoundExceptionWithCoreErrorWhenCoreRejectsTheLookup() throws Exception {
+        ForbiddenException forbidden = new ForbiddenException();
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
+                .thenThrow(forbidden);
+        String coreError = "Error message: \"This API is not prepared to use it in service-to-service communication.\"";
+        when(messageExtractor.getErrorMessage(forbidden)).thenReturn(coreError);
+
+        ImageNotFoundException exception = assertThrows(ImageNotFoundException.class, () -> victim.getImage(createImageFilterSettings()));
+        assertEquals("Could not get the FreeIPA images of image catalog '" + CATALOG_NAME + "'. " + coreError, exception.getMessage());
+        assertSame(forbidden, exception.getCause());
     }
 
     @Test

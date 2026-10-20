@@ -43,6 +43,11 @@ public class CoreImageProvider implements ImageProvider {
             Optional<Image> image = freeIpaImageFilter.findMostRecentImage(images);
 
             return image.map(i -> ImageWrapper.ofCoreImage(i, imageFilterSettings.catalog()));
+        } catch (WebApplicationException e) {
+            String errorMessage = messageExtractor.getErrorMessage(e);
+            LOGGER.warn("Image lookup in image catalog '{}' failed with: {}", imageFilterSettings.catalog(), errorMessage, e);
+            throw new ImageNotFoundException(String.format("Could not get the FreeIPA images of image catalog '%s'. %s",
+                    imageFilterSettings.catalog(), errorMessage), e);
         } catch (Exception ex) {
             LOGGER.warn("Image lookup failed: {}", ex.getMessage());
             return Optional.empty();
