@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,24 +109,31 @@ public class ModifyUserDefinedTagsOnExperiencesHandler extends ExceptionCatcherE
             return;
         }
         List<String> failedExperiences = new ArrayList<>();
-        String operation;
+        String notificationOperation;
         if (EnvTagsModificationSupport.hasTagsToRemove(tagsToRemove)) {
-            operation = "removed tag keys: " + String.join(", ", tagsToRemove);
-            failedExperiences.addAll(deleteTagsFromLiftie(environmentCrn, tagsToRemove));
-            failedExperiences.addAll(deleteTagsFromCommonExperiences(environmentCrn, tagsToRemove));
+            notificationOperation = "removed tag keys: " + String.join(", ", tagsToRemove);
+            String logOperation = "environment tag removal for keys " + tagsToRemove;
+            failedExperiences.addAll(modifyTagsOnLiftie(environmentCrn,
+                    () -> liftieConnectorService.deleteEnvironmentTags(null, environmentCrn, tagsToRemove), logOperation));
+            failedExperiences.addAll(modifyTagsOnCommonExperiences(environmentCrn,
+                    path -> commonExperienceConnectorService.deleteEnvironmentTags(path, environmentCrn, tagsToRemove), logOperation));
         } else {
-            operation = "added or updated tag keys: " + String.join(", ", userDefinedTags.keySet());
-            failedExperiences.addAll(distributeTagsToLiftie(environmentCrn, userDefinedTags));
-            failedExperiences.addAll(distributeTagsToCommonExperiences(environmentCrn, userDefinedTags));
+            notificationOperation = "added or updated tag keys: " + String.join(", ", userDefinedTags.keySet());
+            String logOperation = "environment tag distribution";
+            failedExperiences.addAll(modifyTagsOnLiftie(environmentCrn,
+                    () -> liftieConnectorService.distributeEnvironmentTags(null, environmentCrn, userDefinedTags), logOperation));
+            failedExperiences.addAll(modifyTagsOnCommonExperiences(environmentCrn,
+                    path -> commonExperienceConnectorService.distributeEnvironmentTags(path, environmentCrn, userDefinedTags), logOperation));
         }
-        notifyAboutFailedExperiences(environment, operation, failedExperiences);
+        notifyAboutFailedExperiences(environment, notificationOperation, failedExperiences);
     }
 
-    private void notifyAboutFailedExperiences(Environment environment, String operation, List<String> failedExperiences) {
+    private void notifyAboutFailedExperiences(Environment environment, String notificationOperation, List<String> failedExperiences) {
         if (!failedExperiences.isEmpty()) {
             try {
                 eventSenderService.sendEventAndNotification(environmentService.getEnvironmentDto(environment), ThreadBasedUserCrnProvider.getUserCrn(),
-                        ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_EXPERIENCES_PROPAGATION_FAILED, List.of(operation, String.join(", ", failedExperiences)));
+                        ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_EXPERIENCES_PROPAGATION_FAILED,
+                        List.of(notificationOperation, String.join(", ", failedExperiences)));
             } catch (Exception e) {
                 LOGGER.warn("Failed to notify about the failed tag propagation to experiences {} for environment [crn: {}].",
                         failedExperiences, environment.getResourceCrn(), e);
@@ -133,60 +141,29 @@ public class ModifyUserDefinedTagsOnExperiencesHandler extends ExceptionCatcherE
         }
     }
 
-    private List<String> distributeTagsToLiftie(String environmentCrn, Map<String, String> tags) {
+    private List<String> modifyTagsOnLiftie(String environmentCrn, Runnable tagModification, String logOperation) {
         try {
-            liftieConnectorService.distributeEnvironmentTags(null, environmentCrn, tags);
-            LOGGER.debug("Successfully distributed tags to Liftie for environment [crn: {}].", environmentCrn);
+            tagModification.run();
+            LOGGER.debug("Successfully completed {} on Liftie for environment [crn: {}].", logOperation, environmentCrn);
             return List.of();
         } catch (Exception e) {
-            LOGGER.warn("Failed to distribute tags to Liftie for environment [crn: {}]. Skipping.", environmentCrn, e);
+            LOGGER.warn("Failed during {} on Liftie for environment [crn: {}]. Skipping.", logOperation, environmentCrn, e);
             return List.of(ExperiencesByLiftie.KUBERNETES_XP);
         }
     }
 
-    private List<String> distributeTagsToCommonExperiences(String environmentCrn, Map<String, String> tags) {
+    private List<String> modifyTagsOnCommonExperiences(String environmentCrn, Consumer<String> tagModification, String logOperation) {
         List<String> failedExperiences = new ArrayList<>();
         experienceServicesConfig.getConfigs().forEach(xp -> {
             if (!xp.hasEnvironmentTagsPropagation()) {
-                LOGGER.debug("Experience '{}' has no environmentTagsEndpoint configured, skipping tag distribution.", xp.getName());
+                LOGGER.debug("Experience '{}' has no environmentTagsEndpoint configured, skipping {}.", xp.getName(), logOperation);
                 return;
             }
             try {
-                String path = commonExperiencePathCreator.createPathToEnvironmentTags(xp);
-                commonExperienceConnectorService.distributeEnvironmentTags(path, environmentCrn, tags);
-                LOGGER.debug("Successfully distributed tags to experience '{}' for environment [crn: {}].", xp.getName(), environmentCrn);
+                tagModification.accept(commonExperiencePathCreator.createPathToEnvironmentTags(xp));
+                LOGGER.debug("Successfully completed {} for experience '{}' [crn: {}].", logOperation, xp.getName(), environmentCrn);
             } catch (Exception e) {
-                LOGGER.warn("Failed to distribute tags to experience '{}' for environment [crn: {}]. Skipping.", xp.getName(), environmentCrn, e);
-                failedExperiences.add(xp.getBusinessName());
-            }
-        });
-        return failedExperiences;
-    }
-
-    private List<String> deleteTagsFromLiftie(String environmentCrn, Set<String> tagKeys) {
-        try {
-            liftieConnectorService.deleteEnvironmentTags(null, environmentCrn, tagKeys);
-            LOGGER.debug("Successfully removed tags {} from Liftie for environment [crn: {}].", tagKeys, environmentCrn);
-            return List.of();
-        } catch (Exception e) {
-            LOGGER.warn("Failed to remove tags {} from Liftie for environment [crn: {}]. Skipping.", tagKeys, environmentCrn, e);
-            return List.of(ExperiencesByLiftie.KUBERNETES_XP);
-        }
-    }
-
-    private List<String> deleteTagsFromCommonExperiences(String environmentCrn, Set<String> tagKeys) {
-        List<String> failedExperiences = new ArrayList<>();
-        experienceServicesConfig.getConfigs().forEach(xp -> {
-            if (!xp.hasEnvironmentTagsPropagation()) {
-                LOGGER.debug("Experience '{}' has no environmentTagsEndpoint configured, skipping tag removal.", xp.getName());
-                return;
-            }
-            try {
-                String path = commonExperiencePathCreator.createPathToEnvironmentTags(xp);
-                commonExperienceConnectorService.deleteEnvironmentTags(path, environmentCrn, tagKeys);
-                LOGGER.debug("Successfully removed tags {} from experience '{}' for environment [crn: {}].", tagKeys, xp.getName(), environmentCrn);
-            } catch (Exception e) {
-                LOGGER.warn("Failed to remove tags {} from experience '{}' for environment [crn: {}]. Skipping.", tagKeys, xp.getName(), environmentCrn, e);
+                LOGGER.warn("Failed during {} for experience '{}' [crn: {}]. Skipping.", logOperation, xp.getName(), environmentCrn, e);
                 failedExperiences.add(xp.getBusinessName());
             }
         });

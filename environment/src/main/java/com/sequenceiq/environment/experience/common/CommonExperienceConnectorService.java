@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.client.Invocation;
@@ -117,11 +118,8 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
     @Override
     public void distributeEnvironmentTags(String experienceBasePath, String environmentCrn, Map<String, String> tags) {
         LOGGER.debug("About to distribute environment tags to experience for environment [crn: {}]", environmentCrn);
-        WebTarget webTarget = commonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(experienceBasePath, environmentCrn);
-        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
-        executeCall(webTarget.getUri(), () -> retryableWebTarget.put(call, tags))
-                .ifPresentOrElse(response -> throwExceptionIfResultIsUnsuccessful(response, UNSUCCESSFUL_TAG_DISTRIBUTION_MSG),
-                        this::throwExperienceOperationFailedException);
+        modifyEnvironmentTags(experienceBasePath, environmentCrn, Function.identity(),
+                call -> retryableWebTarget.put(call, tags), UNSUCCESSFUL_TAG_DISTRIBUTION_MSG);
     }
 
     @Override
@@ -131,13 +129,21 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
             return;
         }
         LOGGER.debug("About to remove environment tags from experience for environment [crn: {}]", environmentCrn);
-        WebTarget webTarget = QueryParamInjectorUtil.setRepeatedQueryParam(
-                commonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(experienceBasePath, environmentCrn),
-                CommonExperienceApi.TAG_KEY_QUERY_PARAM, tagKeys);
-        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
-        executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))
-                .ifPresentOrElse(response -> throwExceptionIfResultIsUnsuccessful(response, UNSUCCESSFUL_TAG_REMOVAL_MSG),
-                        this::throwExperienceOperationFailedException);
+        modifyEnvironmentTags(experienceBasePath, environmentCrn,
+                webTarget -> QueryParamInjectorUtil.setRepeatedQueryParam(webTarget, CommonExperienceApi.TAG_KEY_QUERY_PARAM, tagKeys),
+                retryableWebTarget::delete, UNSUCCESSFUL_TAG_REMOVAL_MSG);
+    }
+
+    private void modifyEnvironmentTags(String experienceBasePath, String environmentCrn, Function<WebTarget, WebTarget> webTargetModifier,
+            Function<Invocation.Builder, Response> call, String failureMessage) {
+        WebTarget webTarget = webTargetModifier.apply(
+                commonExperienceWebTargetProvider.getPathToEnvironmentTagsEndpoint(experienceBasePath, environmentCrn));
+        Invocation.Builder invocationBuilder = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
+        Response response = executeCall(webTarget.getUri(), () -> call.apply(invocationBuilder))
+                .orElseThrow(() -> new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
+        try (response) {
+            throwExceptionIfResultIsUnsuccessful(response, failureMessage);
+        }
     }
 
     private void throwExceptionIfResultIsUnsuccessful(Response response, String failureMessage) {

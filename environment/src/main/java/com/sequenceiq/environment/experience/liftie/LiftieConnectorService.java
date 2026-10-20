@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
@@ -117,14 +118,33 @@ public class LiftieConnectorService implements LiftieApi {
 
     @Override
     public void distributeEnvironmentTags(String experienceBasePath, String environmentCrn, Map<String, String> tags) {
-        if (liftiePathProvider.isEnvironmentTagsPropagationDisabled()) {
-            LOGGER.info("Environment tags propagation for Liftie is not configured.");
+        if (!isEnvironmentTagsPropagationEnabled()) {
             return;
         }
-        LOGGER.debug("About to distribute environment tags to Kubernetes Experience for environment [crn: {}]", environmentCrn);
-        WebTarget webTarget = client.target(liftiePathProvider.getPathToEnvironmentTagsEndpoint());
-        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
-        try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.put(call, tags))) {
+        modifyEnvironmentTags(environmentCrn, "distribute environment tags to Kubernetes Experience", Function.identity(),
+                call -> retryableWebTarget.put(call, tags));
+    }
+
+    @Override
+    public void deleteEnvironmentTags(String experienceBasePath, String environmentCrn, Set<String> tagKeys) {
+        if (!isEnvironmentTagsPropagationEnabled()) {
+            return;
+        }
+        if (CollectionUtils.isEmpty(tagKeys)) {
+            LOGGER.debug("No tag keys were given, skipping environment tag removal for environment [crn: {}].", environmentCrn);
+            return;
+        }
+        modifyEnvironmentTags(environmentCrn, "remove environment tags from Kubernetes Experience",
+                webTarget -> QueryParamInjectorUtil.setRepeatedQueryParam(webTarget, CommonExperienceApi.TAG_KEY_QUERY_PARAM, tagKeys),
+                retryableWebTarget::delete);
+    }
+
+    private void modifyEnvironmentTags(String environmentCrn, String operation, Function<WebTarget, WebTarget> webTargetModifier,
+            Function<Invocation.Builder, Response> call) {
+        LOGGER.debug("About to {} for environment [crn: {}]", operation, environmentCrn);
+        WebTarget webTarget = webTargetModifier.apply(client.target(liftiePathProvider.getPathToEnvironmentTagsEndpoint()));
+        Invocation.Builder invocationBuilder = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
+        try (Response result = executeCall(webTarget.getUri(), () -> call.apply(invocationBuilder))) {
             responseReader.read(webTarget.getUri().toString(), result, Void.class)
                     .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
         } catch (RuntimeException e) {
@@ -133,27 +153,12 @@ public class LiftieConnectorService implements LiftieApi {
         }
     }
 
-    @Override
-    public void deleteEnvironmentTags(String experienceBasePath, String environmentCrn, Set<String> tagKeys) {
+    private boolean isEnvironmentTagsPropagationEnabled() {
         if (liftiePathProvider.isEnvironmentTagsPropagationDisabled()) {
             LOGGER.info("Environment tags propagation for Liftie is not configured.");
-            return;
+            return false;
         }
-        if (CollectionUtils.isEmpty(tagKeys)) {
-            LOGGER.debug("No tag keys were given, skipping environment tag removal for environment [crn: {}].", environmentCrn);
-            return;
-        }
-        LOGGER.debug("About to remove environment tags from Kubernetes Experience for environment [crn: {}]", environmentCrn);
-        WebTarget webTarget = QueryParamInjectorUtil.setRepeatedQueryParam(
-                client.target(liftiePathProvider.getPathToEnvironmentTagsEndpoint()), CommonExperienceApi.TAG_KEY_QUERY_PARAM, tagKeys);
-        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
-        try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))) {
-            responseReader.read(webTarget.getUri().toString(), result, Void.class)
-                    .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
-        } catch (RuntimeException e) {
-            LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
-            throw new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
-        }
+        return true;
     }
 
     private Response executeCall(URI path, Callable<Response> toCall) {
