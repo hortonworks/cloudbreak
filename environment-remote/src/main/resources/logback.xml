@@ -13,7 +13,7 @@
     </appender>
 
     <appender name="REMOTE_ENVIRONMENT_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>remote-environment-log/remote-environment.log</file>
+        <file>${SERVICE_LOG_DIR:-remote-environment-log}/remote-environment.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>${INTEGRATION_TEST_LOG_LEVEL:-OFF}</level>
         </filter>
@@ -23,7 +23,7 @@
             </layout>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>remote-environment-log/remote-environment-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${SERVICE_LOG_DIR:-remote-environment-log}/remote-environment-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>1024MB</maxFileSize>
         </rollingPolicy>
     </appender>

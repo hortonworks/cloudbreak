@@ -15,7 +15,7 @@
 
 
     <appender name="EXTERNALIZED_COMPUTE_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>externalized-compute-log/externalized-compute.log</file>
+        <file>${SERVICE_LOG_DIR:-externalized-compute-log}/externalized-compute.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>${INTEGRATION_TEST_LOG_LEVEL:-OFF}</level>
         </filter>
@@ -25,7 +25,7 @@
             </layout>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>externalized-compute-log/externalized-compute-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${SERVICE_LOG_DIR:-externalized-compute-log}/externalized-compute-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>1024MB</maxFileSize>
         </rollingPolicy>
     </appender>

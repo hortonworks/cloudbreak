@@ -15,7 +15,7 @@
 
 
     <appender name="DATALAKE_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>datalake-log/datalake.log</file>
+        <file>${SERVICE_LOG_DIR:-datalake-log}/datalake.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>${INTEGRATION_TEST_LOG_LEVEL:-OFF}</level>
         </filter>
@@ -25,7 +25,7 @@
             </layout>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>datalake-log/datalake-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${SERVICE_LOG_DIR:-datalake-log}/datalake-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>1024MB</maxFileSize>
         </rollingPolicy>
     </appender>
