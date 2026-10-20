@@ -27,7 +27,6 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
-import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 
 @Component
@@ -47,9 +46,6 @@ public class FreeIpaFlowManager {
     private FlowNameFormatService flowNameFormatService;
 
     @Inject
-    private EventBusStatisticReporter reactorReporter;
-
-    @Inject
     private FreeIpaParallelFlowValidator parallelFlowValidator;
 
     @Inject
@@ -65,7 +61,6 @@ public class FreeIpaFlowManager {
         nodeValidator.checkForRecentHeartbeat();
         Event<Selectable> event = eventFactory.createEvent(selectable);
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selectable.selector(), event);
-        reactorReporter.logInfoReport();
         reactor.notify(selectable.selector(), event);
     }
 
@@ -78,7 +73,6 @@ public class FreeIpaFlowManager {
         nodeValidator.checkForRecentHeartbeat();
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selector, event);
         parallelFlowValidator.checkFlowAllowedToStart(selector, event.getData().getResourceId());
-        reactorReporter.logInfoReport();
         reactor.notify(selector, event);
         return checkFlowOperationForResource(event);
     }
@@ -89,7 +83,6 @@ public class FreeIpaFlowManager {
             FlowAcceptResult accepted = (FlowAcceptResult) Benchmark.checkedMeasure(() -> acceptPromise.await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS), LOGGER,
                     "Accepting flow event took {}ms");
             if (accepted == null) {
-                reactorReporter.logErrorReport();
                 throw new RuntimeException("FlowAcceptResult was null. Maybe flow is under operation, request not allowed.");
             }
             return switch (accepted.getResultType()) {
@@ -102,7 +95,6 @@ public class FreeIpaFlowManager {
                 default -> throw new IllegalStateException("Illegal resultType: " + accepted.getResultType());
             };
         } catch (InterruptedException e) {
-            reactorReporter.logErrorReport();
             throw new RuntimeException(e.getMessage());
         }
     }

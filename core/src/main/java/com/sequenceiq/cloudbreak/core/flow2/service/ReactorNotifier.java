@@ -31,7 +31,6 @@ import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
-import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 
 @Service
@@ -52,9 +51,6 @@ public class ReactorNotifier {
 
     @Inject
     private EventBus reactor;
-
-    @Inject
-    private EventBusStatisticReporter reactorReporter;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -92,7 +88,6 @@ public class ReactorNotifier {
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(eventParameterFactory.createEventParameters(stackId), acceptable);
         StackView stack = getStackFn.apply(event.getData().getResourceId());
         Optional.ofNullable(stack).map(StackView::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
-        reactorReporter.logInfoReport();
         reactor.notify(selector, event);
         return checkFlowStatus(event, stack.getName());
     }
@@ -102,12 +97,10 @@ public class ReactorNotifier {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             if (accepted == null) {
                 LOGGER.error("Event not accepted: {}", event);
-                reactorReporter.logErrorReport();
                 throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", identifier));
             }
             return switch (accepted.getResultType()) {
                 case ALREADY_EXISTING_FLOW -> {
-                    reactorReporter.logErrorReport();
                     throw new FlowsAlreadyRunningException(String.format("Request not allowed, cluster '%s' already has a running operation. " +
                                     "Running operation(s): [%s]",
                             identifier,

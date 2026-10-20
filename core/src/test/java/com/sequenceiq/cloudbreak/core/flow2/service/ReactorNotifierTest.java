@@ -43,7 +43,6 @@ import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
-import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,9 +50,6 @@ public class ReactorNotifierTest {
 
     @Mock
     private EventBus reactor;
-
-    @Mock
-    private EventBusStatisticReporter reactorReporter;
 
     @Mock
     private StackService stackService;
@@ -112,7 +108,6 @@ public class ReactorNotifierTest {
 
         underTest.notify(1L, "RANDOM", data, stackService::getByIdWithTransaction);
 
-        verify(reactorReporter, times(1)).logInfoReport();
         verify(reactor, times(1)).notify(eq("RANDOM"), eq(event));
         verify(accepted, times(1)).await(10L, TimeUnit.SECONDS);
     }
@@ -133,8 +128,6 @@ public class ReactorNotifierTest {
 
         assertThrows(FlowNotAcceptedException.class, () -> underTest.notify(1L, "RANDOM", data, stackService::getByIdWithTransaction));
 
-        verify(reactorReporter, times(1)).logInfoReport();
-        verify(reactorReporter, times(1)).logErrorReport();
         verify(reactor, times(1)).notify(eq("RANDOM"), eq(event));
         verify(accepted, times(1)).await(10L, TimeUnit.SECONDS);
     }
@@ -155,8 +148,6 @@ public class ReactorNotifierTest {
 
         assertThrows(FlowsAlreadyRunningException.class, () -> underTest.notify(1L, "RANDOM", data, stackService::getByIdWithTransaction));
 
-        verify(reactorReporter, times(1)).logInfoReport();
-        verify(reactorReporter, times(1)).logErrorReport();
         verify(reactor, times(1)).notify(eq("RANDOM"), eq(event));
         verify(accepted, times(1)).await(10L, TimeUnit.SECONDS);
     }

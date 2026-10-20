@@ -60,7 +60,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.config.EventBusConfig;
-import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -123,9 +122,6 @@ public class TestApplicationContext {
 
     @MockBean
     private FlowNameFormatService flowNameFormatService;
-
-    @MockBean
-    private EventBusStatisticReporter eventBusStatisticReporter;
 
     @MockBean
     private MeterRegistry meterRegistry;

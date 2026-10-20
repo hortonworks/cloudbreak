@@ -21,7 +21,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 
 @Component
@@ -37,14 +36,10 @@ public class EventSender {
 
     private final FlowNameFormatService flowNameFormatService;
 
-    private final EventBusStatisticReporter reactorReporter;
-
-    public EventSender(EventBus reactor, ErrorHandlerAwareReactorEventFactory eventFactory, FlowNameFormatService flowNameFormatService,
-            EventBusStatisticReporter reactorReporter) {
+    public EventSender(EventBus reactor, ErrorHandlerAwareReactorEventFactory eventFactory, FlowNameFormatService flowNameFormatService) {
         this.reactor = reactor;
         this.eventFactory = eventFactory;
         this.flowNameFormatService = flowNameFormatService;
-        this.reactorReporter = reactorReporter;
     }
 
     public FlowIdentifier sendEvent(BaseNamedFlowEvent event, Event.Headers headers) {
@@ -78,14 +73,12 @@ public class EventSender {
             return new FlowIdentifier(FlowType.FLOW_CHAIN, headers.get(FLOW_CHAIN_ID));
         }
         LOGGER.error("Accepted is null, header does not contains flow or flow chain id, event: {}, header: {}", event, headers);
-        reactorReporter.logErrorReport();
         throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", resourceIdentifier));
     }
 
     private FlowIdentifier createFlowIdentifier(FlowAcceptResult accepted, String resourceIdentifier) {
         switch (accepted.getResultType()) {
             case ALREADY_EXISTING_FLOW:
-                reactorReporter.logErrorReport();
                 throw new FlowsAlreadyRunningException(String.format("Request not allowed, cluster '%s' already has a running operation. " +
                                 "Running operation(s): [%s]",
                         resourceIdentifier,
