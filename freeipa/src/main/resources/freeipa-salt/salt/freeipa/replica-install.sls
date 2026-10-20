@@ -25,3 +25,13 @@ install-freeipa-replica:
         - file: /opt/salt/scripts/freeipa_verify_replica_health.sh
         - file: /etc/resolv.conf.install
         - file: /opt/salt/scripts/initdnarange.py
+
+# The replica must resolve through itself once installed, never through the seed alone. This also
+# repairs replicas whose resolv.conf was left pointing at the seed by an earlier retry.
+ensure-freeipa-replica-local-resolver:
+  cmd.run:
+    - name: /opt/salt/scripts/freeipa_ensure_local_resolver.sh
+    - unless: /opt/salt/scripts/freeipa_ensure_local_resolver.sh --check
+    - require:
+        - cmd: install-freeipa-replica
+        - file: /opt/salt/scripts/freeipa_ensure_local_resolver.sh
