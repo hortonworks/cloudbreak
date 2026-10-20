@@ -20,8 +20,6 @@ if [ ! -f /etc/resolv.conf.orig ]; then
   cp /etc/resolv.conf /etc/resolv.conf.orig
 fi
 
-install -m644 /etc/resolv.conf.install /etc/resolv.conf
-
 # On a retry after a prior attempt already completed ipa-replica-install, skip the entire
 # destructive reinstall (uninstall -> pre-join cleanup gate -> client/replica install) and only
 # re-verify replication health in place. Reinstalling would tear down a working replica and leave a
@@ -31,6 +29,12 @@ install -m644 /etc/resolv.conf.install /etc/resolv.conf
 if [ -f /var/log/freeipa_replica_install_completed ]; then
   echo "Prior attempt already completed ipa-replica-install for $FQDN; skipping reinstall and re-verifying replication health in place"
 else
+
+# Resolve only through the seed while joining it. ipa-replica-install --setup-dns points
+# resolv.conf back to this server in its last step, so this must only be applied when that install
+# is going to run: applying it on the skip-reinstall path above would leave the replica resolving
+# through the seed alone.
+install -m644 /etc/resolv.conf.install /etc/resolv.conf
 
 if [ -f /var/log/ipareplica-install.log ] || [ -f /etc/ipa/default.conf ] || [ -f /var/lib/ipa/sysrestore/sysrestore.state ]; then
 # Uninstall runs only if there was a prior attempt that left a partial install. It is skipped on a fresh node to avoid the time consuming operation
