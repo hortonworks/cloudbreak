@@ -21,7 +21,7 @@ public class ImageToImageSettingsResponseConverter implements Converter<ImageEnt
 
     public ImageSettingsResponse convert(ImageEntity source) {
         ImageSettingsResponse response = new ImageSettingsResponse();
-        response.setCatalog(source.getImageCatalogUrl());
+        response.setCatalog(catalogUrlOrName(source.getImageCatalogUrl(), source.getImageCatalogName()));
         response.setId(source.getImageId());
         response.setOs(source.getOs());
         response.setLdapAgentVersion(source.getLdapAgentVersion());
@@ -35,7 +35,7 @@ public class ImageToImageSettingsResponseConverter implements Converter<ImageEnt
             ImageSettingsResponse response = new ImageSettingsResponse();
             response.setId(source.getImageId());
             response.setOs(source.getOs());
-            response.setCatalog(StringUtils.isNotEmpty(source.getImageCatalogUrl()) ? source.getImageCatalogUrl() : source.getImageCatalogName());
+            response.setCatalog(catalogUrlOrName(source.getImageCatalogUrl(), source.getImageCatalogName()));
             response.setLdapAgentVersion(imageEntityConverter.extractLdapAgentVersion(source));
             response.setSourceImage(imageEntityConverter.extractSourceImage(source));
             response.setImdsVersion(imageEntityConverter.extractImdsVersion(source));
@@ -44,5 +44,9 @@ public class ImageToImageSettingsResponseConverter implements Converter<ImageEnt
             LOGGER.debug("Source image is null");
             return null;
         }
+    }
+
+    private String catalogUrlOrName(String imageCatalogUrl, String imageCatalogName) {
+        return StringUtils.isNotEmpty(imageCatalogUrl) ? imageCatalogUrl : imageCatalogName;
     }
 }

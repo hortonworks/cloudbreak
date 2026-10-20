@@ -46,6 +46,38 @@ class ImageToImageSettingsResponseConverterTest {
     }
 
     @Test
+    void testConversionPrefersImageCatalogUrlOverName() {
+        ImageEntity source = new ImageEntity();
+        source.setImageCatalogUrl("caturl");
+        source.setImageCatalogName("catname");
+
+        ImageSettingsResponse result = underTest.convert(source);
+
+        assertEquals("caturl", result.getCatalog());
+    }
+
+    @Test
+    void testConversionWhenImageCatalogIsGivenByName() {
+        ImageEntity source = new ImageEntity();
+        source.setImageCatalogName("custom-freeipa-ic");
+
+        ImageSettingsResponse result = underTest.convert(source);
+
+        assertEquals("custom-freeipa-ic", result.getCatalog());
+    }
+
+    @Test
+    void testConversionWhenImageCatalogUrlIsEmpty() {
+        ImageEntity source = new ImageEntity();
+        source.setImageCatalogUrl("");
+        source.setImageCatalogName("custom-freeipa-ic");
+
+        ImageSettingsResponse result = underTest.convert(source);
+
+        assertEquals("custom-freeipa-ic", result.getCatalog());
+    }
+
+    @Test
     void testCloudImageConversion() {
         com.sequenceiq.cloudbreak.cloud.model.Image source =
                 new Image("imgname", Map.of(), "alma", "rocky", "", "url", "name", "imgid",
