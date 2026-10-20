@@ -139,8 +139,6 @@ public class StackOperationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperationService.class);
 
-    private static final Long WORKSPACE_ID = 1L;
-
     private static final Map<String, List<String>> PLATFORM_DISK_TYPE_MAP = Map.of(
             AWS.name(), Arrays.stream(AwsDiskType.values()).map(AwsDiskType::value).toList(),
             AZURE.name(), Arrays.stream(AzureDiskType.values()).map(AzureDiskType::value).toList(),
@@ -636,9 +634,9 @@ public class StackOperationService {
     private StackDto getStackDtoWithResources(NameOrCrn nameOrCrn) {
         Long stackId;
         if (Crn.isCrn(nameOrCrn.getNameOrCrn())) {
-            stackId = stackService.getIdByCrnInWorkspace(nameOrCrn.getCrn(), WORKSPACE_ID);
+            stackId = stackService.getResourceIdByResourceCrn(nameOrCrn.getCrn());
         } else {
-            stackId = stackService.getIdByNameInWorkspace(nameOrCrn.getName(), WORKSPACE_ID);
+            stackId = stackService.getResourceIdByResourceName(nameOrCrn.getName());
         }
         StackDto stack = stackDtoService.getById(stackId);
         return stack;

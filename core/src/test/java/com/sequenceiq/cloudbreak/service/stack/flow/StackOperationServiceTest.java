@@ -135,8 +135,6 @@ class StackOperationServiceTest {
 
     private static final long STACK_ID = 9876L;
 
-    private static final Long WORKSPACE_ID = 1L;
-
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1234";
 
     @InjectMocks
@@ -829,7 +827,7 @@ class StackOperationServiceTest {
     }
 
     private void mockStackByName(StackDto stack) {
-        when(stackService.getIdByNameInWorkspace("Test", WORKSPACE_ID)).thenReturn(STACK_ID);
+        when(stackService.getResourceIdByResourceName("Test")).thenReturn(STACK_ID);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
     }
 
