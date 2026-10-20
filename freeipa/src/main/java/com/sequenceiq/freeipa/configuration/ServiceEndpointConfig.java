@@ -2,12 +2,15 @@ package com.sequenceiq.freeipa.configuration;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
+import com.sequenceiq.freeipa.maintenancewindow.MaintenanceServiceConditions;
 
 @Configuration
 public class ServiceEndpointConfig {
@@ -42,6 +45,15 @@ public class ServiceEndpointConfig {
     @Value("${freeipa.remoteEnvironment.contextPath}")
     private String remoteEnvironmentRootContextPath;
 
+    @Value("${" + MaintenanceServiceConditions.URL_PROPERTY + ":}")
+    private String maintenanceServiceUrl;
+
+    @Value("${freeipa.maintenance.contextPath:/maintenance}")
+    private String maintenanceContextPath;
+
+    @Value("${freeipa.maintenance.serviceid:}")
+    private String maintenanceServiceId;
+
     @Inject
     private ServiceAddressResolver serviceAddressResolver;
 
@@ -63,5 +75,14 @@ public class ServiceEndpointConfig {
     @Bean
     public String remoteEnvironmentServiceUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(remoteEnvironmentServiceUrl + remoteEnvironmentRootContextPath, "", null);
+    }
+
+    @Bean
+    @DependsOn("serviceAddressResolver")
+    public String maintenanceServerUrl() throws ServiceAddressResolvingException {
+        if (StringUtils.isBlank(maintenanceServiceUrl)) {
+            return "";
+        }
+        return serviceAddressResolver.resolveUrl(maintenanceServiceUrl + maintenanceContextPath, "http", maintenanceServiceId);
     }
 }

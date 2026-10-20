@@ -122,6 +122,7 @@ dependencies {
 
   implementation project(':secret-rotation')
   implementation project(':secret-rotation-api')
+  implementation project(':maintenance-api')
   implementation project(":structuredevent-service-cdp")
   implementation project(':structuredevent-model')
   implementation project(':audit-connector')

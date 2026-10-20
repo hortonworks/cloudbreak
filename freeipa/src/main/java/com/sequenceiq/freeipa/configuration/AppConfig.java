@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -21,8 +23,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.freeipa.maintenancewindow.MaintenanceServiceConditions;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteria;
 import com.sequenceiq.freeipa.service.filter.NetworkFilterProvider;
+import com.sequenceiq.maintenance.client.internal.MaintenanceApiClientParams;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
@@ -46,6 +50,19 @@ public class AppConfig {
 
     @Value("${spring.threads.virtual.enabled:false}")
     private boolean virtualThreadsAvailable;
+
+    @Value("${rest.debug:false}")
+    private boolean restDebug;
+
+    @Value("${cert.validation:true}")
+    private boolean certificateValidation;
+
+    @Value("${cert.ignorePreValidation:true}")
+    private boolean ignorePreValidation;
+
+    @Inject
+    @Named("maintenanceServerUrl")
+    private String maintenanceServerUrl;
 
     @Inject
     private List<NetworkFilterProvider> networkFilterProviders;
@@ -75,6 +92,12 @@ public class AppConfig {
     @Bean
     public ExitCriteria stackBasedExitCriteria() {
         return new StackBasedExitCriteria();
+    }
+
+    @Bean
+    @ConditionalOnExpression(MaintenanceServiceConditions.URL_CONFIGURED)
+    public MaintenanceApiClientParams maintenanceApiClientParams() {
+        return new MaintenanceApiClientParams(restDebug, certificateValidation, ignorePreValidation, maintenanceServerUrl);
     }
 
     @Bean(name = DELAYED_TASK_EXECUTOR)

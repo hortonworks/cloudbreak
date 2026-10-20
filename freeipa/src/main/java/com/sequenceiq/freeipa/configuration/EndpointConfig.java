@@ -48,6 +48,7 @@ import com.sequenceiq.freeipa.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.freeipa.kerberos.v1.KerberosConfigV1Controller;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Controller;
 import com.sequenceiq.freeipa.ldap.v1.LdapConfigV1Controller;
+import com.sequenceiq.freeipa.maintenancewindow.MaintenanceWindowTaskExecuteController;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -79,6 +80,7 @@ public class EndpointConfig extends ResourceConfig {
             FreeIpaCostV1Controller.class,
             FreeIpaCO2V1Controller.class,
             FreeIpaRotationV1Controller.class,
+            MaintenanceWindowTaskExecuteController.class,
             CDPEventV1Endpoint.class,
             AuthorizationUtilController.class,
             OpenApiController.class,
