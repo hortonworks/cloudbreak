@@ -216,7 +216,10 @@ class EntitlementServiceTest {
                 {"CDP_CB_FREEIPA_MULTI_AZ_MIGRATION", (EntitlementCheckFunction) EntitlementService::isFreeIpaMultiAzMigrationEnabled, true},
 
                 {"CDP_GCP_RAZ_WITH_CAB", (EntitlementCheckFunction) EntitlementService::isGcpRazWithCabEnabled, false},
-                {"CDP_GCP_RAZ_WITH_CAB", (EntitlementCheckFunction) EntitlementService::isGcpRazWithCabEnabled, true}
+                {"CDP_GCP_RAZ_WITH_CAB", (EntitlementCheckFunction) EntitlementService::isGcpRazWithCabEnabled, true},
+
+                {"CDP_CB_EXTENDED_REPAIR_BATCH_SIZE", (EntitlementCheckFunction) EntitlementService::isExtendedRepairBatchSizeEnabled, false},
+                {"CDP_CB_EXTENDED_REPAIR_BATCH_SIZE", (EntitlementCheckFunction) EntitlementService::isExtendedRepairBatchSizeEnabled, true}
         };
     }
 
