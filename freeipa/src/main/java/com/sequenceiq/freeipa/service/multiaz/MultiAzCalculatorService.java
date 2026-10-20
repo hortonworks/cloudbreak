@@ -314,9 +314,10 @@ public class MultiAzCalculatorService {
             if (!CollectionUtils.isEmpty(availabilityZones)) {
                 Map<String, Long> zoneToNodeCountMap = collectZoneToNodeCountMap(instanceGroup, availabilityZones, excludeInstanceIds);
                 LOGGER.debug("Initialized zoneToNodeCountMap {}", zoneToNodeCountMap);
+                Map<String, String> zonalSubnetAzPairs = filterSubnetAzPairsIfSubnetsAreZonal(instanceGroup, subnetAzPairs);
                 for (InstanceMetaData instance : instancesToPopulate) {
                     if (instance.getAvailabilityZone() == null) {
-                        String availabilityZone = resolveAvailabilityZoneForInstance(instance, subnetAzPairs, availabilityZones, zoneToNodeCountMap);
+                        String availabilityZone = resolveAvailabilityZoneForInstance(instance, zonalSubnetAzPairs, availabilityZones, zoneToNodeCountMap);
                         if (availabilityZone != null) {
                             zoneToNodeCountMap.merge(availabilityZone, 1L, Long::sum);
                             instance.setAvailabilityZone(availabilityZone);
@@ -332,10 +333,33 @@ public class MultiAzCalculatorService {
         }
     }
 
+    /**
+     * The subnet only tells the instance's zone if the group's subnets are spread over more than one zone. Regional subnets (e.g. on GCP) all
+     * carry the same zone, so deriving the zone from them would put every instance into that single zone.
+     */
+    private Map<String, String> filterSubnetAzPairsIfSubnetsAreZonal(InstanceGroup instanceGroup, Map<String, String> subnetAzPairs) {
+        if (CollectionUtils.isEmpty(subnetAzPairs)) {
+            return Map.of();
+        }
+        Set<String> subnetIdsConfiguredOnInstanceGroup = collectSubnetIds(instanceGroup);
+        Set<String> subnetZones = subnetAzPairs.entrySet().stream()
+                .filter(entry -> subnetIdsConfiguredOnInstanceGroup.isEmpty() || subnetIdsConfiguredOnInstanceGroup.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+        if (subnetZones.size() > 1) {
+            return subnetAzPairs;
+        } else {
+            LOGGER.debug("Subnets of instance group '{}' are not spread over multiple zones ({}), availability zones are not derived from subnets",
+                    instanceGroup.getGroupName(), subnetZones);
+            return Map.of();
+        }
+    }
+
     private String resolveAvailabilityZoneForInstance(InstanceMetaData instance, Map<String, String> subnetAzPairs, Set<String> availabilityZones,
             Map<String, Long> zoneToNodeCountMap) {
         String subnetId = instance.getSubnetId();
-        if (StringUtils.isNotBlank(subnetId) && subnetAzPairs != null) {
+        if (StringUtils.isNotBlank(subnetId) && !CollectionUtils.isEmpty(subnetAzPairs)) {
             String azFromSubnet = subnetAzPairs.get(subnetId);
             if (StringUtils.isNotBlank(azFromSubnet) && availabilityZones.contains(azFromSubnet)) {
                 LOGGER.debug("Availability zone for instance {} derived from subnet {}: {}", instance.getInstanceId(), subnetId, azFromSubnet);

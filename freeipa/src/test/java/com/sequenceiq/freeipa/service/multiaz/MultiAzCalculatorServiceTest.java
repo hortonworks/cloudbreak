@@ -514,6 +514,65 @@ class MultiAzCalculatorServiceTest {
         assertEquals(true, ENVIRONMENT_ZONES.contains(instance.getAvailabilityZone()));
     }
 
+    @Test
+    void testPopulateAvailabilityZonesForInstancesSpreadsWhenGroupSubnetsShareOneZone() {
+        Stack stack = new Stack();
+        stack.setMultiAz(true);
+        InstanceGroup instanceGroup = createInstanceGroupWithSubnets(List.of("subnet-1", "subnet-2"));
+        Set<InstanceMetaData> instances = new HashSet<>();
+        IntStream.range(0, 6).forEach(i -> instances.add(createInstanceMetadata(i % 2 == 0 ? "subnet-1" : "subnet-2", "instance-" + i)));
+        instanceGroup.setInstanceMetaData(instances);
+        // Regional subnets (GCP) all carry the same zone; a subnet outside the group must not make them look zonal
+        Map<String, String> subnetAzPairs = Map.of(
+                "subnet-1", "zone-1",
+                "subnet-2", "zone-1",
+                "subnet-not-in-group", "zone-2");
+
+        underTest.populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzPairs);
+
+        Map<String, Long> zoneToNodeCountMap = instances.stream()
+                .collect(Collectors.groupingBy(InstanceMetaData::getAvailabilityZone, Collectors.counting()));
+        assertEquals(Map.of("zone-1", 2L, "zone-2", 2L, "zone-3", 2L), zoneToNodeCountMap);
+    }
+
+    @Test
+    void testPopulateAvailabilityZonesForInstancesPicksLeastUsedZoneOnUpscaleWhenGroupSubnetsShareOneZone() {
+        Stack stack = new Stack();
+        stack.setMultiAz(true);
+        InstanceGroup instanceGroup = createInstanceGroupWithSubnets(List.of("subnet-1"));
+        InstanceMetaData existingInZone1 = createInstanceMetadata("subnet-1", "instance-1");
+        existingInZone1.setAvailabilityZone("zone-1");
+        InstanceMetaData existingInZone2 = createInstanceMetadata("subnet-1", "instance-2");
+        existingInZone2.setAvailabilityZone("zone-2");
+        InstanceMetaData newInstance = createInstanceMetadata("subnet-1", "instance-new");
+        instanceGroup.setInstanceMetaData(Set.of(existingInZone1, existingInZone2, newInstance));
+
+        underTest.populateAvailabilityZonesForInstances(stack, instanceGroup, Map.of("subnet-1", "zone-1"), Set.of(), Set.of(newInstance));
+
+        assertEquals("zone-3", newInstance.getAvailabilityZone());
+        assertEquals("zone-1", existingInZone1.getAvailabilityZone());
+        assertEquals("zone-2", existingInZone2.getAvailabilityZone());
+    }
+
+    @Test
+    void testPopulateAvailabilityZonesForInstancesDerivesZoneFromSubnetWhenGroupSubnetsSpanMultipleZones() {
+        Stack stack = new Stack();
+        stack.setMultiAz(true);
+        InstanceGroup instanceGroup = createInstanceGroupWithSubnets(List.of("subnet-a", "subnet-b"));
+        // zone-1 is already used, so least-used selection would pick zone-2 or zone-3
+        InstanceMetaData existingInZone1 = createInstanceMetadata("subnet-a", "instance-1");
+        existingInZone1.setAvailabilityZone("zone-1");
+        InstanceMetaData newInstance = createInstanceMetadata("subnet-a", "instance-new");
+        instanceGroup.setInstanceMetaData(Set.of(existingInZone1, newInstance));
+        Map<String, String> subnetAzPairs = Map.of(
+                "subnet-a", "zone-1",
+                "subnet-b", "zone-2");
+
+        underTest.populateAvailabilityZonesForInstances(stack, instanceGroup, subnetAzPairs, Set.of(), Set.of(newInstance));
+
+        assertEquals("zone-1", newInstance.getAvailabilityZone());
+    }
+
     static List<Object[]> numZonesAndNumInstances() {
         List<Object[]> data = new ArrayList<>();
         IntStream.range(1, 4).forEach(zone -> {
@@ -573,6 +632,16 @@ class MultiAzCalculatorServiceTest {
 
     private InstanceMetaData createInstanceMetadata(String subnetId) {
         return createInstanceMetadata(subnetId, null);
+    }
+
+    private InstanceGroup createInstanceGroupWithSubnets(List<String> subnetIds) {
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setAttributes(Json.silent(Map.of(SUBNET_IDS, subnetIds)));
+        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(any())).thenReturn(ENVIRONMENT_ZONES);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setTemplate(new Template());
+        instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
+        return instanceGroup;
     }
 
     private void setUpForPopulateAvailabilityZones(Stack stack, InstanceGroup instanceGroup, AvailabilityZoneConnector availabilityZoneConnector,
