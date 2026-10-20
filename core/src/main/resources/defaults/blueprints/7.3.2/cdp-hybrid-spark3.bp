@@ -99,14 +99,9 @@
             ]
           },
           {
-            "refName": "yarn-NODEMANAGER-WORKER",
+            "refName": "yarn-NODEMANAGER-BASE",
             "roleType": "NODEMANAGER",
-            "base": false
-          },
-          {
-            "refName": "yarn-NODEMANAGER-COMPUTE",
-            "roleType": "NODEMANAGER",
-            "base": false
+            "base": true
           },
           {
             "refName": "yarn-JOBHISTORY-BASE",
@@ -215,7 +210,7 @@
         "refName": "compute",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
-          "yarn-NODEMANAGER-COMPUTE"
+          "yarn-NODEMANAGER-BASE"
         ]
       }
     ]
