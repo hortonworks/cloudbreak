@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
@@ -148,11 +149,10 @@ public class MockSdxRepairTests extends AbstractMockTest {
                 SdxClusterStatusResponse.STOPPED);
     }
 
-    public void testRepair(MockedTestContext testContext,
+    private void testRepair(MockedTestContext testContext,
             List<HostGroupType> hostGroups,
             Consumer<String> actionOnNode,
-            SdxClusterStatusResponse stateBeforeRepair
-    ) {
+            SdxClusterStatusResponse stateBeforeRepair) {
         String sdxInternal = resourcePropertyProvider().getName();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
@@ -190,7 +190,8 @@ public class MockSdxRepairTests extends AbstractMockTest {
                     instancesToDelete.forEach(instanceId -> actionOnNode.accept("/" + testDto.getCrn() + "/spi/" + instanceId));
                     return testDto;
                 })
-                .await(stateBeforeRepair, pollingInterval(Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS)))
+                .await(stateBeforeRepair, pollingInterval(Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS))
+                        .withIgnoredStatues(Set.of(SdxClusterStatusResponse.NODE_FAILURE)))
                 .when(sdxTestClient.repairInternal(hostGroups.stream().map(HostGroupType::getName).toArray(String[]::new)), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .validate();
