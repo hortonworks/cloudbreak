@@ -182,9 +182,9 @@ integrationtest:
     govCloud: false
     multiaz: false
     externalDatabaseSslEnforcementSupported: true
-    region: eu-central-1
-    location: eu-central-1
-    availabilityZone: eu-central-1a
+    region: us-west-2
+    location: us-west-2
+    availabilityZone: us-west-2a
     verticalScale:
       volumeType: gp2
       supported: true
@@ -197,11 +197,11 @@ integrationtest:
       freeipa:
         group: master
         instanceType: m5.2xlarge
-    vpcId: vpc-08ebd4ef51a160824
+    vpcId: vpc-0c55644ba799825a2
     subnetIds:
-      - subnet-072d4a31e010af1bb
-      - subnet-0f9fd28e4ce341398
-      - subnet-05bc4f37606560b18
+      - subnet-051261563edd66813
+      - subnet-0ee2ba7b5bb2fcc29
+      - subnet-0ac6a804221711fc2
     publicKeyId: api-e2e-test
     credential:
       type: role
@@ -240,7 +240,7 @@ integrationtest:
         instanceProfile:
       baseLocation:
       fileSystemType: S3
-    hybridCloudSecurityGroupID: sg-02bf7840fc64073fa
+    hybridCloudSecurityGroupID: sg-0876cd098fdd0f7be
     freeipa:
       instanceType: m5.large
       arm64InstanceType: r7gd.large
@@ -251,8 +251,8 @@ integrationtest:
       rebuild:
         imageId: f6782285-4b6b-47d7-a3a4-9066fc7a092e
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-freeipa-image-catalog.json
-        fullbackup: s3://cloudbreak-test-persistent/freeipa_rebuild/full/
-        databackup: s3://cloudbreak-test-persistent/freeipa_rebuild/hourly/
+        fullbackup: s3://cloudbreak-test-persistent-us-west-2/freeipa_rebuild/full/
+        databackup: s3://cloudbreak-test-persistent-us-west-2/freeipa_rebuild/hourly/
     diskEncryption:
       environmentKey:
       datahubKey:
@@ -261,8 +261,8 @@ integrationtest:
     embeddedDbUpgradeSourceVersion: 11
     trust:
       subnetIds:
-        - subnet-0476e538519ac9570
-        - subnet-0cb6292385565e5da
+        - subnet-0a7f9d740f5e10cc6
+        - subnet-05bbb3a6c02d0a76a
 
   # azure parameters
   azure:
