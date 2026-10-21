@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_INSTANCE_RESOURCE_BUILDER_ORDER;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.USERDATA_SECRET_ID;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
@@ -28,6 +27,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsStackNameCommonUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
+import com.sequenceiq.cloudbreak.cloud.aws.exception.AwsResourceException;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.InstanceCreationContext;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.InstanceTypeRetryExceptionMatcher;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil;
@@ -97,6 +98,8 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     public static final int AWS_INSTANCE_TERMINATED_CODE = 48;
 
     private static final Logger LOGGER = getLogger(AwsNativeInstanceResourceBuilder.class);
+
+    private static final int BULK_REQUEST_SIZE = 100;
 
     @Value("${cb.aws.vpcendpoints.enabled.gateway.services}")
     private Set<String> enabledGatewayServices;
@@ -391,35 +394,23 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Override
     protected CloudResourceStatus getResourceStatus(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
-        boolean creation = context.isBuild();
-        String operation = creation ? "creation" : "termination";
         if (StringUtils.isNotEmpty(resource.getInstanceId())) {
             try {
-                LOGGER.debug("Check instance {} for {}.", operation, resource.getInstanceId());
+                LOGGER.debug("Check instance creation {}.", resource.getInstanceId());
                 DescribeInstancesResponse describeInstancesResponse = context.getAmazonEc2Client().describeInstances(DescribeInstancesRequest.builder()
                         .instanceIds(resource.getInstanceId())
                         .build());
                 InstanceState instanceState = describeInstancesResponse.reservations().stream().flatMap(s -> s.instances().stream())
                         .map(instance -> instance.state()).findFirst().get();
-                if (creation) {
-                    return getResourceStatusForCreation(resource, instanceState);
-                } else {
-                    return getResourceStatusForDeletion(resource, instanceState);
-                }
+                return getResourceStatusForCreation(resource, instanceState);
             } catch (Ec2Exception e) {
-                if (e.awsErrorDetails().errorCode().contains(NOT_FOUND) && !creation) {
-                    LOGGER.info("Aws resource not found: {}", e.getMessage());
-                    return new CloudResourceStatus(resource, ResourceStatus.DELETED, "AWS resource not found");
-                } else {
-                    LOGGER.error("Cannot finish instance {}: {}", operation, e.getMessage(), e);
-                    throw e;
-                }
+                LOGGER.error("Cannot finish instance creation: {}", e.getMessage(), e);
+                throw e;
             }
         } else {
-            LOGGER.warn("The resource with name: '{}' doesn't have instance identifier for operation: '{}'. There is no need to poll the state of the resource",
-                    resource.getName(), operation);
-            ResourceStatus resourceStatus = creation ? ResourceStatus.CREATED : ResourceStatus.DELETED;
-            return new CloudResourceStatus(resource, resourceStatus);
+            LOGGER.warn("The resource with name: '{}' doesn't have instance identifier for creation. There is no need to poll the state of the resource",
+                    resource.getName());
+            return new CloudResourceStatus(resource, ResourceStatus.CREATED);
         }
     }
 
@@ -484,6 +475,124 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         } else {
             return resource;
         }
+    }
+
+    @Override
+    public boolean isBulkDeleteSupported() {
+        return true;
+    }
+
+    @Override
+    public List<CloudResourceStatus> bulkDelete(AwsContext context, AuthenticatedContext auth, List<CloudResource> resources) {
+        Map<Boolean, List<CloudResource>> resourcesByInstanceId = partitionByInstanceId(resources);
+        List<CloudResourceStatus> result = new ArrayList<>(deletedStatuses(resourcesByInstanceId.get(false)));
+        for (List<CloudResource> chunk : Lists.partition(resourcesByInstanceId.get(true), BULK_REQUEST_SIZE)) {
+            result.addAll(terminateInstances(context, chunk));
+        }
+        return result;
+    }
+
+    private List<CloudResourceStatus> terminateInstances(AwsContext context, List<CloudResource> resources) {
+        Map<String, Instance> instancesOnEc2;
+        try {
+            instancesOnEc2 = describeInstancesById(context.getAmazonEc2Client(), instanceIds(resources));
+        } catch (Exception e) {
+            LOGGER.warn("Describing instances {} failed, they will be terminated one by one", instanceIds(resources), e);
+            return List.of();
+        }
+        Map<Boolean, List<CloudResource>> resourcesByLiveness = resources.stream()
+                .collect(Collectors.partitioningBy(resource -> isLive(instancesOnEc2.get(resource.getInstanceId()))));
+        List<CloudResource> goneResources = resourcesByLiveness.get(false);
+        if (!goneResources.isEmpty()) {
+            LOGGER.info("The instances {} could not be found on EC2 or are already terminated, no need for triggering termination",
+                    instanceIds(goneResources));
+        }
+        List<CloudResourceStatus> result = new ArrayList<>(deletedStatuses(goneResources));
+        List<CloudResource> resourcesToTerminate = resourcesByLiveness.get(true);
+        if (!resourcesToTerminate.isEmpty()) {
+            List<String> instanceIds = instanceIds(resourcesToTerminate);
+            LOGGER.info("Terminate instances with instance ids: {}", instanceIds);
+            try {
+                context.getAmazonEc2Client().deleteInstance(TerminateInstancesRequest.builder().instanceIds(instanceIds).build());
+                resourcesToTerminate.forEach(resource -> result.add(new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS)));
+            } catch (Exception e) {
+                // AWS may still have terminated part of the chunk (termination protection only blocks its own AZ), terminating those again is a no-op
+                LOGGER.warn("Bulk termination of instances {} failed with error code {}, they will be terminated one by one",
+                        instanceIds, getErrorCode(e), e);
+            }
+        }
+        return result;
+    }
+
+    private boolean isLive(Instance instance) {
+        return instance != null && instance.state().code() != AWS_INSTANCE_TERMINATED_CODE;
+    }
+
+    private String getErrorCode(Exception e) {
+        return e instanceof AwsServiceException awsServiceException && awsServiceException.awsErrorDetails() != null
+                ? awsServiceException.awsErrorDetails().errorCode()
+                : null;
+    }
+
+    @Override
+    public List<CloudResourceStatus> checkResources(AwsContext context, AuthenticatedContext auth, List<CloudResource> resources) {
+        if (context.isBuild()) {
+            return super.checkResources(context, auth, resources);
+        }
+        Map<Boolean, List<CloudResource>> resourcesByInstanceId = partitionByInstanceId(resources);
+        List<CloudResourceStatus> result = new ArrayList<>(deletedStatuses(resourcesByInstanceId.get(false)));
+        for (List<CloudResource> chunk : Lists.partition(resourcesByInstanceId.get(true), BULK_REQUEST_SIZE)) {
+            Map<String, Instance> instancesOnEc2 = describeInstancesForStatusCheck(context, auth, chunk);
+            for (CloudResource resource : chunk) {
+                Instance instance = instancesOnEc2.get(resource.getInstanceId());
+                if (instance == null) {
+                    LOGGER.debug("Instance {} not found on EC2, termination finished", resource.getInstanceId());
+                    result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED));
+                } else {
+                    result.add(getResourceStatusForDeletion(resource, instance.state()));
+                }
+            }
+        }
+        return result;
+    }
+
+    private Map<String, Instance> describeInstancesForStatusCheck(AwsContext context, AuthenticatedContext auth, List<CloudResource> resources) {
+        try {
+            return describeInstancesById(context.getAmazonEc2Client(), instanceIds(resources));
+        } catch (Exception e) {
+            CloudContext cloudContext = auth.getCloudContext();
+            throw new AwsResourceException("Error during status check", resourceType(), cloudContext.getName(), cloudContext.getId(),
+                    resources.stream().map(CloudResource::getName).collect(Collectors.joining(",")), e);
+        }
+    }
+
+    private Map<Boolean, List<CloudResource>> partitionByInstanceId(List<CloudResource> resources) {
+        return resources.stream().collect(Collectors.partitioningBy(resource -> StringUtils.isNotEmpty(resource.getInstanceId())));
+    }
+
+    private List<CloudResourceStatus> deletedStatuses(List<CloudResource> resources) {
+        return resources.stream().map(resource -> new CloudResourceStatus(resource, ResourceStatus.DELETED)).toList();
+    }
+
+    private List<String> instanceIds(List<CloudResource> resources) {
+        return resources.stream().map(CloudResource::getInstanceId).toList();
+    }
+
+    private Map<String, Instance> describeInstancesById(AmazonEc2Client amazonEc2Client, List<String> instanceIds) {
+        // instance-id filter instead of instanceIds, so an unknown id does not fail the whole request with InvalidInstanceID.NotFound
+        Map<String, Instance> instances = new HashMap<>();
+        String nextToken = null;
+        do {
+            DescribeInstancesResponse response = amazonEc2Client.describeInstances(DescribeInstancesRequest.builder()
+                    .filters(Filter.builder().name("instance-id").values(instanceIds).build())
+                    .nextToken(nextToken)
+                    .build());
+            response.reservations().stream()
+                    .flatMap(reservation -> reservation.instances().stream())
+                    .forEach(instance -> instances.put(instance.instanceId(), instance));
+            nextToken = response.nextToken();
+        } while (StringUtils.isNotEmpty(nextToken));
+        return instances;
     }
 
     private boolean isInstanceExistsOnEc2(AwsContext context, String instanceId) {

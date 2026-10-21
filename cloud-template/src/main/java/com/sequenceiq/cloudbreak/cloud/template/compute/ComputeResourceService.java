@@ -8,9 +8,11 @@ import static java.lang.String.format;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -107,7 +109,11 @@ public class ComputeResourceService {
             for (ComputeResourceBuilder<ResourceBuilderContext> builder : builders) {
                 LOGGER.debug("Delete resources: execute {} builder for the resource of {}", builder.getClass().getSimpleName(), builder.resourceType());
                 List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
-                for (CloudResource cloudResource : resourceList) {
+                List<CloudResource> resourcesToDeleteOneByOne = resourceList;
+                if (builder.isBulkDeleteSupported() && !resourceList.isEmpty()) {
+                    resourcesToDeleteOneByOne = submitBulkDeletion(executor, futures, context, auth, resourceList, builder, cancellable);
+                }
+                for (CloudResource cloudResource : resourcesToDeleteOneByOne) {
                     ResourceDeletionCallable deletionCallable = resourceActionFactory.buildDeletionCallable(
                             new ResourceDeletionCallablePayload(context, auth, cloudResource, builder, cancellable));
                     futures.add(executor.submit(deletionCallable));
@@ -118,6 +124,38 @@ public class ComputeResourceService {
             }
         }
         return results;
+    }
+
+    private List<CloudResource> submitBulkDeletion(ExecutorService executor, Collection<Future<List<CloudResourceStatus>>> futures,
+            ResourceBuilderContext context, AuthenticatedContext auth, List<CloudResource> resources, ComputeResourceBuilder<ResourceBuilderContext> builder,
+            boolean cancellable) {
+        Map<Boolean, List<CloudResource>> resourcesByExistence = resources.stream()
+                .collect(Collectors.partitioningBy(resource -> resource.getStatus().resourceExists()));
+        List<CloudResource> existingResources = resourcesByExistence.get(true);
+        // the one by one deletion only removes the not existing resources from the database
+        List<CloudResource> resourcesToDeleteOneByOne = new ArrayList<>(resourcesByExistence.get(false));
+        if (existingResources.isEmpty()) {
+            return resourcesToDeleteOneByOne;
+        }
+        List<CloudResourceStatus> deletionStatuses;
+        try {
+            deletionStatuses = builder.bulkDelete(context, auth, existingResources);
+        } catch (Exception e) {
+            LOGGER.warn("Bulk deletion of {} resources failed with builder {}, deleting them one by one", existingResources.size(),
+                    builder.getClass().getSimpleName(), e);
+            deletionStatuses = List.of();
+        }
+        Set<CloudResource> handledResources = Collections.newSetFromMap(new IdentityHashMap<>());
+        deletionStatuses.forEach(deletionStatus -> handledResources.add(deletionStatus.getCloudResource()));
+        existingResources.stream().filter(resource -> !handledResources.contains(resource)).forEach(resourcesToDeleteOneByOne::add);
+        if (!deletionStatuses.isEmpty()) {
+            ResourceBulkDeletionCallable bulkDeletionCallable = resourceActionFactory.buildBulkDeletionCallable(
+                    new ResourceBulkDeletionCallablePayload(context, auth, deletionStatuses, builder, cancellable));
+            futures.add(executor.submit(bulkDeletionCallable));
+        }
+        LOGGER.info("{} resources are deleted in bulk, {} one by one with builder {}", deletionStatuses.size(), resourcesToDeleteOneByOne.size(),
+                builder.getClass().getSimpleName());
+        return resourcesToDeleteOneByOne;
     }
 
     private List<CloudResourceStatus> getDeletedResourcesOrFail(Collection<Future<List<CloudResourceStatus>>> futures,

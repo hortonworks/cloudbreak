@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -120,6 +121,33 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
      *                   can be issued again.
      */
     CloudResource delete(C context, AuthenticatedContext auth, CloudResource resource) throws Exception;
+
+    /**
+     * Whether the resources of this builder shall be deleted together with {@link #bulkDelete(ResourceBuilderContext, AuthenticatedContext, List)}
+     * instead of one by one with {@link #delete(ResourceBuilderContext, AuthenticatedContext, CloudResource)}.
+     *
+     * @return Returns true if {@link #bulkDelete(ResourceBuilderContext, AuthenticatedContext, List)} is implemented.
+     */
+    default boolean isBulkDeleteSupported() {
+        return false;
+    }
+
+    /**
+     * Responsible to request the deletion of all the provided cloud resources at once from the cloud provider.
+     *
+     * @param context   Generic context object passed along with the flow to all methods.
+     * @param auth      Authenticated context is provided to be able to send the requests to the cloud provider.
+     * @param resources Cloud resources which shall be deleted.
+     * @return Returns the statuses of the resources the bulk request handled:
+     * {@link com.sequenceiq.cloudbreak.cloud.model.ResourceStatus#IN_PROGRESS} if the deletion was requested and has to be tracked with
+     * {@link #checkResources(ResourceBuilderContext, AuthenticatedContext, List)}, or
+     * {@link com.sequenceiq.cloudbreak.cloud.model.ResourceStatus#DELETED} if there was nothing to delete. Resources without a status, and all
+     * resources if this method throws, are deleted one by one with {@link #delete(ResourceBuilderContext, AuthenticatedContext, CloudResource)}.
+     * The returned statuses must wrap the given resource instances, not copies, because the handled resources are matched by identity.
+     */
+    default List<CloudResourceStatus> bulkDelete(C context, AuthenticatedContext auth, List<CloudResource> resources) {
+        throw new UnsupportedOperationException("Bulk delete is not supported by " + getClass().getSimpleName());
+    }
 
     /**
      * Responsible to start the specified instance. If this resource builder is responsible for resource creation which cannot be started or stopped

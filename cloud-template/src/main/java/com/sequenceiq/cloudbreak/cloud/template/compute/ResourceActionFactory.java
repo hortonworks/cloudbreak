@@ -36,6 +36,10 @@ public class ResourceActionFactory {
         return new ResourceDeletionCallable(payload, syncPollingScheduler, resourcePollTaskFactory, persistenceNotifier);
     }
 
+    public ResourceBulkDeletionCallable buildBulkDeletionCallable(ResourceBulkDeletionCallablePayload payload) {
+        return new ResourceBulkDeletionCallable(payload, syncPollingScheduler, resourcePollTaskFactory, persistenceNotifier);
+    }
+
     public ResourceStopStartCallable buildStopStartCallable(ResourceStopStartCallablePayload payload) {
         return new ResourceStopStartCallable(payload);
     }

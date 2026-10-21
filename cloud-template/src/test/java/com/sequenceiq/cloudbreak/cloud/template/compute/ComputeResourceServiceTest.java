@@ -12,6 +12,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -221,6 +222,78 @@ class ComputeResourceServiceTest {
         assertEquals(deletionCallables.get(2).getResource(), instance1);
         assertEquals(deletionCallables.get(3).getBuilder(), computeResourceBuilder1);
         assertEquals(deletionCallables.get(3).getResource(), instance2);
+    }
+
+    @Test
+    void testResourceDeletionWithBulkDeleteSupportedBuilder() throws Exception {
+        ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
+        when(resourceBuilderContext.getResourceBuilderPoolSize()).thenReturn(2);
+        when(resourceBuilders.compute(AWS_VARIANT)).thenReturn(List.of(computeResourceBuilder1, computeResourceBuilder2));
+        when(computeResourceBuilder1.resourceType()).thenReturn(ResourceType.AWS_INSTANCE);
+        when(computeResourceBuilder1.isBulkDeleteSupported()).thenReturn(true);
+        when(computeResourceBuilder2.resourceType()).thenReturn(ResourceType.AWS_VOLUMESET);
+        mockDeletionCallables();
+        CloudResource instance1 = newResource("instance-1", "group1", ResourceType.AWS_INSTANCE, CommonStatus.CREATED);
+        CloudResource instance2 = newResource("instance-2", "group1", ResourceType.AWS_INSTANCE, CommonStatus.CREATED);
+        CloudResource notHandledInstance = newResource("instance-3", "group1", ResourceType.AWS_INSTANCE, CommonStatus.CREATED);
+        CloudResource notExistingInstance = newResource("instance-4", "group1", ResourceType.AWS_INSTANCE, CommonStatus.FAILED);
+        CloudResource volume1 = newResource("vol-1", "group1", ResourceType.AWS_VOLUMESET, CommonStatus.CREATED);
+        List<CloudResourceStatus> bulkDeletionStatuses = List.of(
+                new CloudResourceStatus(instance1, ResourceStatus.IN_PROGRESS),
+                new CloudResourceStatus(instance2, ResourceStatus.DELETED));
+        when(computeResourceBuilder1.bulkDelete(resourceBuilderContext, authenticatedContext, List.of(instance1, instance2, notHandledInstance)))
+                .thenReturn(bulkDeletionStatuses);
+
+        List<CloudResourceStatus> cloudResourceStatuses = underTest.deleteResources(resourceBuilderContext, authenticatedContext,
+                List.of(instance1, instance2, notHandledInstance, notExistingInstance, volume1), false, true);
+
+        assertThat(cloudResourceStatuses).hasSize(5);
+        ArgumentCaptor<ResourceBulkDeletionCallablePayload> bulkDeletionCallableCaptor = ArgumentCaptor.forClass(ResourceBulkDeletionCallablePayload.class);
+        verify(resourceActionFactory, times(1)).buildBulkDeletionCallable(bulkDeletionCallableCaptor.capture());
+        assertEquals(computeResourceBuilder1, bulkDeletionCallableCaptor.getValue().getBuilder());
+        assertEquals(bulkDeletionStatuses, bulkDeletionCallableCaptor.getValue().getDeletionStatuses());
+        verify(resourceActionFactory, times(3)).buildDeletionCallable(deletionCallableCaptor.capture());
+        assertThat(deletionCallableCaptor.getAllValues()).extracting(ResourceDeletionCallablePayload::getResource)
+                .containsExactlyInAnyOrder(notExistingInstance, notHandledInstance, volume1);
+    }
+
+    @Test
+    void testResourceDeletionFallsBackToOneByOneWhenTheBulkDeleteThrows() throws Exception {
+        ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
+        when(resourceBuilderContext.getResourceBuilderPoolSize()).thenReturn(2);
+        when(resourceBuilders.compute(AWS_VARIANT)).thenReturn(List.of(computeResourceBuilder1));
+        when(computeResourceBuilder1.resourceType()).thenReturn(ResourceType.AWS_INSTANCE);
+        when(computeResourceBuilder1.isBulkDeleteSupported()).thenReturn(true);
+        mockDeletionCallables();
+        CloudResource instance1 = newResource("instance-1", "group1", ResourceType.AWS_INSTANCE, CommonStatus.CREATED);
+        CloudResource instance2 = newResource("instance-2", "group1", ResourceType.AWS_INSTANCE, CommonStatus.CREATED);
+        when(computeResourceBuilder1.bulkDelete(any(), any(), any())).thenThrow(new IllegalStateException("bulk failed"));
+
+        List<CloudResourceStatus> cloudResourceStatuses = underTest.deleteResources(resourceBuilderContext, authenticatedContext,
+                List.of(instance1, instance2), false, true);
+
+        assertThat(cloudResourceStatuses).hasSize(2);
+        verify(resourceActionFactory, never()).buildBulkDeletionCallable(any());
+        verify(resourceActionFactory, times(2)).buildDeletionCallable(deletionCallableCaptor.capture());
+        assertThat(deletionCallableCaptor.getAllValues()).extracting(ResourceDeletionCallablePayload::getResource)
+                .containsExactlyInAnyOrder(instance1, instance2);
+    }
+
+    private void mockDeletionCallables() throws Exception {
+        lenient().when(resourceActionFactory.buildDeletionCallable(any())).thenAnswer(invocation -> {
+            ResourceDeletionCallablePayload payload = invocation.getArgument(0, ResourceDeletionCallablePayload.class);
+            ResourceDeletionCallable deletionCallable = mock(ResourceDeletionCallable.class);
+            when(deletionCallable.call()).thenReturn(List.of(new CloudResourceStatus(payload.getResource(), ResourceStatus.DELETED)));
+            return deletionCallable;
+        });
+        lenient().when(resourceActionFactory.buildBulkDeletionCallable(any())).thenAnswer(invocation -> {
+            ResourceBulkDeletionCallablePayload payload = invocation.getArgument(0, ResourceBulkDeletionCallablePayload.class);
+            ResourceBulkDeletionCallable bulkDeletionCallable = mock(ResourceBulkDeletionCallable.class);
+            when(bulkDeletionCallable.call()).thenReturn(payload.getDeletionStatuses().stream()
+                    .map(status -> new CloudResourceStatus(status.getCloudResource(), ResourceStatus.DELETED))
+                    .toList());
+            return bulkDeletionCallable;
+        });
     }
 
     @Test

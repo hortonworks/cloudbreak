@@ -8,6 +8,7 @@ import static com.sequenceiq.common.model.DefaultApplicationTag.RESOURCE_CRN;
 import static com.sequenceiq.common.model.DefaultApplicationTag.RESOURCE_ID;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,6 +61,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsStackNameCommonUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
+import com.sequenceiq.cloudbreak.cloud.aws.exception.AwsResourceException;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -85,6 +88,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.ec2.model.ArchitectureValues;
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
@@ -102,6 +106,7 @@ import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.SpotInstanceType;
 import software.amazon.awssdk.services.ec2.model.Tag;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -667,7 +672,6 @@ class AwsNativeInstanceResourceBuilderTest {
                 .instanceId(INSTANCE_ID)
                 .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE).build())
                 .build();
-        when(awsContext.isBuild()).thenReturn(true);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         DescribeInstancesResponse describeInstanceResponse = DescribeInstancesResponse.builder()
                 .reservations(Reservation.builder().instances(instance).build())
@@ -684,7 +688,6 @@ class AwsNativeInstanceResourceBuilderTest {
                 .instanceId(INSTANCE_ID)
                 .state(InstanceState.builder().code(0).build())
                 .build();
-        when(awsContext.isBuild()).thenReturn(true);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         DescribeInstancesResponse describeInstanceResponse = DescribeInstancesResponse.builder()
                 .reservations(Reservation.builder().instances(instance).build())
@@ -701,7 +704,6 @@ class AwsNativeInstanceResourceBuilderTest {
                 .instanceId(INSTANCE_ID)
                 .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE).build())
                 .build();
-        when(awsContext.isBuild()).thenReturn(true);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         DescribeInstancesResponse describeInstanceResponse = DescribeInstancesResponse.builder()
                 .reservations(Reservation.builder().instances(instance).build())
@@ -716,7 +718,6 @@ class AwsNativeInstanceResourceBuilderTest {
     @Test
     void testGetResourceStatusWhenCreationAndNotFoundException() {
         CloudResource cloudResource = createInstanceResource();
-        when(awsContext.isBuild()).thenReturn(true);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
                 .message("message")
@@ -728,81 +729,55 @@ class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    void testGetResourceStatusWhenTerminationAndInstanceTerminated() {
-        CloudResource cloudResource = createInstanceResource();
-        Instance instance = Instance.builder()
-                .instanceId(INSTANCE_ID)
-                .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE).build())
-                .build();
+    void testCheckResourcesForTerminationWrapsTheDescribeFailure() {
         when(awsContext.isBuild()).thenReturn(false);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
-        DescribeInstancesResponse describeInstanceResponse = DescribeInstancesResponse.builder()
-                .reservations(Reservation.builder().instances(instance).build())
-                .build();
-        when(amazonEc2Client.describeInstances(any())).thenReturn(describeInstanceResponse);
-        CloudResourceStatus resourceStatus = underTest.getResourceStatus(awsContext, ac, cloudResource);
-        assertEquals(ResourceStatus.DELETED, resourceStatus.getStatus());
-    }
-
-    @Test
-    void testGetResourceStatusWhenTerminationInstanceNotTerminated() {
-        CloudResource cloudResource = createInstanceResource();
-        Instance instance = Instance.builder()
-                .instanceId(INSTANCE_ID)
-                .state(InstanceState.builder().code(0).build())
-                .build();
-        when(awsContext.isBuild()).thenReturn(false);
-        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
-        DescribeInstancesResponse describeInstanceResponse = DescribeInstancesResponse.builder()
-                .reservations(Reservation.builder().instances(instance).build())
-                .build();
-        when(amazonEc2Client.describeInstances(any())).thenReturn(describeInstanceResponse);
-        CloudResourceStatus resourceStatus = underTest.getResourceStatus(awsContext, ac, cloudResource);
-        assertEquals(ResourceStatus.IN_PROGRESS, resourceStatus.getStatus());
-    }
-
-    @Test
-    void testGetResourceStatusWhenTerminationAndNotFoundException() {
-        CloudResource cloudResource = createInstanceResource();
-        when(awsContext.isBuild()).thenReturn(false);
-        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
-        Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
-                .message("message")
-                .awsErrorDetails(AwsErrorDetails.builder().errorCode("NotFound").build())
-                .build();
-        when(amazonEc2Client.describeInstances(any())).thenThrow(amazonEC2Exception);
-        CloudResourceStatus resourceStatus = underTest.getResourceStatus(awsContext, ac, cloudResource);
-        assertEquals(ResourceStatus.DELETED, resourceStatus.getStatus());
-        assertEquals("AWS resource not found", resourceStatus.getStatusReason());
-    }
-
-    @Test
-    void testGetResourceStatusWhenTerminationAndOtherException() {
-        CloudResource cloudResource = createInstanceResource();
-        when(awsContext.isBuild()).thenReturn(false);
-        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(cloudContext.getName()).thenReturn("stack");
+        when(cloudContext.getId()).thenReturn(1L);
         Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
                 .message("message")
                 .awsErrorDetails(AwsErrorDetails.builder().errorCode("AnyOther").build())
                 .build();
-        when(amazonEc2Client.describeInstances(any())).thenThrow(amazonEC2Exception);
-        Ec2Exception actual = assertThrows(Ec2Exception.class, () -> underTest.getResourceStatus(awsContext, ac, cloudResource));
-        assertEquals("AnyOther", actual.awsErrorDetails().errorCode());
+        when(amazonEc2Client.describeInstances(any(DescribeInstancesRequest.class))).thenThrow(amazonEC2Exception);
+
+        AwsResourceException actual = assertThrows(AwsResourceException.class,
+                () -> underTest.checkResources(awsContext, ac, List.of(createInstanceResource())));
+
+        assertThat(actual).hasMessageContaining("Error during status check").hasMessageContaining("stack").hasCause(amazonEC2Exception);
     }
 
     @Test
-    void testGetResourceStatusWhenTerminationAndTheInstanceIdIsEmpty() {
-        CloudResource cloudResource = CloudResource.builder()
-                .withName("name")
-                .withType(ResourceType.AWS_INSTANCE)
-                .withStatus(CommonStatus.DETACHED)
-                .withParameters(emptyMap())
-                .build();
-
+    void testCheckResourcesForTerminationWhenNoResourceHasAnInstanceId() {
+        CloudResource first = createInstanceResource(null);
+        CloudResource second = createInstanceResource("");
         when(awsContext.isBuild()).thenReturn(false);
-        CloudResourceStatus resourceStatus = underTest.getResourceStatus(awsContext, ac, cloudResource);
-        verify(amazonEc2Client, times(0)).describeInstances(any());
-        assertEquals(ResourceStatus.DELETED, resourceStatus.getStatus());
+
+        List<CloudResourceStatus> actual = underTest.checkResources(awsContext, ac, List.of(first, second));
+
+        assertThat(actual).extracting(CloudResourceStatus::getCloudResource, CloudResourceStatus::getStatus).containsExactly(
+                tuple(first, ResourceStatus.DELETED),
+                tuple(second, ResourceStatus.DELETED));
+        verifyNoInteractions(amazonEc2Client);
+    }
+
+    @Test
+    void testCheckResourcesForTerminationFollowsTheNextToken() {
+        CloudResource first = createInstanceResource("i-1");
+        CloudResource second = createInstanceResource("i-2");
+        when(awsContext.isBuild()).thenReturn(false);
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(amazonEc2Client.describeInstances(any(DescribeInstancesRequest.class)))
+                .thenReturn(describeInstancesResponse(ec2Instance("i-1", AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE)).toBuilder()
+                        .nextToken("token")
+                        .build())
+                .thenReturn(describeInstancesResponse(ec2Instance("i-2", AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE)));
+
+        List<CloudResourceStatus> actual = underTest.checkResources(awsContext, ac, List.of(first, second));
+
+        ArgumentCaptor<DescribeInstancesRequest> describeCaptor = ArgumentCaptor.forClass(DescribeInstancesRequest.class);
+        verify(amazonEc2Client, times(2)).describeInstances(describeCaptor.capture());
+        assertThat(describeCaptor.getAllValues()).extracting(DescribeInstancesRequest::nextToken).containsExactly(null, "token");
+        assertThat(actual).extracting(CloudResourceStatus::getStatus).containsExactly(ResourceStatus.IN_PROGRESS, ResourceStatus.IN_PROGRESS);
     }
 
     @Test
@@ -814,7 +789,6 @@ class AwsNativeInstanceResourceBuilderTest {
                 .withParameters(emptyMap())
                 .build();
 
-        when(awsContext.isBuild()).thenReturn(true);
         CloudResourceStatus resourceStatus = underTest.getResourceStatus(awsContext, ac, cloudResource);
         verify(amazonEc2Client, times(0)).describeInstances(any());
         assertEquals(ResourceStatus.CREATED, resourceStatus.getStatus());
@@ -1073,6 +1047,135 @@ class AwsNativeInstanceResourceBuilderTest {
         lenient().when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         lenient().when(amazonEc2Client.modifyInstanceMetadataOptions(any())).thenReturn(ModifyInstanceMetadataOptionsResponse.builder().build());
         return cloudResource;
+    }
+
+    @Test
+    void testBulkDeleteTerminatesTheExistingInstancesInOneRequest() {
+        CloudResource running = createInstanceResource("i-running");
+        CloudResource terminated = createInstanceResource("i-terminated");
+        CloudResource missing = createInstanceResource("i-missing");
+        CloudResource withoutInstanceId = createInstanceResource(null);
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(amazonEc2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(describeInstancesResponse(
+                ec2Instance("i-running", AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE),
+                ec2Instance("i-terminated", AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE)));
+
+        List<CloudResourceStatus> actual = underTest.bulkDelete(awsContext, ac, List.of(running, terminated, missing, withoutInstanceId));
+
+        ArgumentCaptor<TerminateInstancesRequest> terminateCaptor = ArgumentCaptor.forClass(TerminateInstancesRequest.class);
+        verify(amazonEc2Client, times(1)).deleteInstance(terminateCaptor.capture());
+        assertThat(terminateCaptor.getValue().instanceIds()).containsExactly("i-running");
+        ArgumentCaptor<DescribeInstancesRequest> describeCaptor = ArgumentCaptor.forClass(DescribeInstancesRequest.class);
+        verify(amazonEc2Client, times(1)).describeInstances(describeCaptor.capture());
+        assertThat(describeCaptor.getValue().instanceIds()).isEmpty();
+        assertThat(describeCaptor.getValue().filters().getFirst().values()).containsExactly("i-running", "i-terminated", "i-missing");
+        assertThat(actual).extracting(CloudResourceStatus::getCloudResource, CloudResourceStatus::getStatus).containsExactlyInAnyOrder(
+                tuple(running, ResourceStatus.IN_PROGRESS),
+                tuple(terminated, ResourceStatus.DELETED),
+                tuple(missing, ResourceStatus.DELETED),
+                tuple(withoutInstanceId, ResourceStatus.DELETED));
+        verifyNoInteractions(awsMethodExecutor);
+    }
+
+    @Test
+    void testBulkDeleteSplitsTheRequestsIntoChunks() {
+        List<CloudResource> resources = IntStream.range(0, 150).mapToObj(i -> createInstanceResource("i-" + i)).toList();
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(amazonEc2Client.describeInstances(any(DescribeInstancesRequest.class))).thenAnswer(this::describeRequestedInstancesAsRunning);
+
+        List<CloudResourceStatus> actual = underTest.bulkDelete(awsContext, ac, resources);
+
+        ArgumentCaptor<TerminateInstancesRequest> terminateCaptor = ArgumentCaptor.forClass(TerminateInstancesRequest.class);
+        verify(amazonEc2Client, times(2)).deleteInstance(terminateCaptor.capture());
+        assertThat(terminateCaptor.getAllValues()).extracting(request -> request.instanceIds().size()).containsExactly(100, 50);
+        assertThat(actual).hasSize(150).allMatch(status -> status.getStatus() == ResourceStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void testBulkDeleteLeavesOutTheLiveInstancesWhenTheBulkTerminationFails() {
+        CloudResource running = createInstanceResource("i-running");
+        CloudResource terminated = createInstanceResource("i-terminated");
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(amazonEc2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(describeInstancesResponse(
+                ec2Instance("i-running", AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE),
+                ec2Instance("i-terminated", AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE)));
+        when(amazonEc2Client.deleteInstance(any())).thenThrow(Ec2Exception.builder()
+                .message("bulk failed")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("UnauthorizedOperation").build())
+                .build());
+
+        List<CloudResourceStatus> actual = underTest.bulkDelete(awsContext, ac, List.of(running, terminated));
+
+        assertThat(actual).extracting(CloudResourceStatus::getCloudResource, CloudResourceStatus::getStatus)
+                .containsExactly(tuple(terminated, ResourceStatus.DELETED));
+        verifyNoInteractions(awsMethodExecutor);
+    }
+
+    @Test
+    void testBulkDeleteLeavesOutOnlyTheChunkWhoseDescribeFails() {
+        List<CloudResource> resources = IntStream.range(0, 150).mapToObj(i -> createInstanceResource("i-" + i)).toList();
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(amazonEc2Client.describeInstances(any(DescribeInstancesRequest.class)))
+                .thenAnswer(this::describeRequestedInstancesAsRunning)
+                .thenThrow(SdkClientException.create("connection reset"));
+
+        List<CloudResourceStatus> actual = underTest.bulkDelete(awsContext, ac, resources);
+
+        verify(amazonEc2Client, times(1)).deleteInstance(any());
+        assertThat(actual).hasSize(100).allMatch(status -> status.getStatus() == ResourceStatus.IN_PROGRESS)
+                .extracting(CloudResourceStatus::getCloudResource).containsExactlyElementsOf(resources.subList(0, 100));
+    }
+
+    @Test
+    void testCheckResourcesForTerminationDescribesTheInstancesInOneRequest() {
+        CloudResource running = createInstanceResource("i-running");
+        CloudResource terminated = createInstanceResource("i-terminated");
+        CloudResource missing = createInstanceResource("i-missing");
+        when(awsContext.isBuild()).thenReturn(false);
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(amazonEc2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(describeInstancesResponse(
+                ec2Instance("i-running", AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE),
+                ec2Instance("i-terminated", AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE)));
+
+        List<CloudResourceStatus> actual = underTest.checkResources(awsContext, ac, List.of(running, terminated, missing));
+
+        verify(amazonEc2Client, times(1)).describeInstances(any(DescribeInstancesRequest.class));
+        assertThat(actual).extracting(CloudResourceStatus::getStatus)
+                .containsExactly(ResourceStatus.IN_PROGRESS, ResourceStatus.DELETED, ResourceStatus.DELETED);
+    }
+
+    @Test
+    void testCheckResourcesForCreationDescribesTheInstancesOneByOne() {
+        CloudResource first = createInstanceResource("i-1");
+        CloudResource second = createInstanceResource("i-2");
+        when(awsContext.isBuild()).thenReturn(true);
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(amazonEc2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(describeInstancesResponse(
+                ec2Instance("i-1", AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE)));
+
+        underTest.checkResources(awsContext, ac, List.of(first, second));
+
+        verify(amazonEc2Client, times(2)).describeInstances(any(DescribeInstancesRequest.class));
+    }
+
+    private DescribeInstancesResponse describeRequestedInstancesAsRunning(InvocationOnMock invocation) {
+        DescribeInstancesRequest request = invocation.getArgument(0);
+        return describeInstancesResponse(request.filters().getFirst().values().stream()
+                .map(instanceId -> ec2Instance(instanceId, AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE))
+                .toArray(Instance[]::new));
+    }
+
+    private DescribeInstancesResponse describeInstancesResponse(Instance... instances) {
+        return DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder().instances(instances).build())
+                .build();
+    }
+
+    private Instance ec2Instance(String instanceId, int stateCode) {
+        return Instance.builder()
+                .instanceId(instanceId)
+                .state(InstanceState.builder().code(stateCode).build())
+                .build();
     }
 
     private CloudResource createInstanceResource() {
