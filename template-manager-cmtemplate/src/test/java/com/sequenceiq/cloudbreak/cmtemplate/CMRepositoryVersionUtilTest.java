@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB;
+import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_HMAC;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +16,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 
 class CMRepositoryVersionUtilTest {
 
@@ -20,14 +27,14 @@ class CMRepositoryVersionUtilTest {
     @MethodSource("supportedRazConfigurations")
     @DisplayName("isRazConfigurationSupported returns true for supported configurations")
     void isRazConfigurationSupportedReturnsTrue(CloudPlatform cloudPlatform, StackType stackType, String cmVersion) {
-        assertTrue(CMRepositoryVersionUtil.isRazConfigurationSupported(cmVersion, cloudPlatform, stackType));
+        assertTrue(CMRepositoryVersionUtil.isRazConfigurationSupported(RAZ_AUTHENTICATION_TYPE_CAB, cmVersion, cloudPlatform, stackType));
     }
 
     @ParameterizedTest(name = "{0} {1} with CM {2} should NOT be supported")
     @MethodSource("unsupportedRazConfigurations")
     @DisplayName("isRazConfigurationSupported returns false for unsupported configurations")
     void isRazConfigurationSupportedReturnsFalse(CloudPlatform cloudPlatform, StackType stackType, String cmVersion) {
-        assertFalse(CMRepositoryVersionUtil.isRazConfigurationSupported(cmVersion, cloudPlatform, stackType));
+        assertFalse(CMRepositoryVersionUtil.isRazConfigurationSupported(RAZ_AUTHENTICATION_TYPE_CAB, cmVersion, cloudPlatform, stackType));
     }
 
     static Stream<Arguments> supportedRazConfigurations() {
@@ -93,10 +100,102 @@ class CMRepositoryVersionUtilTest {
     void gcpDatahubRequiresHigherVersionThanDatalake() {
         String gcpDatalakeMinVersion = "7.11.0";
         // GCP Datalake is supported at 7.11.0
-        assertTrue(CMRepositoryVersionUtil.isRazConfigurationSupported(gcpDatalakeMinVersion, CloudPlatform.GCP, StackType.DATALAKE));
+        assertTrue(CMRepositoryVersionUtil.isRazConfigurationSupported(RAZ_AUTHENTICATION_TYPE_CAB, gcpDatalakeMinVersion, CloudPlatform.GCP,
+                StackType.DATALAKE));
         // GCP DataHub is NOT supported at 7.11.0
-        assertFalse(CMRepositoryVersionUtil.isRazConfigurationSupported(gcpDatalakeMinVersion, CloudPlatform.GCP, StackType.WORKLOAD));
+        assertFalse(CMRepositoryVersionUtil.isRazConfigurationSupported(RAZ_AUTHENTICATION_TYPE_CAB, gcpDatalakeMinVersion, CloudPlatform.GCP,
+                StackType.WORKLOAD));
         // GCP DataHub IS supported at 7.13.2.20000
-        assertTrue(CMRepositoryVersionUtil.isRazConfigurationSupported("7.13.2.30000", CloudPlatform.GCP, StackType.WORKLOAD));
+        assertTrue(CMRepositoryVersionUtil.isRazConfigurationSupported(RAZ_AUTHENTICATION_TYPE_CAB, "7.13.2.30000", CloudPlatform.GCP, StackType.WORKLOAD));
+    }
+
+    @ParameterizedTest(name = "{0} {1} with Data Lake Raz authentication type {2} should be supported: {3}")
+    @MethodSource("razConfigurationDatalakeAuthenticationTypes")
+    @DisplayName("isRazConfigurationSupported checks the Data Lake Raz authentication type required for Raz in Data Hub")
+    void isRazConfigurationSupportedByDatalakeAuthenticationType(CloudPlatform cloudPlatform, StackType stackType, String datalakeRazAuthenticationType,
+            boolean expected) {
+        assertEquals(expected, CMRepositoryVersionUtil.isRazConfigurationSupported(datalakeRazAuthenticationType, "7.13.2.30000", cloudPlatform, stackType));
+    }
+
+    static Stream<Arguments> razConfigurationDatalakeAuthenticationTypes() {
+        return Stream.of(
+                // AWS and Azure DataHub do not depend on the Data Lake Raz authentication type
+                Arguments.of(CloudPlatform.AWS, StackType.WORKLOAD, null, true),
+                Arguments.of(CloudPlatform.AWS, StackType.WORKLOAD, RAZ_AUTHENTICATION_TYPE_HMAC, true),
+                Arguments.of(CloudPlatform.AZURE, StackType.WORKLOAD, null, true),
+
+                // GCP DataHub requires a Data Lake with CAB Raz authentication type
+                Arguments.of(CloudPlatform.GCP, StackType.WORKLOAD, RAZ_AUTHENTICATION_TYPE_CAB, true),
+                Arguments.of(CloudPlatform.GCP, StackType.WORKLOAD, RAZ_AUTHENTICATION_TYPE_HMAC, false),
+                Arguments.of(CloudPlatform.GCP, StackType.WORKLOAD, null, false),
+
+                // Datalake does not depend on its own stored Raz authentication type
+                Arguments.of(CloudPlatform.AWS, StackType.DATALAKE, null, true),
+                Arguments.of(CloudPlatform.AZURE, StackType.DATALAKE, null, true),
+                Arguments.of(CloudPlatform.GCP, StackType.DATALAKE, RAZ_AUTHENTICATION_TYPE_HMAC, true),
+                Arguments.of(CloudPlatform.GCP, StackType.DATALAKE, null, true),
+
+                // Unsupported cloud platform is not enabled by the Data Lake Raz authentication type
+                Arguments.of(CloudPlatform.YARN, StackType.WORKLOAD, RAZ_AUTHENTICATION_TYPE_CAB, false)
+        );
+    }
+
+    @ParameterizedTest(name = "{0} {1} with Data Lake Raz authentication type {2} should be supported: {3}")
+    @MethodSource("razConfigurationDatalakeAuthenticationTypes")
+    @DisplayName("isRazConfigurationSupported reads the Data Lake view, CM version, cloud platform and stack type from the template preparation object")
+    void isRazConfigurationSupportedByTemplatePreparationObject(CloudPlatform cloudPlatform, StackType stackType, String datalakeRazAuthenticationType,
+            boolean expected) {
+        TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
+                .withDataLakeView(new DatalakeView(true, datalakeRazAuthenticationType, null, "datalakeCrn", false))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.13.2.30000"), List.of())
+                .withCloudPlatform(cloudPlatform)
+                .withStackType(stackType)
+                .build();
+
+        assertEquals(expected, CMRepositoryVersionUtil.isRazConfigurationSupported(source));
+    }
+
+    @Test
+    @DisplayName("isRazConfigurationSupported with template preparation object treats a missing Data Lake view as not CAB for GCP Data Hub")
+    void isRazConfigurationSupportedByTemplatePreparationObjectWhenDatalakeViewIsMissing() {
+        TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.13.2.30000"), List.of())
+                .withCloudPlatform(CloudPlatform.GCP)
+                .withStackType(StackType.WORKLOAD)
+                .build();
+
+        assertFalse(CMRepositoryVersionUtil.isRazConfigurationSupported(source));
+    }
+
+    @Test
+    @DisplayName("isRazConfigurationSupported with template preparation object checks the CM version")
+    void isRazConfigurationSupportedByTemplatePreparationObjectWhenCmVersionIsTooOld() {
+        TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
+                .withDataLakeView(new DatalakeView(true, RAZ_AUTHENTICATION_TYPE_CAB, null, "datalakeCrn", false))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.11.0"), List.of())
+                .withCloudPlatform(CloudPlatform.GCP)
+                .withStackType(StackType.WORKLOAD)
+                .build();
+
+        assertFalse(CMRepositoryVersionUtil.isRazConfigurationSupported(source));
+    }
+
+    @ParameterizedTest(name = "{0} {1} with Data Lake Raz authentication type {2} needs Raz role configuration: {3}")
+    @MethodSource("razRoleConfigurationDatalakeAuthenticationTypes")
+    @DisplayName("isRazConfigurationForRazRoleNeeded is only true for GCP and checks the Data Lake Raz authentication type for Data Hub")
+    void isRazConfigurationForRazRoleNeeded(CloudPlatform cloudPlatform, StackType stackType, String datalakeRazAuthenticationType, boolean expected) {
+        assertEquals(expected,
+                CMRepositoryVersionUtil.isRazConfigurationForRazRoleNeeded(datalakeRazAuthenticationType, "7.13.2.30000", cloudPlatform, stackType));
+    }
+
+    static Stream<Arguments> razRoleConfigurationDatalakeAuthenticationTypes() {
+        return Stream.of(
+                Arguments.of(CloudPlatform.GCP, StackType.WORKLOAD, RAZ_AUTHENTICATION_TYPE_CAB, true),
+                Arguments.of(CloudPlatform.GCP, StackType.WORKLOAD, RAZ_AUTHENTICATION_TYPE_HMAC, false),
+                Arguments.of(CloudPlatform.GCP, StackType.WORKLOAD, null, false),
+                Arguments.of(CloudPlatform.GCP, StackType.DATALAKE, null, true),
+                Arguments.of(CloudPlatform.AWS, StackType.WORKLOAD, RAZ_AUTHENTICATION_TYPE_CAB, false),
+                Arguments.of(CloudPlatform.AZURE, StackType.DATALAKE, null, false)
+        );
     }
 }

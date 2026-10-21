@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB;
+import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_HMAC;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -243,7 +245,7 @@ public class RangerRazDatahubConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(GCP)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(true, null, null, DATALAKE_CRN, false))
+                .withDataLakeView(new DatalakeView(true, RAZ_AUTHENTICATION_TYPE_CAB, null, DATALAKE_CRN, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -258,6 +260,27 @@ public class RangerRazDatahubConfigProviderTest {
                 () -> assertEquals("RANGER_RAZ_SERVER", roleConfigGroups.get(0).getRoleType()),
                 () -> assertEquals("ranger-RANGER_RAZ_SERVER", roleConfigGroups.get(0).getRefName())
         );
+    }
+
+    @Test
+    @DisplayName("CM 7.13.2.30000 GCP DH is used and Raz is requested, but the Data Lake uses HMAC Raz authentication, no additional service needs to be added")
+    void getAdditionalServicesWhenRazIsEnabledForGcpWithCm713230000AndHmacDatalake() {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.13.2.30000");
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withCloudPlatform(GCP)
+                .withProductDetails(cmRepo, List.of())
+                .withDataLakeView(new DatalakeView(true, RAZ_AUTHENTICATION_TYPE_HMAC, null, DATALAKE_CRN, false))
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(master, worker))
+                .build();
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        assertEquals(0, additionalServices.size());
     }
 
     @Test
