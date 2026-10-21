@@ -86,6 +86,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SECURITY_ENFORCING_SELINUX;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SIMULATE_DATABASE_CAPACITY_FAILURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SKIP_ROLLING_UPGRADE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
@@ -1050,6 +1051,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         addEntitlement(builder, accountId, true, CDP_FALLBACK_INSTANCETYPE);
         addEntitlement(builder, accountId, true, CDP_FALLBACK_DATABASE_INSTANCETYPE);
         addEntitlement(builder, accountId, true, CDP_CUSTOM_DATABASE_INSTANCETYPE);
+        addEntitlement(builder, accountId, true, CDP_SIMULATE_DATABASE_CAPACITY_FAILURE);
 
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

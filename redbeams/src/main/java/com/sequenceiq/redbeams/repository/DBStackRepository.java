@@ -6,6 +6,7 @@ import java.util.Set;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,6 +25,10 @@ public interface DBStackRepository extends JpaRepository<DBStack, Long>, JobReso
 
     @Query("SELECT d.databaseServer.instanceType FROM DBStack d WHERE d.resourceCrn = :crn")
     Optional<String> findDatabaseServerInstanceTypeByResourceCrn(@Param("crn") String crn);
+
+    @Modifying
+    @Query("UPDATE DatabaseServer s SET s.instanceType = :instanceType WHERE s.id = :databaseServerId")
+    int updateDatabaseServerInstanceType(@Param("databaseServerId") Long databaseServerId, @Param("instanceType") String instanceType);
 
     @Query("SELECT d.id FROM DBStack d LEFT JOIN d.dbStackStatus dss WHERE dss.status IN :statuses")
     Set<Long> findAllByStatusIn(@Param("statuses") Set<Status> statuses);

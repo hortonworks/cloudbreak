@@ -19,3 +19,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.proxy.ModifyProxyConfigE2ETest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXCustomEncryptionProfileTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEnableEncryptionProfileTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.database.RedbeamsDatabaseInstanceTypeFallbackE2ETest

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
@@ -33,6 +34,17 @@ public class DatabaseServer extends DynamicModel {
      * @see #putParameter(String, Object)
      */
     public static final String EFFECTIVELY_USED_FLAVOR = "effectivelyUsedFlavor";
+
+    /**
+     * Key of the optional dynamic parameter telling the provider how many of the leading instance-type attempts it shall treat as
+     * a capacity failure without calling the cloud provider. Test-only: Redbeams sets it solely for accounts having the
+     * {@code CDP_SIMULATE_DATABASE_CAPACITY_FAILURE} entitlement, so that E2E tests can exercise the automatic instance-type fallback
+     * on real cloud providers. When set, the value shall be a non-negative {@link Integer}.
+     *
+     * @see #getSimulatedCapacityFailures()
+     * @see #putParameter(String, Object)
+     */
+    public static final String SIMULATED_CAPACITY_FAILURES = "simulatedCapacityFailures";
 
     private final String serverId;
 
@@ -165,6 +177,12 @@ public class DatabaseServer extends DynamicModel {
 
     public boolean getHighAvailability() {
         return highAvailability;
+    }
+
+    @JsonIgnore
+    public int getSimulatedCapacityFailures() {
+        Integer simulatedCapacityFailures = getParameter(SIMULATED_CAPACITY_FAILURES, Integer.class);
+        return simulatedCapacityFailures == null ? 0 : simulatedCapacityFailures;
     }
 
     @Override

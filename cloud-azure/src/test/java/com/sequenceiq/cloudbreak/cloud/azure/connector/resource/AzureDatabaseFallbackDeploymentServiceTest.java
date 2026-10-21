@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -171,6 +174,75 @@ class AzureDatabaseFallbackDeploymentServiceTest {
 
         assertNull(result);
         verify(client, times(2)).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString());
+    }
+
+    @Test
+    void deployWithFallbackSimulatedCapacityFailureSkipsPrimaryAndDeploysFallbackSku() {
+        DatabaseStack databaseStack = createDatabaseStack(PRIMARY_SKU, List.of(FALLBACK_SKU_1, FALLBACK_SKU_2), 1);
+        when(azureDatabaseTemplateBuilder.build(eq(cloudContext), any(DatabaseStack.class))).thenReturn(TEMPLATE);
+        mockRetryRunsAction();
+
+        String result = underTest.deployWithFallback(STACK_NAME, RESOURCE_GROUP, client, cloudContext, databaseStack);
+
+        assertEquals(FALLBACK_SKU_1, result);
+        ArgumentCaptor<DatabaseStack> stackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        verify(azureDatabaseTemplateBuilder, times(1)).build(eq(cloudContext), stackCaptor.capture());
+        assertEquals(FALLBACK_SKU_1, stackCaptor.getValue().getDatabaseServer().getFlavor());
+        verify(client, times(1)).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString());
+    }
+
+    @Test
+    void deployWithFallbackAllAttemptsSimulatedCapacityFailuresThrowsWithoutSubmittingDeployment() {
+        DatabaseStack databaseStack = createDatabaseStack(PRIMARY_SKU, List.of(FALLBACK_SKU_1, FALLBACK_SKU_2), Integer.MAX_VALUE);
+
+        InsufficientCapacityException thrown = assertThrows(InsufficientCapacityException.class,
+                () -> underTest.deployWithFallback(STACK_NAME, RESOURCE_GROUP, client, cloudContext, databaseStack));
+
+        assertTrue(thrown.getMessage().contains(String.format("all instance types [%s, %s, %s] exhausted due to capacity shortage",
+                PRIMARY_SKU, FALLBACK_SKU_1, FALLBACK_SKU_2)), thrown.getMessage());
+        assertTrue(thrown.getMessage().contains(String.format("Simulated capacity failure for SKU '%s'", FALLBACK_SKU_2)), thrown.getMessage());
+        assertNull(thrown.getCause());
+        verifyNoInteractions(azureDatabaseTemplateBuilder, retryService, client);
+    }
+
+    @Test
+    void deployWithFallbackSimulatedCapacityFailureWithoutFallbackTypesThrowsWithoutSubmittingDeployment() {
+        DatabaseStack databaseStack = createDatabaseStack(PRIMARY_SKU, List.of(), 1);
+
+        InsufficientCapacityException thrown = assertThrows(InsufficientCapacityException.class,
+                () -> underTest.deployWithFallback(STACK_NAME, RESOURCE_GROUP, client, cloudContext, databaseStack));
+
+        assertTrue(thrown.getMessage().contains(String.format("all instance types [%s] exhausted due to capacity shortage", PRIMARY_SKU)),
+                thrown.getMessage());
+        assertTrue(thrown.getMessage().contains(String.format("Simulated capacity failure for SKU '%s'", PRIMARY_SKU)), thrown.getMessage());
+        verifyNoInteractions(azureDatabaseTemplateBuilder, retryService, client);
+    }
+
+    @Test
+    void deployWithFallbackSimulatedCapacityFailureThenRealCapacityErrorOnLastSkuThrowsExhausted() {
+        DatabaseStack databaseStack = createDatabaseStack(PRIMARY_SKU, List.of(FALLBACK_SKU_1), 1);
+        ManagementException capacityException = createManagementException("SkuNotAvailable");
+
+        when(azureDatabaseTemplateBuilder.build(eq(cloudContext), any(DatabaseStack.class))).thenReturn(TEMPLATE);
+        when(azureExceptionHandler.isCapacityError(capacityException)).thenReturn(true);
+        mockRetryAlwaysThrows(capacityException);
+
+        InsufficientCapacityException thrown = assertThrows(InsufficientCapacityException.class,
+                () -> underTest.deployWithFallback(STACK_NAME, RESOURCE_GROUP, client, cloudContext, databaseStack));
+
+        assertTrue(thrown.getMessage().contains(String.format("all instance types [%s, %s] exhausted due to capacity shortage",
+                PRIMARY_SKU, FALLBACK_SKU_1)), thrown.getMessage());
+        assertEquals(capacityException, thrown.getCause());
+        ArgumentCaptor<DatabaseStack> stackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        verify(azureDatabaseTemplateBuilder, times(1)).build(eq(cloudContext), stackCaptor.capture());
+        assertEquals(FALLBACK_SKU_1, stackCaptor.getValue().getDatabaseServer().getFlavor());
+        verify(client, times(1)).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString());
+    }
+
+    private DatabaseStack createDatabaseStack(String flavor, List<String> fallbackTypes, int simulatedCapacityFailures) {
+        DatabaseStack databaseStack = createDatabaseStack(flavor, fallbackTypes);
+        databaseStack.getDatabaseServer().putParameter(DatabaseServer.SIMULATED_CAPACITY_FAILURES, simulatedCapacityFailures);
+        return databaseStack;
     }
 
     private DatabaseStack createDatabaseStack(String flavor, List<String> fallbackTypes) {

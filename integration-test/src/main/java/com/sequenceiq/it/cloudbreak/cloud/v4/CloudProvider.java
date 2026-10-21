@@ -55,6 +55,7 @@ import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
@@ -242,6 +243,13 @@ public interface CloudProvider {
 
     default String getCustomDatabaseInstanceType() {
         return null;
+    }
+
+    default List<String> getDatabaseFallbackTestInstanceTypes() {
+        return List.of();
+    }
+
+    default void extendDatabaseServerRequestWithProviderParams(DatabaseServerV4StackRequest request) {
     }
 
     VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto);

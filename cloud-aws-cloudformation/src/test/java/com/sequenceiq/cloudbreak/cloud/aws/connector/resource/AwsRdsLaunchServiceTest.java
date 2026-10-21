@@ -180,8 +180,6 @@ class AwsRdsLaunchServiceTest {
         lenient().when(cfRetryClient.describeStacks(isA(DescribeStacksRequest.class)))
                 .thenThrow(AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder().errorMessage("Stack not found").build()).build());
 
-        when(cfRetryClient.waiters()).thenReturn(cfWaiters);
-
         when(cloudFormationTemplateBuilder.build(isA(RDSModelContext.class))).thenReturn(CF_TEMPLATE);
     }
 
@@ -202,6 +200,7 @@ class AwsRdsLaunchServiceTest {
 
     @Test
     void launchFallsBackToNextInstanceTypeOnCapacityFailure() {
+        when(cfRetryClient.waiters()).thenReturn(cfWaiters);
         when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient)).thenReturn(CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP);
         when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any()))
                 .thenThrow(new RuntimeException("stack create failed"))
@@ -226,6 +225,7 @@ class AwsRdsLaunchServiceTest {
 
     @Test
     void launchStampsPrimaryInstanceTypeWhenPrimarySucceeds() {
+        when(cfRetryClient.waiters()).thenReturn(cfWaiters);
         when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient)).thenReturn(CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP);
         when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any())).thenReturn(null);
 
@@ -240,6 +240,7 @@ class AwsRdsLaunchServiceTest {
 
     @Test
     void launchFailsWhenAllInstanceTypesRunOutOfCapacity() {
+        when(cfRetryClient.waiters()).thenReturn(cfWaiters);
         when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any()))
                 .thenThrow(new RuntimeException("primary failed"))
                 .thenThrow(new RuntimeException("fallback failed"));
@@ -256,6 +257,7 @@ class AwsRdsLaunchServiceTest {
 
     @Test
     void launchFailsImmediatelyOnNonCapacityFailureWithoutFallback() {
+        when(cfRetryClient.waiters()).thenReturn(cfWaiters);
         when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any())).thenThrow(new RuntimeException("stack create failed"));
         when(awsCloudFormationErrorMessageProvider.getErrorReason(eq(authenticatedContext), eq(STACK_NAME_CF), any()))
                 .thenReturn("Subnet is invalid, not a capacity problem");
@@ -270,6 +272,7 @@ class AwsRdsLaunchServiceTest {
 
     @Test
     void launchDeletesFailedStackAndReprovisionsWhenPreviousAttemptLeftFailedStack() {
+        when(cfRetryClient.waiters()).thenReturn(cfWaiters);
         when(cfRetryClient.describeStacks(isA(DescribeStacksRequest.class))).thenReturn(DescribeStacksResponse.builder()
                 .stacks(Stack.builder().stackName(STACK_NAME_CF).stackStatus(StackStatus.CREATE_FAILED).build())
                 .build());
@@ -285,7 +288,55 @@ class AwsRdsLaunchServiceTest {
         verify(cfRetryClient).createStack(any());
     }
 
+    @Test
+    void launchSkipsSimulatedCapacityFailureAndProvisionsFallbackInstanceType() {
+        when(cfRetryClient.waiters()).thenReturn(cfWaiters);
+        when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient)).thenReturn(CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP);
+        when(cfWaiters.waitUntilStackCreateComplete(any(DescribeStacksRequest.class), any())).thenReturn(null);
+
+        DatabaseStack databaseStack = createDatabaseStack("db.m5.large", List.of("db.m6i.large"), 1);
+        List<CloudResourceStatus> statuses = underTest.launch(authenticatedContext, databaseStack, resourceNotifier);
+
+        assertThat(statuses).isNotNull();
+        checkOutputResourceExists(statuses, ResourceType.RDS_INSTANCE, OUT_DB_INSTANCE);
+
+        ArgumentCaptor<DatabaseStack> stackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        verify(awsStackRequestHelper, times(1)).createCreateStackRequest(eq(authenticatedContext), stackCaptor.capture(), eq(STACK_NAME_CF), eq(CF_TEMPLATE));
+        assertThat(stackCaptor.getValue().getDatabaseServer().getFlavor()).isEqualTo("db.m6i.large");
+        assertThat(databaseStack.getDatabaseServer().getParameters().get(DatabaseServer.EFFECTIVELY_USED_FLAVOR)).isEqualTo("db.m6i.large");
+        verify(cfRetryClient, times(1)).createStack(any());
+        verify(cfRetryClient, never()).deleteStack(any());
+        verify(awsCloudFormationErrorMessageProvider, never()).getErrorReason(any(), any(), any());
+    }
+
+    @Test
+    void launchFailsWithoutCreatingStackWhenAllInstanceTypesAreSimulatedCapacityFailures() {
+        assertThatThrownBy(() -> underTest.launch(authenticatedContext,
+                createDatabaseStack("db.m5.large", List.of("db.m6i.large", "db.m7i.large"), Integer.MAX_VALUE), resourceNotifier))
+                .isInstanceOf(InsufficientCapacityException.class)
+                .hasMessageContaining("all instance types [db.m5.large, db.m6i.large, db.m7i.large] exhausted due to capacity shortage")
+                .hasMessageContaining("Simulated InsufficientDBInstanceCapacity")
+                .hasMessageContaining("db.m7i.large");
+
+        verify(cfRetryClient, never()).createStack(any());
+        verify(cfRetryClient, never()).deleteStack(any());
+        verify(cfRetryClient, never()).waiters();
+    }
+
+    @Test
+    void launchFailsWithoutCreatingStackWhenSimulatedCapacityFailureAndNoFallbackInstanceTypes() {
+        assertThatThrownBy(() -> underTest.launch(authenticatedContext,
+                createDatabaseStack("db.m5.large", List.of(), 1), resourceNotifier))
+                .isInstanceOf(InsufficientCapacityException.class)
+                .hasMessageContaining("all instance types [db.m5.large] exhausted due to capacity shortage")
+                .hasMessageContaining("Simulated InsufficientDBInstanceCapacity");
+
+        verify(cfRetryClient, never()).createStack(any());
+        verify(cfRetryClient, never()).deleteStack(any());
+    }
+
     private void launchTestUseSslEnforcementInternal(boolean useSslEnforcement, boolean sslCertificateIdentifierDefined) {
+        when(cfRetryClient.waiters()).thenReturn(cfWaiters);
         when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient))
                 .thenReturn(useSslEnforcement ? CF_OUTPUTS_WITH_DB_PARAMETER_GROUP : CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP);
 
@@ -334,6 +385,12 @@ class AwsRdsLaunchServiceTest {
                 .build();
 
         return new DatabaseStack(network, databaseServer, Collections.emptyMap(), null);
+    }
+
+    private DatabaseStack createDatabaseStack(String flavor, List<String> fallbackInstanceTypes, int simulatedCapacityFailures) {
+        DatabaseStack databaseStack = createDatabaseStack(flavor, fallbackInstanceTypes);
+        databaseStack.getDatabaseServer().putParameter(DatabaseServer.SIMULATED_CAPACITY_FAILURES, simulatedCapacityFailures);
+        return databaseStack;
     }
 
     private DatabaseStack createDatabaseStack(String flavor, List<String> fallbackInstanceTypes) {

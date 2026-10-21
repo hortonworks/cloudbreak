@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -61,6 +63,7 @@ import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.DatabaseCapabilityService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
+import com.sequenceiq.redbeams.service.SimulatedDatabaseCapacityFailureService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
@@ -80,6 +83,16 @@ class AllocateDatabaseServerHandlerTest {
     private static final String ENV_CRN = "envcrn";
 
     private static final Long NETWORK_ID = 765L;
+
+    private static final Long DATABASE_SERVER_ID = 567L;
+
+    private static final String ACCOUNT_ID = "1234";
+
+    private static final String OWNER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:234123";
+
+    private static final String PRIMARY_INSTANCE_TYPE = "db.m5.large";
+
+    private static final String FALLBACK_INSTANCE_TYPE = "db.m6i.large";
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -107,6 +120,9 @@ class AllocateDatabaseServerHandlerTest {
 
     @Mock
     private DBStackStatusUpdater dbStackStatusUpdater;
+
+    @Mock
+    private SimulatedDatabaseCapacityFailureService simulatedDatabaseCapacityFailureService;
 
     @InjectMocks
     private AllocateDatabaseServerHandler underTest;
@@ -168,7 +184,9 @@ class AllocateDatabaseServerHandlerTest {
         dbStack = new DBStack();
         dbStack.setCloudPlatform(CloudPlatform.AWS.name());
         dbStack.setEnvironmentId(ENV_CRN);
+        dbStack.setOwnerCrn(Crn.safeFromString(OWNER_CRN));
         DatabaseServer databaseServer = new DatabaseServer();
+        databaseServer.setId(DATABASE_SERVER_ID);
         databaseServer.setInstanceType("type");
         dbStack.setDatabaseServer(databaseServer);
         lenient().when(dbStackService.getById(anyLong())).thenReturn(dbStack);
@@ -319,6 +337,120 @@ class AllocateDatabaseServerHandlerTest {
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
         verify(resourceConnector).launchDatabaseServer(any(AuthenticatedContext.class), databaseStackArgumentCaptor.capture(), any(PersistenceNotifier.class));
         assertEquals("defaultInstanceType", databaseStackArgumentCaptor.getValue().getDatabaseServer().getFlavor());
+    }
+
+    @Test
+    void doAcceptAppliesSimulatedCapacityFailuresToLaunchedStack() throws Exception {
+        setRequestDatabaseStack(PRIMARY_INSTANCE_TYPE, List.of(FALLBACK_INSTANCE_TYPE), null);
+        initCommon();
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        ArgumentCaptor<DatabaseStack> launchedStackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        verify(resourceConnector).launchDatabaseServer(eq(authenticatedContext), launchedStackCaptor.capture(), eq(persistenceNotifier));
+        verify(simulatedDatabaseCapacityFailureService).applyIfRequested(ACCOUNT_ID, launchedStackCaptor.getValue());
+    }
+
+    @Test
+    void doAcceptSavesFallbackInstanceTypeReportedByProviderAsInstanceType() throws Exception {
+        setRequestDatabaseStack(PRIMARY_INSTANCE_TYPE, List.of(FALLBACK_INSTANCE_TYPE), null);
+        initCommon();
+        when(resourceConnector.launchDatabaseServer(eq(authenticatedContext), any(DatabaseStack.class), eq(persistenceNotifier)))
+                .thenAnswer(invocation -> {
+                    DatabaseStack launchedStack = invocation.getArgument(1);
+                    launchedStack.getDatabaseServer().putParameter(
+                            com.sequenceiq.cloudbreak.cloud.model.DatabaseServer.EFFECTIVELY_USED_FLAVOR, FALLBACK_INSTANCE_TYPE);
+                    return List.of();
+                });
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        verify(dbStackService).updateDatabaseServerInstanceType(DATABASE_SERVER_ID, FALLBACK_INSTANCE_TYPE);
+        verify(dbStackService, times(1)).save(dbStack);
+        verify(metricService).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_USED), any(), any());
+    }
+
+    @Test
+    void doAcceptSavesFallbackInstanceTypeFromRequestParametersAsInstanceType() throws Exception {
+        setRequestDatabaseStack(PRIMARY_INSTANCE_TYPE, List.of(FALLBACK_INSTANCE_TYPE), FALLBACK_INSTANCE_TYPE);
+        initCommon();
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        verify(dbStackService).updateDatabaseServerInstanceType(DATABASE_SERVER_ID, FALLBACK_INSTANCE_TYPE);
+        verify(dbStackService, times(1)).save(dbStack);
+    }
+
+    @Test
+    void doAcceptKeepsInstanceTypeWhenProviderDidNotReportFallback() throws Exception {
+        setRequestDatabaseStack(PRIMARY_INSTANCE_TYPE, List.of(FALLBACK_INSTANCE_TYPE), null);
+        initCommon();
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        assertEquals("type", dbStack.getDatabaseServer().getInstanceType());
+        verify(dbStackService, times(1)).save(dbStack);
+        verify(dbStackService, never()).updateDatabaseServerInstanceType(any(), any());
+    }
+
+    @Test
+    void doAcceptKeepsInstanceTypeWhenProviderReportedPrimaryInstanceType() throws Exception {
+        setRequestDatabaseStack(PRIMARY_INSTANCE_TYPE, List.of(FALLBACK_INSTANCE_TYPE), PRIMARY_INSTANCE_TYPE);
+        initCommon();
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        assertThat(selectable).isInstanceOf(AllocateDatabaseServerSuccess.class);
+        assertEquals("type", dbStack.getDatabaseServer().getInstanceType());
+        verify(dbStackService, times(1)).save(dbStack);
+        verify(dbStackService, never()).updateDatabaseServerInstanceType(any(), any());
+        verify(metricService, never()).incrementMetricCounter(eq(MetricType.DB_INSTANCE_TYPE_FALLBACK_USED), any(), any());
+    }
+
+    @Test
+    void doAcceptDoesNotSaveFallbackInstanceTypeWhenLaunchFails() throws Exception {
+        setRequestDatabaseStack(PRIMARY_INSTANCE_TYPE, List.of(FALLBACK_INSTANCE_TYPE), FALLBACK_INSTANCE_TYPE);
+        initCommon();
+        Exception e = new InsufficientCapacityException("all instance types exhausted");
+        when(resourceConnector.launchDatabaseServer(eq(authenticatedContext), any(DatabaseStack.class), eq(persistenceNotifier))).thenThrow(e);
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        verifyFailureEvent(e, selectable);
+        assertEquals("type", dbStack.getDatabaseServer().getInstanceType());
+        verify(dbStackService, times(1)).save(dbStack);
+        verify(dbStackService, never()).updateDatabaseServerInstanceType(any(), any());
+    }
+
+    @Test
+    void doAcceptDoesNotSaveFallbackInstanceTypeWhenResourceValidationFails() throws Exception {
+        setRequestDatabaseStack(PRIMARY_INSTANCE_TYPE, List.of(FALLBACK_INSTANCE_TYPE), FALLBACK_INSTANCE_TYPE);
+        initCommon();
+        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
+        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(true);
+        Exception e = new RuntimeException();
+        doThrow(e).when(cloudResourceValidationService).validateResourcesState(eq(cloudContext), any());
+
+        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
+
+        verifyFailureEvent(e, selectable);
+        assertEquals("type", dbStack.getDatabaseServer().getInstanceType());
+        verify(dbStackService, times(1)).save(dbStack);
+        verify(dbStackService, never()).updateDatabaseServerInstanceType(any(), any());
     }
 
     @Test

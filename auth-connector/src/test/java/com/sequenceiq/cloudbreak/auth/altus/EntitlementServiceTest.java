@@ -262,6 +262,13 @@ class EntitlementServiceTest {
         assertEquals(entitled, underTest.isCustomDatabaseInstanceTypeEnabled(ACCOUNT_ID));
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testSimulateDatabaseCapacityFailureEnabled(boolean entitled) {
+        setUpUmsClient(entitled, "CDP_SIMULATE_DATABASE_CAPACITY_FAILURE", "CDP_SIMULATE_DATABASE_CAPACITY_FAILURE");
+        assertEquals(entitled, underTest.isSimulateDatabaseCapacityFailureEnabled(ACCOUNT_ID));
+    }
+
     @Test
     void getEntitlementsTest() {
         when(umsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);

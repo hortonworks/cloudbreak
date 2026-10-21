@@ -596,6 +596,211 @@ public class DatabaseServiceTest {
     }
 
     @Test
+    public void testGetDatabaseServerRequestChecksFallbackEntitlementForEnvironmentAccountWithoutCheckingCustomEntitlement() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setAttributes(new Json(new HashMap<>()));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        cluster.setSdxDatabase(sdxDatabase);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("test");
+        env.setLocation(locationResponse);
+        env.setCrn(ENV_CRN);
+        env.setAccountId(ACCOUNT_ID);
+        DatabaseConfig databaseConfig = getDatabaseConfig();
+
+        DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
+                        Map.of("test", List.of("db.m5.large")), null, null));
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
+                "initiatorUserCrn");
+
+        assertThat(databaseServerV4StackRequest).isNotNull();
+        assertThat(databaseServerV4StackRequest.getFallbackInstanceTypes()).containsExactly("db.m5.large");
+        verify(entitlementService).isFallbackDatabaseInstanceTypeEnabled(ACCOUNT_ID);
+        verify(entitlementService, never()).isCustomDatabaseInstanceTypeEnabled(any());
+    }
+
+    @Test
+    public void testGetDatabaseServerRequestSetsEmptyFallbackInstanceTypesWhenRegionMissingFromFallbackMap() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setAttributes(new Json(new HashMap<>()));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        cluster.setSdxDatabase(sdxDatabase);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("test");
+        env.setLocation(locationResponse);
+        env.setCrn(ENV_CRN);
+        DatabaseConfig databaseConfig = getDatabaseConfig();
+
+        DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
+                        Map.of("otherRegion", List.of("db.m5.large", "db.m6i.large")), null, null));
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(any())).thenReturn(true);
+
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
+                "initiatorUserCrn");
+
+        assertThat(databaseServerV4StackRequest).isNotNull();
+        assertThat(databaseServerV4StackRequest.getInstanceType()).isEqualTo("instanceType");
+        assertThat(databaseServerV4StackRequest.getFallbackInstanceTypes()).isEmpty();
+    }
+
+    @Test
+    public void testGetDatabaseServerRequestWithCustomInstanceTypeNotEntitledSetsFallbackInstanceTypesWhenFallbackEntitled() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("instancetype", "customInstancetype");
+        sdxDatabase.setAttributes(new Json(attributes));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        cluster.setSdxDatabase(sdxDatabase);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("test");
+        env.setLocation(locationResponse);
+        env.setCrn(ENV_CRN);
+        env.setAccountId(ACCOUNT_ID);
+        DatabaseConfig databaseConfig = getDatabaseConfig();
+
+        DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        when(entitlementService.isCustomDatabaseInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
+                        Map.of("test", List.of("db.m5.large", "db.m6i.large")), null, null));
+
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
+                "initiatorUserCrn");
+
+        assertThat(databaseServerV4StackRequest).isNotNull();
+        assertThat(databaseServerV4StackRequest.getInstanceType()).isEqualTo("instanceType");
+        assertThat(databaseServerV4StackRequest.getFallbackInstanceTypes()).containsExactly("db.m5.large", "db.m6i.large");
+    }
+
+    @Test
+    public void testGetDatabaseServerRequestWithCustomInstanceTypeEntitledDoesNotSetFallbackInstanceTypes() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("instancetype", "customInstancetype");
+        sdxDatabase.setAttributes(new Json(attributes));
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        cluster.setSdxDatabase(sdxDatabase);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("test");
+        env.setLocation(locationResponse);
+        env.setCrn(ENV_CRN);
+        env.setAccountId(ACCOUNT_ID);
+        DatabaseConfig databaseConfig = getDatabaseConfig();
+
+        DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        when(entitlementService.isCustomDatabaseInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
+                        Map.of("test", List.of("db.m5.large", "db.m6i.large")), null, null));
+
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
+                "initiatorUserCrn");
+
+        assertThat(databaseServerV4StackRequest).isNotNull();
+        assertThat(databaseServerV4StackRequest.getInstanceType()).isEqualTo("customInstancetype");
+        assertThat(databaseServerV4StackRequest.getFallbackInstanceTypes()).isEmpty();
+        verify(entitlementService).isCustomDatabaseInstanceTypeEnabled(ACCOUNT_ID);
+        verify(entitlementService, never()).isFallbackDatabaseInstanceTypeEnabled(any());
+    }
+
+    @Test
+    public void testGetDatabaseServerRequestWithPreviousDatabaseModifiedDoesNotSetFallbackInstanceTypes() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("previousDatabaseCrn", DATABASE_CRN);
+        attributes.put("previousClusterShape", SdxClusterShape.LIGHT_DUTY.toString());
+        sdxDatabase.setAttributes(new Json(attributes));
+        cluster.setSdxDatabase(sdxDatabase);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        env.setCrn(ENV_CRN);
+        DatabaseConfig databaseConfig = getDatabaseConfig();
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setStorageSize(1024L);
+        databaseServerV4Response.setInstanceType("m5.8xlarge");
+        DatabaseConfigKey dbConfigKeyLight = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKeyLight)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(any(CloudPlatform.class))).thenReturn(getDatabaseParameterSetter());
+        when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(any())).thenReturn(true);
+
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
+                "initiatorUserCrn");
+
+        assertThat(databaseServerV4StackRequest).isNotNull();
+        assertThat(databaseServerV4StackRequest.getInstanceType()).isEqualTo("m5.8xlarge");
+        assertThat(databaseServerV4StackRequest.getFallbackInstanceTypes()).isEmpty();
+        verifyNoInteractions(environmentPlatformResourceEndpoint);
+    }
+
+    @Test
+    public void testCreateWhenDatabaseCreatedPreviouslyDoesNotEvaluateDatabaseInstanceTypeEntitlements() {
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        env.setCrn(ENV_CRN);
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setCrn(DATABASE_CRN);
+        databaseServerV4Response.setStatus(Status.AVAILABLE);
+        when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
+
+        DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(defaultSdxCluster, env));
+
+        assertThat(response.getResourceCrn()).isEqualTo(DATABASE_CRN);
+        verify(databaseServerV4Endpoint, never()).createInternal(any(), any());
+        verifyNoInteractions(entitlementService, environmentPlatformResourceEndpoint);
+    }
+
+    @Test
     public void testGetDatabaseServerRequestWithPreviousDatabaseModified() {
         SdxCluster cluster = new SdxCluster();
         cluster.setClusterName("NAME");

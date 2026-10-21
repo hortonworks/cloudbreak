@@ -290,6 +290,7 @@ integrationtest:
       datahubKey:
     database:
       customInstanceType: db.m5.xlarge
+      fallbackTestInstanceTypes: db.m5.large,db.m6i.large,db.r5.large
     embeddedDbUpgradeSourceVersion: 11
     trust:
       subnetIds:
@@ -401,6 +402,7 @@ integrationtest:
       encryptionKeyUrl:
     database:
       customInstanceType: Standard_E8ds_v5
+      fallbackTestInstanceTypes: Standard_E4ds_v4,Standard_E4ds_v5,Standard_E4s_v3
     diskEncryption:
       encryptionKeyUrl:
       resourceGroupName:

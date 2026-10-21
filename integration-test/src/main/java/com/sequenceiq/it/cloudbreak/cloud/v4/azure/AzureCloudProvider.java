@@ -28,6 +28,8 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
@@ -74,6 +76,8 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
@@ -85,6 +89,10 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     private static final String DEFAULT_STORAGE_NAME = "apitest" + UUID.randomUUID().toString().replaceAll("-", "");
 
     private static final String MARKETPLACE_REGION = "default";
+
+    private static final long DEFAULT_DATABASE_STORAGE_SIZE_GB = 128L;
+
+    private static final int DEFAULT_DATABASE_BACKUP_RETENTION_DAYS = 7;
 
     private static final String BASE_IMAGE_TEST_IDBROKER_INSTANCE_TYPE = "Standard_D4s_v5";
 
@@ -194,6 +202,22 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getCustomDatabaseInstanceType() {
         return azureProperties.getDatabase().getCustomInstanceType();
+    }
+
+    @Override
+    public List<String> getDatabaseFallbackTestInstanceTypes() {
+        return azureProperties.getDatabase().getFallbackTestInstanceTypes();
+    }
+
+    @Override
+    public void extendDatabaseServerRequestWithProviderParams(DatabaseServerV4StackRequest request) {
+        request.setStorageSize(DEFAULT_DATABASE_STORAGE_SIZE_GB);
+        AzureDatabaseServerV4Parameters azureParameters = new AzureDatabaseServerV4Parameters();
+        azureParameters.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
+        azureParameters.setHighAvailabilityMode(AzureHighAvailabiltyMode.DISABLED);
+        azureParameters.setBackupRetentionDays(DEFAULT_DATABASE_BACKUP_RETENTION_DAYS);
+        azureParameters.setGeoRedundantBackup(false);
+        request.setAzure(azureParameters);
     }
 
     public AzureDistroXV1Parameters distroXParameters() {

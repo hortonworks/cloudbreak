@@ -2,8 +2,10 @@ package com.sequenceiq.it.cloudbreak.assertion.database;
 
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.BaseMicroserviceClientDependentAssertion;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -18,10 +21,13 @@ import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.model.common.Status;
 
 public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDependentAssertion {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsDatabaseTestAssertion.class);
+
+    private static final String EXHAUSTED_FALLBACK_REASON = "exhausted";
 
     private RedbeamsDatabaseTestAssertion() {
     }
@@ -88,5 +94,96 @@ public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDepende
             }
             return entity;
         };
+    }
+
+    public static <T extends CloudbreakTestDto, U extends MicroserviceClient> Assertion<T, U> simulatedDatabaseCapacityFailureEntitled() {
+        return (testContext, entity, client) -> {
+            if (!isEntitled(testContext, Entitlement.CDP_SIMULATE_DATABASE_CAPACITY_FAILURE)) {
+                throw new TestFailException(format("The '%s' entitlement is not granted for the acting user's account, the database instance type "
+                        + "fallback cannot be exercised!", Entitlement.CDP_SIMULATE_DATABASE_CAPACITY_FAILURE.name()));
+            }
+            return entity;
+        };
+    }
+
+    public static <T extends CloudbreakTestDto, U extends MicroserviceClient> Assertion<T, U> hasInstanceType(
+            Function<T, String> databaseServerCrnExtractor, String expectedInstanceType) {
+        return (testContext, entity, client) -> {
+            DatabaseServerV4Response databaseServer = getDatabaseServer(testContext, databaseServerCrnExtractor.apply(entity));
+            if (!expectedInstanceType.equalsIgnoreCase(databaseServer.getInstanceType())) {
+                throw new TestFailException(format("Expected database server '%s' (fallbacks %s) to be provisioned with instance type '%s' but its "
+                                + "instance type is '%s'!", databaseServer.getCrn(), databaseServer.getFallbackInstanceTypes(), expectedInstanceType,
+                        databaseServer.getInstanceType()));
+            }
+            LOGGER.info("Database server '{}' is provisioned with the expected instance type '{}'.", databaseServer.getCrn(),
+                    databaseServer.getInstanceType());
+            return entity;
+        };
+    }
+
+    public static <T extends CloudbreakTestDto, U extends MicroserviceClient> Assertion<T, U> failedWithExhaustedInstanceTypeFallback(
+            Function<T, String> databaseServerCrnExtractor) {
+        return (testContext, entity, client) -> {
+            DatabaseServerV4Response databaseServer = getDatabaseServer(testContext, databaseServerCrnExtractor.apply(entity));
+            if (databaseServer.getStatus() != Status.CREATE_FAILED) {
+                throw new TestFailException(format("Expected database server '%s' to be in %s status but it is in %s status!", databaseServer.getCrn(),
+                        Status.CREATE_FAILED, databaseServer.getStatus()));
+            }
+            if (!StringUtils.containsIgnoreCase(databaseServer.getStatusReason(), EXHAUSTED_FALLBACK_REASON)) {
+                throw new TestFailException(format("Expected database server '%s' to fail because all instance types were exhausted, but its status "
+                        + "reason is '%s'!", databaseServer.getCrn(), databaseServer.getStatusReason()));
+            }
+            LOGGER.info("Database server '{}' failed as expected with status reason '{}'.", databaseServer.getCrn(),
+                    databaseServer.getStatusReason());
+            return entity;
+        };
+    }
+
+    public static <T extends CloudbreakTestDto, U extends MicroserviceClient> Assertion<T, U> usesPrimaryInstanceTypeWithEntitlementAwareFallbacks(
+            Function<T, String> databaseServerCrnExtractor) {
+        return (testContext, entity, client) -> {
+            DatabaseServerV4Response databaseServer = getDatabaseServer(testContext, databaseServerCrnExtractor.apply(entity));
+            String instanceType = databaseServer.getInstanceType();
+            List<String> fallbackInstanceTypes = databaseServer.getFallbackInstanceTypes();
+            if (StringUtils.isBlank(instanceType)) {
+                throw new TestFailException(format("Database server '%s' has no instance type!", databaseServer.getCrn()));
+            }
+            if (CollectionUtils.emptyIfNull(fallbackInstanceTypes).stream().anyMatch(instanceType::equalsIgnoreCase)) {
+                throw new TestFailException(format("Expected database server '%s' to be provisioned with its primary instance type but it is "
+                        + "provisioned with fallback instance type '%s' (fallbacks %s)!", databaseServer.getCrn(), instanceType, fallbackInstanceTypes));
+            }
+            boolean fallbackEntitled = isEntitled(testContext, Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE);
+            String region = testContext.getCloudProvider().region();
+            if (fallbackEntitled && CollectionUtils.isEmpty(fallbackInstanceTypes)) {
+                throw new TestFailException(format("The '%s' entitlement is granted, yet database server '%s' has no fallback instance types in "
+                        + "region '%s'! Check that the region has database instance types configured in its enabled-regions definition.",
+                        Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE.name(), databaseServer.getCrn(), region));
+            } else if (!fallbackEntitled && CollectionUtils.isNotEmpty(fallbackInstanceTypes)) {
+                throw new TestFailException(format("The '%s' entitlement is not granted, yet database server '%s' has fallback instance types %s in "
+                        + "region '%s'!", Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE.name(), databaseServer.getCrn(), fallbackInstanceTypes, region));
+            }
+            LOGGER.info("Database server '{}' uses its primary instance type '{}' with fallback instance types {} in region '{}'.",
+                    databaseServer.getCrn(), instanceType, fallbackInstanceTypes, region);
+            return entity;
+        };
+    }
+
+    private static DatabaseServerV4Response getDatabaseServer(TestContext testContext, String databaseServerCrn) {
+        if (StringUtils.isBlank(databaseServerCrn)) {
+            throw new TestFailException("Database server CRN is not available, cannot assert the database server!");
+        }
+        RedbeamsClient redbeamsClient = getClient(testContext, testContext.getActingUser(), RedbeamsClient.class);
+        return redbeamsClient.getDefaultClient(testContext)
+                .databaseServerV4Endpoint()
+                .getByCrn(databaseServerCrn);
+    }
+
+    private static boolean isEntitled(TestContext testContext, Entitlement entitlement) {
+        CloudbreakClient cloudbreakClient = getClient(testContext, testContext.getActingUser(), CloudbreakClient.class);
+        return cloudbreakClient.getDefaultClient(testContext)
+                .userProfileV4Endpoint()
+                .get()
+                .getEntitlements()
+                .contains(entitlement.name());
     }
 }

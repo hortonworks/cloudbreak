@@ -258,7 +258,7 @@ public class AzureDatabaseResourceService {
                         stackName, resourceGroupName, client, cloudContext, stack);
                 if (effectiveSku != null) {
                     LOGGER.info("DB fallback deployed with effective SKU {} for stack {}", effectiveSku, stackName);
-                    stack.getDatabaseServer().putParameter("effectivelyUsedFlavor", effectiveSku);
+                    stack.getDatabaseServer().putParameter(DatabaseServer.EFFECTIVELY_USED_FLAVOR, effectiveSku);
                 }
             } else {
                 try {
@@ -269,7 +269,7 @@ public class AzureDatabaseResourceService {
                             stackName, resourceGroupName, client, cloudContext, stack);
                     if (effectiveSku != null) {
                         LOGGER.info("DB fallback deployed with effective SKU {} for stack {}", effectiveSku, stackName);
-                        stack.getDatabaseServer().putParameter("effectivelyUsedFlavor", effectiveSku);
+                        stack.getDatabaseServer().putParameter(DatabaseServer.EFFECTIVELY_USED_FLAVOR, effectiveSku);
                     }
                 }
             }

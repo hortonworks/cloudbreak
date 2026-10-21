@@ -23,6 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -86,6 +87,7 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -414,6 +416,181 @@ class ExternalDatabaseServiceTest {
         ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
         verify(redbeamsClient).create(captor.capture());
         assertThat(captor.getValue().getDatabaseServer().getFallbackInstanceTypes()).containsExactly("x86Fallback1", "x86Fallback2");
+    }
+
+    @Test
+    void provisionDatabaseChecksFallbackEntitlementForEnvironmentAccountWithoutCheckingCustomEntitlement() throws JsonProcessingException {
+        environmentResponse.setAccountId(ACCOUNT_ID);
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        stack.setDatabase(createDatabase(DatabaseAvailabilityType.HA));
+        stack.setCluster(cluster);
+        stack.setMultiAz(true);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
+                        Map.of("test", List.of("fallback1")), new HashMap<>(), null));
+
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
+        verify(redbeamsClient).create(captor.capture());
+        assertThat(captor.getValue().getDatabaseServer().getInstanceType()).isEqualTo("instanceType");
+        assertThat(captor.getValue().getDatabaseServer().getFallbackInstanceTypes()).containsExactly("fallback1");
+        verify(entitlementService).isFallbackDatabaseInstanceTypeEnabled(ACCOUNT_ID);
+        verify(entitlementService, never()).isCustomDatabaseInstanceTypeEnabled(any());
+    }
+
+    @Test
+    void provisionDatabaseSetsEmptyFallbackInstanceTypesWhenRegionMissingFromFallbackMap() throws JsonProcessingException {
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        stack.setDatabase(createDatabase(DatabaseAvailabilityType.HA));
+        stack.setCluster(cluster);
+        stack.setMultiAz(true);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(nullable(String.class))).thenReturn(true);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType"),
+                        Map.of("otherRegion", List.of("fallback1", "fallback2")), new HashMap<>(), null));
+
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
+        verify(redbeamsClient).create(captor.capture());
+        assertThat(captor.getValue().getDatabaseServer().getInstanceType()).isEqualTo("instanceType");
+        assertThat(captor.getValue().getDatabaseServer().getFallbackInstanceTypes()).isEmpty();
+    }
+
+    @Test
+    void provisionDatabaseWithCustomInstanceTypeNotEntitledSetsFallbackInstanceTypesWhenFallbackEntitled() throws JsonProcessingException {
+        environmentResponse.setAccountId(ACCOUNT_ID);
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        database.setAttributes(new Json(Map.of("instancetype", "custom.instance.type")));
+        stack.setDatabase(database);
+        stack.setCluster(cluster);
+        when(entitlementService.isCustomDatabaseInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "defaultInstanceType"),
+                        Map.of("test", List.of("fallback1", "fallback2")), new HashMap<>(), null));
+
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
+        verify(redbeamsClient).create(captor.capture());
+        assertThat(captor.getValue().getDatabaseServer().getInstanceType()).isEqualTo("defaultInstanceType");
+        assertThat(captor.getValue().getDatabaseServer().getFallbackInstanceTypes()).containsExactly("fallback1", "fallback2");
+    }
+
+    @Test
+    void provisionDatabaseWithCustomInstanceTypeEntitledDoesNotSetRegionFallbackInstanceTypes() throws JsonProcessingException {
+        environmentResponse.setAccountId(ACCOUNT_ID);
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
+        database.setAttributes(new Json(Map.of("instancetype", "custom.instance.type")));
+        stack.setDatabase(database);
+        stack.setCluster(cluster);
+        when(entitlementService.isCustomDatabaseInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(), any(), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "defaultInstanceType"),
+                        Map.of("test", List.of("fallback1", "fallback2")), new HashMap<>(), null));
+
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
+        verify(redbeamsClient).create(captor.capture());
+        assertThat(captor.getValue().getDatabaseServer().getInstanceType()).isEqualTo("custom.instance.type");
+        assertThat(captor.getValue().getDatabaseServer().getFallbackInstanceTypes()).isEmpty();
+        verify(entitlementService).isCustomDatabaseInstanceTypeEnabled(ACCOUNT_ID);
+        verify(entitlementService, never()).isFallbackDatabaseInstanceTypeEnabled(any());
+    }
+
+    @Test
+    void provisionDatabaseWhenAlreadyExistsDoesNotEvaluateDatabaseInstanceTypeEntitlements() throws JsonProcessingException {
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        stack.setCluster(cluster);
+        stack.setDatabase(createDatabase(DatabaseAvailabilityType.HA));
+        DatabaseServerV4Response dbServerResponse = new DatabaseServerV4Response();
+        dbServerResponse.setCrn(RDBMS_CRN);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(dbServerResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+
+        underTest.provisionDatabase(stack, environmentResponse);
+
+        verify(redbeamsClient, never()).create(any(AllocateDatabaseServerV4Request.class));
+        verifyNoInteractions(entitlementService, environmentPlatformResourceEndpoint);
+    }
+
+    @Test
+    void migrateDatabaseSettingsIfNeededSetsFlexibleServerFallbackInstanceTypesWhenEntitled() {
+        environmentResponse.setAccountId(ACCOUNT_ID);
+        StackDto stack = mock(StackDto.class);
+        TargetMajorVersion majorVersion = mock(TargetMajorVersion.class);
+        when(stack.getCloudPlatform()).thenReturn("AZURE");
+        when(majorVersion.getMajorVersion()).thenReturn("14");
+        when(stack.getExternalDatabaseEngineVersion()).thenReturn("10");
+        ClusterView clusterView = mock(ClusterView.class);
+        when(clusterView.hasExternalDatabase()).thenReturn(true);
+        when(stack.getCluster()).thenReturn(clusterView);
+        when(stack.getDatabase()).thenReturn(new Database());
+        when(parameterDecoratorMap.get(CloudPlatform.AZURE)).thenReturn(dbServerParameterDecorator);
+        doReturn(Optional.of(SINGLE_SERVER), Optional.of(FLEXIBLE_SERVER)).when(dbServerParameterDecorator).getDatabaseType(any());
+        when(dbConfigs.get(new DatabaseStackConfigKey(CloudPlatform.AZURE, FLEXIBLE_SERVER)))
+                .thenReturn(new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(environmentResponse);
+        when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.HA);
+        Stack realStack = new Stack();
+        realStack.setMultiAz(true);
+        realStack.setType(StackType.WORKLOAD);
+        when(stack.getStack()).thenReturn(realStack);
+        when(entitlementService.isFallbackDatabaseInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any(),
+                eq(DatabaseCapabilityType.AZURE_FLEXIBLE), any(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "flexibleInstanceType"),
+                        Map.of("test", List.of("flexibleFallback1", "flexibleFallback2")), new HashMap<>(), null));
+
+        DatabaseServerV4StackRequest result = underTest.migrateDatabaseSettingsIfNeeded(stack, majorVersion);
+
+        assertNotNull(result);
+        assertThat(result.getInstanceType()).isEqualTo("flexibleInstanceType");
+        assertThat(result.getFallbackInstanceTypes()).containsExactly("flexibleFallback1", "flexibleFallback2");
     }
 
     @ParameterizedTest

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -48,16 +49,25 @@ public class AzureDatabaseFallbackDeploymentService {
                 && AzureDatabaseType.FLEXIBLE_SERVER.equals(view.getAzureDatabaseType());
 
         if (!fallbackEnabled) {
-            String template = azureDatabaseTemplateBuilder.build(cloudContext, databaseStack);
-            submitDeploymentWithConflictRetry(stackName, resourceGroupName, template, client);
+            deployWithoutFallback(stackName, resourceGroupName, client, cloudContext, databaseStack, databaseServer.getSimulatedCapacityFailures());
             return null;
         }
 
-        int maxAttempts = 1 + fallbackTypes.size();
+        List<String> skus = new ArrayList<>();
+        skus.add(databaseServer.getFlavor());
+        skus.addAll(fallbackTypes);
         ManagementException lastException = null;
+        String lastReason = null;
+        int simulatedCapacityFailures = databaseServer.getSimulatedCapacityFailures();
 
-        for (int attempt = 0; attempt < maxAttempts; attempt++) {
-            String skuForAttempt = attempt == 0 ? databaseServer.getFlavor() : fallbackTypes.get(attempt - 1);
+        for (int attempt = 0; attempt < skus.size(); attempt++) {
+            String skuForAttempt = skus.get(attempt);
+            if (attempt < simulatedCapacityFailures) {
+                lastReason = simulatedCapacityFailureReason(skuForAttempt);
+                LOGGER.warn("DB ARM deployment {}/{} attempt {} for SKU {} failed with capacity error; will try next fallback. Reason: {}",
+                        resourceGroupName, stackName, attempt, skuForAttempt, lastReason);
+                continue;
+            }
             DatabaseStack stackForAttempt = attempt == 0 ? databaseStack : buildDatabaseStackWithFlavor(databaseStack, skuForAttempt);
             String template = azureDatabaseTemplateBuilder.build(cloudContext, stackForAttempt);
 
@@ -71,6 +81,7 @@ public class AzureDatabaseFallbackDeploymentService {
                 return null;
             } catch (ManagementException e) {
                 lastException = e;
+                lastReason = e.getMessage();
                 if (!azureExceptionHandler.isCapacityError(e)) {
                     LOGGER.debug("DB ARM deployment {}/{} failed with non-capacity error on attempt {} for SKU {}; not retrying.",
                             resourceGroupName, stackName, attempt, skuForAttempt);
@@ -81,10 +92,27 @@ public class AzureDatabaseFallbackDeploymentService {
             }
         }
 
-        throw new InsufficientCapacityException(
-                String.format("DB ARM deployment %s/%s: all %d fallback instance types exhausted.",
-                        resourceGroupName, stackName, fallbackTypes.size()),
+        throw InsufficientCapacityException.allInstanceTypesExhausted(deploymentDescription(resourceGroupName, stackName), skus, lastReason,
                 lastException);
+    }
+
+    private void deployWithoutFallback(String stackName, String resourceGroupName, AzureClient client, CloudContext cloudContext,
+            DatabaseStack databaseStack, int simulatedCapacityFailures) {
+        String sku = databaseStack.getDatabaseServer().getFlavor();
+        if (simulatedCapacityFailures > 0) {
+            throw InsufficientCapacityException.allInstanceTypesExhausted(deploymentDescription(resourceGroupName, stackName), List.of(sku),
+                    simulatedCapacityFailureReason(sku), null);
+        }
+        String template = azureDatabaseTemplateBuilder.build(cloudContext, databaseStack);
+        submitDeploymentWithConflictRetry(stackName, resourceGroupName, template, client);
+    }
+
+    private String deploymentDescription(String resourceGroupName, String stackName) {
+        return String.format("DB ARM deployment %s/%s failed", resourceGroupName, stackName);
+    }
+
+    private String simulatedCapacityFailureReason(String sku) {
+        return String.format("Simulated capacity failure for SKU '%s', the deployment was not submitted", sku);
     }
 
     private DatabaseStack buildDatabaseStackWithFlavor(DatabaseStack original, String flavor) {

@@ -159,9 +159,15 @@ public class AwsRdsLaunchService {
     private void createStackWithInstanceTypeFallback(AuthenticatedContext ac, DatabaseStack stack, String cFStackName, String cfTemplate,
             AmazonCloudFormationClient cfClient) {
         List<String> instanceTypes = instanceTypeCandidates(stack.getDatabaseServer());
+        int simulatedCapacityFailures = stack.getDatabaseServer().getSimulatedCapacityFailures();
         for (int i = 0; i < instanceTypes.size(); i++) {
             String instanceType = instanceTypes.get(i);
-            boolean lastCandidate = i == instanceTypes.size() - 1;
+            if (i < simulatedCapacityFailures) {
+                String reason = String.format("Simulated InsufficientDBInstanceCapacity for instance type '%s', the stack creation was not requested",
+                        instanceType);
+                failIfExhaustedOrLogFallback(cFStackName, instanceTypes, i, reason, null);
+                continue;
+            }
             DatabaseStack attemptStack = withInstanceType(stack, instanceType);
             LOGGER.debug("Sending RDS CloudFormation stack creation request '{}' for stack '{}' with instance type '{}' (attempt {}/{})",
                     cFStackName, ac.getCloudContext().getId(), instanceType, i + 1, instanceTypes.size());
@@ -175,20 +181,26 @@ public class AwsRdsLaunchService {
                 Supplier<String> reasonSupplier = () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, CREATE_FAILED);
                 String reason = resolveErrorReasonForClassification(cFStackName, reasonSupplier);
                 if (isCapacityFailure(reason)) {
-                    if (!lastCandidate) {
-                        LOGGER.warn("RDS instance type '{}' could not be provisioned due to capacity shortage, falling back to '{}'. Reason: {}",
-                                instanceType, instanceTypes.get(i + 1), reason);
-                        deleteRolledBackStack(ac, cFStackName, cfClient);
-                    } else {
-                        throw new InsufficientCapacityException(String.format(
-                                "RDS CloudFormation stack %s creation failed: all instance types %s exhausted due to capacity shortage. Reason: %s",
-                                cFStackName, instanceTypes, reason), e);
-                    }
+                    failIfExhaustedOrLogFallback(cFStackName, instanceTypes, i, reason, e);
+                    deleteRolledBackStack(ac, cFStackName, cfClient);
                 } else {
                     handleWaiterError(String.format("RDS CloudFormation stack %s creation failed", cFStackName), reasonSupplier, e);
                 }
             }
         }
+    }
+
+    /**
+     * Handles a capacity failure of an instance type attempt the same way whether it is real or simulated: throws when it was the last
+     * candidate, otherwise logs the fallback to the next candidate.
+     */
+    private void failIfExhaustedOrLogFallback(String cFStackName, List<String> instanceTypes, int attemptIndex, String reason, Exception cause) {
+        if (attemptIndex == instanceTypes.size() - 1) {
+            throw InsufficientCapacityException.allInstanceTypesExhausted(String.format("RDS CloudFormation stack %s creation failed", cFStackName),
+                    instanceTypes, reason, cause);
+        }
+        LOGGER.warn("RDS instance type '{}' could not be provisioned due to capacity shortage, falling back to '{}'. Reason: {}",
+                instanceTypes.get(attemptIndex), instanceTypes.get(attemptIndex + 1), reason);
     }
 
     private void waitForStackCreateComplete(AuthenticatedContext ac, String cFStackName, AmazonCloudFormationClient cfClient) {

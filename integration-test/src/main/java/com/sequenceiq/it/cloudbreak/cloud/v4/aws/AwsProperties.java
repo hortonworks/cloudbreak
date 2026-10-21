@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.aws;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -291,12 +293,22 @@ public class AwsProperties {
 
         private String customInstanceType;
 
+        private List<String> fallbackTestInstanceTypes = new ArrayList<>();
+
         public String getCustomInstanceType() {
             return customInstanceType;
         }
 
         public void setCustomInstanceType(String customInstanceType) {
             this.customInstanceType = customInstanceType;
+        }
+
+        public List<String> getFallbackTestInstanceTypes() {
+            return fallbackTestInstanceTypes;
+        }
+
+        public void setFallbackTestInstanceTypes(List<String> fallbackTestInstanceTypes) {
+            this.fallbackTestInstanceTypes = fallbackTestInstanceTypes;
         }
     }
 

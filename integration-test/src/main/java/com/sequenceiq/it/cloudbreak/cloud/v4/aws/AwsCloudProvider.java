@@ -76,6 +76,7 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 
 @Component
 public class AwsCloudProvider extends AbstractCloudProvider {
@@ -85,6 +86,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     private static final String DEFAULT_STORAGE_NAME = "apitest" + UUID.randomUUID().toString().replaceAll("-", "");
 
     private static final String KEY_BASED_CREDENTIAL = "key";
+
+    private static final long DEFAULT_DATABASE_STORAGE_SIZE_GB = 100L;
 
     private static final String DEFAULT_GOV_ENCRYPTION_PROFILE_NAME = "cdp_default_fips_140_3_gov";
 
@@ -329,6 +332,16 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getCustomDatabaseInstanceType() {
         return awsProperties.getDatabase().getCustomInstanceType();
+    }
+
+    @Override
+    public List<String> getDatabaseFallbackTestInstanceTypes() {
+        return awsProperties.getDatabase().getFallbackTestInstanceTypes();
+    }
+
+    @Override
+    public void extendDatabaseServerRequestWithProviderParams(DatabaseServerV4StackRequest request) {
+        request.setStorageSize(DEFAULT_DATABASE_STORAGE_SIZE_GB);
     }
 
     @Override

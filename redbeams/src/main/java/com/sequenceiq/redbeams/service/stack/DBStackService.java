@@ -49,6 +49,10 @@ public class DBStackService implements PayloadContextProvider, ResourceIdProvide
         return dbStackRepository.findDatabaseServerInstanceTypeByResourceCrn(crn);
     }
 
+    public void updateDatabaseServerInstanceType(Long databaseServerId, String instanceType) {
+        dbStackRepository.updateDatabaseServerInstanceType(databaseServerId, instanceType);
+    }
+
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
         return getByCrn(resourceCrn).getId();

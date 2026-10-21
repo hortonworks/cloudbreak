@@ -49,6 +49,7 @@ import com.sequenceiq.redbeams.metrics.MetricType;
 import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.DatabaseCapabilityService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
+import com.sequenceiq.redbeams.service.SimulatedDatabaseCapacityFailureService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
@@ -106,6 +107,9 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
     @Inject
     private DBStackStatusUpdater dbStackStatusUpdater;
 
+    @Inject
+    private SimulatedDatabaseCapacityFailureService simulatedDatabaseCapacityFailureService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(AllocateDatabaseServerRequest.class);
@@ -132,6 +136,7 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
             }
             DatabaseStack databaseStack = setupMissingParameters(connector, cloudCredential, cloudContext.getPlatformVariant(), request, dbStack);
             validateInstanceTypes(dbStack, request.getResourceId());
+            simulatedDatabaseCapacityFailureService.applyIfRequested(dbStack.getAccountId(), databaseStack);
             databaseServerSslCertificatePrescriptionService
                     .prescribeSslCertificateIfNeeded(cloudContext,
                             cloudCredential,
@@ -171,8 +176,20 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
             metricService.incrementMetricCounter(MetricType.DB_INSTANCE_TYPE_FALLBACK_USED, Optional.of(dbStack), cloudPlatform);
             LOGGER.info("RDS instance-type fallback used for {}: requested '{}', provisioned '{}', candidates {}",
                     cloudContext, requestedInstanceType, usedInstanceType, databaseServer.getFallbackInstanceTypes());
+            saveProvisionedInstanceType(dbStack, usedInstanceType.toString());
         } else {
             LOGGER.debug("Primary instance type '{}' provisioned for {}, no fallback needed", requestedInstanceType, cloudContext);
+        }
+    }
+
+    /**
+     * Records the instance type the provider actually provisioned, so the API, telemetry and later operations report the real type
+     * right away instead of only after the next RDS provider sync. Only this column is updated, nothing else of the stack.
+     */
+    private void saveProvisionedInstanceType(DBStack dbStack, String provisionedInstanceType) {
+        if (dbStack.getDatabaseServer() != null) {
+            LOGGER.debug("Saving provisioned instance type '{}' as the instance type of the database server", provisionedInstanceType);
+            dbStackService.updateDatabaseServerInstanceType(dbStack.getDatabaseServer().getId(), provisionedInstanceType);
         }
     }
 

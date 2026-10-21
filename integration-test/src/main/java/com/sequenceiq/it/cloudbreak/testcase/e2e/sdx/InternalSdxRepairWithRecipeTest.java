@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.it.cloudbreak.assertion.database.RedbeamsDatabaseTestAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.recipe.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -145,6 +146,8 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
+                .then(RedbeamsDatabaseTestAssertion.usesPrimaryInstanceTypeWithEntitlementAwareFallbacks(dto -> dto.getResponse().getDatabaseServerCrn()),
+                        key(sdxInternal))
                 .then(recipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), FILEPATH, FILENAME, 1));
     }
 

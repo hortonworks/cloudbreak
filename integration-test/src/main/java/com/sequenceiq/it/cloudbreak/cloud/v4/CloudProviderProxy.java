@@ -61,6 +61,7 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
@@ -450,6 +451,16 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public String getCustomDatabaseInstanceType() {
         return delegate.getCustomDatabaseInstanceType();
+    }
+
+    @Override
+    public List<String> getDatabaseFallbackTestInstanceTypes() {
+        return delegate.getDatabaseFallbackTestInstanceTypes();
+    }
+
+    @Override
+    public void extendDatabaseServerRequestWithProviderParams(DatabaseServerV4StackRequest request) {
+        delegate.extendDatabaseServerRequestWithProviderParams(request);
     }
 
     @Override
