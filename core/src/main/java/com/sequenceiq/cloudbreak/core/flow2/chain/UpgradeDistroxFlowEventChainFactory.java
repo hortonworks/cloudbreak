@@ -147,9 +147,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         OsType currentOsType = OsType.getByOsTypeString(currentImage.getOsType());
 
         flowEventChain.addAll(getFullSyncEvent(event));
+        flowEventChain.addAll(getClusterScaleTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getUpgradeValidationTriggerEvent(event));
         flowEventChain.addAll(getClusterUpgradePreparationTriggerEvent(event, currentOsType));
-        flowEventChain.addAll(getClusterScaleTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getSaltUpdateTriggerEvent(event));
         flowEventChain.addAll(getImageUpdateTriggerEvent(event));
