@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -19,6 +20,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.sequenceiq.cloudbreak.client.internal.CloudbreakApiClientParams;
 import com.sequenceiq.datalake.maintenancewindow.MaintenanceServiceConditions;
+import com.sequenceiq.environment.client.internal.EnvironmentApiClientConfig;
 import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
 import com.sequenceiq.maintenance.client.internal.MaintenanceApiClientParams;
@@ -28,6 +30,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 @Configuration
+@Import(EnvironmentApiClientConfig.class)
 @EnableAsync
 @EnableScheduling
 @EnableRetry

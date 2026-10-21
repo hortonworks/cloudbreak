@@ -31,6 +31,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.environment.client.internal.EnvironmentApiClientConfig;
 import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
 import com.sequenceiq.maintenance.client.internal.MaintenanceApiClientParams;
@@ -64,6 +66,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 @Configuration
+@Import(EnvironmentApiClientConfig.class)
 @EnableRetry
 public class AppConfig implements ResourceLoaderAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);

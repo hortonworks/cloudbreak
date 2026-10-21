@@ -6,10 +6,13 @@ import jakarta.inject.Named;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
+import com.sequenceiq.remoteenvironment.api.client.internal.RemoteEnvironmentApiClientConfig;
 import com.sequenceiq.remoteenvironment.api.client.internal.RemoteEnvironmentApiClientParams;
 
 @Configuration
+@Import(RemoteEnvironmentApiClientConfig.class)
 public class RemoteEnvironmentConfig {
 
     @Value("${rest.debug:false}")

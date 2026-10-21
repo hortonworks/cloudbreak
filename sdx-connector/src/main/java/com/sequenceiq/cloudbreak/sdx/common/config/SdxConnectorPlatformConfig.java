@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
@@ -21,10 +22,13 @@ import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeServ
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDhTearDownService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStartStopService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
+import com.sequenceiq.environment.client.internal.EnvironmentApiClientConfig;
 import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
+import com.sequenceiq.remoteenvironment.api.client.internal.RemoteEnvironmentApiClientConfig;
 import com.sequenceiq.remoteenvironment.api.client.internal.RemoteEnvironmentApiClientParams;
 
 @Configuration
+@Import({EnvironmentApiClientConfig.class, RemoteEnvironmentApiClientConfig.class})
 public class SdxConnectorPlatformConfig {
 
     @Inject
