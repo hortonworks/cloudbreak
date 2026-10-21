@@ -59,6 +59,7 @@ auth:
     datahub:
       instancetypes.enable: false
       force.os.upgrade: true
+    extended.repair.batch.size.enabled: false
     environment.experience.deletion.enable: true
     endpointgateway.enable.azure: false
     endpointgateway.enable.gcp: false
