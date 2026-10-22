@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_TYPE_VALIDATION_VERTICAL_SCALE_FALLBACK_INCOMPATIBLE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALE_INSTANCE_TYPES_NOT_IN_TEMPLATE;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1250,6 +1251,112 @@ public class VerticalScalingValidatorServiceTest {
         underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
 
         verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), any(), isNull(), any());
+    }
+
+    @Test
+    public void testValidateInstanceTypeDropsIncompatibleFallbacksAndNotifies() {
+        Map<String, VmType> vmTypes = fallbackVmTypes();
+        StackVerticalScaleV4Request request = setupFallbackFiltering(vmTypes, List.of("m5.4xlarge", "m5.8xlarge", "m5.12xlarge"));
+        when(verticalScaleInstanceProvider.findVerticalScaleIncompatibility(any(), any(), any(), any(), any(), any())).thenReturn(Optional.empty());
+        when(verticalScaleInstanceProvider.findVerticalScaleIncompatibility(any(), any(), eq(Optional.of(vmTypes.get("m5.4xlarge"))), any(), any(), any()))
+                .thenReturn(Optional.of("The current instancetype m5.xlarge has more Ephemeral Disk than the requested m5.4xlarge."));
+        when(verticalScaleInstanceProvider.findVerticalScaleIncompatibility(any(), any(), eq(Optional.empty()), any(), any(), any()))
+                .thenReturn(Optional.of("The requested instancetype does not exist on provider side."));
+
+        underTest.validateInstanceType(stack, request, true);
+
+        assertEquals(List.of("m5.8xlarge"), request.getTemplate().getFallbackInstanceTypes());
+        verify(cloudbreakEventService).fireCloudbreakInstanceGroupEvent(1L, "AVAILABLE", "compute",
+                STACK_INSTANCE_TYPE_VALIDATION_VERTICAL_SCALE_FALLBACK_INCOMPATIBLE,
+                List.of("compute", "m5.xlarge", "m5.4xlarge (The current instancetype m5.xlarge has more Ephemeral Disk than the requested m5.4xlarge); "
+                        + "m5.12xlarge (The requested instancetype does not exist on provider side)"));
+    }
+
+    @Test
+    public void testValidateInstanceTypeDropsIncompatibleFallbacksWithoutNotification() {
+        Map<String, VmType> vmTypes = fallbackVmTypes();
+        StackVerticalScaleV4Request request = setupFallbackFiltering(vmTypes, List.of("m5.4xlarge", "m5.8xlarge"));
+        when(verticalScaleInstanceProvider.findVerticalScaleIncompatibility(any(), any(), any(), any(), any(), any())).thenReturn(Optional.empty());
+        when(verticalScaleInstanceProvider.findVerticalScaleIncompatibility(any(), any(), eq(Optional.of(vmTypes.get("m5.4xlarge"))), any(), any(), any()))
+                .thenReturn(Optional.of("Unable to resize since changing CPU architecture is not supported."));
+
+        underTest.validateInstanceType(stack, request, false);
+
+        assertEquals(List.of("m5.8xlarge"), request.getTemplate().getFallbackInstanceTypes());
+        verify(cloudbreakEventService, never()).fireCloudbreakInstanceGroupEvent(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testValidateInstanceTypeRemovesDuplicateAndRequestedFallbacksSilently() {
+        StackVerticalScaleV4Request request = setupFallbackFiltering(fallbackVmTypes(), List.of("m5.2xlarge", "m5.8xlarge", "m5.8xlarge"));
+
+        underTest.validateInstanceType(stack, request, true);
+
+        assertEquals(List.of("m5.8xlarge"), request.getTemplate().getFallbackInstanceTypes());
+        verify(verticalScaleInstanceProvider, times(1)).findVerticalScaleIncompatibility(any(), any(), any(), any(), any(), any());
+        verify(cloudbreakEventService, never()).fireCloudbreakInstanceGroupEvent(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testValidateInstanceTypeValidatesOnlyTheRequestedInstanceTypeStrictly() {
+        Map<String, VmType> vmTypes = fallbackVmTypes();
+        StackVerticalScaleV4Request request = setupFallbackFiltering(vmTypes, List.of("m5.8xlarge"));
+
+        underTest.validateInstanceType(stack, request, true);
+
+        verify(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), eq(List.of(Optional.of(vmTypes.get("m5.xlarge")))),
+                eq(List.of(Optional.of(vmTypes.get("m5.2xlarge")))), isNull(), any());
+        verify(verticalScaleInstanceProvider).findVerticalScaleIncompatibility(any(), eq(List.of(Optional.of(vmTypes.get("m5.xlarge")))),
+                eq(Optional.of(vmTypes.get("m5.8xlarge"))), isNull(), any(), eq(CdpResourceType.DEFAULT));
+        assertEquals(List.of("m5.8xlarge"), request.getTemplate().getFallbackInstanceTypes());
+    }
+
+    @Test
+    public void testValidateInstanceTypeFailsOnInvalidRequestedInstanceTypeWithoutFilteringFallbacks() {
+        StackVerticalScaleV4Request request = setupFallbackFiltering(fallbackVmTypes(), List.of("m5.4xlarge", "m5.8xlarge"));
+        doThrow(new BadRequestException("Unable to resize since changing CPU architecture is not supported."))
+                .when(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), any(), any(), any(), any());
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateInstanceType(stack, request, true));
+
+        assertEquals("Unable to resize since changing CPU architecture is not supported.", exception.getMessage());
+        assertEquals(List.of("m5.4xlarge", "m5.8xlarge"), request.getTemplate().getFallbackInstanceTypes());
+        verify(verticalScaleInstanceProvider, never()).findVerticalScaleIncompatibility(any(), any(), any(), any(), any(), any());
+        verify(cloudbreakEventService, never()).fireCloudbreakInstanceGroupEvent(any(), any(), any(), any(), any());
+    }
+
+    private Map<String, VmType> fallbackVmTypes() {
+        // m5.12xlarge is intentionally not offered by the provider
+        return List.of("m5.xlarge", "m5.2xlarge", "m5.4xlarge", "m5.8xlarge").stream()
+                .collect(Collectors.toMap(name -> name, name -> vmType(name, 16, 4, null, null, List.of("1"))));
+    }
+
+    private StackVerticalScaleV4Request setupFallbackFiltering(Map<String, VmType> vmTypes, List<String> fallbackInstanceTypes) {
+        String group = "compute";
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(group, "m5.xlarge", template)));
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        lenient().when(stack.getId()).thenReturn(1L);
+        lenient().when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        Credential credential = credential();
+        when(credentialClientService.getByEnvironmentCrn(eq("crn"))).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(eq(credential))).thenReturn(extendedCloudCredential());
+        when(stack.isMultiAz()).thenReturn(false);
+        when(stack.getRegion()).thenReturn("eu");
+        when(stack.getAvailabilityZone()).thenReturn("eu1");
+        when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any()))
+                .thenReturn(cloudVmTypes("eu1", vmTypes.values().toArray(new VmType[0])));
+
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType("m5.2xlarge");
+        instanceTemplateV4Request.setFallbackInstanceTypes(fallbackInstanceTypes);
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+        request.setStackId(1L);
+        request.setGroup(group);
+        request.setTemplate(instanceTemplateV4Request);
+        return request;
     }
 
     private Credential credential() {

@@ -4,9 +4,11 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_TYPE_VALIDATION_VERTICAL_SCALE_FALLBACK_INCOMPATIBLE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALE_INSTANCE_TYPES_NOT_IN_TEMPLATE;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -14,6 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -27,6 +30,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -178,8 +182,6 @@ public class VerticalScalingValidatorService {
                 .filter(e -> e.getGroupName().equals(group))
                 .findFirst();
         String requestedInstanceType = verticalScaleV4Request.getTemplate().getInstanceType();
-        List<String> requestedFallbackInstanceTypes = verticalScaleV4Request.getTemplate().getFallbackInstanceTypes();
-        List<String> allRequestedInstanceTypes = getAllInstanceTypes(requestedInstanceType, requestedFallbackInstanceTypes);
         if (instanceGroupOptional.isPresent()) {
             InstanceGroup instanceGroup = instanceGroupOptional.get();
             boolean validateMultiAz = stack.isMultiAz() && providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(stack) != null;
@@ -208,14 +210,14 @@ public class VerticalScalingValidatorService {
                     Map.of(ARCHITECTURE, Architecture.ALL_ARCHITECTURE));
             String zoneForLookup = resolveZone(availabilityZone, instanceGroupAvailabilityZones, allVmTypes.getCloudVmResponses(), region);
             List<Optional<VmType>> currentInstances = getInstances(zoneForLookup, currentInstanceTypes, allVmTypes);
-            List<Optional<VmType>> requestedInstances = getInstances(zoneForLookup, allRequestedInstanceTypes, allVmTypes);
+            Map<String, Object> additionalProperties = attributes == null ? Map.of() : attributes.getMap();
             try {
                 verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                         stack.getCloudPlatform(),
                         currentInstances,
-                        requestedInstances,
+                        getInstances(zoneForLookup, List.of(requestedInstanceType), allVmTypes),
                         instanceGroupAvailabilityZones,
-                        attributes == null ? Map.of() : attributes.getMap()
+                        additionalProperties
                 );
             } catch (BadRequestException e) {
                 if (instanceTypesNotInTemplate.isEmpty()) {
@@ -227,6 +229,9 @@ public class VerticalScalingValidatorService {
                         String.join(", ", getTemplateInstanceTypes(instanceGroup.getTemplate())), String.join(", ", currentInstanceTypes),
                         e.getMessage()), e);
             }
+            Function<String, Optional<String>> incompatibilityFinder = fallbackIncompatibilityFinder(stack.getCloudPlatform(), currentInstances,
+                    zoneForLookup, allVmTypes, instanceGroupAvailabilityZones, additionalProperties);
+            removeIncompatibleFallbacksFromRequest(stack, instanceGroup, verticalScaleV4Request, currentInstanceTypes, incompatibilityFinder, notify);
         } else {
             throw new BadRequestException(String.format("Define a group which exists in Cluster. It can be [%s].",
                     stack.getInstanceGroups()
@@ -282,6 +287,51 @@ public class VerticalScalingValidatorService {
             }
         }
         return result;
+    }
+
+    private Function<String, Optional<String>> fallbackIncompatibilityFinder(String cloudPlatform, List<Optional<VmType>> currentInstances, String zone,
+            CloudVmTypes allVmTypes, Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
+        return fallback -> verticalScaleInstanceProvider.findVerticalScaleIncompatibility(
+                cloudPlatform,
+                currentInstances,
+                getInstances(zone, List.of(fallback), allVmTypes).getFirst(),
+                instanceGroupAvailabilityZones,
+                additionalProperties,
+                CdpResourceType.DEFAULT);
+    }
+
+    private void removeIncompatibleFallbacksFromRequest(Stack stack, InstanceGroup instanceGroup, StackVerticalScaleV4Request verticalScaleV4Request,
+            List<String> currentInstanceTypes, Function<String, Optional<String>> incompatibilityFinder, boolean notify) {
+        InstanceTemplateV4Request requestedTemplate = verticalScaleV4Request.getTemplate();
+        List<String> requestedFallbackInstanceTypes = requestedTemplate.getFallbackInstanceTypes();
+        if (requestedFallbackInstanceTypes != null && !requestedFallbackInstanceTypes.isEmpty()) {
+            requestedTemplate.setFallbackInstanceTypes(filterFallbackInstanceTypes(stack, instanceGroup, requestedTemplate.getInstanceType(),
+                    requestedFallbackInstanceTypes, currentInstanceTypes, incompatibilityFinder, notify));
+        }
+    }
+
+    private List<String> filterFallbackInstanceTypes(Stack stack, InstanceGroup instanceGroup, String requestedInstanceType, List<String> fallbackInstanceTypes,
+            List<String> currentInstanceTypes, Function<String, Optional<String>> incompatibilityFinder, boolean notify) {
+        List<String> keptFallbacks = new ArrayList<>();
+        Map<String, String> droppedFallbacks = new LinkedHashMap<>();
+        fallbackInstanceTypes.stream()
+                .filter(fallback -> !fallback.equals(requestedInstanceType))
+                .distinct()
+                .forEach(fallback -> incompatibilityFinder.apply(fallback)
+                        .ifPresentOrElse(reason -> droppedFallbacks.put(fallback, reason), () -> keptFallbacks.add(fallback)));
+        if (!droppedFallbacks.isEmpty()) {
+            LOGGER.info("Fallback instance types of group {} cannot replace the current instance types {}, dropping them from the vertical scale request: {}",
+                    instanceGroup.getGroupName(), currentInstanceTypes, droppedFallbacks);
+            if (notify) {
+                String droppedFallbacksWithReasons = droppedFallbacks.entrySet().stream()
+                        .map(entry -> String.format("%s (%s)", entry.getKey(), StringUtils.removeEnd(entry.getValue(), ".")))
+                        .collect(Collectors.joining("; "));
+                cloudbreakEventService.fireCloudbreakInstanceGroupEvent(stack.getId(), eventType(stack), instanceGroup.getGroupName(),
+                        STACK_INSTANCE_TYPE_VALIDATION_VERTICAL_SCALE_FALLBACK_INCOMPATIBLE,
+                        List.of(instanceGroup.getGroupName(), String.join(", ", currentInstanceTypes), droppedFallbacksWithReasons));
+            }
+        }
+        return keptFallbacks;
     }
 
     private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(StackVerticalScaleV4Request verticalScaleV4Request) {

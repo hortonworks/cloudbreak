@@ -273,6 +273,7 @@ public enum ResourceEvent {
     STACK_INSTANCE_TYPE_VALIDATION_ROOT_VOLUME_TYPE_CHANGED("stack.instance.type.validation.root.volume.type.changed"),
     STACK_INSTANCE_TYPE_VALIDATION_VOLUME_SIZE_INCREASED("stack.instance.type.validation.volume.size.increased"),
     STACK_INSTANCE_TYPE_VALIDATION_FALLBACK_DISK_INCOMPATIBLE("stack.instance.type.validation.fallback.disk.incompatible"),
+    STACK_INSTANCE_TYPE_VALIDATION_VERTICAL_SCALE_FALLBACK_INCOMPATIBLE("stack.instance.type.validation.verticalscale.fallback.incompatible"),
     STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK("stack.upscale.adjustment.type.fallback"),
     STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
     STACK_INFRASTRUCTURE_CREATE_FAILED("stack.infrastructure.create.failed"),

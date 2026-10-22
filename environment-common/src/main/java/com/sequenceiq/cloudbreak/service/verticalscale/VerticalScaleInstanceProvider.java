@@ -62,21 +62,14 @@ public class VerticalScaleInstanceProvider {
         LOGGER.debug("currentInstances: {}", currentInstances);
         Set<VmType> suitableInstances = vmTypes
                 .stream()
-                .filter(availableVmType -> {
-                    try {
-                        validateInstanceType(
-                                cloudPlatform,
-                                currentInstances,
-                                List.of(Optional.ofNullable(availableVmType)),
-                                instanceGroupAvailabilityZones,
-                                Map.of(),
-                                cdpResourceType
-                        );
-                        return true;
-                    } catch (BadRequestException ex) {
-                        return false;
-                    }
-                })
+                .filter(availableVmType -> findVerticalScaleIncompatibility(
+                        cloudPlatform,
+                        currentInstances,
+                        Optional.ofNullable(availableVmType),
+                        instanceGroupAvailabilityZones,
+                        Map.of(),
+                        cdpResourceType
+                ).isEmpty())
                 .collect(Collectors.toSet());
         LOGGER.debug("suitableInstances: {}", suitableInstances);
         if (suitableInstances.isEmpty()) {
@@ -117,6 +110,23 @@ public class VerticalScaleInstanceProvider {
         } catch (Exception e) {
             LOGGER.warn("Vertical scale validation error: {}", e.getMessage());
             throw e;
+        }
+    }
+
+    public Optional<String> findVerticalScaleIncompatibility(String cloudPlatform, List<Optional<VmType>> currentInstanceTypeOptionals,
+            Optional<VmType> requestedInstanceTypeOptional, Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties,
+            CdpResourceType cdpResourceType) {
+        try {
+            validateInstanceType(
+                    cloudPlatform,
+                    currentInstanceTypeOptionals,
+                    List.of(requestedInstanceTypeOptional),
+                    instanceGroupAvailabilityZones,
+                    additionalProperties,
+                    cdpResourceType);
+            return Optional.empty();
+        } catch (BadRequestException e) {
+            return Optional.of(e.getMessage());
         }
     }
 

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
@@ -777,6 +778,57 @@ public class VerticalScaleInstanceProviderTest {
         assertDoesNotThrow(() ->
                 underTest.validateInstanceTypeForVerticalScaling(
                         CloudPlatform.AWS.name(), List.of(current), List.of(requested), null, Map.of()));
+    }
+
+    @Test
+    void findVerticalScaleIncompatibilityTestWhenCompatible() {
+        Optional<VmType> current = vmTypeOptional(INSTANCE_TYPE_M5_XLARGE, 16, 4, null, null);
+        Optional<VmType> requested = vmTypeOptional(INSTANCE_TYPE_M5_2XLARGE, 32, 8, null, null);
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        Optional<String> result = underTest.findVerticalScaleIncompatibility("AWS", List.of(current), requested, null, Map.of(), CdpResourceType.DEFAULT);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findVerticalScaleIncompatibilityTestWhenLessEphemeral() {
+        Optional<VmType> current = vmTypeOptional(INSTANCE_TYPE_M5_XLARGE, 16, 4, null, new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 2, 2, 2, 2));
+        Optional<VmType> requested = vmTypeOptional(INSTANCE_TYPE_M5_2XLARGE, 32, 8, null, new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1));
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        Optional<String> result = underTest.findVerticalScaleIncompatibility("AWS", List.of(current), requested, null, Map.of(), CdpResourceType.DEFAULT);
+
+        assertThat(result).hasValue("The current instancetype m5.xlarge has more Ephemeral Disk than the requested m5.2xlarge.");
+    }
+
+    @Test
+    void findVerticalScaleIncompatibilityTestWhenNotInEveryAvailabilityZone() {
+        Optional<VmType> current = vmTypeOptional(INSTANCE_TYPE_M5_XLARGE, 16, 4, null, null, false, false,
+                List.of(AVAILABILITY_ZONE_1, AVAILABILITY_ZONE_2));
+        Optional<VmType> requested = vmTypeOptional(INSTANCE_TYPE_M5_2XLARGE, 32, 8, null, null, false, false, List.of(AVAILABILITY_ZONE_1));
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        Optional<String> result = underTest.findVerticalScaleIncompatibility("AWS", List.of(current), requested,
+                Set.of(AVAILABILITY_ZONE_1, AVAILABILITY_ZONE_2), Map.of(), CdpResourceType.DEFAULT);
+
+        assertThat(result).hasValueSatisfying(reason -> assertThat(reason).startsWith("Stack is MultiAz enabled but requested instance type is not supported"));
+    }
+
+    @Test
+    void findVerticalScaleIncompatibilityTestWhenRequestedDoesNotExist() {
+        Optional<VmType> current = vmTypeOptional(INSTANCE_TYPE_M5_XLARGE, 16, 4, null, null);
+
+        Optional<String> result = underTest.findVerticalScaleIncompatibility("AWS", List.of(current), Optional.empty(), null, Map.of(),
+                CdpResourceType.DEFAULT);
+
+        assertThat(result).hasValue("The requested instancetype does not exist on provider side.");
     }
 
     @Test
