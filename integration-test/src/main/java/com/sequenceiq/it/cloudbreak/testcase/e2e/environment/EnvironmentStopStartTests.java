@@ -38,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
@@ -178,6 +179,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .addTags(DX1_TAGS)
                 .when(distroXTestClient.create(), RunningParameter.key("dx1"))
                 .given("dx2", DistroXTestDto.class)
+                    .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext).smallHostGroup().build())
                 .when(distroXTestClient.create(), RunningParameter.key("dx2"))
                 .given("dx1", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("dx1"))

@@ -35,6 +35,19 @@ public class DistroXInstanceGroupsBuilder {
         return this;
     }
 
+    public DistroXInstanceGroupsBuilder smallHostGroup() {
+        distroXInstanceGroupTestDtoList = withHostGroup(testContext, MASTER, COMPUTE, WORKER, GATEWAY);
+        distroXInstanceGroupTestDtoList.forEach(group -> {
+            String groupName = group.getRequest().getName();
+            if (WORKER.getName().equals(groupName)) {
+                group.withNodeCount(1);
+            } else if (COMPUTE.getName().equals(groupName)) {
+                group.withNodeCount(0);
+            }
+        });
+        return this;
+    }
+
     public DistroXInstanceGroupsBuilder verticalScaleHostGroup() {
         distroXInstanceGroupTestDtoList = withHostGroup(testContext, MASTER, COORDINATOR, EXECUTOR);
         VolumeV4TestDto attachedVolumes = testContext.init(VolumeV4TestDto.class, testContext.getCloudPlatform());
