@@ -274,7 +274,9 @@ print_local_agmt_to_seed() {
 }
 
 if [ -x /opt/salt/scripts/freeipa_verify_replica_health.sh ]; then
-  if ! /opt/salt/scripts/freeipa_verify_replica_health.sh; then
+  gate_rc=0
+  /opt/salt/scripts/freeipa_verify_replica_health.sh || gate_rc=$?
+  if [ "$gate_rc" -ne 0 ]; then
     if peer_agmt_has_decoding_error; then
       # Terminal startReplication decoding error (FIPS): re-initialize this replica's
       # domain suffix from the peer. By now this replica's dirsrv NSS/TLS is fully up,
@@ -304,6 +306,15 @@ if [ -x /opt/salt/scripts/freeipa_verify_replica_health.sh ]; then
       echo "Replica ${FQDN} domain-suffix agreement to seed ${FREEIPA_TO_REPLICATE} is stuck on 'Can't acquire busy replica'; the exclusive-access lock is held on the seed and cannot be cleared from here, and a local IPA-stack restart would not help, so the in-service master is not being restarted. Agreement: $(print_local_agmt_to_seed)"
       echo "FreeIPA replication with another FreeIPA server could not be established because it is temporarily busy. The operation will be retried." >&2
       exit 1
+    elif [ "$gate_rc" -eq 3 ]; then
+      # The gate saw no agreement broken: the only ones left are idle (no session
+      # started since dirsrv startup, code 0) that the other direction / other suffix could
+      # not vouch for yet, and an agreement of this replica completed a session, so its
+      # dirsrv is not latched onto a stale ccache. The restart below would not fix anything
+      # and would reset every agreement of this replica back to idle, so only give
+      # replication another window. When every agreement of this replica is idle the gate
+      # returns 1 instead and the restart below still runs.
+      echo "Replication health gate failed only on idle agreements that are not corroborated yet; not restarting the IPA stack, re-verifying"
     else
       echo "Replication health gate failed; breaking stale dirsrv ccache latch and restarting the IPA stack"
       # A plain 'ipactl restart' re-reads the poisoned external ccache. Stop the
@@ -315,7 +326,7 @@ if [ -x /opt/salt/scripts/freeipa_verify_replica_health.sh ]; then
       ipactl start || true
     fi
     if ! /opt/salt/scripts/freeipa_verify_replica_health.sh; then
-      echo "Replication still unhealthy after recovery — replica install cannot proceed"
+      echo "Replication still unhealthy on re-verification — replica install cannot proceed"
       exit 1
     fi
   fi
