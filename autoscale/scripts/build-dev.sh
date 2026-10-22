@@ -17,3 +17,4 @@ set -x
 ./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 autoscale:test --tests=com.sequenceiq.periscope.openapi.OpenApiGenerator
 
 aws s3 cp ./autoscale/build/openapi/autoscale.json "s3://autoscale-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./autoscale/build/openapi/autoscale.json "s3://cloudbreak-swagger/autoscale/openapi-${VERSION}.json" --acl public-read

@@ -17,3 +17,4 @@ set -x
 ./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 externalized-compute:test --tests=com.sequenceiq.externalizedcompute.openapi.OpenApiGenerator
 
 aws s3 cp ./externalized-compute/build/openapi/externalizedcompute.json "s3://externalizedcompute-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./externalized-compute/build/openapi/externalizedcompute.json "s3://cloudbreak-swagger/externalizedcompute/openapi-${VERSION}.json" --acl public-read

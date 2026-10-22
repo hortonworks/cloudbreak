@@ -39,11 +39,29 @@ if [[ "${RUN_SONARQUBE}" == "true" ]]; then
 fi
 
 aws s3 cp ./core/build/openapi/cb.json "s3://cloudbreak-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./core/build/openapi/cb.json "s3://cloudbreak-swagger/core/openapi-${VERSION}.json" --acl public-read
+
 aws s3 cp ./environment/build/openapi/environment.json "s3://environment-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./environment/build/openapi/environment.json "s3://cloudbreak-swagger/environment/openapi-${VERSION}.json" --acl public-read
+
 aws s3 cp ./freeipa/build/openapi/freeipa.json "s3://freeipa-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./freeipa/build/openapi/freeipa.json "s3://cloudbreak-swagger/freeipa/openapi-${VERSION}.json" --acl public-read
+
 aws s3 cp ./redbeams/build/openapi/redbeams.json "s3://redbeams-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./redbeams/build/openapi/redbeams.json "s3://cloudbreak-swagger/redbeams/openapi-${VERSION}.json" --acl public-read
+
 aws s3 cp ./datalake/build/openapi/datalake.json "s3://datalake-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./datalake/build/openapi/datalake.json "s3://cloudbreak-swagger/datalake/openapi-${VERSION}.json" --acl public-read
+
 aws s3 cp ./autoscale/build/openapi/autoscale.json "s3://autoscale-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./autoscale/build/openapi/autoscale.json "s3://cloudbreak-swagger/autoscale/openapi-${VERSION}.json" --acl public-read
+
 aws s3 cp ./externalized-compute/build/openapi/externalizedcompute.json "s3://externalizedcompute-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./externalized-compute/build/openapi/externalizedcompute.json "s3://cloudbreak-swagger/externalizedcompute/openapi-${VERSION}.json" --acl public-read
+
 aws s3 cp ./environment-remote/build/openapi/remoteenvironment.json "s3://remoteenvironment-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./environment-remote/build/openapi/remoteenvironment.json "s3://cloudbreak-swagger/remoteenvironment/openapi-${VERSION}.json" --acl public-read
+
 aws s3 cp ./maintenance/build/openapi/maintenance.json "s3://maintenance-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./maintenance/build/openapi/maintenance.json "s3://cloudbreak-swagger/maintenance/openapi-${VERSION}.json" --acl public-read
+

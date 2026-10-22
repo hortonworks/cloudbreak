@@ -17,3 +17,4 @@ set -x
 ./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 environment-remote:test --tests=com.sequenceiq.remoteenvironment.openapi.OpenApiGenerator
 
 aws s3 cp ./environment-remote/build/openapi/remoteenvironment.json "s3://remoteenvironment-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./environment-remote/build/openapi/remoteenvironment.json "s3://cloudbreak-swagger/remoteenvironment/openapi-${VERSION}.json" --acl public-read

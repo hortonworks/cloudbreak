@@ -17,3 +17,4 @@ set -x
 ./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 datalake:test --tests=com.sequenceiq.datalake.openapi.OpenApiGenerator
 
 aws s3 cp ./datalake/build/openapi/datalake.json "s3://datalake-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./datalake/build/openapi/datalake.json "s3://cloudbreak-swagger/datalake/openapi-${VERSION}.json" --acl public-read
