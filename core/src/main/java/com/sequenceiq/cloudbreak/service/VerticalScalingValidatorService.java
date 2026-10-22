@@ -6,13 +6,16 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_VOLUMES;
 import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_VOLUMES_ONLY;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALE_INSTANCE_TYPES_NOT_IN_TEMPLATE;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -61,6 +64,7 @@ import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValida
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
@@ -71,6 +75,8 @@ import com.sequenceiq.common.model.Architecture;
 public class VerticalScalingValidatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VerticalScalingValidatorService.class);
+
+    private static final String UNKNOWN_EVENT_TYPE = "UNKNOWN";
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -107,6 +113,9 @@ public class VerticalScalingValidatorService {
 
     @Inject
     private TemplateValidatorAndUpdater templateValidatorAndUpdater;
+
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
 
     @Autowired
     private StackService stackService;
@@ -174,7 +183,7 @@ public class VerticalScalingValidatorService {
         }
     }
 
-    public void validateInstanceType(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
+    public void validateInstanceType(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request, boolean notify) {
         String group = verticalScaleV4Request.getGroup();
         Optional<InstanceGroup> instanceGroupOptional = stack.getInstanceGroups()
                 .stream()
@@ -192,6 +201,14 @@ public class VerticalScalingValidatorService {
                     ? instanceGroupService.findAvailabilityZonesByStackIdAndGroupId(instanceGroup.getId())
                     : null;
             List<String> currentInstanceTypes = getCurrentInstanceTypes(instanceGroup);
+            List<String> instanceTypesNotInTemplate = findInstanceTypesNotInTemplate(currentInstanceTypes, instanceGroup.getTemplate());
+            if (!instanceTypesNotInTemplate.isEmpty()) {
+                LOGGER.info("There are instance types {} in the group {} that are not present in the template, validating the vertical scale against all " +
+                        "of the current instance types {}.", instanceTypesNotInTemplate, instanceGroup.getGroupName(), currentInstanceTypes);
+                if (notify) {
+                    notifyAboutInstanceTypesNotInTemplate(stack, instanceGroup, instanceTypesNotInTemplate);
+                }
+            }
             Credential credential = credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
             Json attributes = instanceGroup.getTemplate().getAttributes();
@@ -202,13 +219,26 @@ public class VerticalScalingValidatorService {
                     CdpResourceType.DEFAULT,
                     Map.of(ARCHITECTURE, Architecture.ALL_ARCHITECTURE));
             String zoneForLookup = resolveZone(availabilityZone, instanceGroupAvailabilityZones, allVmTypes.getCloudVmResponses(), region);
-            verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
-                    stack.getCloudPlatform(),
-                    getInstances(zoneForLookup, currentInstanceTypes, allVmTypes),
-                    getInstances(zoneForLookup, allRequestedInstanceTypes, allVmTypes),
-                    instanceGroupAvailabilityZones,
-                    attributes == null ? Map.of() : attributes.getMap()
-            );
+            List<Optional<VmType>> currentInstances = getInstances(zoneForLookup, currentInstanceTypes, allVmTypes);
+            List<Optional<VmType>> requestedInstances = getInstances(zoneForLookup, allRequestedInstanceTypes, allVmTypes);
+            try {
+                verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
+                        stack.getCloudPlatform(),
+                        currentInstances,
+                        requestedInstances,
+                        instanceGroupAvailabilityZones,
+                        attributes == null ? Map.of() : attributes.getMap()
+                );
+            } catch (BadRequestException e) {
+                if (instanceTypesNotInTemplate.isEmpty()) {
+                    throw e;
+                }
+                throw new BadRequestException(String.format("The instance type(s) %s of the instances in host group '%s' are not among the expected " +
+                                "instance types %s, so the requested instance type must be compatible with all instance types currently in use (%s). %s",
+                        String.join(", ", instanceTypesNotInTemplate), instanceGroup.getGroupName(),
+                        String.join(", ", getTemplateInstanceTypes(instanceGroup.getTemplate())), String.join(", ", currentInstanceTypes),
+                        e.getMessage()), e);
+            }
         } else {
             throw new BadRequestException(String.format("Define a group which exists in Cluster. It can be [%s].",
                     stack.getInstanceGroups()
@@ -220,28 +250,39 @@ public class VerticalScalingValidatorService {
     }
 
     private List<String> getCurrentInstanceTypes(InstanceGroup instanceGroup) {
-        String templateInstanceType = instanceGroup.getTemplate().getInstanceType();
-        List<String> allProviderInstanceTypes = instanceGroup.getNotTerminatedAndNotZombieInstanceMetaDataSet().stream()
-                .filter(instanceMetaData -> instanceMetaData.getProviderInstanceType() != null)
+        List<String> providerInstanceTypes = collectProviderInstanceTypes(instanceGroup);
+        return providerInstanceTypes.isEmpty() ? List.of(instanceGroup.getTemplate().getInstanceType()) : providerInstanceTypes;
+    }
+
+    private List<String> collectProviderInstanceTypes(InstanceGroup instanceGroup) {
+        return instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getProviderInstanceType)
-                .distinct()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)))
+                .stream()
                 .toList();
-        if (!allProviderInstanceTypes.isEmpty()) {
-            // Compare case-insensitively: provider casing may differ from the template (e.g. Azure may
-            // surface "standard_d8_v3" while the template stores "Standard_D8_v3").
-            Set<String> templateInstanceTypesLowerSet = instanceGroup.getTemplate().getAllInstanceTypesLowerCase();
-            if (allProviderInstanceTypes.stream().map(String::toLowerCase).allMatch(templateInstanceTypesLowerSet::contains)) {
-                return allProviderInstanceTypes;
-            } else {
-                List<String> instanceTypesNotInTemplate = allProviderInstanceTypes.stream()
-                        .map(String::toLowerCase)
-                        .filter(Predicate.not(templateInstanceTypesLowerSet::contains))
-                        .toList();
-                throw new BadRequestException(String.format("There are actual instance types '%s' in the group '%s' that are not present in the template.",
-                        instanceTypesNotInTemplate, instanceGroup.getGroupName()));
-            }
-        }
-        return List.of(templateInstanceType);
+    }
+
+    private List<String> findInstanceTypesNotInTemplate(List<String> providerInstanceTypes, Template template) {
+        Set<String> templateInstanceTypesLowerCase = template.getAllInstanceTypesLowerCase();
+        return providerInstanceTypes.stream()
+                .filter(instanceType -> !templateInstanceTypesLowerCase.contains(instanceType.toLowerCase(Locale.ROOT)))
+                .toList();
+    }
+
+    private void notifyAboutInstanceTypesNotInTemplate(Stack stack, InstanceGroup instanceGroup, List<String> instanceTypesNotInTemplate) {
+        cloudbreakEventService.fireCloudbreakInstanceGroupEvent(stack.getId(), eventType(stack), instanceGroup.getGroupName(),
+                STACK_VERTICALSCALE_INSTANCE_TYPES_NOT_IN_TEMPLATE,
+                List.of(instanceGroup.getGroupName(), String.join(", ", instanceTypesNotInTemplate),
+                        String.join(", ", getTemplateInstanceTypes(instanceGroup.getTemplate()))));
+    }
+
+    private List<String> getTemplateInstanceTypes(Template template) {
+        return getAllInstanceTypes(template.getInstanceType(), template.getFallbackInstanceTypesAsList());
+    }
+
+    private String eventType(Stack stack) {
+        return stack.getStatus() == null ? UNKNOWN_EVENT_TYPE : stack.getStatus().name();
     }
 
     private List<String> getAllInstanceTypes(String instanceType, List<String> fallbackInstanceTypes) {
@@ -262,16 +303,6 @@ public class VerticalScalingValidatorService {
                 || verticalScaleV4Request.getTemplate().getTemporaryStorage() != null;
     }
 
-    private Optional<VmType> getInstance(String zone, String instanceType, CloudVmTypes allVmTypes) {
-        Set<VmType> vmTypes = allVmTypes.getCloudVmResponses().get(zone);
-        if (vmTypes == null) {
-            throw new BadRequestException(String.format("No VM types found for zone '%s'.", zone));
-        }
-        return vmTypes.stream()
-                .filter(e -> e.getValue().equals(instanceType))
-                .findFirst();
-    }
-
     private List<Optional<VmType>> getInstances(String zone, List<String> instanceTypes, CloudVmTypes allVmTypes) {
         Set<VmType> vmTypesInZone = allVmTypes.getCloudVmResponses().get(zone);
         if (vmTypesInZone == null) {
@@ -279,7 +310,7 @@ public class VerticalScalingValidatorService {
         }
         return instanceTypes.stream()
                 .map(instanceType -> vmTypesInZone.stream()
-                        .filter(vmType -> vmType.getValue().equals(instanceType))
+                        .filter(vmType -> vmType.getValue().equalsIgnoreCase(instanceType))
                         .findFirst())
                 .collect(Collectors.toList());
     }
@@ -293,8 +324,8 @@ public class VerticalScalingValidatorService {
         Set<String> availableZonesFromProvider = cloudVmResponses.keySet();
         Optional<String> instanceGroupZone = instanceGroupAvailabilityZones == null ? Optional.empty()
                 : instanceGroupAvailabilityZones.stream()
-                        .filter(availableZonesFromProvider::contains)
-                        .findFirst();
+                .filter(availableZonesFromProvider::contains)
+                .findFirst();
         if (instanceGroupZone.isPresent()) {
             LOGGER.debug("Using instance group availability zone '{}' for VM type lookup.", instanceGroupZone.get());
             return instanceGroupZone.get();

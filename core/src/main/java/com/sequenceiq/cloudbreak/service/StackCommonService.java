@@ -352,7 +352,7 @@ public class StackCommonService {
     public FlowIdentifier putVerticalScalingInWorkspace(Stack stack, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
         MDCBuilder.buildMdcContext(stack);
         stackVerticalScaleV4Request.setStackId(stack.getId());
-        validateVerticalScalingRequest(stack, stackVerticalScaleV4Request);
+        validateVerticalScalingRequest(stack, stackVerticalScaleV4Request, true);
         verticalScalingValidatorService.validateIfEphemeralVolumesPresent(stack, stackVerticalScaleV4Request.getGroup());
         return clusterCommonService.putVerticalScaling(stack.getResourceCrn(), stackVerticalScaleV4Request);
     }
@@ -360,7 +360,7 @@ public class StackCommonService {
     public void validateVerticalScaleInWorkspace(Stack stack, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
         MDCBuilder.buildMdcContext(stack);
         stackVerticalScaleV4Request.setStackId(stack.getId());
-        validateVerticalScalingRequest(stack, stackVerticalScaleV4Request);
+        validateVerticalScalingRequest(stack, stackVerticalScaleV4Request, false);
     }
 
     private void validateScalingRequest(StackView stack, String instanceGroupName, Integer scalingAdjustment) {
@@ -381,10 +381,10 @@ public class StackCommonService {
         nodeCountLimitValidator.validateScale(stack, scalingAdjustment, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
     }
 
-    private void validateVerticalScalingRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
+    private void validateVerticalScalingRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request, boolean notify) {
         verticalScalingValidatorService.validateProvider(stack, "Vertical scaling", verticalScaleV4Request);
         verticalScalingValidatorService.validateRequest(stack, verticalScaleV4Request);
-        verticalScalingValidatorService.validateInstanceType(stack, verticalScaleV4Request);
+        verticalScalingValidatorService.validateInstanceType(stack, verticalScaleV4Request, notify);
         if (stack.getType().equals(StackType.WORKLOAD)) {
             verticalScalingValidatorService.validateIfInstanceAvailable(Crn.safeFromString(stack.getResourceCrn()).getAccountId(),
                     verticalScaleV4Request.getTemplate().getInstanceType(), stack.getArchitecture(),

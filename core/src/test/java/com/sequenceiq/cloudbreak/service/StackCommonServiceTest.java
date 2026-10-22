@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesR
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
@@ -1005,6 +1006,37 @@ class StackCommonServiceTest {
                 stackAddVolumesRequest));
 
         assertEquals("Adding Disk for Azure is not enabled for this account", exception.getMessage());
+    }
+
+    @Test
+    void testPutVerticalScalingInWorkspaceValidatesInstanceTypeWithNotification() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getResourceCrn()).thenReturn("CRN");
+        when(stack.getType()).thenReturn(StackType.DATALAKE);
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+        request.setGroup("compute");
+        when(clusterCommonService.putVerticalScaling("CRN", request)).thenReturn(FLOW_IDENTIFIER);
+
+        FlowIdentifier result = underTest.putVerticalScalingInWorkspace(stack, request);
+
+        assertEquals(FLOW_IDENTIFIER, result);
+        verify(verticalScalingValidatorService).validateInstanceType(stack, request, true);
+        verify(verticalScalingValidatorService).validateIfEphemeralVolumesPresent(stack, "compute");
+    }
+
+    @Test
+    void testValidateVerticalScaleInWorkspaceValidatesInstanceTypeWithoutNotification() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getType()).thenReturn(StackType.DATALAKE);
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+        request.setGroup("compute");
+
+        underTest.validateVerticalScaleInWorkspace(stack, request);
+
+        verify(verticalScalingValidatorService).validateInstanceType(stack, request, false);
+        verifyNoInteractions(clusterCommonService);
     }
 
     @Test

@@ -601,6 +601,24 @@ public class VerticalScaleInstanceProviderTest {
     }
 
     @Test
+    public void testValidateInstanceTypeWithMixedResourceDiskCurrentTypesOnAzureShouldDropBadRequest() {
+        Optional<VmType> currentWithoutResourceDisk = vmTypeOptional("Standard_D4as_v5", 16, 4, null, null, false, false, List.of());
+        Optional<VmType> currentWithResourceDisk = vmTypeOptional("Standard_D4s_v3", 16, 4, null, null, true, false, List.of());
+        Optional<VmType> requestedWithResourceDisk = vmTypeOptional("Standard_D8s_v3", 32, 8, null, null, true, false, List.of());
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
+                underTest.validateInstanceTypeForVerticalScaling("AZURE",
+                        List.of(currentWithResourceDisk, currentWithoutResourceDisk), List.of(requestedWithResourceDisk), null, Map.of()));
+
+        assertEquals("Unable to resize since changing from resource disk to non-resource disk VM size and " +
+                        "vice-versa is not allowed. Please refer to https://aka.ms/AAah4sj for more details.",
+                badRequestException.getMessage());
+    }
+
+    @Test
     void listInstanceTypesTestDeprecatedVmTypesArePropagated() {
         VmType regular = vmType(
                 INSTANCE_TYPE_M5_2XLARGE,

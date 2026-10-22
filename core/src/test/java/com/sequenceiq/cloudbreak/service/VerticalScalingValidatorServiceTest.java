@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALE_INSTANCE_TYPES_NOT_IN_TEMPLATE;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -20,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,6 +34,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -65,11 +70,13 @@ import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.OrchestratorType;
@@ -121,6 +128,9 @@ public class VerticalScalingValidatorServiceTest {
 
     @Mock
     private TemplateValidatorAndUpdater templateValidatorAndUpdater;
+
+    @Mock
+    private CloudbreakEventService cloudbreakEventService;
 
     @Test
     public void testCloudPlatformVariantAWSInValidateRequest() {
@@ -361,7 +371,7 @@ public class VerticalScalingValidatorServiceTest {
         stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
 
-        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
 
         verify(instanceGroupService, times(1)).findAvailabilityZonesByStackIdAndGroupId(any());
         verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
@@ -420,7 +430,7 @@ public class VerticalScalingValidatorServiceTest {
         stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
 
-        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
 
         verify(verticalScaleInstanceProvider, times(1))
                 .validateInstanceTypeForVerticalScaling(any(), any(), any(), eq(Set.of("us-west2-a", "us-west2-b")), any());
@@ -476,7 +486,7 @@ public class VerticalScalingValidatorServiceTest {
         stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
 
-        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
 
         verify(verticalScaleInstanceProvider, times(1))
                 .validateInstanceTypeForVerticalScaling(any(), any(), any(), eq(Set.of("1", "2", "3")), any());
@@ -523,7 +533,7 @@ public class VerticalScalingValidatorServiceTest {
         stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
 
-        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
 
         verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
@@ -573,7 +583,7 @@ public class VerticalScalingValidatorServiceTest {
         stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
 
-        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
 
         verify(credentialClientService, times(1)).getByEnvironmentCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
@@ -595,7 +605,7 @@ public class VerticalScalingValidatorServiceTest {
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+            underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
         });
 
         assertEquals("Define a group which exists in Cluster. It can be [].", badRequestException.getMessage());
@@ -932,9 +942,9 @@ public class VerticalScalingValidatorServiceTest {
         template.setFallbackInstanceTypes(new Json(List.of(fallbackInstanceType)));
 
         InstanceGroup instanceGroup = instanceGroup(instanceGroupNameInRequest, templateInstanceType, template);
-        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData imd1 = new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        InstanceMetaData imd1 = new InstanceMetaData();
         imd1.setProviderInstanceType(actualProviderInstanceType1);
-        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData imd2 = new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        InstanceMetaData imd2 = new InstanceMetaData();
         imd2.setProviderInstanceType(actualProviderInstanceType2);
         instanceGroup.setInstanceMetaData(Set.of(imd1, imd2));
 
@@ -964,39 +974,208 @@ public class VerticalScalingValidatorServiceTest {
         stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
 
-        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
 
         verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), any(), isNull(), any());
     }
 
     @Test
-    public void testValidateInstanceTypeWithProviderTypeNotInTemplateThrowsBadRequest() {
-        String instanceGroupNameInRequest = "compute";
-        String templateInstanceType = "m3.xlarge";
-        String actualProviderInstanceType = "m3.4xlarge";
-
+    public void testValidateInstanceTypeWithProviderTypeNotInTemplateValidatesAllCurrentTypesAndNotifies() {
+        VmType templateVmType = vmType("m3.xlarge", 1, 1, null, null, List.of("1"));
+        VmType unexpectedVmType = vmType("m3.4xlarge", 4, 4, null, null, List.of("1"));
+        VmType requestedVmType = vmType("m3.8xlarge", 8, 8, null, null, List.of("1"));
         Template template = new Template();
         template.setInstanceStorageCount(0);
+        template.setFallbackInstanceTypes(new Json(List.of("m3.2xlarge")));
+        InstanceGroup instanceGroup = instanceGroup("compute", "m3.xlarge", template);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData("i-1", "m3.xlarge", InstanceStatus.SERVICES_HEALTHY),
+                instanceMetaData("i-2", "m3.4xlarge", InstanceStatus.SERVICES_HEALTHY)));
+        setupInstanceTypeValidation(instanceGroup, templateVmType, unexpectedVmType, requestedVmType);
 
-        InstanceGroup instanceGroup = instanceGroup(instanceGroupNameInRequest, templateInstanceType, template);
-        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData imd1 = new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
-        imd1.setProviderInstanceType(actualProviderInstanceType);
-        instanceGroup.setInstanceMetaData(Set.of(imd1));
+        underTest.validateInstanceType(stack, verticalScaleRequest("compute", "m3.8xlarge"), true);
 
-        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        verify(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(),
+                eq(List.of(Optional.of(unexpectedVmType), Optional.of(templateVmType))), eq(List.of(Optional.of(requestedVmType))), isNull(), any());
+        verify(cloudbreakEventService).fireCloudbreakInstanceGroupEvent(1L, "AVAILABLE", "compute", STACK_VERTICALSCALE_INSTANCE_TYPES_NOT_IN_TEMPLATE,
+                List.of("compute", "m3.4xlarge", "m3.xlarge, m3.2xlarge"));
+    }
 
-        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
-        instanceTemplateV4Request.setInstanceType(templateInstanceType);
+    @Test
+    public void testValidateInstanceTypeWithUniformProviderTypeNotInTemplateValidatesItAndNotifies() {
+        VmType templateVmType = vmType("m3.xlarge", 1, 1, null, null, List.of("1"));
+        VmType unexpectedVmType = vmType("m3.4xlarge", 4, 4, null, null, List.of("1"));
+        VmType requestedVmType = vmType("m3.8xlarge", 8, 8, null, null, List.of("1"));
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        InstanceGroup instanceGroup = instanceGroup("compute", "m3.xlarge", template);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData("i-1", "m3.4xlarge", InstanceStatus.SERVICES_HEALTHY),
+                instanceMetaData("i-2", "m3.4xlarge", InstanceStatus.SERVICES_HEALTHY)));
+        setupInstanceTypeValidation(instanceGroup, templateVmType, unexpectedVmType, requestedVmType);
 
-        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
-        stackVerticalScaleV4Request.setStackId(1L);
-        stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
-        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+        underTest.validateInstanceType(stack, verticalScaleRequest("compute", "m3.8xlarge"), true);
+
+        verify(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), eq(List.of(Optional.of(unexpectedVmType))),
+                eq(List.of(Optional.of(requestedVmType))), isNull(), any());
+        verify(cloudbreakEventService).fireCloudbreakInstanceGroupEvent(1L, "AVAILABLE", "compute", STACK_VERTICALSCALE_INSTANCE_TYPES_NOT_IN_TEMPLATE,
+                List.of("compute", "m3.4xlarge", "m3.xlarge"));
+    }
+
+    @Test
+    public void testValidateInstanceTypeWithProviderTypeNotInTemplateNotifiesAndExplainsDriftWhenCompatibilityCheckFails() {
+        VmType templateVmType = vmType("m3.xlarge", 1, 1, null, null, List.of("1"));
+        VmType unexpectedVmType = vmType("m3.4xlarge", 4, 4, null, null, List.of("1"));
+        VmType requestedVmType = vmType("m3.8xlarge", 8, 8, null, null, List.of("1"));
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        template.setFallbackInstanceTypes(new Json(List.of("m3.2xlarge")));
+        InstanceGroup instanceGroup = instanceGroup("compute", "m3.xlarge", template);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData("i-1", "m3.xlarge", InstanceStatus.SERVICES_HEALTHY),
+                instanceMetaData("i-2", "m3.4xlarge", InstanceStatus.SERVICES_HEALTHY)));
+        setupInstanceTypeValidation(instanceGroup, templateVmType, unexpectedVmType, requestedVmType);
+        BadRequestException compatibilityException = new BadRequestException("The current instancetype m3.4xlarge has more Ephemeral Disk " +
+                "than the requested m3.8xlarge.");
+        doThrow(compatibilityException).when(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), any(), any(), any(), any());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.validateInstanceType(stack, stackVerticalScaleV4Request));
-        assertEquals("There are actual instance types '[m3.4xlarge]' in the group 'compute' that are not present in the template.",
+                () -> underTest.validateInstanceType(stack, verticalScaleRequest("compute", "m3.8xlarge"), true));
+
+        assertEquals("The instance type(s) m3.4xlarge of the instances in host group 'compute' are not among the expected instance types " +
+                "m3.xlarge, m3.2xlarge, so the requested instance type must be compatible with all instance types currently in use " +
+                "(m3.4xlarge, m3.xlarge). The current instancetype m3.4xlarge has more Ephemeral Disk than the requested m3.8xlarge.",
                 badRequestException.getMessage());
+        assertEquals(compatibilityException, badRequestException.getCause());
+        verify(cloudbreakEventService).fireCloudbreakInstanceGroupEvent(1L, "AVAILABLE", "compute", STACK_VERTICALSCALE_INSTANCE_TYPES_NOT_IN_TEMPLATE,
+                List.of("compute", "m3.4xlarge", "m3.xlarge, m3.2xlarge"));
+    }
+
+    @Test
+    public void testValidateInstanceTypeWithProviderTypeNotInTemplateExplainsDriftWhenOnlyValidating() {
+        VmType templateVmType = vmType("m3.xlarge", 1, 1, null, null, List.of("1"));
+        VmType unexpectedVmType = vmType("m3.4xlarge", 4, 4, null, null, List.of("1"));
+        VmType requestedVmType = vmType("m3.8xlarge", 8, 8, null, null, List.of("1"));
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        InstanceGroup instanceGroup = instanceGroup("compute", "m3.xlarge", template);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData("i-1", "m3.4xlarge", InstanceStatus.SERVICES_HEALTHY)));
+        setupInstanceTypeValidation(instanceGroup, templateVmType, unexpectedVmType, requestedVmType);
+        doThrow(new BadRequestException("Unable to resize since changing CPU architecture is not supported."))
+                .when(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), any(), any(), any(), any());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateInstanceType(stack, verticalScaleRequest("compute", "m3.8xlarge"), false));
+
+        assertEquals("The instance type(s) m3.4xlarge of the instances in host group 'compute' are not among the expected instance types " +
+                "m3.xlarge, so the requested instance type must be compatible with all instance types currently in use (m3.4xlarge). " +
+                "Unable to resize since changing CPU architecture is not supported.", badRequestException.getMessage());
+        verify(cloudbreakEventService, never()).fireCloudbreakInstanceGroupEvent(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testValidateInstanceTypeWithoutDriftRethrowsCompatibilityErrorUnchanged() {
+        VmType templateVmType = vmType("m3.xlarge", 1, 1, null, null, List.of("1"));
+        VmType requestedVmType = vmType("m3.8xlarge", 8, 8, null, null, List.of("1"));
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        InstanceGroup instanceGroup = instanceGroup("compute", "m3.xlarge", template);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData("i-1", "m3.xlarge", InstanceStatus.SERVICES_HEALTHY)));
+        setupInstanceTypeValidation(instanceGroup, templateVmType, requestedVmType);
+        BadRequestException compatibilityException = new BadRequestException("Unable to resize since changing CPU architecture is not supported.");
+        doThrow(compatibilityException).when(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), any(), any(), any(), any());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateInstanceType(stack, verticalScaleRequest("compute", "m3.8xlarge"), true));
+
+        assertEquals(compatibilityException, badRequestException);
+        verify(cloudbreakEventService, never()).fireCloudbreakInstanceGroupEvent(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testValidateInstanceTypeWithProviderTypeNotInTemplateDoesNotNotifyWhenOnlyValidating() {
+        VmType templateVmType = vmType("m3.xlarge", 1, 1, null, null, List.of("1"));
+        VmType unexpectedVmType = vmType("m3.4xlarge", 4, 4, null, null, List.of("1"));
+        VmType requestedVmType = vmType("m3.8xlarge", 8, 8, null, null, List.of("1"));
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        InstanceGroup instanceGroup = instanceGroup("compute", "m3.xlarge", template);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData("i-1", "m3.4xlarge", InstanceStatus.SERVICES_HEALTHY)));
+        setupInstanceTypeValidation(instanceGroup, templateVmType, unexpectedVmType, requestedVmType);
+
+        underTest.validateInstanceType(stack, verticalScaleRequest("compute", "m3.8xlarge"), false);
+
+        verify(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), eq(List.of(Optional.of(unexpectedVmType))),
+                eq(List.of(Optional.of(requestedVmType))), isNull(), any());
+        verify(cloudbreakEventService, never()).fireCloudbreakInstanceGroupEvent(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testValidateInstanceTypeIgnoresInstancesDeletedOnProviderSide() {
+        VmType templateVmType = vmType("m3.xlarge", 1, 1, null, null, List.of("1"));
+        VmType staleVmType = vmType("m3.4xlarge", 4, 4, null, null, List.of("1"));
+        VmType requestedVmType = vmType("m3.8xlarge", 8, 8, null, null, List.of("1"));
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        InstanceGroup instanceGroup = instanceGroup("compute", "m3.xlarge", template);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData("i-1", "m3.xlarge", InstanceStatus.SERVICES_HEALTHY),
+                instanceMetaData("i-2", "m3.4xlarge", InstanceStatus.DELETED_ON_PROVIDER_SIDE),
+                instanceMetaData("i-3", "m3.4xlarge", InstanceStatus.DELETED_BY_PROVIDER)));
+        setupInstanceTypeValidation(instanceGroup, templateVmType, staleVmType, requestedVmType);
+
+        underTest.validateInstanceType(stack, verticalScaleRequest("compute", "m3.8xlarge"), true);
+
+        verify(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), eq(List.of(Optional.of(templateVmType))),
+                eq(List.of(Optional.of(requestedVmType))), isNull(), any());
+        verify(cloudbreakEventService, never()).fireCloudbreakInstanceGroupEvent(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testValidateInstanceTypeResolvesProviderTypesCaseInsensitivelyAndDeduplicatesThem() {
+        VmType templateVmType = vmType("Standard_D8_v3", 1, 1, null, null, List.of("1"));
+        VmType requestedVmType = vmType("Standard_D16_v3", 2, 2, null, null, List.of("1"));
+        Template template = new Template();
+        template.setInstanceStorageCount(0);
+        InstanceGroup instanceGroup = instanceGroup("compute", "Standard_D8_v3", template);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData("i-1", "standard_d8_v3", InstanceStatus.SERVICES_HEALTHY),
+                instanceMetaData("i-2", "STANDARD_D8_V3", InstanceStatus.SERVICES_HEALTHY)));
+        setupInstanceTypeValidation(instanceGroup, templateVmType, requestedVmType);
+
+        underTest.validateInstanceType(stack, verticalScaleRequest("compute", "Standard_D16_v3"), true);
+
+        verify(verticalScaleInstanceProvider).validateInstanceTypeForVerticalScaling(any(), eq(List.of(Optional.of(templateVmType))),
+                eq(List.of(Optional.of(requestedVmType))), isNull(), any());
+        verify(cloudbreakEventService, never()).fireCloudbreakInstanceGroupEvent(any(), any(), any(), any(), any());
+    }
+
+    private void setupInstanceTypeValidation(InstanceGroup instanceGroup, VmType... vmTypes) {
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        lenient().when(stack.getId()).thenReturn(1L);
+        lenient().when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        Credential credential = credential();
+        when(credentialClientService.getByEnvironmentCrn(eq("crn"))).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(eq(credential))).thenReturn(extendedCloudCredential());
+        when(stack.isMultiAz()).thenReturn(false);
+        when(stack.getRegion()).thenReturn("eu");
+        when(stack.getAvailabilityZone()).thenReturn("eu1");
+        when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes("eu1", vmTypes));
+    }
+
+    private StackVerticalScaleV4Request verticalScaleRequest(String group, String instanceType) {
+        InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
+        instanceTemplateV4Request.setInstanceType(instanceType);
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
+        stackVerticalScaleV4Request.setStackId(1L);
+        stackVerticalScaleV4Request.setGroup(group);
+        stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
+        return stackVerticalScaleV4Request;
+    }
+
+    private InstanceMetaData instanceMetaData(String instanceId, String providerInstanceType, InstanceStatus instanceStatus) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceId(instanceId);
+        instanceMetaData.setProviderInstanceType(providerInstanceType);
+        instanceMetaData.setInstanceStatus(instanceStatus);
+        return instanceMetaData;
     }
 
     @Test
@@ -1009,7 +1188,7 @@ public class VerticalScalingValidatorServiceTest {
         template.setInstanceStorageCount(0);
 
         InstanceGroup instanceGroup = instanceGroup(instanceGroupNameInRequest, templateInstanceType, template);
-        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData imd1 = new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        InstanceMetaData imd1 = new InstanceMetaData();
         imd1.setProviderInstanceType(providerInstanceTypeDifferentCase);
         instanceGroup.setInstanceMetaData(Set.of(imd1));
 
@@ -1038,7 +1217,7 @@ public class VerticalScalingValidatorServiceTest {
         stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
 
-        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
 
         verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), any(), isNull(), any());
     }
@@ -1055,14 +1234,14 @@ public class VerticalScalingValidatorServiceTest {
         template.setInstanceStorageCount(0);
 
         InstanceGroup instanceGroup = instanceGroup(instanceGroupNameInRequest, templateInstanceType, template);
-        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData terminated =
-                new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        InstanceMetaData terminated =
+                new InstanceMetaData();
         terminated.setProviderInstanceType(terminatedProviderInstanceType);
-        terminated.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED);
-        com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData zombie =
-                new com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData();
+        terminated.setInstanceStatus(InstanceStatus.TERMINATED);
+        InstanceMetaData zombie =
+                new InstanceMetaData();
         zombie.setProviderInstanceType(terminatedProviderInstanceType);
-        zombie.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ZOMBIE);
+        zombie.setInstanceStatus(InstanceStatus.ZOMBIE);
         instanceGroup.setInstanceMetaData(Set.of(terminated, zombie));
 
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
@@ -1090,7 +1269,7 @@ public class VerticalScalingValidatorServiceTest {
         stackVerticalScaleV4Request.setGroup(instanceGroupNameInRequest);
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
 
-        underTest.validateInstanceType(stack, stackVerticalScaleV4Request);
+        underTest.validateInstanceType(stack, stackVerticalScaleV4Request, true);
 
         verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), any(), isNull(), any());
     }
