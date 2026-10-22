@@ -16,4 +16,4 @@ set -x
 
 ./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 maintenance:test --tests=com.sequenceiq.maintenance.openapi.OpenApiGenerator
 
-aws s3 cp ./maintenance/build/openapi/maintenance.json "s3://maintenance-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./maintenance/build/openapi/maintenance.json "s3://cloudbreak-swagger/maintenance/openapi-${VERSION}.json" --acl public-read

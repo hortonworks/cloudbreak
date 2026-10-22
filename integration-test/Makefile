@@ -102,15 +102,6 @@ schema-migration:
 swagger-compare:
 	CB_VERSION=$(CB_VERSION) CB_TARGET_BRANCH=$(CB_TARGET_BRANCH) ./scripts/openapi-check.sh
 
-upload-s3:
-	aws s3 cp ./apidefinitions/cb.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read
-	aws s3 cp ./apidefinitions/environment.json s3://environment-swagger/swagger-$(VERSION).json --acl public-read
-	aws s3 cp ./apidefinitions/freeipa.json s3://freeipa-swagger/swagger-$(VERSION).json --acl public-read
-	aws s3 cp ./apidefinitions/redbeams.json s3://redbeams-swagger/swagger-$(VERSION).json --acl public-read
-	aws s3 cp ./apidefinitions/datalake.json s3://datalake-swagger/swagger-$(VERSION).json --acl public-read
-	aws s3 cp ./apidefinitions/autoscale.json s3://autoscale-swagger/swagger-$(VERSION).json --acl public-read
-	aws s3 cp ./apidefinitions/maintenance.json s3://maintenance-swagger/swagger-$(VERSION).json --acl public-read
-
 start-integration-test:
 	./scripts/start-integration-test.sh
 

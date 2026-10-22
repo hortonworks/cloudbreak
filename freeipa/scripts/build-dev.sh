@@ -30,3 +30,4 @@ set -x
 ./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 freeipa:test --tests=com.sequenceiq.freeipa.openapi.OpenApiGenerator
 
 aws s3 cp ./freeipa/build/openapi/freeipa.json "s3://freeipa-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./freeipa/build/openapi/freeipa.json "s3://cloudbreak-swagger/freeipa/openapi-${VERSION}.json" --acl public-read

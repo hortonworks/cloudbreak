@@ -17,3 +17,4 @@ set -x
 ./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 redbeams:test --tests=com.sequenceiq.redbeams.openapi.OpenApiGenerator
 
 aws s3 cp ./redbeams/build/openapi/redbeams.json "s3://redbeams-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./redbeams/build/openapi/redbeams.json "s3://cloudbreak-swagger/redbeams/openapi-${VERSION}.json" --acl public-read

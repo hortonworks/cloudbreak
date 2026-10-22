@@ -17,3 +17,4 @@ set -x
 ./gradlew -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 core:test --tests=com.sequenceiq.cloudbreak.openapi.OpenApiGenerator
 
 aws s3 cp ./core/build/openapi/cb.json "s3://cloudbreak-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./core/build/openapi/cb.json "s3://cloudbreak-swagger/core/openapi-${VERSION}.json" --acl public-read
