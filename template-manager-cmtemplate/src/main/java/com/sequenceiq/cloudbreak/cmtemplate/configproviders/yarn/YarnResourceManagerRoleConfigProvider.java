@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CDPD_VERSION_7_2_11;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_5;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NAME_NODE_INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_SPOT;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_WORKER;
 
 import java.util.LinkedList;
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveRoles;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
@@ -28,13 +31,18 @@ public class YarnResourceManagerRoleConfigProvider extends AbstractRoleConfigPro
 
     private static final String RESOURCE_MANAGER_YARN_SITE_SAFETY_VALVE = "resourcemanager_config_safety_valve";
 
+    private static final String AM_PLACEMENT_EXCLUSION_WITH_NODE_ATTRIBUTES = "yarn_resourcemanager_am_placement_exclusion_with_node_attributes";
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.RESOURCEMANAGER:
                 List<ApiClusterTemplateConfig> configs = new LinkedList<>();
-                if (isContainerPlacementConfigRequired(source)) {
+                if (isStackVersionNewerOrEqualThan(source, CDPD_VERSION_7_2_11)) {
                     configs.add(config(RESOURCE_MANAGER_YARN_SITE_SAFETY_VALVE, getYarnSiteContainerPlacementSafetyValveValues()));
+                }
+                if (isStackVersionNewerOrEqualThan(source, CLOUDERA_STACK_VERSION_7_3_5)) {
+                    configs.add(config(AM_PLACEMENT_EXCLUSION_WITH_NODE_ATTRIBUTES, getAmPlacementExclusionValue()));
                 }
                 if (isLlapBasedConfigNeeded((CmTemplateProcessor) source.getBlueprintView().getProcessor())) {
                     configs.add(config(CAPACITY_SCHEDULER_SAFETY_VALVE, ConfigUtils.getSafetyValveConfiguration(getCapacitySchedulerValveValue())));
@@ -59,7 +67,7 @@ public class YarnResourceManagerRoleConfigProvider extends AbstractRoleConfigPro
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return isLlapBasedConfigNeeded(cmTemplateProcessor) || isContainerPlacementConfigRequired(source);
+        return isLlapBasedConfigNeeded(cmTemplateProcessor) || isStackVersionNewerOrEqualThan(source, CDPD_VERSION_7_2_11);
     }
 
     private boolean isLlapBasedConfigNeeded(CmTemplateProcessor cmTemplateProcessor) {
@@ -97,10 +105,8 @@ public class YarnResourceManagerRoleConfigProvider extends AbstractRoleConfigPro
                 + ConfigUtils.getSafetyValveProperty("yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms", "10");
     }
 
-    private boolean isContainerPlacementConfigRequired(TemplatePreparationObject source) {
-        String cdpdVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
-                "" : source.getBlueprintView().getProcessor().getStackVersion();
-        return isVersionNewerOrEqualThanLimited(cdpdVersion, CDPD_VERSION_7_2_11);
+    private boolean isStackVersionNewerOrEqualThan(TemplatePreparationObject source, Versioned minimumVersion) {
+        return isVersionNewerOrEqualThanLimited(getCdhVersion(source), minimumVersion);
     }
 
     private String getYarnSiteContainerPlacementSafetyValveValues() {
@@ -112,5 +118,9 @@ public class YarnResourceManagerRoleConfigProvider extends AbstractRoleConfigPro
                         String.format("ORDER NODES IN %s WITH %s > %s", ATTRIBUTE_NAME_NODE_INSTANCE_TYPE,
                                 ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE, ATTRIBUTE_NODE_INSTANCE_TYPE_WORKER));
 
+    }
+
+    private String getAmPlacementExclusionValue() {
+        return String.format("EXCLUDE NODES IN %s WITH %s", ATTRIBUTE_NAME_NODE_INSTANCE_TYPE, ATTRIBUTE_NODE_INSTANCE_TYPE_SPOT);
     }
 }
