@@ -75,7 +75,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         Image currentImage = getCurrentImage(event);
         ImageChangeDto imageChangeDto = getImageChangeDto(event, currentImage);
         StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
-        boolean lockComponents = lockedComponentService.isComponentsLocked(stack, event.getImageId());
+        boolean lockComponents = imageChangeDto.getComponents() == null && lockedComponentService.isComponentsLocked(stack, event.getImageId());
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.addAll(getFullSyncEvent(event));
@@ -122,7 +122,8 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     }
 
     private ImageChangeDto getImageChangeDto(DataLakeUpgradeFlowChainTriggerEvent event, Image currentImage) {
-        return new ImageChangeDto(event.getResourceId(), event.getImageId(), currentImage.getImageCatalogName(), currentImage.getImageCatalogUrl());
+        return event.getImageChangeDto() != null ? event.getImageChangeDto()
+                : new ImageChangeDto(event.getResourceId(), event.getImageId(), currentImage.getImageCatalogName(), currentImage.getImageCatalogUrl());
     }
 
     private List<ClusterUpgradeValidationTriggerEvent> getClusterUpgradeValidationTriggerEvent(

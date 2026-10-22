@@ -1,10 +1,15 @@
 package com.sequenceiq.distrox.v1.distrox;
 
 import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -19,7 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
@@ -36,13 +46,20 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.UpgradeComponentsConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.BaseImageUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesFactory;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeComponents;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOptionsResponseFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
@@ -106,6 +123,15 @@ class StackUpgradeOperationsTest {
 
     @Mock
     private ClusterUpgradeCandidateFilterService clusterUpgradeCandidateFilterService;
+
+    @Mock
+    private BaseImageUpgradeService baseImageUpgradeService;
+
+    @Mock
+    private ClusterUpgradePropertiesFactory clusterUpgradePropertiesFactory;
+
+    @Mock
+    private UpgradeOptionsResponseFactory upgradeOptionsResponseFactory;
 
     private NameOrCrn nameOrCrn;
 
@@ -425,6 +451,54 @@ class StackUpgradeOperationsTest {
         cluster.setId(STACK_ID);
         stack.setCluster(cluster);
         return stack;
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true,true", "true,false", "false,true", "false,false"})
+    void resolvesBaseImageWithRequestedComponentsForDatalake(boolean reinitiation, boolean preparation) {
+        Stack stack = createStack(StackType.DATALAKE);
+        UpgradeV4Request request = new UpgradeV4Request();
+        request.setComponents(createComponents());
+        request.setSkipDataHubValidation(false);
+        request.setInternalUpgradeSettings(InternalUpgradeSettings.builder().withUpgradeReinitiation(reinitiation).withUpgradePreparation(preparation).build());
+        UpgradeComponents components = UpgradeComponentsConverter.fromRequest(request.getComponents());
+        ImageChangeDto imageChange = new ImageChangeDto(STACK_ID, IMAGE_ID, "catalog", "url", components);
+        if (reinitiation) {
+            request.setImageId(IMAGE_ID);
+            request.setRuntime("7.3.2");
+            when(baseImageUpgradeService.createImageChangeDto(eq(stack), any(UpgradeComponents.class), eq(IMAGE_ID))).thenReturn(imageChange);
+        } else {
+            when(baseImageUpgradeService.createImageChangeDto(eq(stack), any(UpgradeComponents.class))).thenReturn(imageChange);
+        }
+        ClusterUpgradeProperties properties = mock(ClusterUpgradeProperties.class);
+        when(clusterUpgradePropertiesFactory.create(imageChange, false, false, true)).thenReturn(properties);
+        UpgradeV4Response response = createUpgradeResponse();
+        when(upgradeOptionsResponseFactory.createV4Response(properties)).thenReturn(response);
+
+        assertEquals(response, underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request));
+
+        verify(clusterUpgradeAvailabilityService).validateUpgradePreconditions(stack, true, request.getInternalUpgradeSettings());
+        ArgumentCaptor<UpgradeComponents> captured = ArgumentCaptor.forClass(UpgradeComponents.class);
+        if (reinitiation) {
+            verify(baseImageUpgradeService).createImageChangeDto(eq(stack), captured.capture(), eq(IMAGE_ID));
+        } else {
+            verify(baseImageUpgradeService).createImageChangeDto(eq(stack), captured.capture());
+        }
+        assertThat(captured.getValue()).usingRecursiveComparison().isEqualTo(components);
+        if (preparation) {
+            verifyNoInteractions(upgradePreconditionService);
+        } else {
+            verify(upgradePreconditionService).checkForRunningAttachedClusters(ENVIRONMENT_CRN, false, false, ACCOUNT_ID);
+        }
+        verifyNoInteractions(clusterUpgradeCandidateFilterService);
+        verify(clusterUpgradeAvailabilityService, never()).checkForUpgradesByName(any(), anyBoolean(), any(), any(), anyBoolean(), any());
+    }
+
+    private ClouderaManagerV4Request createComponents() {
+        return new ClouderaManagerV4Request().withRepository(new ClouderaManagerRepositoryV4Request()
+                .withVersion("7.13.2.20000-83309838").withBaseUrl("https://build/cm/"))
+                .withProducts(List.of(new ClouderaManagerProductV4Request().withName("CDH")
+                        .withVersion("7.3.2-1.cdh7.3.2.p20000.83281140").withParcel("https://build/cdh/")));
     }
 
 }

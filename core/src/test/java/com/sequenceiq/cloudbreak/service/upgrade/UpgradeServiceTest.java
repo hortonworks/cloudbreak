@@ -1,16 +1,23 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -18,6 +25,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -25,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.converter.UpgradeComponentsConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -87,6 +98,9 @@ public class UpgradeServiceTest {
 
     @Mock
     private ReactorFlowManager flowManager;
+
+    @Mock
+    private BaseImageUpgradeService baseImageUpgradeService;
 
     @Mock
     private BlueprintService blueprintService;
@@ -177,6 +191,54 @@ public class UpgradeServiceTest {
         stack.setWorkspace(workspace);
         stack.setArchitecture(Architecture.ARM64);
         return stack;
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void forwardsComponentsToUpgradeAndPreparation(boolean preparation) {
+        StackDto stack = getStackDto();
+        when(stackDtoService.getByNameOrCrn(OF_CRN, ACCOUNT_ID)).thenReturn(stack);
+        ClouderaManagerV4Request request = createComponents();
+        UpgradeComponents components = UpgradeComponentsConverter.fromRequest(request);
+        ImageChangeDto dto = new ImageChangeDto(stack.getId(), IMAGE_ID, "selected-catalog", "https://selected-catalog", components);
+        ArgumentCaptor<UpgradeComponents> captured = ArgumentCaptor.forClass(UpgradeComponents.class);
+        when(baseImageUpgradeService.createImageChangeDto(eq(stack), captured.capture(), eq(IMAGE_ID))).thenReturn(dto);
+        FlowIdentifier flow = new FlowIdentifier(FlowType.FLOW_CHAIN, "flow");
+        if (preparation) {
+            when(flowManager.triggerClusterUpgradePreparation(stack.getId(), dto, "7.3.2")).thenReturn(flow);
+            assertEquals(flow, underTest.prepareClusterUpgrade(ACCOUNT_ID, OF_CRN, IMAGE_ID, request));
+        } else {
+            when(flowManager.triggerDataLakeClusterUpgrade(stack.getId(), dto, true)).thenReturn(flow);
+            assertEquals(flow, underTest.upgradeCluster(ACCOUNT_ID, OF_CRN, IMAGE_ID, true, request));
+        }
+        assertThat(captured.getValue()).usingRecursiveComparison().isEqualTo(components);
+        verifyNoInteractions(lockedComponentService, componentConfigProviderService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void selectsBaseImageWhenInternalRequestHasNoImageId(boolean preparation) {
+        StackDto stack = getStackDto();
+        when(stackDtoService.getByNameOrCrn(OF_CRN, ACCOUNT_ID)).thenReturn(stack);
+        ClouderaManagerV4Request request = createComponents();
+        UpgradeComponents components = UpgradeComponentsConverter.fromRequest(request);
+        ImageChangeDto dto = new ImageChangeDto(stack.getId(), IMAGE_ID, "catalog", "url", components);
+        when(baseImageUpgradeService.createImageChangeDto(eq(stack), any(UpgradeComponents.class))).thenReturn(dto);
+        if (preparation) {
+            underTest.prepareClusterUpgrade(ACCOUNT_ID, OF_CRN, null, request);
+            verify(flowManager).triggerClusterUpgradePreparation(stack.getId(), dto, "7.3.2");
+        } else {
+            underTest.upgradeCluster(ACCOUNT_ID, OF_CRN, null, false, request);
+            verify(flowManager).triggerDataLakeClusterUpgrade(stack.getId(), dto, false);
+        }
+        verifyNoInteractions(lockedComponentService, componentConfigProviderService);
+    }
+
+    private ClouderaManagerV4Request createComponents() {
+        return new ClouderaManagerV4Request().withRepository(new ClouderaManagerRepositoryV4Request()
+                .withVersion("7.13.2.20000-83309838").withBaseUrl("https://build/cm/"))
+                .withProducts(List.of(new ClouderaManagerProductV4Request().withName("CDH")
+                        .withVersion("7.3.2-1.cdh7.3.2.p20000.83281140").withParcel("https://build/cdh/")));
     }
 
 }

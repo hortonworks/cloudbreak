@@ -230,10 +230,11 @@ public class SdxRuntimeUpgradeService {
     }
 
     private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates) {
-        if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty() || Boolean.TRUE.equals(upgradeRequest.getLockComponents())) {
+        if (Objects.isNull(upgradeRequest) || upgradeRequest.getComponents() != null || upgradeRequest.isEmpty()
+                || Boolean.TRUE.equals(upgradeRequest.getLockComponents())) {
             ImageInfoV4Response imageInfoV4Response = upgradeCandidates.stream().max(ImageInfoV4Response.defaultUpgradeCandidateComparator()).orElseThrow();
             String imageId = imageInfoV4Response.getImageId();
-            LOGGER.debug("Choosing latest image with id {} as either upgrade request is empty or lockComponents is true", imageId);
+            LOGGER.debug("Choosing image {} for explicit components, an empty upgrade request or locked components", imageId);
             return imageId;
         } else {
             String requestImageId = upgradeRequest.getImageId();

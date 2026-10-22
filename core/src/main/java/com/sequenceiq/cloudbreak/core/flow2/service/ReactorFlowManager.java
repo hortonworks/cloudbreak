@@ -307,6 +307,13 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new DataLakeUpgradeFlowChainTriggerEvent(selector, stackId, imageId, rollingUpgradeEnabled));
     }
 
+    public FlowIdentifier triggerDataLakeClusterUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean rollingUpgradeEnabled) {
+        String selector = FlowChainTriggers.DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector,
+                new DataLakeUpgradeFlowChainTriggerEvent(selector, stackId, new Promise<>(), imageChangeDto.getImageId(),
+                        rollingUpgradeEnabled, imageChangeDto));
+    }
+
     public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents, String variant,
             boolean rollingUpgradeEnabled, String runtime) {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;

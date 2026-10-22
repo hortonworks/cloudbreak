@@ -6,12 +6,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -48,7 +46,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
@@ -109,17 +106,18 @@ class StackV4ControllerTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void rejectsComponentsForUnsupportedDatalakePath(boolean prepare) {
-        ClouderaManagerV4Request components =
-                new ClouderaManagerV4Request();
-        assertThrows(BadRequestException.class, () -> {
-            if (prepare) {
-                underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, "image", USER_CRN, components);
-            } else {
-                underTest.upgradeClusterByNameInternal(WORKSPACE_ID, "stack", "image", USER_CRN, false, components);
-            }
-        });
-        verifyNoInteractions(stackUpgradeOperations);
+    void forwardsComponentsForDatalakeUpgradeAndPreparation(boolean prepare) {
+        ClouderaManagerV4Request components = new ClouderaManagerV4Request();
+        FlowIdentifier flow = new FlowIdentifier(FlowType.FLOW_CHAIN, "flow");
+        if (prepare) {
+            when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID, "image", components)).thenReturn(flow);
+            assertSame(flow, doAs(USER_CRN,
+                    () -> underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, "image", USER_CRN, components)));
+        } else {
+            when(stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID, "image", false, components)).thenReturn(flow);
+            assertSame(flow, doAs(USER_CRN,
+                    () -> underTest.upgradeClusterByNameInternal(WORKSPACE_ID, STACK_NAME, "image", USER_CRN, false, components)));
+        }
     }
 
     @Test
@@ -219,7 +217,7 @@ class StackV4ControllerTest {
     @Test
     void prewarmInternalUpgradeStillUsesExistingService() {
         FlowIdentifier flow = new FlowIdentifier(FlowType.FLOW, "pollId");
-        when(stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID, "image", false)).thenReturn(flow);
+        when(stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID, "image", false, null)).thenReturn(flow);
 
         FlowIdentifier result = doAs(USER_CRN,
                 () -> underTest.upgradeClusterByNameInternal(WORKSPACE_ID, STACK_NAME, "image", USER_CRN, false, null));
@@ -231,7 +229,7 @@ class StackV4ControllerTest {
     void testPrepareClusterUpgradeByCrnInternal() {
         String imageId = "imageId";
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
-        when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID, imageId)).thenReturn(flowIdentifier);
+        when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID, imageId, null)).thenReturn(flowIdentifier);
 
         FlowIdentifier result = doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, imageId, USER_CRN, null));
 

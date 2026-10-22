@@ -463,10 +463,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public FlowIdentifier upgradeClusterByNameInternal(Long workspaceId, String name, String imageId, @InitiatorUserCrn String initiatorUserCrn,
             Boolean rollingUpgradeEnabled, ClouderaManagerV4Request components) {
-        if (components != null) {
-            throw new BadRequestException("Component-based Data Lake upgrades are not supported yet.");
-        }
-        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), imageId, rollingUpgradeEnabled);
+        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), imageId,
+                rollingUpgradeEnabled, components);
     }
 
     @Override
@@ -479,10 +477,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public FlowIdentifier prepareClusterUpgradeByCrnInternal(Long workspaceId, String crn, String imageId, @InitiatorUserCrn String initiatorUserCrn,
             ClouderaManagerV4Request components) {
-        if (components != null) {
-            throw new BadRequestException("Component-based Data Lake upgrades are not supported yet.");
-        }
-        return stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), imageId);
+        return stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), imageId, components);
     }
 
     @Override

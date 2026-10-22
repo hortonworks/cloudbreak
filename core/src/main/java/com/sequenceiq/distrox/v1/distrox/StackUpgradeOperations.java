@@ -18,23 +18,33 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.component.PreparedImages;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.converter.UpgradeComponentsConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.BaseImageUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesFactory;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeComponents;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOptionsResponseFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
+import com.sequenceiq.cloudbreak.validation.UpgradeRequestValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -66,6 +76,15 @@ public class StackUpgradeOperations {
     @Inject
     private ClusterUpgradeCandidateFilterService clusterUpgradeCandidateFilterService;
 
+    @Inject
+    private BaseImageUpgradeService baseImageUpgradeService;
+
+    @Inject
+    private ClusterUpgradePropertiesFactory clusterUpgradePropertiesFactory;
+
+    @Inject
+    private UpgradeOptionsResponseFactory upgradeOptionsResponseFactory;
+
     public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, String accountId, boolean keepVariant) {
         LOGGER.debug("Starting to upgrade OS: {}", nameOrCrn);
         return upgradeService.upgradeOs(accountId, nameOrCrn, keepVariant);
@@ -82,6 +101,11 @@ public class StackUpgradeOperations {
         return upgradeService.upgradeCluster(accountId, nameOrCrn, imageId, rollingUpgradeEnabled);
     }
 
+    public FlowIdentifier upgradeCluster(NameOrCrn nameOrCrn, String accountId, String imageId, Boolean rollingUpgradeEnabled,
+            ClouderaManagerV4Request components) {
+        return upgradeService.upgradeCluster(accountId, nameOrCrn, imageId, rollingUpgradeEnabled, components);
+    }
+
     public UpgradeReinitiableV4Response upgradeReinitiable(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         LOGGER.debug("Checking if there is a reinitiable upgrade for cluster: {}", nameOrCrn);
         Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
@@ -93,6 +117,10 @@ public class StackUpgradeOperations {
         return upgradeService.prepareClusterUpgrade(accountId, nameOrCrn, imageId);
     }
 
+    public FlowIdentifier prepareClusterUpgrade(NameOrCrn nameOrCrn, String accountId, String imageId, ClouderaManagerV4Request components) {
+        return upgradeService.prepareClusterUpgrade(accountId, nameOrCrn, imageId, components);
+    }
+
     public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
         return checkForClusterUpgrade(accountId, stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId), request);
     }
@@ -100,6 +128,11 @@ public class StackUpgradeOperations {
     public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull Stack stack, UpgradeV4Request request) {
         MDCBuilder.buildMdcContext(stack);
         stack.setInstanceGroups(instanceGroupService.getByStackAndFetchTemplates(stack.getId()));
+        if (stack.isDatalake() && request.getComponents() != null) {
+            UpgradeV4Response response = resolveBaseImageUpgrade(stack, request);
+            validateAttachedDataHubsForDataLake(accountId, stack, response, request);
+            return response;
+        }
         boolean osUpgrade = Boolean.TRUE.equals(request.getLockComponents()) && StringUtils.isEmpty(request.getRuntime());
         boolean getAllImages = request.getImageId() != null;
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, request.getReplaceVms(),
@@ -111,6 +144,21 @@ public class StackUpgradeOperations {
         validateAttachedDataHubsForDataLake(accountId, stack, upgradeResponse, request);
         LOGGER.debug("Upgrade response after validations: {}", upgradeResponse);
         return upgradeResponse;
+    }
+
+    private UpgradeV4Response resolveBaseImageUpgrade(Stack stack, UpgradeV4Request request) {
+        UpgradeRequestValidator.getComponentsOptionsError(request).ifPresent(error -> {
+            throw new BadRequestException(error);
+        });
+        UpgradeComponents components = UpgradeComponentsConverter.fromRequest(request.getComponents());
+        components.validate();
+        InternalUpgradeSettings settings = Optional.ofNullable(request.getInternalUpgradeSettings()).orElseGet(() -> InternalUpgradeSettings.builder().build());
+        clusterUpgradeAvailabilityService.validateUpgradePreconditions(stack, true, settings);
+        ImageChangeDto imageChangeDto = settings.isUpgradeReinitiation() && StringUtils.isNotBlank(request.getImageId())
+                ? baseImageUpgradeService.createImageChangeDto(stack, components, request.getImageId())
+                : baseImageUpgradeService.createImageChangeDto(stack, components);
+        ClusterUpgradeProperties properties = clusterUpgradePropertiesFactory.create(imageChangeDto, false, isRollingUpgradeEnabled(request), true);
+        return upgradeOptionsResponseFactory.createV4Response(properties);
     }
 
     private void populateCandidatesWithPreparedFlag(Stack stack, UpgradeV4Response upgradeResponse) {

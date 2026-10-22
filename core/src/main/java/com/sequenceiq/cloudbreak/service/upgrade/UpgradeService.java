@@ -6,17 +6,20 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.converter.UpgradeComponentsConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -60,6 +63,9 @@ public class UpgradeService {
 
     @Inject
     private LockedComponentService lockedComponentService;
+
+    @Inject
+    private BaseImageUpgradeService baseImageUpgradeService;
 
     public FlowIdentifier upgradeOsByUpgradeSets(StackView stack, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
         Image image = findImage(stack);
@@ -108,9 +114,37 @@ public class UpgradeService {
         return flowManager.triggerDataLakeClusterUpgrade(stack.getId(), imageId, Boolean.TRUE.equals(rollingUpgradeEnabled));
     }
 
-    public FlowIdentifier prepareClusterUpgrade(String accountId, NameOrCrn stackNameOrCrn, String imageId) {
+    public FlowIdentifier upgradeCluster(String accountId, NameOrCrn stackNameOrCrn, String imageId, Boolean rollingUpgradeEnabled,
+            ClouderaManagerV4Request componentsRequest) {
+        if (componentsRequest == null) {
+            return upgradeCluster(accountId, stackNameOrCrn, imageId, rollingUpgradeEnabled);
+        }
         StackDto stack = stackDtoService.getByNameOrCrn(stackNameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
+        UpgradeComponents components = UpgradeComponentsConverter.fromRequest(componentsRequest);
+        components.validate();
+        ImageChangeDto imageChangeDto = getComponentImageChangeDto(stack, imageId, components);
+        boolean rollingUpgrade = Boolean.TRUE.equals(rollingUpgradeEnabled);
+        LOGGER.info("Starting Data Lake runtime upgrade: runtime={}, imageId={}, rollingUpgradeEnabled={}",
+                components.getRuntimeVersion(), imageChangeDto.getImageId(), rollingUpgrade);
+        return flowManager.triggerDataLakeClusterUpgrade(stack.getId(), imageChangeDto, rollingUpgrade);
+    }
+
+    public FlowIdentifier prepareClusterUpgrade(String accountId, NameOrCrn stackNameOrCrn, String imageId) {
+        return prepareClusterUpgrade(accountId, stackNameOrCrn, imageId, null);
+    }
+
+    public FlowIdentifier prepareClusterUpgrade(String accountId, NameOrCrn stackNameOrCrn, String imageId, ClouderaManagerV4Request componentsRequest) {
+        StackDto stack = stackDtoService.getByNameOrCrn(stackNameOrCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
+        if (componentsRequest != null) {
+            UpgradeComponents components = UpgradeComponentsConverter.fromRequest(componentsRequest);
+            components.validate();
+            ImageChangeDto imageChangeDto = getComponentImageChangeDto(stack, imageId, components);
+            String runtimeVersion = components.getRuntimeVersion();
+            LOGGER.info("Starting Data Lake upgrade preparation: runtime={}, imageId={}", runtimeVersion, imageChangeDto.getImageId());
+            return flowManager.triggerClusterUpgradePreparation(stack.getId(), imageChangeDto, runtimeVersion);
+        }
         if (lockedComponentService.isComponentsLocked(stack, imageId)) {
             throw new BadRequestException("Upgrade preparation is not necessary in case of OS upgrade.");
         }
@@ -118,6 +152,11 @@ public class UpgradeService {
         ImageChangeDto imageChangeDto = getImageChangeDto(imageId, stack.getId(), image);
         String runtimeVersion = image.getPackageVersion(ImagePackageVersion.STACK);
         return flowManager.triggerClusterUpgradePreparation(stack.getId(), imageChangeDto, runtimeVersion);
+    }
+
+    private ImageChangeDto getComponentImageChangeDto(StackDto stack, String imageId, UpgradeComponents components) {
+        return StringUtils.isBlank(imageId) ? baseImageUpgradeService.createImageChangeDto(stack, components)
+                : baseImageUpgradeService.createImageChangeDto(stack, components, imageId);
     }
 
     private ImageChangeDto getImageChangeDto(String imageId, Long stackId, Image image) {

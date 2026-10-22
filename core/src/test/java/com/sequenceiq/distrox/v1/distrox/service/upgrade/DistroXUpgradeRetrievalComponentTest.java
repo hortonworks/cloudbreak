@@ -127,6 +127,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.BaseImageUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.BlockedUpgradePath;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.ComponentVersionComparator;
 import com.sequenceiq.cloudbreak.service.upgrade.ComponentVersionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.CurrentImageRetrieverService;
@@ -283,6 +284,9 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     @MockBean
     private StackDtoService stackDtoService;
+
+    @MockBean
+    private ClusterUpgradePropertiesFactory clusterUpgradePropertiesFactory;
 
     @MockBean
     private StackRepository stackRepository;

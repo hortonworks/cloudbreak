@@ -176,7 +176,7 @@ public class SdxUpgradeRequest {
     }
 
     private boolean isUnspecifiedUpgradeType() {
-        return Objects.isNull(imageId) && Objects.isNull(runtime) && !Boolean.TRUE.equals(lockComponents);
+        return Objects.isNull(imageId) && Objects.isNull(runtime) && components == null && !Boolean.TRUE.equals(lockComponents);
     }
 
     public boolean isSkipValidation() {

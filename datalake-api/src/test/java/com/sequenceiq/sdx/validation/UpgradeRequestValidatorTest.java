@@ -9,18 +9,24 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintValidatorContext;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
@@ -160,4 +166,39 @@ public class UpgradeRequestValidatorTest {
                 Arguments.of(null, null, true, true, LATEST_ONLY, SdxUpgradeReplaceVms.ENABLED)
         );
     }
+
+    @Test
+    void acceptsComponentsWithoutRuntime() {
+        SdxUpgradeRequest request = componentUpgradeRequest();
+        assertFalse(request.isEmpty());
+        assertTrue(underTest.isValid(request, validatorContext));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"imageId", "runtime", "lockComponents", "dryRun", "showAvailableImages", "repository", "products"})
+    void rejectsInvalidComponentRequests(String invalidField) {
+        SdxUpgradeRequest request = componentUpgradeRequest();
+        switch (invalidField) {
+            case "imageId" -> request.setImageId(IMAGE_ID);
+            case "runtime" -> request.setRuntime(RUNTIME);
+            case "lockComponents" -> request.setLockComponents(true);
+            case "dryRun" -> request.setDryRun(true);
+            case "showAvailableImages" -> request.setShowAvailableImages(SHOW);
+            case "repository" -> request.getComponents().setRepository(null);
+            case "products" -> request.getComponents().setProducts(List.of());
+            default -> throw new IllegalArgumentException(invalidField);
+        }
+        when(validatorContext.buildConstraintViolationWithTemplate(any())).thenReturn(constraintViolationBuilder);
+        when(constraintViolationBuilder.addConstraintViolation()).thenReturn(validatorContext);
+        assertFalse(underTest.isValid(request, validatorContext));
+    }
+
+    private SdxUpgradeRequest componentUpgradeRequest() {
+        SdxUpgradeRequest request = new SdxUpgradeRequest();
+        request.setComponents(new ClouderaManagerV4Request().withRepository(new ClouderaManagerRepositoryV4Request()
+                .withVersion("7.13.2").withBaseUrl("https://build/cm/"))
+                .withProducts(List.of(new ClouderaManagerProductV4Request().withName("CDH").withVersion("7.3.2").withParcel("https://build/cdh/"))));
+        return request;
+    }
+
 }

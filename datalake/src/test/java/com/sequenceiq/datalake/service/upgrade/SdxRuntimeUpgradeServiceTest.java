@@ -177,6 +177,8 @@ class SdxRuntimeUpgradeServiceTest {
         ClouderaManagerV4Request components = SdxTestUtil.getUpgradeComponents();
         sdxUpgradeRequest.setComponents(components);
         sdxUpgradeRequest.setLockComponents(false);
+        sdxUpgradeRequest.setImageId(null);
+        sdxUpgradeRequest.setRuntime(null);
         when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> requestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), requestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);

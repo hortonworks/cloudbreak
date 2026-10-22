@@ -1,6 +1,10 @@
 package com.sequenceiq.sdx.validation;
 
+import static com.sequenceiq.cloudbreak.validation.UpgradeRequestValidator.COMPONENTS_OPTIONS_ERROR;
+import static com.sequenceiq.cloudbreak.validation.UpgradeRequestValidator.getComponentsContentError;
+
 import java.util.Objects;
+import java.util.Optional;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -19,6 +23,9 @@ public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgrade
         }
         if (!mutuallyExclusiveDryRunOrShowImages(request, context)) {
             return false;
+        }
+        if (request.getComponents() != null) {
+            return validateComponents(request, context);
         }
         return isOsUpgrade(request) || isRuntimeUpgrade(request) || request.isDryRunOnly() || request.isShowAvailableImagesOnly() || request.isEmpty();
     }
@@ -51,5 +58,18 @@ public class UpgradeRequestValidator implements ConstraintValidator<ValidUpgrade
                 && (!StringUtils.isEmpty(request.getRuntime()) && StringUtils.isEmpty(request.getImageId())
                 || !StringUtils.isEmpty(request.getImageId()) && StringUtils.isEmpty(request.getRuntime()));
     }
+
+    private boolean validateComponents(SdxUpgradeRequest request, ConstraintValidatorContext context) {
+        Optional<String> error;
+        if (Boolean.TRUE.equals(request.getLockComponents()) || request.isDryRun() || request.isShowAvailableImagesSet()
+                || StringUtils.isNotBlank(request.getImageId()) || StringUtils.isNotBlank(request.getRuntime())) {
+            error = Optional.of(COMPONENTS_OPTIONS_ERROR);
+        } else {
+            error = getComponentsContentError(request.getComponents());
+        }
+        error.ifPresent(message -> ValidatorUtil.addConstraintViolation(context, message).disableDefaultConstraintViolation());
+        return error.isEmpty();
+    }
+
 }
 

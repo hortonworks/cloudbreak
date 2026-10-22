@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -158,6 +160,27 @@ public class UpgradeOptionsResponseFactoryTest {
         imageComponentVersions.setCm(V_7_0_3);
         imageComponentVersions.setCdp(V_7_0_2);
         return imageComponentVersions;
+    }
+
+    @Test
+    void createsBaseImageResponseWithRequestedComponentVersions() {
+        Map<String, String> versions = createPackageVersions();
+        Image current = createModelImage(versions);
+        Image target = Image.builder().withImageId("base-image").withImageCatalogName(IMAGE_CATALOG_NAME)
+                .withImageName(IMAGE_NAME).withPackageVersions(versions).withOs("redhat8").withDate(DATE).withCreated(CREATED).build();
+        ClusterUpgradeProperties properties = mock(ClusterUpgradeProperties.class);
+        when(properties.toCurrentCloudImage()).thenReturn(current);
+        when(properties.toCloudImage()).thenReturn(target);
+        ImageComponentVersions requestedVersions = createExpectedPackageVersions();
+        when(componentVersionProvider.getComponentVersions(eq(versions), any(), eq(DATE))).thenReturn(requestedVersions);
+
+        UpgradeV4Response response = underTest.createV4Response(properties);
+
+        assertEquals(IMAGE_ID, response.getCurrent().getImageId());
+        assertEquals(1, response.getUpgradeCandidates().size());
+        assertEquals("base-image", response.getUpgradeCandidates().getFirst().getImageId());
+        assertEquals(requestedVersions, response.getUpgradeCandidates().getFirst().getComponentVersions());
+        verifyNoInteractions(imageService, baseImagePackageVersionsEnricher);
     }
 
 }

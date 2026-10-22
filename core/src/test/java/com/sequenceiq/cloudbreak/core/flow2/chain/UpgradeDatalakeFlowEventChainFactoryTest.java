@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -24,6 +25,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
@@ -44,8 +48,10 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeComponents;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -83,8 +89,9 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
         assertEquals(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, underTest.initEvent());
     }
 
-    @Test
-    void testCreateFlowTriggerEventQueue() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testCreateFlowTriggerEventQueue(boolean baseImage) throws Exception {
         Image currentImage = Image.builder()
                 .withImageId(IMAGE_ID)
                 .withImageCatalogName(IMAGE_CATALOG_NAME)
@@ -98,12 +105,25 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
                         new SecretRotationFlowChainTriggerEvent(secretRotationSelector, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByIdWithoutResources(1L)).thenReturn(stackDto);
-        when(lockedComponentService.isComponentsLocked(stackDto, IMAGE_ID)).thenReturn(false);
+        UpgradeComponents components = baseImage ? new UpgradeComponents(null, List.of()) : null;
+        ImageChangeDto imageChangeDto = baseImage ? new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL, components) : null;
+        if (!baseImage) {
+            when(lockedComponentService.isComponentsLocked(stackDto, IMAGE_ID)).thenReturn(false);
+        }
 
         FlowTriggerEventQueue flowTriggerQueue = underTest.createFlowTriggerEventQueue(
-                new DataLakeUpgradeFlowChainTriggerEvent(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, IMAGE_ID, true));
+                new DataLakeUpgradeFlowChainTriggerEvent(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, null, IMAGE_ID, true, imageChangeDto));
 
         assertEquals(9, flowTriggerQueue.getQueue().size());
+        flowTriggerQueue.getQueue().stream().filter(ClusterUpgradeValidationTriggerEvent.class::isInstance)
+                .map(ClusterUpgradeValidationTriggerEvent.class::cast)
+                .forEach(trigger -> assertEquals(components, trigger.getImageChangeDto().getComponents()));
+        flowTriggerQueue.getQueue().stream().filter(ClusterUpgradePreparationTriggerEvent.class::isInstance)
+                .map(ClusterUpgradePreparationTriggerEvent.class::cast)
+                .forEach(trigger -> assertEquals(components, trigger.getImageChangeDto().getComponents()));
+        if (baseImage) {
+            verifyNoInteractions(lockedComponentService);
+        }
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedDeque<>(flowTriggerQueue.getQueue());
         assertSyncTriggerEvent(flowTriggerQueue);
         assertClusterSyncTriggerEvent(flowTriggerQueue);
@@ -236,6 +256,26 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
     private void assertSetDefaultJavaEvent(FlowTriggerEventQueue flowChainQueue) {
         Selectable javaEvent = flowChainQueue.getQueue().remove();
         assertInstanceOf(SetDefaultJavaVersionForUpgradeTriggerEvent.class, javaEvent);
+    }
+
+    @Test
+    void serializesComponentsAndReadsLegacyTrigger() throws Exception {
+        UpgradeComponents components = new UpgradeComponents(null, List.of());
+        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL, components);
+        DataLakeUpgradeFlowChainTriggerEvent trigger = new DataLakeUpgradeFlowChainTriggerEvent(
+                DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, null, IMAGE_ID, true, imageChangeDto);
+        DataLakeUpgradeFlowChainTriggerEvent restored = JsonUtil.readValue(JsonUtil.writeValueAsString(trigger), DataLakeUpgradeFlowChainTriggerEvent.class);
+        assertThat(restored.getImageChangeDto()).usingRecursiveComparison().isEqualTo(imageChangeDto);
+
+        DataLakeUpgradeFlowChainTriggerEvent legacy = JsonUtil.readValue(
+                """
+                {"@type":"com.sequenceiq.cloudbreak.core.flow2.event.DataLakeUpgradeFlowChainTriggerEvent",
+                "selector":"DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT", "resourceId":1,
+                "imageId":"targetImageId", "rollingUpgradeEnabled":true}
+                """,
+                DataLakeUpgradeFlowChainTriggerEvent.class);
+        assertEquals(IMAGE_ID, legacy.getImageId());
+        assertNull(legacy.getImageChangeDto());
     }
 
 }

@@ -43,6 +43,15 @@ public class UpgradeOptionsResponseFactory {
                 filteredImages.getReason());
     }
 
+    public UpgradeV4Response createV4Response(ClusterUpgradeProperties properties) {
+        return new UpgradeV4Response(createImageInfo(properties.toCurrentCloudImage()), List.of(createImageInfo(properties.toCloudImage())), null);
+    }
+
+    private ImageInfoV4Response createImageInfo(com.sequenceiq.cloudbreak.cloud.model.Image image) {
+        return new ImageInfoV4Response(image.getImageName(), image.getImageId(), image.getImageCatalogName(), image.getCreated(), image.getDate(),
+                getComponentVersions(image.getPackageVersions(), image.getOs(), image.getDate()));
+    }
+
     private ImageInfoV4Response createImageInfoFromCurrentImage(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Stack stack,
             String imageCatalogName) {
         com.sequenceiq.cloudbreak.cloud.model.Image enrichedCurrentImage = baseImagePackageVersionsEnricher.enrich(currentImage, stack);
