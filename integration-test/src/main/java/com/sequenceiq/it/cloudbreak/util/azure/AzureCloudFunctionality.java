@@ -79,6 +79,11 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
+    public void deleteInstances(String clusterName, Map<String, String> instances) {
+        deleteInstances(clusterName, List.copyOf(instances.keySet()));
+    }
+
+    @Override
     public void stopInstances(String clusterName, List<String> instanceIds) {
         azureClientActions.stopInstances(clusterName, instanceIds);
     }
