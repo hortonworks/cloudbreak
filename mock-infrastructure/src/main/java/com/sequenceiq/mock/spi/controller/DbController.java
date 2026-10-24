@@ -22,6 +22,7 @@ import com.sequenceiq.mock.clouderamanager.ClouderaManagerStoreService;
 import com.sequenceiq.mock.service.ResponseModifierService;
 import com.sequenceiq.mock.spi.DbDto;
 import com.sequenceiq.mock.spi.DbStoreService;
+import com.sequenceiq.mock.spi.TagStoreService;
 import com.sequenceiq.mock.verification.RequestResponseStorageService;
 
 @RestController
@@ -40,15 +41,20 @@ public class DbController {
     @Inject
     private RequestResponseStorageService requestResponseStorageService;
 
+    @Inject
+    private TagStoreService tagStoreService;
+
     @PostMapping()
     public CloudResourceStatus[] launch(@PathVariable("mock_uuid") String mockuuid, @RequestBody DatabaseStack databaseStack) {
         List<CloudResourceStatus> cloudResourceStatuses = dbStoreService.store(mockuuid, databaseStack);
+        tagStoreService.init(mockuuid, databaseStack.getTags());
         return cloudResourceStatuses.toArray(new CloudResourceStatus[cloudResourceStatuses.size()]);
     }
 
     @DeleteMapping()
     public void terminate(@PathVariable("mock_uuid") String mockuuid) {
         dbStoreService.terminate(mockuuid);
+        tagStoreService.remove(mockuuid);
     }
 
     @GetMapping()

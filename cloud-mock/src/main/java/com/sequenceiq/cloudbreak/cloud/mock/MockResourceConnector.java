@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -218,6 +219,18 @@ public class MockResourceConnector implements ResourceConnector {
 
     @Override
     public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
+    }
+
+    @Override
+    public void updateCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
+        LOGGER.info("Update tags {} on mock spi for {} cloud resources", tags, cloudResources.size());
+        mockUrlFactory.get(authenticatedContext, "/tags").post(Entity.entity(tags, MediaType.APPLICATION_JSON_TYPE), String.class);
+    }
+
+    @Override
+    public void deleteCloudResourcesTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Set<String> tagKeys) {
+        LOGGER.info("Delete tag keys {} on mock spi for {} cloud resources", tagKeys, cloudResources.size());
+        mockUrlFactory.get(authenticatedContext, "/tags/delete").post(Entity.entity(tagKeys, MediaType.APPLICATION_JSON_TYPE), String.class);
     }
 
     @Override

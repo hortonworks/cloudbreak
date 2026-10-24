@@ -20,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteActio
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByCrnsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByNamesAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteTagsByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDirectionalTrustSetupAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentEditByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentEncryptionProfileEnableAction;
@@ -172,5 +173,9 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> triggerEnvironmentEdit(EnvironmentEditRequest environmentEditRequest) {
         return new EnvironmentEditByNameAction(environmentEditRequest);
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> deleteTags(Set<String> tagKeys) {
+        return new EnvironmentDeleteTagsByNameAction(tagKeys);
     }
 }

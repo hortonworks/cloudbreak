@@ -30,6 +30,7 @@ import com.sequenceiq.mock.salt.SaltStoreService;
 import com.sequenceiq.mock.service.ResponseModifierService;
 import com.sequenceiq.mock.spi.SpiService;
 import com.sequenceiq.mock.spi.SpiStoreService;
+import com.sequenceiq.mock.spi.TagStoreService;
 
 @RestController
 @RequestMapping("/{mock_uuid}/spi")
@@ -53,6 +54,9 @@ public class SpiController {
     @Inject
     private ResponseModifierService responseModifierService;
 
+    @Inject
+    private TagStoreService tagStoreService;
+
     @PostMapping("/launch")
     public List<CloudVmInstanceStatus> launch(@PathVariable("mock_uuid") String mockuuid, @RequestBody CloudStack cloudStack) {
         List<CloudVmInstanceStatus> vms = spiStoreService.store(mockuuid, cloudStack)
@@ -60,6 +64,7 @@ public class SpiController {
                 .map(CloudVmMetaDataStatus::getCloudVmInstanceStatus)
                 .collect(Collectors.toList());
         saltStoreService.create(mockuuid);
+        tagStoreService.init(mockuuid, cloudStack.getTags());
         return vms;
     }
 
@@ -84,6 +89,7 @@ public class SpiController {
         clouderaManagerStoreService.terminate(mockuuid);
         freeipaStoreService.terminate(mockuuid);
         saltStoreService.terminate(mockuuid);
+        tagStoreService.remove(mockuuid);
         responseModifierService.cleanByMockUuid(mockuuid);
     }
 
