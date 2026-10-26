@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -73,8 +74,8 @@ public class FreeIpaUpgradeNativeTests extends AbstractE2ETest {
                 freeIpaImageCatalogUrl,
                 Architecture.X86_64,
                 testContext.getCloudProvider().getCloudPlatform().name(),
-                testContext.getCloudProvider().getFreeIpaSingleUpgradeSourceImageOS(),
-                testContext.getCloudProvider().getFreeIpaSingleUpgradeDestinationImageOS()
+                OsType.RHEL8,
+                OsType.RHEL9
         );
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 1)
                 .withTelemetry("telemetry")
