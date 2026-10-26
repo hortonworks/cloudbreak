@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isGcpRazCabAuthTypeSupported;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazConfigurationForRazRoleNeeded;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazConfigurationForServiceTypeSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
@@ -17,6 +16,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -55,7 +55,7 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
         if (!Strings.isNullOrEmpty(cdhVersion) && isRazConfigurationForServiceTypeSupported(cdhVersion, cloudPlatform, source.getStackType())) {
             safetyValveValue.append(getSafetyValveProperty(RANGER_RAZ_BOOTSTRAP_SERVICETYPES, getServiceType(cloudPlatform)));
         }
-        if (isRazConfigurationForRazRoleNeeded(source.getProductDetailsView().getCm().getVersion(), cloudPlatform, source.getStackType())) {
+        if (isRazConfigurationForRazRoleNeeded(source, cloudPlatform)) {
             String rangerCloudAccessAuthorizerServiceAccount = getRangerCloudAccessAuthorizerServiceAccount(source);
             if (rangerCloudAccessAuthorizerServiceAccount != null) {
                 safetyValveValue.append(getSafetyValveProperty(RANGER_RAZ_GCP_SERVICE_ACCOUNT, rangerCloudAccessAuthorizerServiceAccount));
@@ -69,6 +69,15 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
             roleConfigs.add(config(RANGER_RAZ_SITE_XML_ROLE_SAFETY_VALVE, safetyValveValue.toString()));
         }
         return roleConfigs;
+    }
+
+    private boolean isRazConfigurationForRazRoleNeeded(TemplatePreparationObject source, CloudPlatform cloudPlatform) {
+        return CMRepositoryVersionUtil.isRazConfigurationForRazRoleNeeded(
+                getRazAuthenticationType(source),
+                source.getProductDetailsView().getCm().getVersion(),
+                cloudPlatform,
+                source.getStackType()
+        );
     }
 
     private String getRazAuthenticationType(TemplatePreparationObject source) {

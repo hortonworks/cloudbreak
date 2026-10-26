@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazConfigurationSupported;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoles;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -25,8 +26,7 @@ public class RangerRazDatalakeConfigProvider extends RangerRazBaseConfigProvider
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return StackType.DATALAKE == source.getStackType()
-                && CMRepositoryVersionUtil.isRazConfigurationSupported(
-                        source.getProductDetailsView().getCm().getVersion(), source.getCloudPlatform(), source.getStackType())
+                && isRazConfigurationSupported(source)
                 && source.getGeneralClusterConfigs().isEnableRangerRaz();
     }
 
