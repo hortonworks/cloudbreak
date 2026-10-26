@@ -19,6 +19,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerConfigService;
+import com.sequenceiq.cloudbreak.cm.config.upgrade.RuntimeUpgradeServiceConfigPatcher;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -26,7 +27,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
 @Component
-public class ClouderaManagerFlinkConfigurationService {
+public class ClouderaManagerFlinkConfigurationService implements RuntimeUpgradeServiceConfigPatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerFlinkConfigurationService.class);
 
@@ -41,17 +42,21 @@ public class ClouderaManagerFlinkConfigurationService {
     @Inject
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
-    public void addServiceConfigurationIfNecessary(ApiClient apiClient, StackDtoDelegate stackDto, Set<ClouderaManagerProduct> products) {
-        if (isConfigNecessaryByRuntime(products) && isFLinkServicePresent(stackDto)) {
-            try {
-                LOGGER.debug("Trying to set the {} config to {} for Flink service.", RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE);
-                clouderaManagerConfigService.modifyServiceConfig(apiClient, stackDto.getName(), FLINK_SERVICE_TYPE,
-                        Map.of(RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE));
-            } catch (CloudbreakException e) {
-                String message = String.format("Failed to set the %s config to %s for Flink service.", RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE);
-                LOGGER.error(message, e);
-                throw new CloudbreakServiceException(message, e);
-            }
+    @Override
+    public boolean isPatchNeeded(StackDtoDelegate stackDto, Set<ClouderaManagerProduct> products) {
+        return isConfigNecessaryByRuntime(products) && isFLinkServicePresent(stackDto);
+    }
+
+    @Override
+    public void patchServiceConfig(ApiClient apiClient, StackDtoDelegate stackDto, Set<ClouderaManagerProduct> products) {
+        try {
+            LOGGER.debug("Trying to set the {} config to {} for Flink service.", RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE);
+            clouderaManagerConfigService.modifyServiceConfig(apiClient, stackDto.getName(), FLINK_SERVICE_TYPE,
+                    Map.of(RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE));
+        } catch (CloudbreakException e) {
+            String message = String.format("Failed to set the %s config to %s for Flink service.", RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 

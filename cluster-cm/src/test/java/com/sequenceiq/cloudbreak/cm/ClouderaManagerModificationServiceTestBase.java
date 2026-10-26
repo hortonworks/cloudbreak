@@ -49,8 +49,8 @@ import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.cm.config.ClouderaManagerFlinkConfigurationService;
 import com.sequenceiq.cloudbreak.cm.config.modification.ClouderaManagerConfigModificationService;
+import com.sequenceiq.cloudbreak.cm.config.upgrade.RuntimeUpgradeServiceConfigPatcherService;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.cm.util.TransientCmCommandFailureClassifier;
@@ -196,7 +196,7 @@ abstract class ClouderaManagerModificationServiceTestBase {
     protected ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
     @Mock
-    protected ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
+    protected RuntimeUpgradeServiceConfigPatcherService runtimeUpgradeServiceConfigPatcherService;
 
     @Mock
     protected ClouderaManagerKraftMigrationService clouderaManagerKraftMigrationService;
