@@ -72,7 +72,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: "$springBootVersion"
   implementation     group: 'org.springframework',       name: 'spring-context-support',               version: "$springFrameworkVersion"
   implementation     group: 'org.hibernate',             name: 'hibernate-envers',                     version: "$hibernateCoreVersion"
-  implementation    (group: 'org.springframework.data',  name: 'spring-data-envers',                   version: "$springDataJpaFrameworkVersion") {
+  implementation    (group: 'org.springframework.data',  name: 'spring-data-envers',                   version: "$springDataVersion") {
     exclude group: 'org.hibernate', module: 'hibernate-envers'
   }
   implementation group: 'org.bouncycastle',                 name: 'bc-fips',                        version: "$bouncycastleFipsVersion"

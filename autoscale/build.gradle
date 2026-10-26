@@ -146,7 +146,7 @@ dependencyManagement {
 }
 
 dependencies {
-  implementation group: 'org.springframework.data',           name: 'spring-data-envers',         version: "$springDataJpaFrameworkVersion"
+  implementation group: 'org.springframework.data',           name: 'spring-data-envers',         version: "$springDataVersion"
 
 
     implementation group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: "$okhttpVersion"

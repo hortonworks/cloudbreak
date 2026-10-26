@@ -167,7 +167,7 @@ dependencies {
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
   implementation group: 'org.springframework.boot',           name: 'spring-boot-starter-quartz'
 
-  implementation group: 'org.springframework.data',           name: 'spring-data-envers',         version: "$springDataJpaFrameworkVersion"
+  implementation group: 'org.springframework.data',           name: 'spring-data-envers',         version: "$springDataVersion"
 
   implementation group: 'org.springframework.retry',          name: 'spring-retry'
 

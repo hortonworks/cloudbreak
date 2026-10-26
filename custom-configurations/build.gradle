@@ -11,7 +11,7 @@ dependencies {
   implementation project(':secret-engine')
   implementation project(':custom-configurations-api')
 
-  implementation group: 'org.springframework.data',        name: 'spring-data-jpa',              version: "$springDataJpaFrameworkVersion"
+  implementation group: 'org.springframework.data',        name: 'spring-data-jpa',              version: "$springDataVersion"
   implementation group: 'org.springframework.boot',        name: 'spring-boot-starter-web',      version: "$springBootVersion"
 
   runtimeOnly group: 'org.postgresql', name: 'postgresql', version: "$postgreSQLVersion"

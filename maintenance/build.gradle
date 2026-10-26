@@ -44,8 +44,8 @@ sonar {
 
 configurations.all {
   resolutionStrategy {
-    force "org.springframework.data:spring-data-jpa:${springDataJpaFrameworkVersion}"
-    force "org.springframework.data:spring-data-commons:${springDataJpaFrameworkVersion}"
+    force "org.springframework.data:spring-data-jpa:${springDataVersion}"
+    force "org.springframework.data:spring-data-commons:${springDataVersion}"
   }
 }
 
@@ -55,8 +55,8 @@ dependencyManagement {
     dependency group: 'org.springframework',      name: 'spring-webmvc',      version: "$springFrameworkVersion"
     dependency group: 'io.projectreactor.netty',  name: 'reactor-netty-http', version: "$reactorNettyHttp"
     dependency group: 'org.postgresql',           name: 'postgresql',         version: "$postgreSQLVersion"
-    dependency group: 'org.springframework.data', name: 'spring-data-jpa',    version: "$springDataJpaFrameworkVersion"
-    dependency group: 'org.springframework.data', name: 'spring-data-commons', version: "$springDataJpaFrameworkVersion"
+    dependency group: 'org.springframework.data', name: 'spring-data-jpa',    version: "$springDataVersion"
+    dependency group: 'org.springframework.data', name: 'spring-data-commons', version: "$springDataVersion"
   }
 }
 
@@ -74,8 +74,8 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: "$springBootVersion"
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa', version: "$springBootVersion"
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz', version: "$springBootVersion"
-  implementation     group: 'org.springframework.data',  name: 'spring-data-jpa',              version: "$springDataJpaFrameworkVersion"
-  implementation     group: 'org.springframework.data',  name: 'spring-data-commons',        version: "$springDataJpaFrameworkVersion"
+  implementation     group: 'org.springframework.data',  name: 'spring-data-jpa',              version: "$springDataVersion"
+  implementation     group: 'org.springframework.data',  name: 'spring-data-commons',        version: "$springDataVersion"
   implementation     group: 'org.apache.commons',        name: 'commons-lang3',              version: "$apacheCommonsLangVersion"
 
   implementation group: 'net.bytebuddy', name: 'byte-buddy', version: "$byteBuddyVersion"
