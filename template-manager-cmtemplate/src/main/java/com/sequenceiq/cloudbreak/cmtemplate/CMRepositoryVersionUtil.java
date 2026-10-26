@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS_NATIVE_GOV;
+import static com.sequenceiq.cloudbreak.constant.GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,6 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 public class CMRepositoryVersionUtil {
@@ -148,6 +151,12 @@ public class CMRepositoryVersionUtil {
         }
     };
 
+    public static final Map<CloudPlatform, String> DATALAKE_RAZ_AUTHENTICATION_TYPE_FOR_RAZ_DATAHUB = new HashMap<>() {
+        {
+            put(GCP, RAZ_AUTHENTICATION_TYPE_CAB);
+        }
+    };
+
     public static final Map<CloudPlatform, Versioned> MIN_CM_VERSION_FOR_RAZ_DATAHUB = new HashMap<>() {
         {
             put(AWS, CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2);
@@ -265,10 +274,24 @@ public class CMRepositoryVersionUtil {
         return supported;
     }
 
-    public static boolean isRazConfigurationSupported(String cmVersion, CloudPlatform cloudPlatform, StackType stackType) {
+    public static boolean isRazConfigurationSupported(String datalakeRazAuthenticationType, String cmVersion, CloudPlatform cloudPlatform,
+            StackType stackType) {
         LOGGER.info("CM Version {} is compared for Raz support for {} in {}", cmVersion, cloudPlatform, stackType);
         return isRazSupportedForCloudAndStack(cloudPlatform, stackType)
-                && isVersionNewerOrEqualThanLimited(cmVersion, getRazSupportedRuntimeVersion(cloudPlatform, stackType));
+                && isVersionNewerOrEqualThanLimited(cmVersion, getRazSupportedRuntimeVersion(cloudPlatform, stackType))
+                && isRazSupportedByDatalakeAuthenticationType(datalakeRazAuthenticationType, cloudPlatform, stackType);
+    }
+
+    private static boolean isRazSupportedByDatalakeAuthenticationType(String datalakeRazAuthenticationType, CloudPlatform cloudPlatform,
+            StackType stackType) {
+        if (StackType.DATALAKE == stackType) {
+            return true;
+        }
+        String requiredAuthenticationType = DATALAKE_RAZ_AUTHENTICATION_TYPE_FOR_RAZ_DATAHUB.get(cloudPlatform);
+        boolean supported = requiredAuthenticationType == null || requiredAuthenticationType.equals(datalakeRazAuthenticationType);
+        LOGGER.info("Raz for {} on {} requires Data Lake Raz authentication type {}, Data Lake has {}, supported: {}",
+                stackType, cloudPlatform, requiredAuthenticationType, datalakeRazAuthenticationType, supported);
+        return supported;
     }
 
     private static Versioned getRazSupportedRuntimeVersion(CloudPlatform cloudPlatform, StackType stackType) {
@@ -278,6 +301,15 @@ public class CMRepositoryVersionUtil {
             default:
                 return MIN_CM_VERSION_FOR_RAZ_DATAHUB.get(cloudPlatform);
         }
+    }
+
+    public static boolean isRazConfigurationSupported(TemplatePreparationObject source) {
+        return CMRepositoryVersionUtil.isRazConfigurationSupported(
+                source.getDatalakeView().map(DatalakeView::getRazAuthenticationType).orElse(null),
+                source.getProductDetailsView().getCm().getVersion(),
+                source.getCloudPlatform(),
+                source.getStackType()
+        );
     }
 
     public static boolean isHmsRangerServiceNameRequired(String cdhVersion) {
@@ -295,9 +327,10 @@ public class CMRepositoryVersionUtil {
                 && isRazSupportedForCloudAndStack(cloudPlatform, stackType);
     }
 
-    public static boolean isRazConfigurationForRazRoleNeeded(String cmVersion, CloudPlatform cloudPlatform, StackType stackType) {
+    public static boolean isRazConfigurationForRazRoleNeeded(String datalakeRazAuthenticationType, String cmVersion, CloudPlatform cloudPlatform,
+            StackType stackType) {
         LOGGER.info("Cloud Platform {} is checked for Raz role configuration in {} for cmVersion {}", cloudPlatform, stackType, cmVersion);
-        return cloudPlatform == GCP && isRazConfigurationSupported(cmVersion, cloudPlatform, stackType);
+        return cloudPlatform == GCP && isRazConfigurationSupported(datalakeRazAuthenticationType, cmVersion, cloudPlatform, stackType);
     }
 
     public static boolean isGcpRazCabAuthTypeSupported(String cmVersion) {

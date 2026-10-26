@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazConfigurationSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.common.model.CloudStorageCdpService.HBASE_ROOT;
 import static com.sequenceiq.common.model.CloudStorageCdpService.HIVE_METASTORE_EXTERNAL_WAREHOUSE;
@@ -16,13 +17,11 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
@@ -49,9 +48,7 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
-        String cmVersion = templatePreparationObject.getProductDetailsView().getCm().getVersion();
-        CloudPlatform cloudPlatform = templatePreparationObject.getCloudPlatform();
-        if (CMRepositoryVersionUtil.isRazConfigurationSupported(cmVersion, cloudPlatform, templatePreparationObject.getStackType())) {
+        if (isRazConfigurationSupported(templatePreparationObject)) {
             List<String> cloudPaths = new ArrayList<>();
             ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, HIVE_METASTORE_DIR)
                     .ifPresent(location -> cloudPaths.add(HIVE_METASTORE_WAREHOUSE.name() + "=" + location.getValue()));

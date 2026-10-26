@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.rms;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_18;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isHmsRangerServiceNameRequired;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazConfigurationSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.rms.RangerRmsRoles.RANGER_RMS_SERVER_REF_NAME;
@@ -31,7 +32,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -99,8 +99,7 @@ public class RangerRmsDatalakeConfigProvider extends AbstractRoleConfigProvider 
                 && source.getGeneralClusterConfigs().isEnableRangerRaz()
                 && source.getGeneralClusterConfigs().isEnableRangerRms()
                 && isVersionSupported(cmTemplateProcessor, source)
-                && CMRepositoryVersionUtil.isRazConfigurationSupported(
-                source.getProductDetailsView().getCm().getVersion(), source.getCloudPlatform(), source.getStackType());
+                && isRazConfigurationSupported(source);
     }
 
     @Override

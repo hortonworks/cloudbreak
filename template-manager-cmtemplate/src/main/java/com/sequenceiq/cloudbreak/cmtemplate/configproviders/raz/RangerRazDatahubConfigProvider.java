@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazConfigurationSupported;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -8,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -21,7 +22,6 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
  */
 @Component
 public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider {
-
     private static final int MIN_ZK_SERVER_COUNT = 2;
 
     @Override
@@ -29,8 +29,7 @@ public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider 
         return StackType.WORKLOAD == source.getStackType()
                 && source.getProductDetailsView() != null
                 && source.getProductDetailsView().getCm() != null
-                && CMRepositoryVersionUtil.isRazConfigurationSupported(
-                        source.getProductDetailsView().getCm().getVersion(), source.getCloudPlatform(), source.getStackType())
+                && isRazConfigurationSupported(source)
                 && source.getDatalakeView().isPresent()
                 && source.getDatalakeView().get().isRazEnabled()
                 && TargetPlatform.PAAS.equals(source.getDatalakeView().get().getTargetPlatform());

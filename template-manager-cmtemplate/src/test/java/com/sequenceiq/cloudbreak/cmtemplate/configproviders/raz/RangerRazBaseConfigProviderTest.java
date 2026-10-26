@@ -299,6 +299,56 @@ public class RangerRazBaseConfigProviderTest {
                 "<value>rangerrazauthorizer@gcp-dev-cloudbreak.iam.gserviceaccount.com</value></property>", roleConfigs.get(0).getValue());
     }
 
+    @Test
+    public void getRoleConfigWhenGcpDataHubWithCabDatalakeShouldAddServiceAccountAndCabAuthType() {
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.10"));
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.13.2.30000");
+
+        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", null, blueprintTextProcessor))
+                .withCloudPlatform(CloudPlatform.GCP)
+                .withProductDetails(cmRepo, List.of())
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withDataLakeView(new DatalakeView(true, GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB, getAccountMappingView().getUserMappings(),
+                        DATALAKE_CRN, false))
+                .build();
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
+
+        assertEquals(2, roleConfigs.size());
+        assertEquals("ranger_raz_gs_auth_type", roleConfigs.get(0).getName());
+        assertEquals(GcpConstants.RAZ_AUTHENTICATION_TYPE_CAB, roleConfigs.get(0).getValue());
+        assertEquals("ranger-raz-conf/ranger-raz-site.xml_role_safety_valve", roleConfigs.get(1).getName());
+        assertEquals("<property><name>ranger.raz.bootstrap.servicetypes</name><value>gs</value></property>" +
+                "<property><name>ranger.raz.gs.service.account</name>" +
+                "<value>rangerrazauthorizer@gcp-dev-cloudbreak.iam.gserviceaccount.com</value></property>", roleConfigs.get(1).getValue());
+    }
+
+    @Test
+    public void getRoleConfigWhenGcpDataHubWithHmacDatalakeShouldNotAddServiceAccountAndCabAuthType() {
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of("7.2.10"));
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.13.2.30000");
+
+        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withBlueprintView(new BlueprintView("", "7.2.10", "CDH", null, blueprintTextProcessor))
+                .withCloudPlatform(CloudPlatform.GCP)
+                .withProductDetails(cmRepo, List.of())
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withDataLakeView(new DatalakeView(true, GcpConstants.RAZ_AUTHENTICATION_TYPE_HMAC, getAccountMappingView().getUserMappings(),
+                        DATALAKE_CRN, false))
+                .build();
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", cmTemplate, preparationObject);
+
+        assertEquals(1, roleConfigs.size());
+        assertEquals("ranger-raz-conf/ranger-raz-site.xml_role_safety_valve", roleConfigs.get(0).getName());
+        assertEquals("<property><name>ranger.raz.bootstrap.servicetypes</name><value>gs</value></property>", roleConfigs.get(0).getValue());
+    }
+
     private AccountMappingView getAccountMappingView() {
         Map<String, String> userMappingView = new HashMap<>() {
             {
