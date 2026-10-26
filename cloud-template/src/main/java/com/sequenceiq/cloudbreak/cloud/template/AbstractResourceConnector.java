@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -261,6 +262,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
             context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(variant, resources));
             reattachableVolumeSets = diskReattachment(resources, scalingGroup, context);
         }
+        buildMissingZonalGroupResources(auth, stack, resources, context, scalingGroups);
 
         cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, false, cloudContext);
         //compute
@@ -268,6 +270,22 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
                 scalingGroups, adjustmentTypeWithThreshold);
         cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, true, cloudContext);
         return cloudResourceStatuses;
+    }
+
+    /**
+     * Scaling groups can be extended to new availability zones after provisioning (e.g. FreeIPA multi-AZ migration),
+     * so the zonal group resources of those zones have to be created before the new instances are placed there.
+     */
+    private void buildMissingZonalGroupResources(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, ResourceBuilderContext context,
+            Set<Group> scalingGroups) {
+        try {
+            List<CloudResourceStatus> groupStatuses = groupResourceService.buildMissingZonalResources(context, auth, scalingGroups, stack.getNetwork(),
+                    resources);
+            LOGGER.debug("Missing zonal group resources built during upscale: {}", groupStatuses);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to build missing zonal group resources during upscale of stack {}", auth.getCloudContext().getName(), e);
+            throw new CloudConnectorException("Failed to build missing zonal group resources: " + e.getMessage(), e);
+        }
     }
 
     protected List<CloudResource> diskReattachment(List<CloudResource> resources, Group scalingGroup, ResourceBuilderContext context) {

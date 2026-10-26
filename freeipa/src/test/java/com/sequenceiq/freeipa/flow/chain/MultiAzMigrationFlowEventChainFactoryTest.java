@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.flow.core.FlowEventContext;
@@ -114,7 +115,15 @@ class MultiAzMigrationFlowEventChainFactoryTest {
 
                 Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), true),
                 Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1), true),
-                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW), true)
+                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW), true),
+
+                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW, NON_PGW_1), false),
+                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW), false),
+
+                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), true),
+                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW, NON_PGW_1), true),
+                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW), true)
         );
     }
 
@@ -168,7 +177,7 @@ class MultiAzMigrationFlowEventChainFactoryTest {
                 case 3 -> 15;
                 default -> 0;
             };
-            case "AWS_NATIVE", "AWS_NATIVE_GOV" -> switch (instanceIds.size()) {
+            case "AWS_NATIVE", "AWS_NATIVE_GOV", "GCP" -> switch (instanceIds.size()) {
                 case 1 -> 4;
                 case 2 -> 6;
                 case 3 -> 8;

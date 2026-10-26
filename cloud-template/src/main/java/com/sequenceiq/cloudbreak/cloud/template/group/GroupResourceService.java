@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -67,29 +69,70 @@ public class GroupResourceService {
             }
             for (Group group : getOrderedCopy(groups)) {
                 for (String availabilityZone : getAvailabilityZones(builder, group, context)) {
-                    try {
-                        CloudResource buildableResource = builder.create(context, auth, group, network, availabilityZone);
-                        if (buildableResource != null) {
-                            buildableResource = CloudResource.builder().cloudResource(buildableResource).withGroup(group.getName()).build();
-                            createResource(auth, buildableResource);
-                            CloudResource resource = builder.build(context, auth, group, network, group.getSecurity(), buildableResource);
-                            updateResource(auth, resource);
-                            PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, Collections.singletonList(resource),
-                                    context, true);
-                            List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-                            context.addGroupResources(group.getName(), Collections.singletonList(resource));
-                            results.addAll(pollerResult);
-                        } else {
-                            LOGGER.debug("CloudResource is null for {} with resourceType: {} and builder: {}, build is skipped.",
-                                    group.getName(), builder.resourceType(), builder.getClass().getSimpleName());
-                        }
-                    } catch (ResourceNotNeededException e) {
-                        LOGGER.debug("Skipping resource creation: {}", e.getMessage());
-                    }
+                    results.addAll(buildResource(context, auth, network, builder, group, availabilityZone));
                 }
             }
         }
         return results;
+    }
+
+    /**
+     * Builds the zonal group resources that are missing for the availability zones of the given groups,
+     * e.g. when a group was extended to new zones after it had been provisioned.
+     * A zone counts as covered when a resource of the same type already exists for the group in that zone, regardless of its name,
+     * so resources created with legacy naming are never duplicated.
+     * Group resources keep their REQUESTED status after a successful build, so a row left behind by a failed build can't be told apart
+     * from a built one. The resources of covered zones are built again instead, which relies on the build of zonal resources being idempotent,
+     * so a resource that is missing on the provider is recreated.
+     * Stacks that have no resource of a zonal type at all predate that resource type, so there is nothing to extend and they are left as they are.
+     */
+    public List<CloudResourceStatus> buildMissingZonalResources(ResourceBuilderContext context, AuthenticatedContext auth, Iterable<Group> groups,
+            Network network, Collection<CloudResource> existingResources) throws Exception {
+        List<CloudResourceStatus> results = new ArrayList<>();
+        for (GroupResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.group(auth.getCloudContext().getVariant())) {
+            if (builder.isZonalResource()) {
+                results.addAll(buildMissingZonalResourcesOfType(context, auth, groups, network, builder,
+                        getResources(existingResources, builder.resourceType())));
+            }
+        }
+        return results;
+    }
+
+    private List<CloudResourceStatus> buildMissingZonalResourcesOfType(ResourceBuilderContext context, AuthenticatedContext auth, Iterable<Group> groups,
+            Network network, GroupResourceBuilder<ResourceBuilderContext> builder, List<CloudResource> existingResourcesOfType) throws Exception {
+        if (CANCELLED.equals(InMemoryStateStore.getStack(auth.getCloudContext().getId()))) {
+            LOGGER.info("Stack {} is cancelled, skipping the build of missing {}", auth.getCloudContext().getName(), builder.resourceType());
+            return List.of();
+        }
+        if (existingResourcesOfType.isEmpty()) {
+            LOGGER.info("Stack {} has no {}, skipping the build of missing ones", auth.getCloudContext().getName(), builder.resourceType());
+            return List.of();
+        }
+        List<CloudResourceStatus> results = new ArrayList<>();
+        for (Group group : getOrderedCopy(groups)) {
+            for (String availabilityZone : getAvailabilityZones(builder, group, context)) {
+                results.addAll(buildZonalResource(context, auth, network, builder, group, availabilityZone, existingResourcesOfType));
+            }
+        }
+        return results;
+    }
+
+    private List<CloudResourceStatus> buildZonalResource(ResourceBuilderContext context, AuthenticatedContext auth, Network network,
+            GroupResourceBuilder<ResourceBuilderContext> builder, Group group, String availabilityZone, List<CloudResource> existingResourcesOfType)
+            throws Exception {
+        Optional<CloudResource> coveringResource = findResourceCoveringZone(existingResourcesOfType, group, availabilityZone, context);
+        if (coveringResource.isEmpty()) {
+            LOGGER.info("Building missing {} for group {} in availability zone {}", builder.resourceType(), group.getName(), availabilityZone);
+            return buildResource(context, auth, network, builder, group, availabilityZone);
+        }
+        if (coveringResource.get().getAvailabilityZone() == null) {
+            LOGGER.debug("Legacy {} {} without availability zone covers group {} in availability zone {}", builder.resourceType(),
+                    coveringResource.get().getName(), group.getName(), availabilityZone);
+            return List.of();
+        }
+        LOGGER.debug("{} {} exists for group {} in availability zone {}, building it again in case it is missing on the provider",
+                builder.resourceType(), coveringResource.get().getName(), group.getName(), availabilityZone);
+        return buildAndPollResource(context, auth, network, builder, group, coveringResource.get());
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context,
@@ -153,6 +196,62 @@ public class GroupResourceService {
         if (buildableResource.isPersistent()) {
             resourceNotifier.notifyUpdate(buildableResource, auth.getCloudContext());
         }
+    }
+
+    private List<CloudResourceStatus> buildResource(ResourceBuilderContext context, AuthenticatedContext auth, Network network,
+            GroupResourceBuilder<ResourceBuilderContext> builder, Group group, String availabilityZone) throws Exception {
+        Optional<CloudResource> buildableResource = createBuildableResource(context, auth, network, builder, group, availabilityZone);
+        if (buildableResource.isEmpty()) {
+            return List.of();
+        }
+        return buildAndPollResource(context, auth, network, builder, group, buildableResource.get());
+    }
+
+    private Optional<CloudResource> createBuildableResource(ResourceBuilderContext context, AuthenticatedContext auth, Network network,
+            GroupResourceBuilder<ResourceBuilderContext> builder, Group group, String availabilityZone) {
+        try {
+            CloudResource buildableResource = builder.create(context, auth, group, network, availabilityZone);
+            if (buildableResource == null) {
+                LOGGER.debug("CloudResource is null for {} with resourceType: {} and builder: {}, build is skipped.",
+                        group.getName(), builder.resourceType(), builder.getClass().getSimpleName());
+                return Optional.empty();
+            }
+            buildableResource = CloudResource.builder().cloudResource(buildableResource).withGroup(group.getName()).build();
+            createResource(auth, buildableResource);
+            return Optional.of(buildableResource);
+        } catch (ResourceNotNeededException e) {
+            LOGGER.debug("Skipping resource creation: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private List<CloudResourceStatus> buildAndPollResource(ResourceBuilderContext context, AuthenticatedContext auth, Network network,
+            GroupResourceBuilder<ResourceBuilderContext> builder, Group group, CloudResource buildableResource) throws Exception {
+        try {
+            CloudResource resource = builder.build(context, auth, group, network, group.getSecurity(), buildableResource);
+            updateResource(auth, resource);
+            PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, Collections.singletonList(resource),
+                    context, true);
+            List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+            context.addGroupResources(group.getName(), Collections.singletonList(resource));
+            return pollerResult;
+        } catch (ResourceNotNeededException e) {
+            LOGGER.debug("Skipping resource creation: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Resources without a group or availability zone predate zonal group resources: they were created for the stack's own zone,
+     * and are considered to cover it for every group, so we never create a second resource next to them.
+     */
+    private Optional<CloudResource> findResourceCoveringZone(List<CloudResource> existingResources, Group group, String availabilityZone,
+            ResourceBuilderContext context) {
+        String stackAvailabilityZone = context.getLocation().getAvailabilityZone().value();
+        return existingResources.stream()
+                .filter(resource -> resource.getGroup() == null || resource.getGroup().equals(group.getName()))
+                .filter(resource -> availabilityZone.equals(Objects.requireNonNullElse(resource.getAvailabilityZone(), stackAvailabilityZone)))
+                .findFirst();
     }
 
     private List<CloudResource> getResources(Collection<CloudResource> resources, ResourceType type) {

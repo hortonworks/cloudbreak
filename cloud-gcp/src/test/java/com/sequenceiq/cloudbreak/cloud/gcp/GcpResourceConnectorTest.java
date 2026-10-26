@@ -12,8 +12,12 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -31,13 +35,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.gcp.tag.GcpResourceTagUpdaterService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -112,7 +118,7 @@ public class GcpResourceConnectorTest {
     public void testGetTlsInfoWhenEverythingIsfine() {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
-        assertEquals(false, underTest.getTlsInfo(authenticatedContext,  cloudStack).isUsePrivateIpToTls());
+        assertEquals(false, underTest.getTlsInfo(authenticatedContext, cloudStack).isUsePrivateIpToTls());
     }
 
     @Test
@@ -199,7 +205,7 @@ public class GcpResourceConnectorTest {
     }
 
     @Test
-    public void testUpscaleWhenEverythingIsFine() throws QuotaExceededException {
+    public void testUpscaleWhenEverythingIsFine() throws Exception {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
         Network network = mock(Network.class);
@@ -251,6 +257,39 @@ public class GcpResourceConnectorTest {
                 anyCollection(),
                 any()
         );
+        InOrder inOrder = inOrder(groupResourceService, computeResourceService);
+        inOrder.verify(groupResourceService).buildMissingZonalResources(eq(resourceBuilderContext), eq(authenticatedContext),
+                argThat(groups -> "master".equals(Iterables.getOnlyElement(groups).getName())),
+                eq(network), eq(cloudResourceList));
+        inOrder.verify(computeResourceService).buildResourcesForUpscale(any(), any(), any(), anyCollection(), any());
+    }
+
+    @Test
+    public void testUpscaleWhenBuildingMissingZonalGroupResourcesFails() throws Exception {
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        Network network = mock(Network.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
+        ResourceContextBuilder resourceContextBuilder = mock(ResourceContextBuilder.class);
+
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudStack.getNetwork()).thenReturn(network);
+        when(cloudContext.getPlatform()).thenReturn(platform("GCP"));
+        when(cloudContext.getVariant()).thenReturn(GcpConstants.GCP_VARIANT);
+        when(contextBuilders.get(any(Platform.class))).thenReturn(resourceContextBuilder);
+        when(resourceContextBuilder.contextInit(any(CloudContext.class), any(AuthenticatedContext.class), any(Network.class), anyBoolean()))
+                .thenReturn(resourceBuilderContext);
+        Group master = group();
+        master.getInstances().get(0).putParameter(CloudInstance.FQDN, "fqdn");
+        when(cloudStack.getGroups()).thenReturn(List.of(master));
+        when(groupResourceService.buildMissingZonalResources(any(), any(), any(), any(), any())).thenThrow(new IllegalStateException("insert failed"));
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () ->
+                underTest.upscale(authenticatedContext, cloudStack, List.of(), new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L)));
+
+        assertEquals("Failed to build missing zonal group resources: insert failed", exception.getMessage());
+        verify(computeResourceService, never()).buildResourcesForUpscale(any(), any(), any(), anyCollection(), any());
     }
 
     @Test

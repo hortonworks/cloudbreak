@@ -114,12 +114,9 @@ public class MultiAzMigrationInitHandler extends ExceptionCatcherEventHandler<Mu
         }
 
         Set<String> currentAzs = currentAvailabilityZones(instanceGroup);
-        Set<String> targetSubnetIds = subnetMetas.entrySet().stream()
-                .filter(e -> e.getValue() != null && targetAzs.contains(e.getValue().getAvailabilityZone()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
         Map<String, Object> attributesMap = currentAttributesMap(instanceGroup);
         Set<String> currentSubnetIds = currentSubnetIdsFromAttributes(attributesMap);
+        Set<String> targetSubnetIds = targetSubnetIds(targetAzs, subnetMetas, currentSubnetIds, stack);
 
         if (Objects.equals(targetAzs, currentAzs) && Objects.equals(targetSubnetIds, currentSubnetIds)) {
             LOGGER.debug("Skipping availability-zone update for instance group {} — already up to date (azs={}, subnetIds={}).",
@@ -139,6 +136,20 @@ public class MultiAzMigrationInitHandler extends ExceptionCatcherEventHandler<Mu
             instanceGroupService.save(instanceGroup);
             LOGGER.debug("Updated availability zones {} (subnetIds={}) for instance group {}", targetAzs, targetSubnetIds, instanceGroup.getGroupName());
         }
+    }
+
+    /**
+     * Only AWS subnets are zonal. Azure and GCP subnets are regional and carry no usable zone (none, the region, or a single zone of the region),
+     * so they can't be filtered by zone. The subnets of the group are kept as they are instead.
+     */
+    private Set<String> targetSubnetIds(Set<String> targetAzs, Map<String, CloudSubnet> subnetMetas, Set<String> currentSubnetIds, Stack stack) {
+        if (!CloudPlatform.AWS.name().equals(stack.getCloudPlatform())) {
+            return currentSubnetIds;
+        }
+        return subnetMetas.entrySet().stream()
+                .filter(e -> e.getValue() != null && targetAzs.contains(e.getValue().getAvailabilityZone()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private InstanceGroupNetwork createInstanceGroupNetworkFromStack(Stack stack) {

@@ -126,6 +126,14 @@ public interface GroupResourceBuilder<C extends ResourceBuilderContext> extends 
      */
     ResourceType resourceType();
 
+    /**
+     * Defines whether one resource is created per availability zone of the group instead of one per group.
+     * The build of zonal resources has to be idempotent: during upscale the existing zonal resources are built again,
+     * so that a resource missing on the cloud provider is recreated, see
+     * {@link com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService#buildMissingZonalResources}.
+     *
+     * @return Return true if the resource is created per availability zone.
+     */
     default boolean isZonalResource() {
         return false;
     }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -33,7 +34,8 @@ public class MultiAzMigrationValidationService {
             AwsConstants.AwsVariant.AWS_VARIANT.variant(),
             AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant(),
             AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant(),
-            AzureConstants.VARIANT
+            AzureConstants.VARIANT,
+            GcpConstants.GCP_VARIANT
     );
 
     @Inject

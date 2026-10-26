@@ -27,10 +27,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -137,6 +140,68 @@ class MultiAzMigrationInitHandlerTest {
 
         assertEquals(STACK_ID, result.getResourceId());
         assertEquals(OPERATION_ID, result.getOperationId());
+    }
+
+    @Test
+    void testDoAcceptKeepsSubnetsOnAzureWhereSubnetsHaveNoZone() throws TransactionExecutionException {
+        String azureSubnet = "azure-subnet";
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setAttributes(new Json(Map.of(NetworkConstants.SUBNET_IDS, List.of(azureSubnet))));
+        InstanceGroup instanceGroup = createInstanceGroup("master", instanceGroupNetwork, Set.of());
+        Stack stack = createStack(instanceGroup);
+        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+        // Azure subnets are regional, the environment doesn't stamp subnets of an existing VNet with any zone
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
+                .withNetwork(EnvironmentNetworkResponse.builder()
+                        .withSubnetMetas(Map.of(azureSubnet, new CloudSubnet.Builder().id(azureSubnet).name(azureSubnet).build()))
+                        .withAzure(EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder.anEnvironmentNetworkAzureParams()
+                                .withAvailabilityZones(Set.of("1", "2", "3"))
+                                .build())
+                        .build())
+                .build();
+        when(stackService.getEnvironmentCrnByStackId(STACK_ID)).thenReturn(ENVIRONMENT_CRN);
+        when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        runTransactionInline();
+
+        underTest.doAccept(new HandlerEvent<>(new Event<>(new MultiAzMigrationInitHandlerRequest(STACK_ID, OPERATION_ID))));
+
+        assertThat(zonesOf(instanceGroup)).containsExactlyInAnyOrder("1", "2", "3");
+        assertThat(instanceGroup.getInstanceGroupNetwork().getAttributes().getMap().get(NetworkConstants.SUBNET_IDS))
+                .asInstanceOf(list(String.class))
+                .containsExactly(azureSubnet);
+        verify(instanceGroupService).save(instanceGroup);
+    }
+
+    @Test
+    void testDoAcceptKeepsSubnetsOnGcpWhenSubnetZoneIsNotAmongTargetZones() throws TransactionExecutionException {
+        String gcpSubnet = "gcp-subnet";
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setAttributes(new Json(Map.of(NetworkConstants.SUBNET_IDS, List.of(gcpSubnet))));
+        InstanceGroup instanceGroup = createInstanceGroup("master", instanceGroupNetwork, Set.of());
+        Stack stack = createStack(instanceGroup);
+        stack.setCloudPlatform(CloudPlatform.GCP.name());
+        // GCP subnets are regional, the environment stamps them with the first zone of the region, which isn't among the target zones
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
+                .withNetwork(EnvironmentNetworkResponse.builder()
+                        .withSubnetMetas(Map.of(gcpSubnet, new CloudSubnet.Builder().id(gcpSubnet).name(gcpSubnet).availabilityZone("zone-a").build()))
+                        .withGcp(EnvironmentNetworkGcpParams.EnvironmentNetworkGcpParamsBuilder.anEnvironmentNetworkGcpParamsBuilder()
+                                .withAvailabilityZones(Set.of(AZ_A, AZ_B))
+                                .build())
+                        .build())
+                .build();
+        when(stackService.getEnvironmentCrnByStackId(STACK_ID)).thenReturn(ENVIRONMENT_CRN);
+        when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        runTransactionInline();
+
+        underTest.doAccept(new HandlerEvent<>(new Event<>(new MultiAzMigrationInitHandlerRequest(STACK_ID, OPERATION_ID))));
+
+        assertThat(zonesOf(instanceGroup)).containsExactlyInAnyOrder(AZ_A, AZ_B);
+        assertThat(instanceGroup.getInstanceGroupNetwork().getAttributes().getMap().get(NetworkConstants.SUBNET_IDS))
+                .asInstanceOf(list(String.class))
+                .containsExactly(gcpSubnet);
+        verify(instanceGroupService).save(instanceGroup);
     }
 
     @Test
