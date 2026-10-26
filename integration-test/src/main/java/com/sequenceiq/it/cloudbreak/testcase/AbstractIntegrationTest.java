@@ -190,6 +190,11 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         waitForDatahubCreation(testContext);
     }
 
+    protected void createSmallDatahubForExistingDatalake(TestContext testContext) {
+        initiateSmallDatahubCreation(testContext);
+        waitForDatahubCreation(testContext);
+    }
+
     protected void createDefaultDatahubWithAutoTlsAndExternalDbForExistingDatalake(TestContext testContext) {
         initiateDefaultDatahubCreationWithAutoTlsAndExternalDb(testContext);
         waitForDatahubCreation(testContext);
@@ -224,6 +229,14 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void initiateDefaultDatahubCreation(TestContext testContext) {
         testContext
                 .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .validate();
+    }
+
+    protected void initiateSmallDatahubCreation(TestContext testContext) {
+        testContext
+                .given(DistroXTestDto.class)
+                .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext).smallHostGroup().build())
                 .when(distroXTestClient.create())
                 .validate();
     }

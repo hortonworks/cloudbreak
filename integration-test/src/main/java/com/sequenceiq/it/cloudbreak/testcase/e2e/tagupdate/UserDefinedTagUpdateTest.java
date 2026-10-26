@@ -23,14 +23,11 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class UserDefinedTagUpdateTest extends AbstractE2ETest {
 
@@ -62,14 +59,8 @@ public class UserDefinedTagUpdateTest extends AbstractE2ETest {
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
 
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.HA);
-
         testContext
                 .given(SdxInternalTestDto.class)
-                .withClusterShape(SdxClusterShape.ENTERPRISE)
-                .withEnableMultiAz(true)
-                .withDatabase(sdxDatabaseRequest)
                 .withCloudStorage()
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -81,7 +72,7 @@ public class UserDefinedTagUpdateTest extends AbstractE2ETest {
 
     private void createDatahubsForEveryVariant(TestContext testContext) {
         DistroXDatabaseRequest distroxDatabaseRequest = new DistroXDatabaseRequest();
-        distroxDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.HA);
+        distroxDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
 
         List<String> variants = testContext.getCloudProvider().getDistroXVariants();
         if (variants == null || variants.isEmpty()) {
@@ -105,7 +96,7 @@ public class UserDefinedTagUpdateTest extends AbstractE2ETest {
                 .given(key, DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintNameForCurrentRuntime())
                 .withExternalDatabase(databaseRequest)
-                .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.dataEngHostGroups(testContext, testContext.getCloudPlatform()))
+                .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext).smallHostGroup().build())
                 .withLoadBalancer();
         if (variant != null) {
             dto.withVariant(variant);

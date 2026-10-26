@@ -69,7 +69,7 @@ public class ModifyProxyConfigE2ETest extends AbstractE2ETest {
         validateDatalakeProxy(testContext, proxy);
 
         changeAndValidateProxy(testContext, proxy2);
-        createDefaultDatahubForExistingDatalake(testContext);
+        createSmallDatahubForExistingDatalake(testContext);
         validateDatahubProxy(testContext, proxy2);
 
         removeAndValidateProxy(testContext);
