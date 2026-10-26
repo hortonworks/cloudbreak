@@ -236,6 +236,16 @@ public interface ImageCatalogV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RuntimeVersionsV4Response getRuntimeVersionsFromDefault(@PathParam("workspaceId") Long workspaceId) throws Exception;
 
+    @GET
+    @Path("default_freeipa_images")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = ImageCatalogOpDescription.GET_FREEIPA_IMAGES_FROM_DEFAULT,
+            description = IMAGE_CATALOG_NOTES, operationId = "getFreeIpaImagesFromDefault",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    ImagesV4Response getFreeIpaImagesFromDefault(@PathParam("workspaceId") Long workspaceId,
+            @QueryParam("provider") String provider,
+            @QueryParam("architecture") String architecture) throws Exception;
+
     @POST
     @Path("validate_recommended")
     @Produces(MediaType.APPLICATION_JSON)

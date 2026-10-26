@@ -10,7 +10,6 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,12 +61,11 @@ public class DefaultImageCatalogService {
         StatedImage statedImage;
         switch (imageType) {
             case FREEIPA:
-                List<Image> images = imageCatalogProvider.getImageCatalogV3(defaultFreeIpaCatalogUrl).getImages().getFreeIpaImages();
+                List<Image> images = getDefaultFreeIpaCatalogImages();
                 Optional<Image> image = images.stream()
-                        .filter(i -> architecture.isEmpty() || StringUtils.equalsIgnoreCase(architecture.get().getName(), i.getArchitecture()))
-                        .filter(i -> i.getImageSetsByProvider().keySet()
-                                .stream()
-                                .anyMatch(key -> key.equalsIgnoreCase(provider.nameToLowerCase()))).max(getImageComparing(images));
+                        .filter(i -> hasArchitecture(i, architecture))
+                        .filter(i -> hasImageSetsOf(i, provider))
+                        .max(getImageComparing(images));
                 statedImage = statedImage(image.orElseThrow(() -> new CloudbreakImageNotFoundException(
                         String.format("Could not find any image with provider: '%s' and architecture: '%s' in catalog: '%s'",
                                 provider, architecture.isPresent() ? architecture.get() : "not defined", FREEIPA_DEFAULT_CATALOG_NAME))),
@@ -79,6 +77,14 @@ public class DefaultImageCatalogService {
                 throw new BadRequestException(String.format("Type '%s' is not supported.", type));
         }
         return statedImage;
+    }
+
+    public List<Image> getFreeIpaImagesFromDefaultCatalog(Optional<ImageCatalogPlatform> provider, Optional<Architecture> architecture)
+            throws CloudbreakImageCatalogException {
+        return getDefaultFreeIpaCatalogImages().stream()
+                .filter(image -> hasArchitecture(image, architecture))
+                .filter(image -> provider.map(platform -> hasImageSetsOf(image, platform)).orElse(true))
+                .toList();
     }
 
     public StatedImage getImageFromDefaultCatalog(String type, ImageCatalogPlatform provider, String runtime, Architecture architecture)
@@ -103,6 +109,18 @@ public class DefaultImageCatalogService {
                 throw new BadRequestException(String.format("Image type '%s' is not supported.", type));
         }
         return statedImage;
+    }
+
+    private List<Image> getDefaultFreeIpaCatalogImages() throws CloudbreakImageCatalogException {
+        return imageCatalogProvider.getImageCatalogV3(defaultFreeIpaCatalogUrl).getImages().getFreeIpaImages();
+    }
+
+    private boolean hasArchitecture(Image image, Optional<Architecture> architecture) {
+        return architecture.map(expected -> Architecture.fromStringWithFallback(image.getArchitecture()) == expected).orElse(true);
+    }
+
+    private boolean hasImageSetsOf(Image image, ImageCatalogPlatform provider) {
+        return image.getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(provider.nameToLowerCase()));
     }
 
     private Comparator<Image> getImageComparing(List<Image> images) {

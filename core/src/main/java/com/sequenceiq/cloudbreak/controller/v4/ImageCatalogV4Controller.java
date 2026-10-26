@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -63,6 +64,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -313,6 +315,22 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     public RuntimeVersionsV4Response getRuntimeVersionsFromDefault(Long workspaceId) throws Exception {
         List<String> runtimeVersions = imageCatalogService.getRuntimeVersionsFromDefault();
         return new RuntimeVersionsV4Response(runtimeVersions);
+    }
+
+    @Override
+    @AccountIdNotNeeded
+    @DisableCheckPermissions
+    public ImagesV4Response getFreeIpaImagesFromDefault(Long workspaceId, String provider, String architecture) throws Exception {
+        Optional<ImageCatalogPlatform> platform = Optional.ofNullable(provider)
+                .filter(StringUtils::hasText)
+                .map(cloudPlatform -> platformStringTransformer.getPlatformStringForImageCatalog(cloudPlatform, false));
+        Optional<Architecture> imageArchitecture = Optional.ofNullable(architecture)
+                .filter(StringUtils::hasText)
+                .map(arch -> Architecture.fromString(arch, false));
+        List<Image> images = defaultImageCatalogService.getFreeIpaImagesFromDefaultCatalog(platform, imageArchitecture);
+        ImagesV4Response response = new ImagesV4Response();
+        response.setFreeipaImages(images.stream().map(imageToImageV4ResponseConverter::convert).toList());
+        return response;
     }
 
     @Override

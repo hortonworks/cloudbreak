@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.common.api.type.ImageType;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @ExtendWith(MockitoExtension.class)
 public class DefaultImageCatalogServiceTest {
@@ -209,10 +210,41 @@ public class DefaultImageCatalogServiceTest {
                 victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"), Optional.of(Architecture.UNKNOWN)));
     }
 
+    @ParameterizedTest(name = "provider {0}, architecture {1}")
+    @MethodSource("testGetFreeIpaImagesFromDefaultCatalogDataProvider")
+    public void testGetFreeIpaImagesFromDefaultCatalog(Optional<ImageCatalogPlatform> provider, Optional<Architecture> architecture,
+            List<String> expectedImageIds) throws CloudbreakImageCatalogException {
+        List<Image> imageList = List.of(
+                createImage("aws-x86", "aws", Architecture.X86_64.getName()),
+                createImage("aws-arm", "aws", Architecture.ARM64.getName()),
+                createImage("azure-x86", "azure", Architecture.X86_64.getName()),
+                createImage("aws-no-architecture", "aws", null));
+        CloudbreakImageCatalogV3 freeipaImageCatalogV3 = mock(CloudbreakImageCatalogV3.class);
+        Images images = mock(Images.class);
+        when(imageCatalogProvider.getImageCatalogV3(DEFAULT_FREEIPA_CATALOG_URL)).thenReturn(freeipaImageCatalogV3);
+        when(freeipaImageCatalogV3.getImages()).thenReturn(images);
+        when(images.getFreeIpaImages()).thenReturn(imageList);
+
+        List<Image> actual = victim.getFreeIpaImagesFromDefaultCatalog(provider, architecture);
+
+        assertEquals(expectedImageIds, actual.stream().map(Image::getUuid).toList());
+    }
+
+    private static Object[][] testGetFreeIpaImagesFromDefaultCatalogDataProvider() {
+        return new Object[][]{
+                {Optional.empty(), Optional.empty(), List.of("aws-x86", "aws-arm", "azure-x86", "aws-no-architecture")},
+                {Optional.of(imageCatalogPlatform("AWS")), Optional.empty(), List.of("aws-x86", "aws-arm", "aws-no-architecture")},
+                {Optional.empty(), Optional.of(Architecture.X86_64), List.of("aws-x86", "azure-x86", "aws-no-architecture")},
+                {Optional.of(imageCatalogPlatform("AWS")), Optional.of(Architecture.ARM64), List.of("aws-arm")},
+                {Optional.of(imageCatalogPlatform("GCP")), Optional.empty(), List.of()},
+                {Optional.empty(), Optional.of(Architecture.UNKNOWN), List.of()}
+        };
+    }
+
     private static Object[][] testFreeipaArchitectureFilteringDataProvider() {
         return new Object[][]{
                 {Optional.of(Architecture.ARM64), "3"},
-                {Optional.of(Architecture.X86_64), "4"},
+                {Optional.of(Architecture.X86_64), "5"},
                 {Optional.empty(), "5"}
         };
     }
@@ -221,6 +253,14 @@ public class DefaultImageCatalogServiceTest {
         Image image = mock(Image.class);
         lenient().when(image.getImageSetsByProvider()).thenReturn(Map.of("aws", Map.of()));
         lenient().when(image.getCreated()).thenReturn(time);
+        lenient().when(image.getArchitecture()).thenReturn(architecture);
+        lenient().when(image.getUuid()).thenReturn(uuid);
+        return image;
+    }
+
+    private Image createImage(String uuid, String provider, String architecture) {
+        Image image = mock(Image.class);
+        lenient().when(image.getImageSetsByProvider()).thenReturn(Map.of(provider, Map.of()));
         lenient().when(image.getArchitecture()).thenReturn(architecture);
         lenient().when(image.getUuid()).thenReturn(uuid);
         return image;

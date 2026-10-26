@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 
+import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,23 +10,37 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageRecommendationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageRecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.RuntimeVersionsV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.controller.validation.RecommendedImageValidator;
+import com.sequenceiq.cloudbreak.converter.v4.imagecatalog.ImageToImageV4ResponseConverter;
+import com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @ExtendWith(MockitoExtension.class)
 public class ImageCatalogV4ControllerTest {
@@ -41,6 +56,15 @@ public class ImageCatalogV4ControllerTest {
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Mock
+    private DefaultImageCatalogService defaultImageCatalogService;
+
+    @Mock
+    private PlatformStringTransformer platformStringTransformer;
+
+    @Mock
+    private ImageToImageV4ResponseConverter imageToImageV4ResponseConverter;
+
     @InjectMocks
     private ImageCatalogV4Controller victim;
 
@@ -52,6 +76,35 @@ public class ImageCatalogV4ControllerTest {
         RuntimeVersionsV4Response actual = victim.getRuntimeVersionsFromDefault(WORKSPACE_ID);
 
         assertEquals(expected, actual.getRuntimeVersions());
+    }
+
+    @Test
+    void testGetFreeIpaImagesFromDefault() throws Exception {
+        ImageCatalogPlatform aws = imageCatalogPlatform("AWS");
+        Image image = mock(Image.class);
+        ImageV4Response imageResponse = new ImageV4Response();
+        when(platformStringTransformer.getPlatformStringForImageCatalog("aws", false)).thenReturn(aws);
+        when(defaultImageCatalogService.getFreeIpaImagesFromDefaultCatalog(Optional.of(aws), Optional.of(Architecture.ARM64)))
+                .thenReturn(List.of(image));
+        when(imageToImageV4ResponseConverter.convert(image)).thenReturn(imageResponse);
+
+        ImagesV4Response response = victim.getFreeIpaImagesFromDefault(WORKSPACE_ID, "aws", "arm64");
+
+        assertEquals(List.of(imageResponse), response.getFreeipaImages());
+        assertTrue(response.getBaseImages().isEmpty());
+        assertTrue(response.getCdhImages().isEmpty());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = " ")
+    void testGetFreeIpaImagesFromDefaultWithoutFilters(String filter) throws Exception {
+        when(defaultImageCatalogService.getFreeIpaImagesFromDefaultCatalog(Optional.empty(), Optional.empty())).thenReturn(List.of());
+
+        ImagesV4Response response = victim.getFreeIpaImagesFromDefault(WORKSPACE_ID, filter, filter);
+
+        assertTrue(response.getFreeipaImages().isEmpty());
+        verifyNoInteractions(platformStringTransformer);
     }
 
     @Test
