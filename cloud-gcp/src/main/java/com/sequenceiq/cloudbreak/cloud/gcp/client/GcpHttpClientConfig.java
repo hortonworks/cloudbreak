@@ -33,6 +33,13 @@ public class GcpHttpClientConfig {
 
     private static final String[] TLS_PROTOCOLS = {TLS_1_3.getVersion()};
 
+    // google.jks ships inside google-api-client and is a JKS keystore (magic bytes FEEDFEED), despite
+    // historically being read through a PKCS12 keystore here: the SUN provider's PKCS12 implementation
+    // transparently accepts JKS. jdk-25-fips drops that provider, so it must be read as JKS. See CB-35226.
+    private static final String GOOGLE_TRUST_BUNDLE = "google.jks";
+
+    private static final String GOOGLE_TRUST_BUNDLE_PASSWORD = "notasecret";
+
     @Value("${cb.gcp.tlsHardening:false}")
     private boolean tlsHardeningEnabled;
 
@@ -70,25 +77,18 @@ public class GcpHttpClientConfig {
 
     private KeyStore getCertificateTrustStore() throws IOException, GeneralSecurityException {
         KeyStore certTrustStore = SecurityUtils.getDefaultKeyStore();
-        try (InputStream keyStoreStream = GoogleUtils.class.getResourceAsStream("google.jks")) {
-            LOGGER.debug("Trying to load Google's certificates to default key store with type: {}", certTrustStore.getType());
+        try (InputStream keyStoreStream = GoogleUtils.class.getResourceAsStream(GOOGLE_TRUST_BUNDLE)) {
             certTrustStore.load(null, null);
-            LOGGER.debug("Loading Google's certificates to PKCS12 key store");
-            KeyStore pkcs12KeyStore = SecurityUtils.getPkcs12KeyStore();
-            String googleKeyStoreDefaultPassword = "notasecret";
-            SecurityUtils.loadKeyStore(pkcs12KeyStore, Objects.requireNonNull(keyStoreStream), googleKeyStoreDefaultPassword);
-            LOGGER.debug("Loading certificates from PKCS12 key store to the default key store with type: {}", certTrustStore.getType());
-            for (String alias : Collections.list(pkcs12KeyStore.aliases())) {
-                if (pkcs12KeyStore.isKeyEntry(alias)) {
-                    LOGGER.debug("Not ready to load keys to BCFKS trust store with alias: {}", alias);
-                } else {
-                    certTrustStore.setCertificateEntry(alias, pkcs12KeyStore.getCertificate(alias));
+            KeyStore googleTrustBundle = SecurityUtils.getJavaKeyStore();
+            SecurityUtils.loadKeyStore(googleTrustBundle, Objects.requireNonNull(keyStoreStream), GOOGLE_TRUST_BUNDLE_PASSWORD);
+            int certificates = 0;
+            for (String alias : Collections.list(googleTrustBundle.aliases())) {
+                if (!googleTrustBundle.isKeyEntry(alias)) {
+                    certTrustStore.setCertificateEntry(alias, googleTrustBundle.getCertificate(alias));
+                    certificates++;
                 }
             }
-            LOGGER.debug("Loaded Google's certificates into default key store with type: {}", certTrustStore.getType());
-        } catch (Exception e) {
-            LOGGER.warn("Google's certificates could not be loaded into the default key store with type:'{}'.", certTrustStore.getType(), e);
-            certTrustStore.load(null);
+            LOGGER.info("Loaded {} of Google's certificates into the {} trust store", certificates, certTrustStore.getType());
         }
         return certTrustStore;
     }

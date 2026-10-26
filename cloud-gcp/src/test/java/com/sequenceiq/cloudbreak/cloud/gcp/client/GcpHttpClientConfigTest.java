@@ -9,6 +9,9 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.util.Collections;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -66,6 +69,27 @@ public class GcpHttpClientConfigTest {
         invokeConfigurator(socketFactory, sslSocket);
         verify(sslSocket).setEnabledProtocols(new String[] {"TLSv1.3"});
         verify(sslSocket).setEnabledCipherSuites(new String[] {"TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384"});
+    }
+
+    @Test
+    public void testCertificateTrustStoreContainsGoogleCertificates() throws KeyStoreException {
+        KeyStore trustStore = ReflectionTestUtils.invokeMethod(underTest, "getCertificateTrustStore");
+
+        assertThat(trustStore).isNotNull();
+        assertThat(certificateCount(trustStore))
+                .as("Google's bundled google.jks must end up in the trust store. An empty store is not a safe fallback: "
+                        + "every GCP call then fails its TLS handshake with nothing pointing back to this class.")
+                .isPositive();
+    }
+
+    private static int certificateCount(KeyStore keyStore) throws KeyStoreException {
+        int certificates = 0;
+        for (String alias : Collections.list(keyStore.aliases())) {
+            if (!keyStore.isKeyEntry(alias)) {
+                certificates++;
+            }
+        }
+        return certificates;
     }
 
     private static SSLSocketFactory extractSslSocketFactory(NetHttpTransport transport) {
