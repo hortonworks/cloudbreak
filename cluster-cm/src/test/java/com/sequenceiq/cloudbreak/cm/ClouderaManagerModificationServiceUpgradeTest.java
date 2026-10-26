@@ -105,12 +105,13 @@ class ClouderaManagerModificationServiceUpgradeTest extends ClouderaManagerModif
         verifyNoInteractions(clouderaManagerUpgradeService);
 
         InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clustersResourceApi,
-                clouderaManagerRestartService);
+                clouderaManagerRestartService, runtimeUpgradeServiceConfigPatcherService);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).checkParcelApiAvailability(stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(products, clouderaManagerResourceApi);
         inOrder.verify(clouderaManagerParcelManagementService).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
+        inOrder.verify(runtimeUpgradeServiceConfigPatcherService).patchServiceConfigs(v31Client, stack, products);
         inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
@@ -353,12 +354,13 @@ class ClouderaManagerModificationServiceUpgradeTest extends ClouderaManagerModif
         verify(clouderaManagerCommonCommandService, times(1)).getApiCommand(any(), any(), any(), any());
 
         InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clouderaManagerUpgradeService,
-                clustersResourceApi, clouderaManagerCommonCommandService, servicesResourceApi);
+                clustersResourceApi, clouderaManagerCommonCommandService, servicesResourceApi, runtimeUpgradeServiceConfigPatcherService);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).checkParcelApiAvailability(stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(products, clouderaManagerResourceApi);
         inOrder.verify(clouderaManagerParcelManagementService).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
+        inOrder.verify(runtimeUpgradeServiceConfigPatcherService).patchServiceConfigs(v31Client, stack, products);
         inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).activateParcels(nonCdhProduct, parcelResourceApi, parcelsResourceApi, stack, v31Client);

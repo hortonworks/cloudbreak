@@ -9,13 +9,14 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cluster.service.LoadBalancerUserFacingFqdnProvider;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
-public class LoadBalancerFqdnUtil {
+public class LoadBalancerFqdnUtil implements LoadBalancerUserFacingFqdnProvider {
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
@@ -26,6 +27,7 @@ public class LoadBalancerFqdnUtil {
     /*
      * Favors public, then gateway_private over private
      */
+    @Override
     public String getLoadBalancerUserFacingFQDN(Long stackId) {
         Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId).stream()
                 .filter(lb -> StringUtils.isNotBlank(lb.getDns()) ||

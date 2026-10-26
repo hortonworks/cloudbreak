@@ -208,12 +208,63 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(9, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
         assertClusterSyncTriggerEvent(flowChainQueue);
+        assertClusterScaleTriggerEvent(flowChainQueue);
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
-        assertClusterScaleTriggerEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue, IMAGE_ID);
+    }
+
+    @Test
+    void testChainQueueForRuntimeUpgradeShouldStartStoppedNodesBeforeValidation() throws CloudbreakImageNotFoundException {
+        InstanceMetaData master = getHost("master1", "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
+        InstanceMetaData compute1 = getHost("compute1", "compute", InstanceStatus.STOPPED, InstanceGroupType.CORE);
+        InstanceMetaData compute2 = getHost("compute2", "compute", InstanceStatus.STOPPED, InstanceGroupType.CORE);
+        InstanceMetaData compute3 = getHost("compute3", "compute", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.CORE);
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(List.of(master, compute1, compute2, compute3));
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, false, false, "variant", false, "runtime");
+
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+
+        assertEquals(9, flowChainQueue.getQueue().size());
+        assertSyncTriggerEvent(flowChainQueue);
+        assertClusterSyncTriggerEvent(flowChainQueue);
+        assertClusterScaleTriggerEvent(flowChainQueue, "compute", 2);
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
+        assertSaltUpdateEvent(flowChainQueue);
+        assertImageUpdateEvent(flowChainQueue);
+        assertUpgradeEvent(flowChainQueue, IMAGE_ID);
+    }
+
+    @Test
+    void testChainQueueForOsUpgradeShouldStartStoppedNodesBeforeValidation() throws CloudbreakImageNotFoundException {
+        InstanceMetaData master = getHost("master1", "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
+        InstanceMetaData compute1 = getHost("compute1", "compute", InstanceStatus.STOPPED, InstanceGroupType.CORE);
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(List.of(master, compute1));
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
+        when(repairBatchSizeService.getBatchNodeCount(any())).thenReturn(100);
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
+                Result.success(Map.of(HostGroupName.hostGroupName("compute"), Set.of(compute1)));
+        when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
+
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+
+        assertEquals(7, flowChainQueue.getQueue().size());
+        assertSyncTriggerEvent(flowChainQueue);
+        assertClusterSyncTriggerEvent(flowChainQueue);
+        assertClusterScaleTriggerEvent(flowChainQueue, "compute", 1);
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertSaltUpdateEvent(flowChainQueue);
+        assertImageUpdateEvent(flowChainQueue);
+        assertRepairEvent(flowChainQueue, RepairType.ALL_AT_ONCE, 1, "variant");
     }
 
     private void assertClusterSyncTriggerEvent(FlowTriggerEventQueue flowTriggerEventQueue) {
@@ -472,11 +523,17 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(imageId, ((ClusterUpgradePreparationTriggerEvent) upgradePreparationEvent).getImageChangeDto().getImageId());
     }
 
-    private void assertClusterScaleTriggerEvent(FlowTriggerEventQueue flowChainQueue) {
+    private StopStartUpscaleTriggerEvent assertClusterScaleTriggerEvent(FlowTriggerEventQueue flowChainQueue) {
         Selectable clusterScaleEvent = flowChainQueue.getQueue().remove();
         assertEquals(STOPSTART_UPSCALE_TRIGGER_EVENT.event(), clusterScaleEvent.selector());
         assertEquals(STACK_ID, clusterScaleEvent.getResourceId());
-        assertInstanceOf(StopStartUpscaleTriggerEvent.class, clusterScaleEvent);
+        return assertInstanceOf(StopStartUpscaleTriggerEvent.class, clusterScaleEvent);
+    }
+
+    private void assertClusterScaleTriggerEvent(FlowTriggerEventQueue flowChainQueue, String hostGroup, int adjustment) {
+        StopStartUpscaleTriggerEvent clusterScaleEvent = assertClusterScaleTriggerEvent(flowChainQueue);
+        assertEquals(hostGroup, clusterScaleEvent.getHostGroup());
+        assertEquals(adjustment, clusterScaleEvent.getAdjustment());
     }
 
     private void assertSaltSecretRotationTriggerEvent(FlowTriggerEventQueue flowChainQueue) {

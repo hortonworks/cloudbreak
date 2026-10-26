@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi.NifiKnoxProxyHostRoleConfigProvider.NIFI_WEB_PROXY_HOST;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi.NifiProxyHostsCollector.NIFI_WEB_PROXY_HOST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -95,16 +95,16 @@ class NifiKnoxProxyHostRoleConfigProviderTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"4.12.0.0", "4.12.0.20000-231", "4.13.0.0-1"})
-    void testConfigurationNeededFromCfm4120(String cfmVersion) {
+    @ValueSource(strings = {"4.12.0.10000", "4.12.0.10000-1", "4.12.0.10000-238", "4.12.0.20000-231", "4.13.0.0-1"})
+    void testConfigurationNeededFromCfm412010000(String cfmVersion) {
         when(cmTemplateProcessor.isRoleTypePresentInService("NIFI", List.of(NifiRoles.NIFI_NODE))).thenReturn(true);
 
         assertTrue(underTest.isConfigurationNeeded(cmTemplateProcessor, tpo(generalClusterConfigs(), cfmVersion)));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"2.2.9.0-1", "4.0.0.0-1", "4.11.0.0-100"})
-    void testConfigurationNotNeededBeforeCfm4120(String cfmVersion) {
+    @ValueSource(strings = {"2.2.9.0-1", "4.11.0.0-100", "4.12.0.0-914", "4.12.0.401-1", "4.12.0.9999-999"})
+    void testConfigurationNotNeededBeforeCfm412010000(String cfmVersion) {
         when(cmTemplateProcessor.isRoleTypePresentInService("NIFI", List.of(NifiRoles.NIFI_NODE))).thenReturn(true);
 
         assertFalse(underTest.isConfigurationNeeded(cmTemplateProcessor, tpo(generalClusterConfigs(), cfmVersion)));

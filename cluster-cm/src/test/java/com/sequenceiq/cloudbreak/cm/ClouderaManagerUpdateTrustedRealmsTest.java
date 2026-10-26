@@ -33,8 +33,8 @@ import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.cm.config.ClouderaManagerFlinkConfigurationService;
 import com.sequenceiq.cloudbreak.cm.config.modification.ClouderaManagerConfigModificationService;
+import com.sequenceiq.cloudbreak.cm.config.upgrade.RuntimeUpgradeServiceConfigPatcherService;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
@@ -128,7 +128,7 @@ class ClouderaManagerUpdateTrustedRealmsTest {
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
     @Mock
-    private ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
+    private RuntimeUpgradeServiceConfigPatcherService runtimeUpgradeServiceConfigPatcherService;
 
     @Mock
     private ClouderaManagerKraftMigrationService clouderaManagerKraftMigrationService;

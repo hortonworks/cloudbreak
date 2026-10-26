@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.cm.config;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.flink.FlinkConfigProviderUtils.RELEASE_NAME_CONF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.flink.FlinkConfigProviderUtils.RELEASE_NAME_CONF_VALUE;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -53,62 +55,61 @@ class ClouderaManagerFlinkConfigurationServiceTest {
     private Set<ClouderaManagerProduct> products;
 
     @Test
-    void testAddServiceConfigurationIfNecessaryShouldSetTheConfiguration() throws CloudbreakException {
+    void testFlinkPatchShouldSetTheConfiguration() throws CloudbreakException {
         Stack stack = createStack();
 
         when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.1")));
         when(cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprintJsonText())).thenReturn(true);
 
-        underTest.addServiceConfigurationIfNecessary(apiClient, stack, products);
+        assertTrue(underTest.isPatchNeeded(stack, products));
+        underTest.patchServiceConfig(apiClient, stack, products);
 
         verify(clouderaManagerConfigService).modifyServiceConfig(apiClient, stack.getName(), FLINK_SERVICE_TYPE,
                 Map.of(RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE));
     }
 
     @Test
-    void testAddServiceConfigurationIfNecessaryShouldNotSetTheConfigurationWhenTheRuntimeVersionIsLower() {
+    void testFlinkPatchShouldNotSetTheConfigurationWhenTheRuntimeVersionIsLower() {
         Stack stack = createStack();
 
         when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.0")));
 
-        underTest.addServiceConfigurationIfNecessary(apiClient, stack, products);
+        assertFalse(underTest.isPatchNeeded(stack, products));
 
         verifyNoInteractions(cmTemplateService, clouderaManagerConfigService);
     }
 
     @Test
-    void testAddServiceConfigurationIfNecessaryShouldNotSetTheConfigurationWhenTheRuntimeVersionIsHigher() {
+    void testFlinkPatchShouldNotSetTheConfigurationWhenTheRuntimeVersionIsHigher() {
         Stack stack = createStack();
 
         when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.2")));
 
-        underTest.addServiceConfigurationIfNecessary(apiClient, stack, products);
+        assertFalse(underTest.isPatchNeeded(stack, products));
 
         verifyNoInteractions(cmTemplateService, clouderaManagerConfigService);
     }
 
     @Test
-    void testAddServiceConfigurationIfNecessaryShouldNotSetTheConfigurationWhenTheFlinkServiceIsNotPresent() {
+    void testFlinkPatchShouldNotSetTheConfigurationWhenTheFlinkServiceIsNotPresent() {
         Stack stack = createStack();
 
         when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.1")));
         when(cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprintJsonText())).thenReturn(false);
 
-        underTest.addServiceConfigurationIfNecessary(apiClient, stack, products);
+        assertFalse(underTest.isPatchNeeded(stack, products));
 
         verifyNoInteractions(clouderaManagerConfigService);
     }
 
     @Test
-    void testAddServiceConfigurationIfNecessaryShouldThrowExceptionWhenTryingToSetTheConfig() throws CloudbreakException {
+    void testFlinkPatchShouldThrowExceptionWhenTryingToSetTheConfig() throws CloudbreakException {
         Stack stack = createStack();
 
-        when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.1")));
-        when(cmTemplateService.isServiceTypePresent(FLINK_SERVICE_TYPE, stack.getBlueprintJsonText())).thenReturn(true);
         doThrow(CloudbreakException.class).when(clouderaManagerConfigService).modifyServiceConfig(apiClient, stack.getName(), FLINK_SERVICE_TYPE,
                 Map.of(RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE));
 
-        assertThrows(CloudbreakServiceException.class, () -> underTest.addServiceConfigurationIfNecessary(apiClient, stack, products));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.patchServiceConfig(apiClient, stack, products));
 
         verify(clouderaManagerConfigService).modifyServiceConfig(apiClient, stack.getName(), FLINK_SERVICE_TYPE,
                 Map.of(RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE));
