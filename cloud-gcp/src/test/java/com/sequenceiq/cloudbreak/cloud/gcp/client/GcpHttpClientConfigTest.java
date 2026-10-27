@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.gcp.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -20,12 +22,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.util.SecurityUtils;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,9 +81,25 @@ public class GcpHttpClientConfigTest {
 
         assertThat(trustStore).isNotNull();
         assertThat(certificateCount(trustStore))
-                .as("Google's bundled google.jks must end up in the trust store. An empty store is not a safe fallback: "
-                        + "every GCP call then fails its TLS handshake with nothing pointing back to this class.")
+                .as("Google's bundled google.jks is a JKS keystore, so it must load through getJavaKeyStore(). "
+                        + "Reading it as PKCS12 only worked via the SUN provider and fails on jdk-25-fips (CB-35226).")
                 .isPositive();
+    }
+
+    @Test
+    public void testCertificateTrustStoreFallsBackToEmptyStoreWhenBundleCannotBeRead() throws KeyStoreException {
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class, CALLS_REAL_METHODS)) {
+            securityUtils.when(SecurityUtils::getJavaKeyStore).thenThrow(new KeyStoreException("JKS not available"));
+
+            KeyStore trustStore = ReflectionTestUtils.invokeMethod(underTest, "getCertificateTrustStore");
+
+            // Must not propagate: this bean is constructed at startup wherever cloud-gcp is on the classpath,
+            // including gov deployments where GCP is not an enabled platform (enabledgovplatforms: AWS).
+            assertThat(trustStore)
+                    .as("A load failure must leave the service startable, not fail bean construction")
+                    .isNotNull();
+            assertThat(certificateCount(trustStore)).isZero();
+        }
     }
 
     private static int certificateCount(KeyStore keyStore) throws KeyStoreException {

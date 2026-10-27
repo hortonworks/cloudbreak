@@ -89,6 +89,12 @@ public class GcpHttpClientConfig {
                 }
             }
             LOGGER.info("Loaded {} of Google's certificates into the {} trust store", certificates, certTrustStore.getType());
+        } catch (Exception e) {
+            // Non-fatal on purpose: this bean is built even where GCP is disabled, so throwing would block startup.
+            LOGGER.warn("Could not load Google's certificates into the {} trust store, continuing with an empty one. "
+                    + "GCP API calls will fail the TLS handshake. Expected where GCP is not an enabled platform.",
+                    certTrustStore.getType(), e);
+            certTrustStore.load(null);
         }
         return certTrustStore;
     }
