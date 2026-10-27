@@ -143,8 +143,8 @@ public class VerticalScalingValidatorService {
 
         if (!entitlementService.isVerticalScaleHaEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
             if (!stack.isStopped()) {
-                //Instruction: You must stop Environment for Vertical scaling of FreeIPA
-                throw new BadRequestException(String.format("You must stop Environment for %s of %s.", message, stack.getName()));
+                //Instruction: You must stop particular stack for vertical scaling
+                throw new BadRequestException(String.format("You must stop %s for %s.", stack.getName(), message));
             }
         }
     }

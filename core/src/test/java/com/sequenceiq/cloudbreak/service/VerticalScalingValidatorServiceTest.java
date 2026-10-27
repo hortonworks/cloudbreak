@@ -912,7 +912,7 @@ public class VerticalScalingValidatorServiceTest {
             underTest.validateProvider(stack, message, request);
         });
 
-        assertEquals(String.format("You must stop Environment for %s of %s.", message, stackName), badRequestException.getMessage());
+        assertEquals("You must stop test-stack for Vertical scaling.", badRequestException.getMessage());
         verify(cloudParameterCache).isVerticalScalingSupported(cloudPlatform);
         verify(entitlementService).isVerticalScaleHaEnabled("default");
         verify(stack).isStopped();
