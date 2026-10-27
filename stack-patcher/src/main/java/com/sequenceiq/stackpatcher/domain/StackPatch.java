@@ -25,6 +25,13 @@ public class StackPatch {
     @Column(name = "resource_id")
     private Long resourceId;
 
+    /**
+     * Mirrors {@link #resourceId} so that the previous release, which only knows the stack_id column, keeps working after a rollback.
+     * Queries filter on this column until every release in the rollback window writes resource_id. See CB-35238.
+     */
+    @Column(name = "stack_id")
+    private Long legacyStackId;
+
     @Convert(converter = StackPatchTypeConverter.class)
     private StackPatchType type;
 
@@ -41,6 +48,7 @@ public class StackPatch {
 
     public StackPatch(Long resourceId, StackPatchType type) {
         this.resourceId = resourceId;
+        this.legacyStackId = resourceId;
         this.type = type;
         this.status = StackPatchStatus.SCHEDULED;
     }
@@ -54,11 +62,16 @@ public class StackPatch {
     }
 
     public Long getResourceId() {
-        return resourceId;
+        if (resourceId != null) {
+            return resourceId;
+        } else {
+            return legacyStackId;
+        }
     }
 
     public void setResourceId(Long resourceId) {
         this.resourceId = resourceId;
+        this.legacyStackId = resourceId;
     }
 
     public StackPatchType getType() {

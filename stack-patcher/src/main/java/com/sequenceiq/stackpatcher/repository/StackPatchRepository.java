@@ -19,13 +19,15 @@ import com.sequenceiq.stackpatcher.domain.StackPatchType;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface StackPatchRepository extends JpaRepository<StackPatch, Long> {
 
+    @Query("SELECT sp FROM StackPatch sp WHERE sp.legacyStackId = :resourceId AND sp.type = :stackPatchType")
     Optional<StackPatch> findByResourceIdAndType(Long resourceId, StackPatchType stackPatchType);
 
+    @Query("SELECT sp FROM StackPatch sp WHERE sp.type = :stackPatchType AND sp.legacyStackId IN :resourceIds")
     List<StackPatch> findByTypeAndResourceIdIn(StackPatchType stackPatchType, Collection<Long> resourceIds);
 
     List<StackPatch> findByTypeIn(Set<StackPatchType> stackPatchTypes);
 
     @Modifying
-    @Query("DELETE FROM StackPatch se WHERE se.resourceId = :resourceId")
+    @Query("DELETE FROM StackPatch se WHERE se.legacyStackId = :resourceId")
     void deleteByResourceId(Long resourceId);
 }
