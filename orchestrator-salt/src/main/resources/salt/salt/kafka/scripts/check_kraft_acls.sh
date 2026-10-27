@@ -48,24 +48,43 @@ if [ -z "$bootstrap_server" ]; then
 fi
 echo "Using bootstrap server $bootstrap_server"
 
-# Only stdout holds the ACL listing, the client warnings on stderr could contain host names that match the principal by accident
+# Lists the ACLs into acls_output, the extra arguments are passed to kafka-acls as resource filters.
+# Only stdout holds the ACL listing, the client warnings on stderr could contain host names that match the principal by accident.
 kafka_acls_stderr="$work_dir/kafka-acls.err"
-set +e
-cluster_acls=$(timeout "$KAFKA_ACLS_TIMEOUT_SECONDS" kafka-acls --bootstrap-server "$bootstrap_server" --command-config "$KAFKA_CLIENT_CONF" \
-  --list --cluster 2> "$kafka_acls_stderr")
-list_acls_exit_code=$?
-set -e
-if [ "$list_acls_exit_code" -eq 124 ]; then
-  fail "Listing the cluster ACLs on $bootstrap_server did not finish within $KAFKA_ACLS_TIMEOUT_SECONDS seconds."
-elif [ "$list_acls_exit_code" -ne 0 ]; then
-  # The client logs its shutdown after the failure, so the error lines are picked instead of the end of the output
-  kafka_acls_errors=$(grep -E 'ERROR|Exception|Error:' "$kafka_acls_stderr" | tail -n 5 || true)
-  fail "Listing the cluster ACLs on $bootstrap_server failed with exit code $list_acls_exit_code: ${kafka_acls_errors:-$(tail -n 5 "$kafka_acls_stderr")}"
-fi
+list_acls() {
+  set +e
+  acls_output=$(timeout "$KAFKA_ACLS_TIMEOUT_SECONDS" kafka-acls --bootstrap-server "$bootstrap_server" --command-config "$KAFKA_CLIENT_CONF" \
+    --list "$@" 2> "$kafka_acls_stderr")
+  local list_acls_exit_code=$?
+  set -e
+  if [ "$list_acls_exit_code" -eq 124 ]; then
+    fail "Listing the cluster ACLs on $bootstrap_server did not finish within $KAFKA_ACLS_TIMEOUT_SECONDS seconds."
+  elif [ "$list_acls_exit_code" -ne 0 ]; then
+    # The client logs its shutdown after the failure, so the error lines are picked instead of the end of the output
+    local kafka_acls_errors
+    kafka_acls_errors=$(grep -E 'ERROR|Exception|Error:' "$kafka_acls_stderr" | tail -n 5 || true)
+    fail "Listing the cluster ACLs on $bootstrap_server failed with exit code $list_acls_exit_code: ${kafka_acls_errors:-$(tail -n 5 "$kafka_acls_stderr")}"
+  fi
+}
 
+# Every resource block starts with a "Current ACLs for resource" header, only the entries of the CLUSTER resource blocks are counted.
 # The principal type is written as User or USER depending on the authorizer, GROUP principals named kraft must not be counted, and DENY entries
 # do not grant anything to the KRaft principal
-kraft_acl_count=$(grep -iE 'principal=user:kraft([^[:alnum:]_.-]|$)' <<< "$cluster_acls" | grep -ciE 'permissionType=ALLOW([^[:alnum:]_]|$)' || true)
+count_kraft_cluster_acls() {
+  awk '/^Current ACLs for resource/ {in_cluster = ($0 ~ /resourceType=CLUSTER[,)]/); next} in_cluster' <<< "$1" \
+    | grep -iE 'principal=user:kraft([^[:alnum:]_.-]|$)' | grep -ciE 'permissionType=ALLOW([^[:alnum:]_]|$)' || true
+}
+
+# The Ranger authorizer answers the ACL filters differently per runtime: on 7.3.2 only the literal --cluster filter returns the cluster
+# policies (resource name kafka-cluster), on 7.3.3 it returns nothing, because the cluster policies are reported with the name *, and
+# only the match pattern type filter returns them (together with the ACLs of the other resource types)
+list_acls --cluster
+kraft_acl_count=$(count_kraft_cluster_acls "$acls_output")
+if [ "$kraft_acl_count" -eq 0 ]; then
+  echo "No cluster ACL found for the KRaft principal with the literal --cluster filter, checking with the match pattern type filter."
+  list_acls --cluster --resource-pattern-type match
+  kraft_acl_count=$(count_kraft_cluster_acls "$acls_output")
+fi
 if [ "$kraft_acl_count" -eq 0 ]; then
   fail "No cluster ACL belongs to the KRaft principal on $bootstrap_server. The Zookeeper to KRaft migration requires cluster ACLs for the KRaft principal, grant them and retry the migration."
 fi
