@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.notification.WebSocketNotificationService;
 
@@ -46,7 +48,17 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakComposit
                 String msg = String.format("Failed to send notification from structured event, stack('%s')", stackResponse.getId());
                 LOGGER.warn(msg, e);
             }
+        } else {
+            LOGGER.warn("Skipped websocket notification for resource event '{}', because the stack response is missing. Stack: {}",
+                    cloudbreakCompositeEvent.getResourceEvent(), getStackCrn(cloudbreakCompositeEvent));
         }
+    }
+
+    private String getStackCrn(CloudbreakCompositeEvent cloudbreakCompositeEvent) {
+        return Optional.ofNullable(cloudbreakCompositeEvent.getStructuredNotificationEvent())
+                .map(StructuredNotificationEvent::getNotificationDetails)
+                .map(NotificationDetails::getStackCrn)
+                .orElse(null);
     }
 
     private String getNotificationType(StructuredNotificationEvent structuredNotificationEvent) {

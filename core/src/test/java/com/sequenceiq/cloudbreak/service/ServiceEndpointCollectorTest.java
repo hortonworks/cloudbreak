@@ -310,7 +310,7 @@ public class ServiceEndpointCollectorTest {
     }
 
     @Test
-    public void testPrepareClusterExposedServicesIfBlueprintNull() {
+    public void testPrepareClusterExposedServicesUsesExtendedBlueprintTextWhenBlueprintHasNoJsonText() {
         Stack stack = createStackWithComponents(new ExposedService[] { exposedService("ATLAS") },
                 new ExposedService[] { exposedService("HIVE_SERVER"), exposedService("WEBHDFS") }, GatewayType.INDIVIDUAL);
         stack.getCluster().getGateway().setGatewayPort(443);
@@ -318,6 +318,34 @@ public class ServiceEndpointCollectorTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setStackVersion("7.2.14");
         stack.getCluster().setBlueprint(blueprint);
+        mockBlueprintTextProcessor();
+        mockComponentLocator(Lists.newArrayList("10.0.0.1"));
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
+                underTest.prepareClusterExposedServices(stack, "10.0.0.1");
+
+        assertEquals(4L, clusterExposedServicesMap.keySet().size());
+    }
+
+    @Test
+    public void testPrepareClusterExposedServicesReturnsEmptyMapWhenBlueprintNull() {
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER") }, GatewayType.INDIVIDUAL);
+        stack.getCluster().setBlueprint(null);
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
+                underTest.prepareClusterExposedServices(stack, CLOUDERA_MANAGER_IP);
+
+        assertTrue(clusterExposedServicesMap.isEmpty());
+    }
+
+    @Test
+    public void testPrepareClusterExposedServicesUsesExtendedBlueprintTextWhenBlueprintNull() {
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER"), exposedService("WEBHDFS") }, GatewayType.INDIVIDUAL);
+        stack.getCluster().getGateway().setGatewayPort(443);
+        stack.getCluster().setExtendedBlueprintText("extended-blueprint");
+        stack.getCluster().setBlueprint(null);
         mockBlueprintTextProcessor();
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));
 

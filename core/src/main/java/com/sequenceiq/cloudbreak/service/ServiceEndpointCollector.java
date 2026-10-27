@@ -123,9 +123,6 @@ public class ServiceEndpointCollector {
     }
 
     public Map<String, Collection<ClusterExposedServiceV4Response>> prepareClusterExposedServices(StackDtoDelegate stackDto, String managerIp) {
-        if (stackDto.getBlueprint() == null) {
-            throw new NotFoundException("Cannot find blueprint for stack with crn: " + stackDto.getStack().getResourceCrn());
-        }
         String blueprintText = getBlueprintString(stackDto);
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
         if (!Strings.isNullOrEmpty(blueprintText)) {
