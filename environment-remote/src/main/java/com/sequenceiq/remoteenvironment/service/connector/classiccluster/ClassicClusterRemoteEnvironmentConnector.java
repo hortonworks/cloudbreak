@@ -3,10 +3,12 @@ package com.sequenceiq.remoteenvironment.service.connector.classiccluster;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,13 +21,17 @@ import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.remotecluster.client.RemoteClusterGrpcErrors;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnector;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnectorType;
 import com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane.PrivateControlPlaneRemoteEnvironmentConnector;
+
+import io.grpc.StatusRuntimeException;
 
 @Component
 public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironmentConnector {
@@ -35,6 +41,9 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     // also accept UNSET for older registrations
     private static final Set<OnPremisesApiProto.ClouderaManagerClusterType.Value> BASE_CLUSTER_TYPES =
             Set.of(OnPremisesApiProto.ClouderaManagerClusterType.Value.UNSET, OnPremisesApiProto.ClouderaManagerClusterType.Value.BASE_CLUSTER);
+
+    private static final String CM_PROXY_CALL_FAILED_MESSAGE =
+            "Failed to reach Cloudera Manager through cluster proxy. Please make sure Cloudera Manager is running and reachable, then try again.";
 
     @Inject
     private RemoteClusterServiceClient remoteClusterServiceClient;
@@ -67,7 +76,7 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
 
     @Override
     public Collection<SimpleRemoteEnvironmentResponse> list(String userCrn) {
-        List<OnPremisesApiProto.Cluster> clusters = remoteClusterServiceClient.listClassicClusters(userCrn).stream()
+        List<OnPremisesApiProto.Cluster> clusters = translateCmProxyFailure(() -> remoteClusterServiceClient.listClassicClusters(userCrn)).stream()
                 .filter(this::isBaseCluster)
                 .toList();
         return listService.list(clusters);
@@ -86,7 +95,7 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
 
     @Override
     public ValidateForDatalakeResponse validateForDatalake(String userCrn, String environmentCrn) {
-        return validateForDatalakeService.validateForDatalake(userCrn, environmentCrn);
+        return translateCmProxyFailure(() -> validateForDatalakeService.validateForDatalake(userCrn, environmentCrn));
     }
 
     @Override
@@ -121,13 +130,26 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
     }
 
     private OnPremisesApiProto.Cluster getCluster(String userCrn, String crn, boolean withDetails) {
-        OnPremisesApiProto.Cluster cluster = remoteClusterServiceClient.describeClassicCluster(userCrn, crn, withDetails);
+        OnPremisesApiProto.Cluster cluster = translateCmProxyFailure(() -> remoteClusterServiceClient.describeClassicCluster(userCrn, crn, withDetails));
         MDCBuilder.buildMdcContext(cluster);
         MDCBuilder.addResourceCrn(cluster.getClusterCrn());
         if (!isBaseCluster(cluster)) {
             throw new BadRequestException("Only Classic Clusters with BASE_CLUSTER cluster type can be used as environment.");
         }
         return cluster;
+    }
+
+    private <T> T translateCmProxyFailure(Supplier<T> remoteClusterCall) {
+        try {
+            return remoteClusterCall.get();
+        } catch (StatusRuntimeException ex) {
+            if (RemoteClusterGrpcErrors.isCmProxyCallFailure(ex)) {
+                LOGGER.warn("Cluster proxy call to Cloudera Manager has failed in remotecluster service: {}",
+                        ex.getStatus().getDescription());
+                throw new OnPremCMApiException(CM_PROXY_CALL_FAILED_MESSAGE, ex, HttpStatus.SC_BAD_GATEWAY);
+            }
+            throw ex;
+        }
     }
 
     @VisibleForTesting

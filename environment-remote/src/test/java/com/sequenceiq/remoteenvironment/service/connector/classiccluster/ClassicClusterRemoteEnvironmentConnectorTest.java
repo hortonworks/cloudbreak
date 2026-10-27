@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +31,12 @@ import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
+import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 import com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane.PrivateControlPlaneRemoteEnvironmentConnector;
+
+import io.grpc.Metadata;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 @ExtendWith(MockitoExtension.class)
 class ClassicClusterRemoteEnvironmentConnectorTest {
@@ -189,4 +195,50 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
                 .isEqualTo(ex);
     }
 
+    @Test
+    void describeV2CmProxyCallFailure() {
+        StatusRuntimeException cmProxyCallFailure = cmProxyCallFailure();
+        when(remoteClusterServiceClient.describeClassicCluster(USER_CRN, CLUSTER_CRN, false)).thenThrow(cmProxyCallFailure);
+
+        assertThatThrownBy(() -> underTest.describeV2(USER_CRN, CLUSTER_CRN))
+                .isInstanceOf(OnPremCMApiException.class)
+                .hasCause(cmProxyCallFailure)
+                .hasMessage("Failed to reach Cloudera Manager through cluster proxy. Please make sure Cloudera Manager is running and reachable, " +
+                        "then try again.")
+                .extracting(e -> ((OnPremCMApiException) e).getStatusCode())
+                .isEqualTo(HttpStatus.SC_BAD_GATEWAY);
+    }
+
+    @Test
+    void validateForDatalakeCmProxyCallFailure() {
+        when(validateForDatalakeService.validateForDatalake(USER_CRN, CLUSTER_CRN)).thenThrow(cmProxyCallFailure());
+
+        assertThatThrownBy(() -> underTest.validateForDatalake(USER_CRN, CLUSTER_CRN))
+                .isInstanceOf(OnPremCMApiException.class)
+                .extracting(e -> ((OnPremCMApiException) e).getStatusCode())
+                .isEqualTo(HttpStatus.SC_BAD_GATEWAY);
+    }
+
+    @Test
+    void listCmProxyCallFailure() {
+        when(remoteClusterServiceClient.listClassicClusters(USER_CRN)).thenThrow(cmProxyCallFailure());
+
+        assertThatThrownBy(() -> underTest.list(USER_CRN))
+                .isInstanceOf(OnPremCMApiException.class);
+    }
+
+    @Test
+    void describeV2UnavailableWithoutCmProxyExtensionIsRethrown() {
+        StatusRuntimeException unavailable = Status.UNAVAILABLE.asRuntimeException();
+        when(remoteClusterServiceClient.describeClassicCluster(USER_CRN, CLUSTER_CRN, false)).thenThrow(unavailable);
+
+        assertThatThrownBy(() -> underTest.describeV2(USER_CRN, CLUSTER_CRN))
+                .isSameAs(unavailable);
+    }
+
+    private StatusRuntimeException cmProxyCallFailure() {
+        Metadata trailers = new Metadata();
+        trailers.put(Metadata.Key.of("grpc-status-code-extension", Metadata.ASCII_STRING_MARSHALLER), "25");
+        return Status.UNAVAILABLE.withDescription("Call to cluster proxy failed").asRuntimeException(trailers);
+    }
 }
