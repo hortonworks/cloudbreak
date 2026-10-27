@@ -17,6 +17,10 @@ import com.sequenceiq.common.model.OsType;
 
 public abstract class AbstractTelemetryRepoConfigurationHolder {
 
+    private static final String LATEST_VERSION = "latest";
+
+    private static final String CENTOS7_LAST_VERSION = "1.3.16";
+
     @NotBlank
     private String name;
 
@@ -44,8 +48,16 @@ public abstract class AbstractTelemetryRepoConfigurationHolder {
         return switch (OsType.getByOsTypeStringWithCentos7Fallback(context.getOsType())) {
             case RHEL9 -> rhel9RepoConfigBasedOnArch;
             case RHEL8 -> rhel8RepoConfigBasedOnArch;
-            case CENTOS7 -> getRepoConfigByPlatformValue(platformValues.get(CENTOS7).get(X86_64));
+            case CENTOS7 -> getCentos7RepoConfig();
         };
+    }
+
+    private TelemetryRepoConfiguration getCentos7RepoConfig() {
+        TelemetryRepoConfiguration repoConfig = getRepoConfigByPlatformValue(platformValues.get(CENTOS7).get(X86_64));
+        return new TelemetryRepoConfiguration(repoConfig.name(),
+                repoConfig.baseUrl().replace(LATEST_VERSION, CENTOS7_LAST_VERSION),
+                repoConfig.gpgKey().replace(LATEST_VERSION, CENTOS7_LAST_VERSION),
+                repoConfig.gpgCheck());
     }
 
     private TelemetryRepoConfiguration getRepoConfigByPlatformValue(String platformValue) {

@@ -47,6 +47,49 @@ class TelemetryRepoConfigurationHolderTest {
     }
 
     @Test
+    void selectCorrectRepoConfigWhenOsTypeRhel7PinsLatestVersion() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "baseUrl", "https://archive/cdp-infra-tools/latest/%s/yum", true);
+        FieldUtils.writeField(underTest, "gpgKey", "https://archive/cdp-infra-tools/latest/%s/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins", true);
+        TelemetryContext context = new TelemetryContext();
+        context.setOsType("redhat7");
+        TelemetryRepoConfiguration selected = underTest.selectCorrectRepoConfig(context);
+        assertEquals("https://archive/cdp-infra-tools/1.3.16/centos7/yum", selected.baseUrl());
+        assertEquals("https://archive/cdp-infra-tools/1.3.16/centos7/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins", selected.gpgKey());
+    }
+
+    @Test
+    void selectCorrectRepoConfigWhenOsTypeRedhat8KeepsLatestVersion() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "baseUrl", "https://archive/cdp-infra-tools/latest/%s/yum", true);
+        FieldUtils.writeField(underTest, "gpgKey", "https://archive/cdp-infra-tools/latest/%s/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins", true);
+        TelemetryContext context = new TelemetryContext();
+        context.setOsType("redhat8");
+        TelemetryRepoConfiguration selected = underTest.selectCorrectRepoConfig(context);
+        assertEquals("https://archive/cdp-infra-tools/latest/redhat8/yum", selected.baseUrl());
+        assertEquals("https://archive/cdp-infra-tools/latest/redhat8/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins", selected.gpgKey());
+    }
+
+    @Test
+    void selectCorrectRepoConfigWhenOsTypeRedhat9KeepsLatestVersion() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "baseUrl", "https://archive/cdp-infra-tools/latest/%s/yum", true);
+        FieldUtils.writeField(underTest, "gpgKey", "https://archive/cdp-infra-tools/latest/%s/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins", true);
+        TelemetryContext context = new TelemetryContext();
+        context.setOsType("redhat9");
+        TelemetryRepoConfiguration selected = underTest.selectCorrectRepoConfig(context);
+        assertEquals("https://archive/cdp-infra-tools/latest/redhat9/yum", selected.baseUrl());
+        assertEquals("https://archive/cdp-infra-tools/latest/redhat9/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins", selected.gpgKey());
+    }
+
+    @Test
+    void selectCorrectRepoConfigWhenOsTypeRedhat9AndArchIsArm() {
+        TelemetryContext context = new TelemetryContext();
+        context.setOsType("redhat9");
+        context.setArchitecture("arm64");
+        TelemetryRepoConfiguration selected = underTest.selectCorrectRepoConfig(context);
+        assertEquals("url/redhat9arm", selected.baseUrl());
+        assertEquals("key/redhat9arm", selected.gpgKey());
+    }
+
+    @Test
     void selectCorrectRepoConfigWhenOsTypeRedhat8() {
         TelemetryContext context = new TelemetryContext();
         context.setOsType("redhat8");
