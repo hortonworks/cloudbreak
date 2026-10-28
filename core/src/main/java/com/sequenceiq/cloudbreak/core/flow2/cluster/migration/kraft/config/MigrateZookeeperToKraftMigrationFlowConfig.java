@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.KRAFT_MIGRATION_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.KRAFT_MIGRATION_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState.MIGRATE_ZOOKEEPER_TO_KRAFT_FAILED_STATE;
@@ -18,14 +21,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class MigrateZookeeperToKraftMigrationFlowConfig extends StackStatusFinalizerAbstractFlowConfig<MigrateZookeeperToKraftMigrationState,
-        MigrateZookeeperToKraftMigrationStateSelectors> implements RetryableFlowConfiguration<MigrateZookeeperToKraftMigrationStateSelectors> {
+        MigrateZookeeperToKraftMigrationStateSelectors> implements RetryableFlowConfiguration<MigrateZookeeperToKraftMigrationStateSelectors>,
+        ClusterUseCaseAware {
 
     private static final List<Transition<MigrateZookeeperToKraftMigrationState, MigrateZookeeperToKraftMigrationStateSelectors>> TRANSITIONS =
             new Transition.Builder<MigrateZookeeperToKraftMigrationState, MigrateZookeeperToKraftMigrationStateSelectors>()
@@ -93,5 +100,16 @@ public class MigrateZookeeperToKraftMigrationFlowConfig extends StackStatusFinal
     @Override
     public MigrateZookeeperToKraftMigrationStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (MIGRATE_ZOOKEEPER_TO_KRAFT_FINISHED_STATE.equals(flowState)) {
+            return KRAFT_MIGRATION_FINISHED;
+        } else if (MIGRATE_ZOOKEEPER_TO_KRAFT_FAILED_STATE.equals(flowState)) {
+            return KRAFT_MIGRATION_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

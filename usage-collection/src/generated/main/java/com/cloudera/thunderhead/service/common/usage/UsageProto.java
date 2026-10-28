@@ -169801,6 +169801,70 @@ public final class UsageProto {
        * <code>ADD_VOLUMES_FAILED = 85;</code>
        */
       ADD_VOLUMES_FAILED(85),
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration configuration has completed successfully.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_CONFIGURATION_FINISHED = 86;</code>
+       */
+      KRAFT_MIGRATION_CONFIGURATION_FINISHED(86),
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration configuration has failed.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_CONFIGURATION_FAILED = 87;</code>
+       */
+      KRAFT_MIGRATION_CONFIGURATION_FAILED(87),
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration has completed successfully.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_FINISHED = 88;</code>
+       */
+      KRAFT_MIGRATION_FINISHED(88),
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration has failed.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_FAILED = 89;</code>
+       */
+      KRAFT_MIGRATION_FAILED(89),
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration finalization has completed successfully.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_FINALIZATION_FINISHED = 90;</code>
+       */
+      KRAFT_MIGRATION_FINALIZATION_FINISHED(90),
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration finalization has failed.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_FINALIZATION_FAILED = 91;</code>
+       */
+      KRAFT_MIGRATION_FINALIZATION_FAILED(91),
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration rollback has completed successfully.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_ROLLBACK_FINISHED = 92;</code>
+       */
+      KRAFT_MIGRATION_ROLLBACK_FINISHED(92),
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration rollback has failed.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_ROLLBACK_FAILED = 93;</code>
+       */
+      KRAFT_MIGRATION_ROLLBACK_FAILED(93),
       UNRECOGNIZED(-1),
       ;
 
@@ -170492,6 +170556,70 @@ public final class UsageProto {
        * <code>ADD_VOLUMES_FAILED = 85;</code>
        */
       public static final int ADD_VOLUMES_FAILED_VALUE = 85;
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration configuration has completed successfully.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_CONFIGURATION_FINISHED = 86;</code>
+       */
+      public static final int KRAFT_MIGRATION_CONFIGURATION_FINISHED_VALUE = 86;
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration configuration has failed.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_CONFIGURATION_FAILED = 87;</code>
+       */
+      public static final int KRAFT_MIGRATION_CONFIGURATION_FAILED_VALUE = 87;
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration has completed successfully.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_FINISHED = 88;</code>
+       */
+      public static final int KRAFT_MIGRATION_FINISHED_VALUE = 88;
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration has failed.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_FAILED = 89;</code>
+       */
+      public static final int KRAFT_MIGRATION_FAILED_VALUE = 89;
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration finalization has completed successfully.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_FINALIZATION_FINISHED = 90;</code>
+       */
+      public static final int KRAFT_MIGRATION_FINALIZATION_FINISHED_VALUE = 90;
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration finalization has failed.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_FINALIZATION_FAILED = 91;</code>
+       */
+      public static final int KRAFT_MIGRATION_FINALIZATION_FAILED_VALUE = 91;
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration rollback has completed successfully.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_ROLLBACK_FINISHED = 92;</code>
+       */
+      public static final int KRAFT_MIGRATION_ROLLBACK_FINISHED_VALUE = 92;
+      /**
+       * <pre>
+       * The status when ZooKeeper to KRaft migration rollback has failed.
+       * </pre>
+       *
+       * <code>KRAFT_MIGRATION_ROLLBACK_FAILED = 93;</code>
+       */
+      public static final int KRAFT_MIGRATION_ROLLBACK_FAILED_VALUE = 93;
 
 
       public final int getNumber() {
@@ -170604,6 +170732,14 @@ public final class UsageProto {
           case 83: return ADD_VOLUMES_STARTED;
           case 84: return ADD_VOLUMES_FINISHED;
           case 85: return ADD_VOLUMES_FAILED;
+          case 86: return KRAFT_MIGRATION_CONFIGURATION_FINISHED;
+          case 87: return KRAFT_MIGRATION_CONFIGURATION_FAILED;
+          case 88: return KRAFT_MIGRATION_FINISHED;
+          case 89: return KRAFT_MIGRATION_FAILED;
+          case 90: return KRAFT_MIGRATION_FINALIZATION_FINISHED;
+          case 91: return KRAFT_MIGRATION_FINALIZATION_FAILED;
+          case 92: return KRAFT_MIGRATION_ROLLBACK_FINISHED;
+          case 93: return KRAFT_MIGRATION_ROLLBACK_FAILED;
           default: return null;
         }
       }
@@ -231145,7 +231281,7 @@ public final class UsageProto {
      *
      * <code>int32 associatedDeploymentCount = 12 [deprecated = true];</code>
      * @deprecated usage.CDPDFSharedParameterGroupLifecycle.associatedDeploymentCount is deprecated.
-     *     See usage.proto;l=3478
+     *     See usage.proto;l=3498
      * @return The associatedDeploymentCount.
      */
     @java.lang.Deprecated int getAssociatedDeploymentCount();
@@ -231628,7 +231764,7 @@ public final class UsageProto {
      *
      * <code>int32 associatedDeploymentCount = 12 [deprecated = true];</code>
      * @deprecated usage.CDPDFSharedParameterGroupLifecycle.associatedDeploymentCount is deprecated.
-     *     See usage.proto;l=3478
+     *     See usage.proto;l=3498
      * @return The associatedDeploymentCount.
      */
     @java.lang.Override
@@ -233147,7 +233283,7 @@ public final class UsageProto {
        *
        * <code>int32 associatedDeploymentCount = 12 [deprecated = true];</code>
        * @deprecated usage.CDPDFSharedParameterGroupLifecycle.associatedDeploymentCount is deprecated.
-       *     See usage.proto;l=3478
+       *     See usage.proto;l=3498
        * @return The associatedDeploymentCount.
        */
       @java.lang.Override
@@ -233161,7 +233297,7 @@ public final class UsageProto {
        *
        * <code>int32 associatedDeploymentCount = 12 [deprecated = true];</code>
        * @deprecated usage.CDPDFSharedParameterGroupLifecycle.associatedDeploymentCount is deprecated.
-       *     See usage.proto;l=3478
+       *     See usage.proto;l=3498
        * @param value The associatedDeploymentCount to set.
        * @return This builder for chaining.
        */
@@ -233179,7 +233315,7 @@ public final class UsageProto {
        *
        * <code>int32 associatedDeploymentCount = 12 [deprecated = true];</code>
        * @deprecated usage.CDPDFSharedParameterGroupLifecycle.associatedDeploymentCount is deprecated.
-       *     See usage.proto;l=3478
+       *     See usage.proto;l=3498
        * @return This builder for chaining.
        */
       @java.lang.Deprecated public Builder clearAssociatedDeploymentCount() {
@@ -586889,7 +587025,7 @@ java.lang.String defaultValue) {
       "\n\031CANCEL_TRUST_SETUP_FAILED\0200\022\036\n\032MULTI_A" +
       "Z_MIGRATION_STARTED\0201\022\037\n\033MULTI_AZ_MIGRAT" +
       "ION_FINISHED\0202\022\035\n\031MULTI_AZ_MIGRATION_FAI" +
-      "LED\0203\"\266\022\n\020CDPClusterStatus\"\241\022\n\005Value\022\t\n\005" +
+      "LED\0203\"\346\024\n\020CDPClusterStatus\"\321\024\n\005Value\022\t\n\005" +
       "UNSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CREATE_FI" +
       "NISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELETE_ST" +
       "ARTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rDELETE_F" +
@@ -586948,1665 +587084,1673 @@ java.lang.String defaultValue) {
       "P\022\030\n\024DISK_UPDATE_FINISHED\020Q\022\026\n\022DISK_UPDA" +
       "TE_FAILED\020R\022\027\n\023ADD_VOLUMES_STARTED\020S\022\030\n\024" +
       "ADD_VOLUMES_FINISHED\020T\022\026\n\022ADD_VOLUMES_FA" +
-      "ILED\020U\"h\n\034OnPremisesControlPlaneStatus\"H" +
-      "\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tINITIATED\020\001\022\n\n\006ACT" +
-      "IVE\020\002\022\014\n\010INACTIVE\020\003\022\013\n\007DELETED\020\004\"q\n\031OnPr" +
-      "emiseConnectionStatus\"T\n\005Value\022\t\n\005UNSET\020" +
-      "\000\022\r\n\tINITIATED\020\001\022\n\n\006ACTIVE\020\002\022\014\n\010INACTIVE" +
-      "\020\003\022\n\n\006FAILED\020\004\022\013\n\007DELETED\020\005\"\372\002\n\023CDPOpera" +
-      "tionDetails\022\021\n\taccountId\030\001 \001(\t\022\023\n\013resour" +
-      "ceCrn\030\002 \001(\t\022\024\n\014resourceName\030\003 \001(\t\022\024\n\014ini" +
-      "tiatorCrn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 " +
-      "\001(\t\022G\n\030cdpRequestProcessingStep\030\006 \001(\0162%." +
-      "usage.CDPRequestProcessingStep.Value\022\016\n\006" +
-      "flowId\030\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\022\021\n\tflo" +
-      "wState\030\t \001(\t\022\025\n\rcorrelationId\030\n \001(\t\022D\n\017e" +
-      "nvironmentType\030\013 \001(\0162+.usage.CDPEnvironm" +
-      "entsEnvironmentType.Value\022\025\n\rcreatorClie" +
-      "nt\030\014 \001(\t\"\332\005\n\025CDPEnvironmentDetails\022D\n\017en" +
-      "vironmentType\030\001 \001(\0162+.usage.CDPEnvironme" +
-      "ntsEnvironmentType.Value\022\016\n\006region\030\002 \001(\t" +
-      "\022!\n\031numberOfAvailabilityZones\030\003 \001(\005\022\031\n\021a" +
-      "vailabilityZones\030\004 \001(\t\0220\n\016networkDetails" +
-      "\030\005 \001(\0132\030.usage.CDPNetworkDetails\0223\n\nawsD" +
-      "etails\030\006 \001(\0132\037.usage.CDPEnvironmentAwsDe" +
-      "tails\0227\n\014azureDetails\030\007 \001(\0132!.usage.CDPE" +
-      "nvironmentAzureDetails\022\020\n\010userTags\030\010 \001(\t" +
-      "\0223\n\ngcpDetails\030\t \001(\0132\037.usage.CDPEnvironm" +
-      "entGcpDetails\0226\n\021credentialDetails\030\n \001(\013" +
-      "2\033.usage.CDPCredentialDetails\022\037\n\027secretE" +
-      "ncryptionEnabled\030\013 \001(\010\022\025\n\rcreatorClient\030" +
-      "\014 \001(\t\022>\n\025computeClusterDetails\030\r \001(\0132\037.u" +
-      "sage.CDPComputeClusterDetails\022H\n\027environ" +
-      "mentDeletionType\030\016 \001(\0162\'.usage.CDPEnviro" +
-      "nmentDeletionType.Value\022L\n\031environmentDe" +
-      "ploymentType\030\017 \001(\0162).usage.CDPEnvironmen" +
-      "tDeploymentType.Value\"R\n\021CDPFreeIPADetai" +
-      "ls\022\r\n\005nodes\030\001 \001(\005\022\014\n\004spot\030\002 \001(\010\022\017\n\007multi" +
-      "Az\030\003 \001(\010\022\017\n\007seLinux\030\004 \001(\t\"\177\n\032CDPEnvironm" +
-      "entAzureDetails\022\033\n\023singleResourceGroup\030\001" +
-      " \001(\010\022!\n\031resourceEncryptionEnabled\030\002 \001(\010\022" +
-      "!\n\031encryptionManagedIdentity\030\003 \001(\t\"=\n\030CD" +
-      "PEnvironmentGcpDetails\022!\n\031resourceEncryp" +
-      "tionEnabled\030\001 \001(\010\"=\n\030CDPEnvironmentAwsDe" +
-      "tails\022!\n\031resourceEncryptionEnabled\030\001 \001(\010" +
-      "\"\241\001\n%CDPEnvironmentTelemetryFeatureDetai" +
-      "ls\022\031\n\021workloadAnalytics\030\001 \001(\t\022\035\n\025cluster" +
-      "LogsCollection\030\002 \001(\t\022\033\n\023storageLocationB" +
-      "ase\030\003 \001(\t\022!\n\031backupStorageLocationBase\030\004" +
-      " \001(\t\"J\n\017CDPProxyDetails\022\r\n\005proxy\030\001 \001(\010\022\020" +
-      "\n\010protocol\030\002 \001(\t\022\026\n\016authentication\030\003 \001(\t" +
-      "\"\"\n\016CDPOwnDnsZones\022\020\n\010postgres\030\001 \001(\010\"\362\003\n" +
-      "\021CDPNetworkDetails\022\023\n\013networkType\030\001 \001(\t\022" +
-      "\024\n\014connectivity\030\002 \001(\t\022\033\n\023numberPublicSub" +
-      "nets\030\003 \001(\005\022\034\n\024numberPrivateSubnets\030\004 \001(\005" +
-      "\022\037\n\027serviceEndpointCreation\030\005 \001(\t\022,\n\014pro" +
-      "xyDetails\030\006 \001(\0132\026.usage.CDPProxyDetails\022" +
-      "#\n\033publicEndpointAccessGateway\030\007 \001(\t\022\032\n\022" +
-      "securityAccessType\030\010 \001(\t\0221\n)controlPlane" +
-      "AndCCMAgentConnectionSecurity\030\t \001(\t\022\016\n\006d" +
-      "omain\030\n \001(\t\022*\n\013ownDnsZones\030\013 \001(\0132\025.usage" +
-      ".CDPOwnDnsZones\022\'\n\037numberPublicLoadBalan" +
-      "cerSubnets\030\014 \001(\005\022(\n numberPrivateLoadBal" +
-      "ancerSubnets\030\r \001(\005\022%\n\035numberFlexibleServ" +
-      "erSubnetIds\030\016 \001(\005\"N\n\024CDPCredentialDetail" +
-      "s\0226\n\016credentialType\030\001 \001(\0162\036.usage.CDPCre" +
-      "dentialType.Value\"\315\001\n\030CDPComputeClusterD" +
-      "etails\022\017\n\007enabled\030\001 \001(\010\022\026\n\016privateCluste" +
-      "r\030\002 \001(\010\022!\n\031kubeApiAuthorizedIpRanges\030\003 \003" +
-      "(\t\022\033\n\023workerNodeSubnetIds\030\004 \003(\t\022H\n\032azure" +
-      "ComputeClusterDetails\030\005 \001(\0132$.usage.CDPA" +
-      "zureComputeClusterDetails\"5\n\035CDPAzureCom" +
-      "puteClusterDetails\022\024\n\014outboundType\030\001 \001(\t" +
-      "\"\203\002\n\027CDPEnvironmentRequested\0224\n\020operatio" +
-      "nDetails\030\001 \001(\0132\032.usage.CDPOperationDetai" +
-      "ls\0228\n\022environmentDetails\030\002 \001(\0132\034.usage.C" +
-      "DPEnvironmentDetails\022M\n\027telemetryFeature" +
-      "Details\030\003 \001(\0132,.usage.CDPEnvironmentTele" +
-      "metryFeatureDetails\022)\n\007freeIPA\030\004 \001(\0132\030.u" +
-      "sage.CDPFreeIPADetails\"\212\003\n\033CDPEnvironmen" +
-      "tStatusChanged\0224\n\020operationDetails\030\001 \001(\013" +
-      "2\032.usage.CDPOperationDetails\0224\n\toldStatu" +
-      "s\030\002 \001(\0162!.usage.CDPEnvironmentStatus.Val" +
-      "ue\0224\n\tnewStatus\030\003 \001(\0162!.usage.CDPEnviron" +
-      "mentStatus.Value\022\025\n\rfailureReason\030\004 \001(\t\022" +
-      "8\n\022environmentDetails\030\005 \001(\0132\034.usage.CDPE" +
-      "nvironmentDetails\022M\n\027telemetryFeatureDet" +
-      "ails\030\006 \001(\0132,.usage.CDPEnvironmentTelemet" +
-      "ryFeatureDetails\022)\n\007freeIPA\030\007 \001(\0132\030.usag" +
-      "e.CDPFreeIPADetails\"<\n\017CDPFreeIPAShape\022\r" +
-      "\n\005nodes\030\001 \001(\005\022\032\n\022hostGroupNodeCount\030\002 \001(" +
-      "\t\"f\n\027CDPFreeIPAStatusDetails\022\023\n\013stackSta" +
-      "tus\030\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031" +
-      "\n\021stackStatusReason\030\003 \001(\t\"\237\002\n\031CDPFreeIPA" +
-      "ExtendedDetails\022,\n\014freeIPAShape\030\001 \001(\0132\026." +
-      "usage.CDPFreeIPAShape\022,\n\014imageDetails\030\002 " +
-      "\001(\0132\026.usage.CDPImageDetails\022?\n\027cdpVertic" +
-      "alScaleDetails\030\003 \001(\0132\036.usage.CDPVertical" +
-      "ScaleDetails\022\030\n\020loadBalancerType\030\004 \001(\t\022K" +
-      "\n\025trustRelationshipType\030\005 \001(\0162,.usage.CD" +
-      "PFreeIPATrustRelationshipType.Value\"\\\n\037C" +
-      "DPFreeIPATrustRelationshipType\"9\n\005Value\022" +
-      "\t\n\005UNSET\020\000\022\013\n\007UNKNOWN\020\001\022\013\n\007ONE_WAY\020\002\022\013\n\007" +
-      "TWO_WAY\020\003\"\212\002\n\027CDPFreeIPAStatusChanged\0224\n" +
-      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
-      "tionDetails\0228\n\016freeIPADetails\030\002 \001(\0132 .us" +
-      "age.CDPFreeIPAExtendedDetails\0225\n\rstatusD" +
-      "etails\030\003 \001(\0132\036.usage.CDPFreeIPAStatusDet" +
-      "ails\022\026\n\016environmentCrn\030\004 \001(\t\0220\n\tnewStatu" +
-      "s\030\005 \001(\0162\035.usage.CDPFreeIPAStatus.Value\"\217" +
-      "\001\n\017CDPImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014i" +
-      "mageCatalog\030\002 \001(\t\022\027\n\017imageCatalogUrl\030\003 \001" +
-      "(\t\022\016\n\006osType\030\004 \001(\t\022\021\n\timageName\030\005 \001(\t\022\031\n" +
-      "\021imageArchitecture\030\006 \001(\t\"\333\001\n\017CDPClusterS" +
-      "hape\022\033\n\023clusterTemplateName\030\001 \001(\t\022\r\n\005nod" +
-      "es\030\002 \001(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021" +
-      "definitionDetails\030\004 \001(\t\022\034\n\024temporaryStor" +
-      "ageUsed\030\005 \001(\010\022\036\n\026clusterTemplateDetails\030" +
-      "\006 \001(\t\022\'\n\037clusterTemplateOverridesDetails" +
-      "\030\007 \001(\t\"\215\001\n\024CDPDatalakeShapeType\"u\n\005Value" +
-      "\022\t\n\005UNSET\020\000\022\016\n\nLIGHT_DUTY\020\001\022\022\n\016MEDIUM_DU" +
-      "TY_HA\020\002\022\016\n\nMICRO_DUTY\020\003\022\n\n\006CUSTOM\020\004\022\021\n\rC" +
-      "ONTAINERIZED\020\005\022\016\n\nENTERPRISE\020\006\"G\n\030CDPDat" +
-      "alakeOperationType\"+\n\005Value\022\t\n\005UNSET\020\000\022\n" +
-      "\n\006BACKUP\020\001\022\013\n\007RESTORE\020\002\"\266\001\n\021CDPVersionDe" +
-      "tails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002 " +
-      "\001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion\030" +
-      "\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t" +
-      "\022\023\n\013javaVersion\030\007 \001(\t\022\031\n\021javaVersionForc" +
-      "ed\030\010 \001(\010\"\203\001\n\022CDPDatabaseDetails\022\025\n\rengin" +
-      "eVersion\030\001 \001(\t\022\030\n\020availabilityType\030\002 \001(\t" +
-      "\022\022\n\nattributes\030\003 \001(\t\022\022\n\nsslEnabled\030\004 \001(\010" +
-      "\022\024\n\014instanceType\030\005 \001(\t\"\336\003\n\021CDPClusterDet" +
-      "ails\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDPCl" +
-      "usterShape\0220\n\016versionDetails\030\002 \001(\0132\030.usa" +
-      "ge.CDPVersionDetails\022,\n\014imageDetails\030\003 \001" +
-      "(\0132\026.usage.CDPImageDetails\022\020\n\010userTags\030\004" +
-      " \001(\t\022F\n\024cloudProviderVariant\030\005 \001(\0162(.usa" +
-      "ge.CDPCloudProviderVariantType.Value\022\017\n\007" +
-      "multiAz\030\006 \001(\010\022\027\n\017applicationTags\030\007 \001(\t\022?" +
-      "\n\027cdpVerticalScaleDetails\030\010 \001(\0132\036.usage." +
-      "CDPVerticalScaleDetails\022\035\n\025usingExternal" +
-      "Database\030\n \001(\010\022\022\n\nsslEnabled\030\013 \001(\010\0222\n\017da" +
-      "tabaseDetails\030\014 \001(\0132\031.usage.CDPDatabaseD" +
-      "etails\022\017\n\007seLinux\030\r \001(\t\"\223\001\n\020CDPStatusDet" +
-      "ails\022\023\n\013stackStatus\030\001 \001(\t\022\033\n\023stackDetail" +
-      "edStatus\030\002 \001(\t\022\031\n\021stackStatusReason\030\003 \001(" +
-      "\t\022\025\n\rclusterStatus\030\004 \001(\t\022\033\n\023clusterStatu" +
-      "sReason\030\005 \001(\t\"1\n\023CDPDatalakeFeatures\022\032\n\003" +
-      "raz\030\001 \001(\0132\r.usage.CDPRaz\"\030\n\006CDPRaz\022\016\n\006st" +
-      "atus\030\001 \001(\t\"\304\001\n\024CDPDatalakeRequested\0224\n\020o" +
-      "perationDetails\030\001 \001(\0132\032.usage.CDPOperati" +
-      "onDetails\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clu" +
-      "sterDetails\030\003 \001(\0132\030.usage.CDPClusterDeta" +
-      "ils\022,\n\010features\030\004 \001(\0132\032.usage.CDPDatalak" +
-      "eFeatures\"\334\002\n\030CDPDatalakeStatusChanged\0224" +
+      "ILED\020U\022*\n&KRAFT_MIGRATION_CONFIGURATION_" +
+      "FINISHED\020V\022(\n$KRAFT_MIGRATION_CONFIGURAT" +
+      "ION_FAILED\020W\022\034\n\030KRAFT_MIGRATION_FINISHED" +
+      "\020X\022\032\n\026KRAFT_MIGRATION_FAILED\020Y\022)\n%KRAFT_" +
+      "MIGRATION_FINALIZATION_FINISHED\020Z\022\'\n#KRA" +
+      "FT_MIGRATION_FINALIZATION_FAILED\020[\022%\n!KR" +
+      "AFT_MIGRATION_ROLLBACK_FINISHED\020\\\022#\n\037KRA" +
+      "FT_MIGRATION_ROLLBACK_FAILED\020]\"h\n\034OnPrem" +
+      "isesControlPlaneStatus\"H\n\005Value\022\t\n\005UNSET" +
+      "\020\000\022\r\n\tINITIATED\020\001\022\n\n\006ACTIVE\020\002\022\014\n\010INACTIV" +
+      "E\020\003\022\013\n\007DELETED\020\004\"q\n\031OnPremiseConnectionS" +
+      "tatus\"T\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tINITIATED\020\001" +
+      "\022\n\n\006ACTIVE\020\002\022\014\n\010INACTIVE\020\003\022\n\n\006FAILED\020\004\022\013" +
+      "\n\007DELETED\020\005\"\372\002\n\023CDPOperationDetails\022\021\n\ta" +
+      "ccountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n\014r" +
+      "esourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 \001(\t\022" +
+      "\032\n\022applicationVersion\030\005 \001(\t\022G\n\030cdpReques" +
+      "tProcessingStep\030\006 \001(\0162%.usage.CDPRequest" +
+      "ProcessingStep.Value\022\016\n\006flowId\030\007 \001(\t\022\023\n\013" +
+      "flowChainId\030\010 \001(\t\022\021\n\tflowState\030\t \001(\t\022\025\n\r" +
+      "correlationId\030\n \001(\t\022D\n\017environmentType\030\013" +
+      " \001(\0162+.usage.CDPEnvironmentsEnvironmentT" +
+      "ype.Value\022\025\n\rcreatorClient\030\014 \001(\t\"\332\005\n\025CDP" +
+      "EnvironmentDetails\022D\n\017environmentType\030\001 " +
+      "\001(\0162+.usage.CDPEnvironmentsEnvironmentTy" +
+      "pe.Value\022\016\n\006region\030\002 \001(\t\022!\n\031numberOfAvai" +
+      "labilityZones\030\003 \001(\005\022\031\n\021availabilityZones" +
+      "\030\004 \001(\t\0220\n\016networkDetails\030\005 \001(\0132\030.usage.C" +
+      "DPNetworkDetails\0223\n\nawsDetails\030\006 \001(\0132\037.u" +
+      "sage.CDPEnvironmentAwsDetails\0227\n\014azureDe" +
+      "tails\030\007 \001(\0132!.usage.CDPEnvironmentAzureD" +
+      "etails\022\020\n\010userTags\030\010 \001(\t\0223\n\ngcpDetails\030\t" +
+      " \001(\0132\037.usage.CDPEnvironmentGcpDetails\0226\n" +
+      "\021credentialDetails\030\n \001(\0132\033.usage.CDPCred" +
+      "entialDetails\022\037\n\027secretEncryptionEnabled" +
+      "\030\013 \001(\010\022\025\n\rcreatorClient\030\014 \001(\t\022>\n\025compute" +
+      "ClusterDetails\030\r \001(\0132\037.usage.CDPComputeC" +
+      "lusterDetails\022H\n\027environmentDeletionType" +
+      "\030\016 \001(\0162\'.usage.CDPEnvironmentDeletionTyp" +
+      "e.Value\022L\n\031environmentDeploymentType\030\017 \001" +
+      "(\0162).usage.CDPEnvironmentDeploymentType." +
+      "Value\"R\n\021CDPFreeIPADetails\022\r\n\005nodes\030\001 \001(" +
+      "\005\022\014\n\004spot\030\002 \001(\010\022\017\n\007multiAz\030\003 \001(\010\022\017\n\007seLi" +
+      "nux\030\004 \001(\t\"\177\n\032CDPEnvironmentAzureDetails\022" +
+      "\033\n\023singleResourceGroup\030\001 \001(\010\022!\n\031resource" +
+      "EncryptionEnabled\030\002 \001(\010\022!\n\031encryptionMan" +
+      "agedIdentity\030\003 \001(\t\"=\n\030CDPEnvironmentGcpD" +
+      "etails\022!\n\031resourceEncryptionEnabled\030\001 \001(" +
+      "\010\"=\n\030CDPEnvironmentAwsDetails\022!\n\031resourc" +
+      "eEncryptionEnabled\030\001 \001(\010\"\241\001\n%CDPEnvironm" +
+      "entTelemetryFeatureDetails\022\031\n\021workloadAn" +
+      "alytics\030\001 \001(\t\022\035\n\025clusterLogsCollection\030\002" +
+      " \001(\t\022\033\n\023storageLocationBase\030\003 \001(\t\022!\n\031bac" +
+      "kupStorageLocationBase\030\004 \001(\t\"J\n\017CDPProxy" +
+      "Details\022\r\n\005proxy\030\001 \001(\010\022\020\n\010protocol\030\002 \001(\t" +
+      "\022\026\n\016authentication\030\003 \001(\t\"\"\n\016CDPOwnDnsZon" +
+      "es\022\020\n\010postgres\030\001 \001(\010\"\362\003\n\021CDPNetworkDetai" +
+      "ls\022\023\n\013networkType\030\001 \001(\t\022\024\n\014connectivity\030" +
+      "\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001(\005\022\034\n\024nu" +
+      "mberPrivateSubnets\030\004 \001(\005\022\037\n\027serviceEndpo" +
+      "intCreation\030\005 \001(\t\022,\n\014proxyDetails\030\006 \001(\0132" +
+      "\026.usage.CDPProxyDetails\022#\n\033publicEndpoin" +
+      "tAccessGateway\030\007 \001(\t\022\032\n\022securityAccessTy" +
+      "pe\030\010 \001(\t\0221\n)controlPlaneAndCCMAgentConne" +
+      "ctionSecurity\030\t \001(\t\022\016\n\006domain\030\n \001(\t\022*\n\013o" +
+      "wnDnsZones\030\013 \001(\0132\025.usage.CDPOwnDnsZones\022" +
+      "\'\n\037numberPublicLoadBalancerSubnets\030\014 \001(\005" +
+      "\022(\n numberPrivateLoadBalancerSubnets\030\r \001" +
+      "(\005\022%\n\035numberFlexibleServerSubnetIds\030\016 \001(" +
+      "\005\"N\n\024CDPCredentialDetails\0226\n\016credentialT" +
+      "ype\030\001 \001(\0162\036.usage.CDPCredentialType.Valu" +
+      "e\"\315\001\n\030CDPComputeClusterDetails\022\017\n\007enable" +
+      "d\030\001 \001(\010\022\026\n\016privateCluster\030\002 \001(\010\022!\n\031kubeA" +
+      "piAuthorizedIpRanges\030\003 \003(\t\022\033\n\023workerNode" +
+      "SubnetIds\030\004 \003(\t\022H\n\032azureComputeClusterDe" +
+      "tails\030\005 \001(\0132$.usage.CDPAzureComputeClust" +
+      "erDetails\"5\n\035CDPAzureComputeClusterDetai" +
+      "ls\022\024\n\014outboundType\030\001 \001(\t\"\203\002\n\027CDPEnvironm" +
+      "entRequested\0224\n\020operationDetails\030\001 \001(\0132\032" +
+      ".usage.CDPOperationDetails\0228\n\022environmen" +
+      "tDetails\030\002 \001(\0132\034.usage.CDPEnvironmentDet" +
+      "ails\022M\n\027telemetryFeatureDetails\030\003 \001(\0132,." +
+      "usage.CDPEnvironmentTelemetryFeatureDeta" +
+      "ils\022)\n\007freeIPA\030\004 \001(\0132\030.usage.CDPFreeIPAD" +
+      "etails\"\212\003\n\033CDPEnvironmentStatusChanged\0224" +
       "\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOper" +
-      "ationDetails\0220\n\toldStatus\030\002 \001(\0162\035.usage." +
-      "CDPClusterStatus.Value\0220\n\tnewStatus\030\003 \001(" +
-      "\0162\035.usage.CDPClusterStatus.Value\022.\n\rstat" +
-      "usDetails\030\004 \001(\0132\027.usage.CDPStatusDetails" +
-      "\022\026\n\016environmentCrn\030\005 \001(\t\0220\n\016clusterDetai" +
-      "ls\030\006 \001(\0132\030.usage.CDPClusterDetails\022,\n\010fe" +
-      "atures\030\007 \001(\0132\032.usage.CDPDatalakeFeatures" +
-      "\"\225\001\n\023CDPDatahubRequested\0224\n\020operationDet" +
-      "ails\030\001 \001(\0132\032.usage.CDPOperationDetails\022\026" +
-      "\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDetails" +
-      "\030\003 \001(\0132\030.usage.CDPClusterDetails\"\255\002\n\027CDP" +
-      "DatahubStatusChanged\0224\n\020operationDetails" +
-      "\030\001 \001(\0132\032.usage.CDPOperationDetails\0220\n\tol" +
-      "dStatus\030\002 \001(\0162\035.usage.CDPClusterStatus.V" +
-      "alue\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClust" +
-      "erStatus.Value\022.\n\rstatusDetails\030\004 \001(\0132\027." +
-      "usage.CDPStatusDetails\022\026\n\016environmentCrn" +
-      "\030\005 \001(\t\0220\n\016clusterDetails\030\006 \001(\0132\030.usage.C" +
-      "DPClusterDetails\"\217\001\n\016CDPSyncDetails\022\016\n\006s" +
-      "tatus\030\001 \001(\t\022\026\n\016detailedStatus\030\002 \001(\t\022\036\n\026c" +
-      "lusterCreationStarted\030\003 \001(\004\022\037\n\027clusterCr" +
-      "eationFinished\030\004 \001(\004\022\024\n\014databaseType\030\005 \001" +
-      "(\t\"\203\002\n\017CDPDatalakeSync\0224\n\020operationDetai" +
-      "ls\030\001 \001(\0132\032.usage.CDPOperationDetails\022*\n\013" +
-      "syncDetails\030\002 \001(\0132\025.usage.CDPSyncDetails" +
-      "\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClus" +
-      "terDetails\022.\n\rstatusDetails\030\004 \001(\0132\027.usag" +
-      "e.CDPStatusDetails\022,\n\010features\030\005 \001(\0132\032.u" +
-      "sage.CDPDatalakeFeatures\"\324\001\n\016CDPDatahubS" +
-      "ync\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CD" +
-      "POperationDetails\022*\n\013syncDetails\030\002 \001(\0132\025" +
-      ".usage.CDPSyncDetails\0220\n\016clusterDetails\030" +
-      "\003 \001(\0132\030.usage.CDPClusterDetails\022.\n\rstatu" +
-      "sDetails\030\004 \001(\0132\027.usage.CDPStatusDetails\"" +
-      "8\n\030CDPDFCatalogArtifactType\"\034\n\005Value\022\t\n\005" +
-      "UNSET\020\000\022\010\n\004FLOW\020\001\"7\n\020CDPDFEventSource\"#\n" +
-      "\005Value\022\t\n\005UNSET\020\000\022\006\n\002UI\020\001\022\007\n\003CLI\020\002\"\272\001\n\033C" +
-      "DPDFCatalogArtifactCreated\022\022\n\nartifactId" +
-      "\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223" +
-      "\n\004type\030\004 \001(\0162%.usage.CDPDFCatalogArtifac" +
-      "tType.Value\0222\n\013eventSource\030\005 \001(\0162\035.usage" +
-      ".CDPDFEventSource.Value\"\272\001\n\033CDPDFCatalog" +
-      "ArtifactDeleted\022\022\n\nartifactId\030\001 \001(\t\022\021\n\ta" +
-      "ccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(" +
-      "\0162%.usage.CDPDFCatalogArtifactType.Value" +
-      "\0222\n\013eventSource\030\005 \001(\0162\035.usage.CDPDFEvent" +
-      "Source.Value\"\237\001\n\"CDPDFCatalogArtifactVer" +
-      "sionCreated\022\021\n\tversionId\030\001 \001(\t\022\022\n\nartifa",
-      "ctId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001" +
-      "(\t\0222\n\013eventSource\030\005 \001(\0162\035.usage.CDPDFEve" +
-      "ntSource.Value\"\237\001\n\"CDPDFCatalogArtifactV" +
-      "ersionDeleted\022\021\n\tversionId\030\001 \001(\t\022\022\n\narti" +
-      "factId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022\021\n\taccountId\030\004" +
-      " \001(\t\0222\n\013eventSource\030\005 \001(\0162\035.usage.CDPDFE" +
-      "ventSource.Value\"\324\001\n\037CDPDFCatalogCollect" +
-      "ionLifecycle\022\013\n\003crn\030\001 \001(\t\022\021\n\taccountId\030\002" +
-      " \001(\t\022\031\n\021flowDefinitionIds\030\003 \003(\t\022B\n\006actio" +
-      "n\030\004 \001(\01622.usage.CDPDFCatalogCollectionLi" +
-      "fecycleAction.Value\0222\n\013eventSource\030\005 \001(\016" +
-      "2\035.usage.CDPDFEventSource.Value\"\200\001\n%CDPD" +
-      "FCatalogCollectionLifecycleAction\"W\n\005Val" +
-      "ue\022\t\n\005UNSET\020\000\022\013\n\007CREATED\020\001\022\013\n\007DELETED\020\002\022" +
-      "\013\n\007UPDATED\020\003\022\034\n\030FLOW_DEFINITION_ASSIGNED" +
-      "\020\004\"l\n\025CDPDFFlowDesignAction\"S\n\005Value\022\t\n\005" +
-      "UNSET\020\000\022\013\n\007CREATED\020\001\022\n\n\006OPENED\020\002\022\n\n\006CLOS" +
-      "ED\020\003\022\013\n\007DELETED\020\004\022\r\n\tPUBLISHED\020\005\"\236\002\n\030CDP" +
-      "DFFlowDesignLifecycle\022\026\n\016flowDesignerId\030" +
-      "\001 \001(\t\0222\n\006action\030\002 \001(\0162\".usage.CDPDFFlowD" +
-      "esignAction.Value\022\024\n\014dfServiceCrn\030\003 \001(\t\022" +
-      "\023\n\013dfServiceId\030\004 \001(\t\022\026\n\016environmentCrn\030\005" +
-      " \001(\t\022\021\n\taccountId\030\006 \001(\t\022\020\n\010username\030\007 \001(" +
-      "\t\022\020\n\010actorCrn\030\010 \001(\t\022\033\n\023basisFlowVersionC" +
-      "rn\030\t \001(\t\022\037\n\027publishedFlowVersionCrn\030\n \001(" +
-      "\t\"\332\003\n\"CDPDFSharedParameterGroupLifecycle" +
-      "\022\030\n\020parameterGroupId\030\001 \001(\t\022\031\n\021parameterG" +
-      "roupCrn\030\002 \001(\t\022\032\n\022parameterGroupName\030\003 \001(" +
-      "\t\022<\n\006action\030\004 \001(\0162,.usage.CDPDFSharedPar" +
-      "ameterGroupAction.Value\022\026\n\016parameterCoun" +
-      "t\030\005 \001(\005\022 \n\030associatedFlowDraftCount\030\006 \001(" +
-      "\005\022\024\n\014dfServiceCrn\030\007 \001(\t\022\023\n\013dfServiceId\030\010" +
-      " \001(\t\022\026\n\016environmentCrn\030\t \001(\t\022\020\n\010username" +
-      "\030\n \001(\t\022J\n\024parameterGroupSource\030\013 \001(\0162,.u" +
-      "sage.CDPDFSharedParameterGroupSource.Val" +
-      "ue\022%\n\031associatedDeploymentCount\030\014 \001(\005B\002\030" +
-      "\001\022#\n\033associatedDeployedFlowCount\030\r \001(\005\"\235" +
-      "\001\n\037CDPDFSharedParameterGroupAction\"z\n\005Va" +
-      "lue\022\t\n\005UNSET\020\000\022\013\n\007CREATED\020\001\022\013\n\007DELETED\020\002" +
-      "\022\013\n\007UPDATED\020\003\022&\n\036FLOW_DRAFT_ASSOCIATION_" +
-      "UPDATED\020\004\032\002\010\001\022\027\n\023ASSOCIATION_UPDATED\020\005\"w" +
-      "\n\037CDPDFSharedParameterGroupSource\"T\n\005Val" +
-      "ue\022\t\n\005LOCAL\020\000\022\025\n\021SHARED_FLOW_DRAFT\020\001\022\n\n\006" +
-      "SHARED\020\002\022\035\n\031SHARED_PARAMETER_PROVIDER\020\003\"" +
-      "\315\010\n\022CDPDFServiceStatus\"\266\010\n\005Value\022\t\n\005UNSE" +
-      "T\020\000\022\024\n\020ENABLE_REQUESTED\020\001\022\026\n\022ENABLE_IN_P" +
-      "ROGRESS\020\002\022\024\n\020ENABLE_COMPLETED\020\003\022\021\n\rENABL" +
-      "E_FAILED\020\004\022\025\n\021DISABLE_REQUESTED\020\005\022\027\n\023DIS" +
-      "ABLE_IN_PROGRESS\020\006\022\025\n\021DISABLE_COMPLETED\020" +
-      "\007\022\022\n\016DISABLE_FAILED\020\010\022\024\n\020UPDATE_REQUESTE" +
-      "D\020\t\022\026\n\022UPDATE_IN_PROGRESS\020\n\022\021\n\rUPDATE_FA" +
-      "ILED\020\013\022\024\n\020UPDATE_COMPLETED\020\014\022\023\n\017RESET_RE" +
-      "QUESTED\020\r\022\025\n\021RESET_IN_PROGRESS\020\016\022\023\n\017RESE" +
-      "T_COMPLETED\020\017\022\020\n\014RESET_FAILED\020\020\022\014\n\010ORPHA" +
-      "NED\020\021\022\030\n\024ORPHANED_NOT_ENABLED\020\022\022\016\n\nUNORP" +
-      "HANED\020\023\022\025\n\021UPGRADE_REQUESTED\020\024\022\022\n\016UPGRAD" +
-      "E_FAILED\020\025\022\025\n\021UPGRADE_COMPLETED\020\026\022#\n\037UPG" +
-      "RADE_K8S_VERSION_IN_PROGRESS\020\027\022 \n\034UPGRAD" +
-      "E_WORKLOAD_IN_PROGRESS\020\030\022\030\n\024ROLLBACK_IN_" +
-      "PROGRESS\020\031\022#\n\037UPGRADE_DEPLOYMENTS_IN_PRO" +
-      "GRESS\020\032\022%\n!PEM_CERTIFICATE_RENEWAL_REQUE" +
-      "STED\020\033\022\'\n#PEM_CERTIFICATE_RENEWAL_IN_PRO" +
-      "GRESS\020\034\022\"\n\036PEM_CERTIFICATE_RENEWAL_FAILE" +
-      "D\020\035\022%\n!PEM_CERTIFICATE_RENEWAL_SUCCEEDED" +
-      "\020\036\022\026\n\022ROLLBACK_COMPLETED\020\037\022\023\n\017ROLLBACK_F" +
-      "AILED\020 \022\035\n\031ABORT_UPGRADE_IN_PROGRESS\020!\022\033" +
-      "\n\027ABORT_UPGRADE_COMPLETED\020\"\022\030\n\024ABORT_UPG" +
-      "RADE_FAILED\020#\022!\n\035ENABLE_VALIDATION_IN_PR" +
-      "OGRESS\020$\022 \n\034DB_ROTATE_PASSWORD_REQUESTED" +
-      "\020%\022\"\n\036DB_ROTATE_PASSWORD_IN_PROGRESS\020&\022\035" +
-      "\n\031DB_ROTATE_PASSWORD_FAILED\020\'\022 \n\034DB_ROTA" +
-      "TE_PASSWORD_SUCCEEDED\020(\"\232\001\n\025CDPDFOperati" +
-      "onDetails\022\n\n\002id\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\tac" +
-      "countId\030\003 \001(\t\022\022\n\nworkflowId\030\004 \001(\t\022\r\n\005run" +
-      "Id\030\005 \001(\t\0222\n\013eventSource\030\006 \001(\0162\035.usage.CD" +
-      "PDFEventSource.Value\"\210\005\n\025CDPDFServiceReq" +
-      "uested\0226\n\020operationDetails\030\001 \001(\0132\034.usage" +
-      ".CDPDFOperationDetails\022\026\n\016environmentCrn" +
-      "\030\002 \001(\t\022D\n\017environmentType\030\003 \001(\0162+.usage." +
-      "CDPEnvironmentsEnvironmentType.Value\022\024\n\014" +
-      "instanceType\030\004 \001(\t\022\020\n\010minNodes\030\005 \001(\005\022\020\n\010" +
-      "maxNodes\030\006 \001(\005\022\030\n\020k8sServerVersion\030\007 \001(\t" +
-      "\022\017\n\007version\030\010 \001(\t\022\026\n\016publicEndpoint\030\t \001(" +
-      "\010\022\030\n\020accessRestricted\030\n \001(\010\022/\n\006status\030\013 " +
-      "\001(\0162\037.usage.CDPDFServiceStatus.Value\022$\n\034" +
-      "loadBalancerAccessRestricted\030\014 \001(\010\022\020\n\010ac" +
-      "torCrn\030\r \001(\t\022\026\n\016privateCluster\030\016 \001(\010\022\026\n\016" +
-      "runValidations\030\017 \001(\010\022\032\n\022userDefinedRouti" +
-      "ng\030\020 \001(\010\022\025\n\rcustomPodCidr\030\021 \001(\010\022\031\n\021custo" +
-      "mServiceCidr\030\022 \001(\010\022\020\n\010userTags\030\023 \001(\t\022\030\n\020" +
-      "updateNodeImages\030\024 \001(\010\022\026\n\016workloadRegion" +
-      "\030\025 \001(\t\022\027\n\017environmentName\030\026 \001(\t\"\352\001\n\031CDPD" +
-      "FServiceStatusChanged\0226\n\020operationDetail" +
-      "s\030\001 \001(\0132\034.usage.CDPDFOperationDetails\0222\n" +
-      "\toldStatus\030\002 \001(\0162\037.usage.CDPDFServiceSta" +
-      "tus.Value\0222\n\tnewStatus\030\003 \001(\0162\037.usage.CDP" +
-      "DFServiceStatus.Value\022\025\n\rfailureReason\030\004" +
-      " \001(\t\022\026\n\016environmentCrn\030\005 \001(\t\"\264\004\n\034CDPDFSe" +
-      "rviceUpgradeRequested\0226\n\020operationDetail" +
-      "s\030\001 \001(\0132\034.usage.CDPDFOperationDetails\022\026\n" +
-      "\016environmentCrn\030\002 \001(\t\022D\n\017environmentType" +
-      "\030\003 \001(\0162+.usage.CDPEnvironmentsEnvironmen" +
-      "tType.Value\022\024\n\014instanceType\030\004 \001(\t\022\020\n\010min" +
-      "Nodes\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022\033\n\023newK8sS" +
-      "erverVersion\030\007 \001(\t\022\033\n\023oldK8sServerVersio" +
-      "n\030\010 \001(\t\022\022\n\nnewVersion\030\t \001(\t\022\022\n\noldVersio" +
-      "n\030\n \001(\t\022\026\n\016publicEndpoint\030\013 \001(\010\022\030\n\020acces" +
-      "sRestricted\030\014 \001(\010\022/\n\006status\030\r \001(\0162\037.usag" +
-      "e.CDPDFServiceStatus.Value\022$\n\034loadBalanc" +
-      "erAccessRestricted\030\016 \001(\010\022\020\n\010actorCrn\030\017 \001" +
-      "(\t\022\026\n\016runValidations\030\020 \001(\010\022\026\n\016workloadRe" +
-      "gion\030\021 \001(\t\022\027\n\017environmentName\030\022 \001(\t\"\323\002\n " +
-      "CDPDFServiceUpgradeStatusChanged\0226\n\020oper" +
-      "ationDetails\030\001 \001(\0132\034.usage.CDPDFOperatio" +
-      "nDetails\0222\n\toldStatus\030\002 \001(\0162\037.usage.CDPD" +
-      "FServiceStatus.Value\0222\n\tnewStatus\030\003 \001(\0162" +
-      "\037.usage.CDPDFServiceStatus.Value\022\025\n\rfail" +
-      "ureReason\030\004 \001(\t\022\026\n\016environmentCrn\030\005 \001(\t\022" +
-      "\022\n\nnewVersion\030\006 \001(\t\022\022\n\noldVersion\030\007 \001(\t\022" +
-      "\033\n\023newK8sServerVersion\030\010 \001(\t\022\033\n\023oldK8sSe" +
-      "rverVersion\030\t \001(\t\"\252\r\n\025CDPDFDeploymentSta" +
-      "tus\"\220\r\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020CREATE_REQUE" +
-      "STED\020\001\022\026\n\022CREATE_IN_PROGRESS\020\002\022\024\n\020CREATE" +
-      "_COMPLETED\020\003\022\021\n\rCREATE_FAILED\020\004\022\027\n\023TERMI" +
-      "NATE_REQUESTED\020\005\022\031\n\025TERMINATE_IN_PROGRES" +
-      "S\020\006\022\027\n\023TERMINATE_COMPLETED\020\007\022\024\n\020TERMINAT" +
-      "E_FAILED\020\010\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022UPDA" +
-      "TE_IN_PROGRESS\020\n\022\024\n\020UPDATE_COMPLETED\020\013\022\021" +
-      "\n\rUPDATE_FAILED\020\014\022!\n\035NIFI_VERSION_UPDATE" +
-      "_REQUESTED\020\r\022#\n\037NIFI_VERSION_UPDATE_IN_P" +
-      "ROGRESS\020\016\022!\n\035NIFI_VERSION_UPDATE_COMPLET" +
-      "ED\020\017\022\036\n\032NIFI_VERSION_UPDATE_FAILED\020\020\022(\n$" +
-      "CANCEL_NIFI_VERSION_UPDATE_REQUESTED\020\021\022*" +
-      "\n&CANCEL_NIFI_VERSION_UPDATE_IN_PROGRESS" +
-      "\020\022\022(\n$CANCEL_NIFI_VERSION_UPDATE_COMPLET" +
-      "ED\020\023\022%\n!CANCEL_NIFI_VERSION_UPDATE_FAILE" +
-      "D\020\024\022\032\n\026SUSPEND_FLOW_REQUESTED\020\025\022\034\n\030SUSPE" +
-      "ND_FLOW_IN_PROGRESS\020\026\022\032\n\026SUSPEND_FLOW_CO" +
-      "MPLETED\020\027\022\027\n\023SUSPEND_FLOW_FAILED\020\030\022\030\n\024ST" +
-      "ART_FLOW_REQUESTED\020\031\022\032\n\026START_FLOW_IN_PR" +
-      "OGRESS\020\032\022\030\n\024START_FLOW_COMPLETED\020\033\022\025\n\021ST" +
-      "ART_FLOW_FAILED\020\034\022\025\n\021UPGRADE_REQUESTED\020!" +
-      "\022\027\n\023UPGRADE_IN_PROGRESS\020\035\022\025\n\021UPGRADE_COM" +
-      "PLETED\020\036\022\022\n\016UPGRADE_FAILED\020\037\022\030\n\024ROLLBACK" +
-      "_IN_PROGRESS\020 \022\026\n\022ROLLBACK_REQUESTED\020\"\022\023" +
-      "\n\017ROLLBACK_FAILED\020#\022\026\n\022ROLLBACK_COMPLETE" +
-      "D\020$\022\027\n\023STOP_FLOW_REQUESTED\020%\022\031\n\025STOP_FLO" +
-      "W_IN_PROGRESS\020&\022\027\n\023STOP_FLOW_COMPLETED\020\'" +
-      "\022\024\n\020STOP_FLOW_FAILED\020(\022\025\n\021SUSPEND_REQUES" +
-      "TED\020)\022\027\n\023SUSPEND_IN_PROGRESS\020*\022\025\n\021SUSPEN" +
-      "D_COMPLETED\020+\022\022\n\016SUSPEND_FAILED\020,\022\024\n\020RES" +
-      "UME_REQUESTED\020-\022\026\n\022RESUME_IN_PROGRESS\020.\022" +
-      "\024\n\020RESUME_COMPLETED\020/\022\021\n\rRESUME_FAILED\0200" +
-      "\022!\n\035FLOW_VERSION_CHANGE_REQUESTED\0201\022#\n\037F" +
-      "LOW_VERSION_CHANGE_IN_PROGRESS\0202\022!\n\035FLOW" +
-      "_VERSION_CHANGE_COMPLETED\0203\022\036\n\032FLOW_VERS" +
-      "ION_CHANGE_FAILED\0204\022*\n&FLOW_VERSION_CHAN" +
-      "GE_PREPARATION_FAILED\0205\022(\n$CANCEL_FLOW_V" +
-      "ERSION_CHANGE_REQUESTED\0206\022*\n&CANCEL_FLOW" +
-      "_VERSION_CHANGE_IN_PROGRESS\0207\022(\n$CANCEL_" +
-      "FLOW_VERSION_CHANGE_COMPLETED\0208\022%\n!CANCE" +
-      "L_FLOW_VERSION_CHANGE_FAILED\0209\022\034\n\030TEST_S" +
-      "ESSION_NOT_HEALTHY\020:\022\030\n\024TEST_SESSION_HEA" +
-      "LTHY\020;\"\250\001\n\031CDPDFDeploymentProjectTag\022\n\n\002" +
-      "id\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t" +
-      "\022\026\n\016environmentCrn\030\004 \001(\t\022\031\n\021dataFlowServ" +
-      "iceId\030\005 \001(\t\022\032\n\022dataFlowServiceCrn\030\006 \001(\t\022" +
-      "\020\n\010userTags\030\007 \001(\t\"\271\006\n\030CDPDFDeploymentReq" +
-      "uested\0226\n\020operationDetails\030\001 \001(\0132\034.usage" +
-      ".CDPDFOperationDetails\022\026\n\016environmentCrn" +
-      "\030\002 \001(\t\022\026\n\016parameterCount\030\003 \001(\005\022\020\n\010kpiCou" +
-      "nt\030\004 \001(\005\022\032\n\022autoscalingEnabled\030\005 \001(\010\022\020\n\010" +
-      "minNodes\030\006 \001(\005\022\020\n\010maxNodes\030\007 \001(\005\022\020\n\010node" +
-      "Type\030\010 \001(\t\022\023\n\013nifiVersion\030\t \001(\t\0222\n\006statu" +
-      "s\030\n \001(\0162\".usage.CDPDFDeploymentStatus.Va" +
-      "lue\022\027\n\017assetReferences\030\013 \001(\010\022\021\n\treadyFlo" +
-      "w\030\014 \001(\010\022\026\n\016flowVersionCrn\030\r \001(\t\022\026\n\016deplo" +
-      "ymentName\030\016 \001(\t\022\036\n\026customNarConfiguratio" +
-      "n\030\017 \001(\010\022 \n\030supportInboundConnection\030\020 \001(" +
-      "\010\022\023\n\013testSession\030\021 \001(\010\022\026\n\016flowDesignerId" +
-      "\030\022 \001(\t\022\020\n\010username\030\023 \001(\t\022\032\n\022dataFlowServ" +
-      "iceCrn\030\024 \001(\t\022\026\n\016deploymentSize\030\025 \001(\t\022\032\n\022" +
-      "nodeStorageProfile\030\026 \001(\t\022%\n\035flowMetricsA" +
-      "utoscalingEnabled\030\027 \001(\010\022!\n\031customPythonC" +
-      "onfiguration\030\030 \001(\010\022\r\n\005cores\030\031 \001(\001\022\016\n\006mem" +
-      "ory\030\032 \001(\001\022\032\n\022contentRepoProfile\030\033 \001(\t\022\035\n" +
-      "\025provenanceRepoProfile\030\034 \001(\t\022\033\n\023flowFile" +
-      "RepoProfile\030\035 \001(\t\022\032\n\022niFiComponentsUsed\030" +
-      "\036 \001(\t\"\277\002\n\034CDPDFDeploymentStatusChanged\0226" +
-      "\n\020operationDetails\030\001 \001(\0132\034.usage.CDPDFOp" +
-      "erationDetails\0225\n\toldStatus\030\002 \001(\0162\".usag" +
-      "e.CDPDFDeploymentStatus.Value\0225\n\tnewStat" +
-      "us\030\003 \001(\0162\".usage.CDPDFDeploymentStatus.V" +
-      "alue\022\025\n\rfailureReason\030\004 \001(\t\022\026\n\016flowVersi" +
-      "onCrn\030\005 \001(\t\022\026\n\016deploymentName\030\006 \001(\t\022\026\n\016f" +
-      "lowDesignerId\030\007 \001(\t\022\032\n\022dataFlowServiceCr" +
-      "n\030\010 \001(\t\"\256\001\n\030CDPDFDeploymentPodStatus\022\n\n\002" +
-      "id\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t" +
-      "\022\026\n\016environmentCrn\030\004 \001(\t\022\031\n\021dataFlowServ" +
-      "iceId\030\005 \001(\t\022\032\n\022dataFlowServiceCrn\030\006 \001(\t\022" +
-      "\027\n\017currentPodCount\030\007 \001(\005\"\321\002\n\037CDPDFDeploy" +
-      "mentUpgradeRequested\0226\n\020operationDetails" +
-      "\030\001 \001(\0132\034.usage.CDPDFOperationDetails\022\026\n\016" +
-      "environmentCrn\030\002 \001(\t\022\031\n\021dataFlowServiceI" +
-      "d\030\003 \001(\t\022\032\n\022dataFlowServiceCrn\030\004 \001(\t\022\026\n\016o" +
-      "ldNifiVersion\030\005 \001(\t\022\026\n\016newNifiVersion\030\006 " +
-      "\001(\t\0222\n\006status\030\007 \001(\0162\".usage.CDPDFDeploym" +
-      "entStatus.Value\022\026\n\016flowVersionCrn\030\010 \001(\t\022" +
-      "\026\n\016deploymentName\030\t \001(\t\022\023\n\013parentRunId\030\n" +
-      " \001(\t\"\227\003\n#CDPDFDeploymentUpgradeStatusCha" +
-      "nged\0226\n\020operationDetails\030\001 \001(\0132\034.usage.C" +
-      "DPDFOperationDetails\0225\n\toldStatus\030\002 \001(\0162" +
-      "\".usage.CDPDFDeploymentStatus.Value\0225\n\tn" +
-      "ewStatus\030\003 \001(\0162\".usage.CDPDFDeploymentSt" +
-      "atus.Value\022\025\n\rfailureReason\030\004 \001(\t\022\026\n\016flo" +
-      "wVersionCrn\030\005 \001(\t\022\026\n\016deploymentName\030\006 \001(" +
-      "\t\022\032\n\022dataFlowServiceCrn\030\007 \001(\t\022\031\n\021dataFlo" +
-      "wServiceId\030\010 \001(\t\022\026\n\016environmentCrn\030\t \001(\t" +
-      "\022\026\n\016oldNifiVersion\030\n \001(\t\022\026\n\016newNifiVersi" +
-      "on\030\013 \001(\tJ\004\010\014\020\r\"\215\010\n\027CDPDFDeployedFlowStat" +
-      "us\"\361\007\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020CREATE_REQUES" +
-      "TED\020\001\022\026\n\022CREATE_IN_PROGRESS\020\002\022\024\n\020CREATE_" +
-      "COMPLETED\020\003\022\021\n\rCREATE_FAILED\020\004\022\024\n\020DELETE" +
-      "_REQUESTED\020\005\022\026\n\022DELETE_IN_PROGRESS\020\006\022\024\n\020" +
-      "DELETE_COMPLETED\020\007\022\021\n\rDELETE_FAILED\020\010\022\024\n" +
-      "\020UPDATE_REQUESTED\020\t\022\026\n\022UPDATE_IN_PROGRES" +
-      "S\020\n\022\024\n\020UPDATE_COMPLETED\020\013\022\021\n\rUPDATE_FAIL" +
-      "ED\020\014\022\030\n\024START_FLOW_REQUESTED\020\r\022\032\n\026START_" +
-      "FLOW_IN_PROGRESS\020\016\022\030\n\024START_FLOW_COMPLET" +
-      "ED\020\017\022\025\n\021START_FLOW_FAILED\020\020\022\027\n\023STOP_FLOW" +
-      "_REQUESTED\020\021\022\031\n\025STOP_FLOW_IN_PROGRESS\020\022\022" +
-      "\027\n\023STOP_FLOW_COMPLETED\020\023\022\024\n\020STOP_FLOW_FA" +
-      "ILED\020\024\022!\n\035FLOW_VERSION_CHANGE_REQUESTED\020" +
-      "\025\022#\n\037FLOW_VERSION_CHANGE_IN_PROGRESS\020\026\022!" +
-      "\n\035FLOW_VERSION_CHANGE_COMPLETED\020\027\022\036\n\032FLO" +
-      "W_VERSION_CHANGE_FAILED\020\030\022*\n&FLOW_VERSIO" +
-      "N_CHANGE_PREPARATION_FAILED\020\031\022(\n$CANCEL_" +
-      "FLOW_VERSION_CHANGE_REQUESTED\020\032\022*\n&CANCE" +
-      "L_FLOW_VERSION_CHANGE_IN_PROGRESS\020\033\022(\n$C" +
-      "ANCEL_FLOW_VERSION_CHANGE_COMPLETED\020\034\022%\n" +
-      "!CANCEL_FLOW_VERSION_CHANGE_FAILED\020\035\022\025\n\021" +
-      "SUSPEND_REQUESTED\020\036\022\027\n\023SUSPEND_IN_PROGRE" +
-      "SS\020\037\022\025\n\021SUSPEND_COMPLETED\020 \022\022\n\016SUSPEND_F" +
-      "AILED\020!\022\024\n\020RESUME_REQUESTED\020\"\022\026\n\022RESUME_" +
-      "IN_PROGRESS\020#\022\024\n\020RESUME_COMPLETED\020$\022\021\n\rR" +
-      "ESUME_FAILED\020%\"\274\003\n\032CDPDFDeployedFlowRequ" +
+      "ationDetails\0224\n\toldStatus\030\002 \001(\0162!.usage." +
+      "CDPEnvironmentStatus.Value\0224\n\tnewStatus\030" +
+      "\003 \001(\0162!.usage.CDPEnvironmentStatus.Value" +
+      "\022\025\n\rfailureReason\030\004 \001(\t\0228\n\022environmentDe" +
+      "tails\030\005 \001(\0132\034.usage.CDPEnvironmentDetail" +
+      "s\022M\n\027telemetryFeatureDetails\030\006 \001(\0132,.usa" +
+      "ge.CDPEnvironmentTelemetryFeatureDetails" +
+      "\022)\n\007freeIPA\030\007 \001(\0132\030.usage.CDPFreeIPADeta" +
+      "ils\"<\n\017CDPFreeIPAShape\022\r\n\005nodes\030\001 \001(\005\022\032\n" +
+      "\022hostGroupNodeCount\030\002 \001(\t\"f\n\027CDPFreeIPAS" +
+      "tatusDetails\022\023\n\013stackStatus\030\001 \001(\t\022\033\n\023sta" +
+      "ckDetailedStatus\030\002 \001(\t\022\031\n\021stackStatusRea" +
+      "son\030\003 \001(\t\"\237\002\n\031CDPFreeIPAExtendedDetails\022" +
+      ",\n\014freeIPAShape\030\001 \001(\0132\026.usage.CDPFreeIPA" +
+      "Shape\022,\n\014imageDetails\030\002 \001(\0132\026.usage.CDPI" +
+      "mageDetails\022?\n\027cdpVerticalScaleDetails\030\003" +
+      " \001(\0132\036.usage.CDPVerticalScaleDetails\022\030\n\020" +
+      "loadBalancerType\030\004 \001(\t\022K\n\025trustRelations" +
+      "hipType\030\005 \001(\0162,.usage.CDPFreeIPATrustRel" +
+      "ationshipType.Value\"\\\n\037CDPFreeIPATrustRe" +
+      "lationshipType\"9\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007UN" +
+      "KNOWN\020\001\022\013\n\007ONE_WAY\020\002\022\013\n\007TWO_WAY\020\003\"\212\002\n\027CD" +
+      "PFreeIPAStatusChanged\0224\n\020operationDetail" +
+      "s\030\001 \001(\0132\032.usage.CDPOperationDetails\0228\n\016f" +
+      "reeIPADetails\030\002 \001(\0132 .usage.CDPFreeIPAEx" +
+      "tendedDetails\0225\n\rstatusDetails\030\003 \001(\0132\036.u" +
+      "sage.CDPFreeIPAStatusDetails\022\026\n\016environm" +
+      "entCrn\030\004 \001(\t\0220\n\tnewStatus\030\005 \001(\0162\035.usage." +
+      "CDPFreeIPAStatus.Value\"\217\001\n\017CDPImageDetai" +
+      "ls\022\017\n\007imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(" +
+      "\t\022\027\n\017imageCatalogUrl\030\003 \001(\t\022\016\n\006osType\030\004 \001" +
+      "(\t\022\021\n\timageName\030\005 \001(\t\022\031\n\021imageArchitectu" +
+      "re\030\006 \001(\t\"\333\001\n\017CDPClusterShape\022\033\n\023clusterT" +
+      "emplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n\022host" +
+      "GroupNodeCount\030\003 \001(\t\022\031\n\021definitionDetail" +
+      "s\030\004 \001(\t\022\034\n\024temporaryStorageUsed\030\005 \001(\010\022\036\n" +
+      "\026clusterTemplateDetails\030\006 \001(\t\022\'\n\037cluster" +
+      "TemplateOverridesDetails\030\007 \001(\t\"\215\001\n\024CDPDa" +
+      "talakeShapeType\"u\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nL" +
+      "IGHT_DUTY\020\001\022\022\n\016MEDIUM_DUTY_HA\020\002\022\016\n\nMICRO" +
+      "_DUTY\020\003\022\n\n\006CUSTOM\020\004\022\021\n\rCONTAINERIZED\020\005\022\016" +
+      "\n\nENTERPRISE\020\006\"G\n\030CDPDatalakeOperationTy" +
+      "pe\"+\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006BACKUP\020\001\022\013\n\007RE" +
+      "STORE\020\002\"\266\001\n\021CDPVersionDetails\022\021\n\tcrVersi" +
+      "on\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersi" +
+      "on\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatch" +
+      "Level\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\022\023\n\013javaVersion\030" +
+      "\007 \001(\t\022\031\n\021javaVersionForced\030\010 \001(\010\"\203\001\n\022CDP" +
+      "DatabaseDetails\022\025\n\rengineVersion\030\001 \001(\t\022\030" +
+      "\n\020availabilityType\030\002 \001(\t\022\022\n\nattributes\030\003" +
+      " \001(\t\022\022\n\nsslEnabled\030\004 \001(\010\022\024\n\014instanceType" +
+      "\030\005 \001(\t\"\336\003\n\021CDPClusterDetails\022,\n\014clusterS" +
+      "hape\030\001 \001(\0132\026.usage.CDPClusterShape\0220\n\016ve" +
+      "rsionDetails\030\002 \001(\0132\030.usage.CDPVersionDet" +
+      "ails\022,\n\014imageDetails\030\003 \001(\0132\026.usage.CDPIm" +
+      "ageDetails\022\020\n\010userTags\030\004 \001(\t\022F\n\024cloudPro" +
+      "viderVariant\030\005 \001(\0162(.usage.CDPCloudProvi" +
+      "derVariantType.Value\022\017\n\007multiAz\030\006 \001(\010\022\027\n" +
+      "\017applicationTags\030\007 \001(\t\022?\n\027cdpVerticalSca" +
+      "leDetails\030\010 \001(\0132\036.usage.CDPVerticalScale" +
+      "Details\022\035\n\025usingExternalDatabase\030\n \001(\010\022\022" +
+      "\n\nsslEnabled\030\013 \001(\010\0222\n\017databaseDetails\030\014 " +
+      "\001(\0132\031.usage.CDPDatabaseDetails\022\017\n\007seLinu" +
+      "x\030\r \001(\t\"\223\001\n\020CDPStatusDetails\022\023\n\013stackSta" +
+      "tus\030\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031" +
+      "\n\021stackStatusReason\030\003 \001(\t\022\025\n\rclusterStat" +
+      "us\030\004 \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1\n" +
+      "\023CDPDatalakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usag" +
+      "e.CDPRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024C" +
+      "DPDatalakeRequested\0224\n\020operationDetails\030" +
+      "\001 \001(\0132\032.usage.CDPOperationDetails\022\026\n\016env" +
+      "ironmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(" +
+      "\0132\030.usage.CDPClusterDetails\022,\n\010features\030" +
+      "\004 \001(\0132\032.usage.CDPDatalakeFeatures\"\334\002\n\030CD" +
+      "PDatalakeStatusChanged\0224\n\020operationDetai" +
+      "ls\030\001 \001(\0132\032.usage.CDPOperationDetails\0220\n\t" +
+      "oldStatus\030\002 \001(\0162\035.usage.CDPClusterStatus" +
+      ".Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClu" +
+      "sterStatus.Value\022.\n\rstatusDetails\030\004 \001(\0132" +
+      "\027.usage.CDPStatusDetails\022\026\n\016environmentC" +
+      "rn\030\005 \001(\t\0220\n\016clusterDetails\030\006 \001(\0132\030.usage" +
+      ".CDPClusterDetails\022,\n\010features\030\007 \001(\0132\032.u" +
+      "sage.CDPDatalakeFeatures\"\225\001\n\023CDPDatahubR" +
+      "equested\0224\n\020operationDetails\030\001 \001(\0132\032.usa" +
+      "ge.CDPOperationDetails\022\026\n\016environmentCrn" +
+      "\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.C" +
+      "DPClusterDetails\"\255\002\n\027CDPDatahubStatusCha" +
+      "nged\0224\n\020operationDetails\030\001 \001(\0132\032.usage.C" +
+      "DPOperationDetails\0220\n\toldStatus\030\002 \001(\0162\035." +
+      "usage.CDPClusterStatus.Value\0220\n\tnewStatu" +
+      "s\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022." +
+      "\n\rstatusDetails\030\004 \001(\0132\027.usage.CDPStatusD" +
+      "etails\022\026\n\016environmentCrn\030\005 \001(\t\0220\n\016cluste" +
+      "rDetails\030\006 \001(\0132\030.usage.CDPClusterDetails" +
+      "\"\217\001\n\016CDPSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016d" +
+      "etailedStatus\030\002 \001(\t\022\036\n\026clusterCreationSt" +
+      "arted\030\003 \001(\004\022\037\n\027clusterCreationFinished\030\004" +
+      " \001(\004\022\024\n\014databaseType\030\005 \001(\t\"\203\002\n\017CDPDatala" +
+      "keSync\0224\n\020operationDetails\030\001 \001(\0132\032.usage" +
+      ".CDPOperationDetails\022*\n\013syncDetails\030\002 \001(" +
+      "\0132\025.usage.CDPSyncDetails\0220\n\016clusterDetai" +
+      "ls\030\003 \001(\0132\030.usage.CDPClusterDetails\022.\n\rst" +
+      "atusDetails\030\004 \001(\0132\027.usage.CDPStatusDetai" +
+      "ls\022,\n\010features\030\005 \001(\0132\032.usage.CDPDatalake" +
+      "Features\"\324\001\n\016CDPDatahubSync\0224\n\020operation" +
+      "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
+      "s\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPSyncDe" +
+      "tails\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CD" +
+      "PClusterDetails\022.\n\rstatusDetails\030\004 \001(\0132\027" +
+      ".usage.CDPStatusDetails\"8\n\030CDPDFCatalogA" +
+      "rtifactType\"\034\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004FLOW\020" +
+      "\001\"7\n\020CDPDFEventSource\"#\n\005Value\022\t\n\005UNSET\020" +
+      "\000\022\006\n\002UI\020\001\022\007\n\003CLI\020\002\"\272\001\n\033CDPDFCatalogArtif" +
+      "actCreated\022\022\n\nartifactId\030\001 \001(\t\022\021\n\taccoun" +
+      "tId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%.u" +
+      "sage.CDPDFCatalogArtifactType.Value\0222\n\013e",
+      "ventSource\030\005 \001(\0162\035.usage.CDPDFEventSourc" +
+      "e.Value\"\272\001\n\033CDPDFCatalogArtifactDeleted\022" +
+      "\022\n\nartifactId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013" +
+      "\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%.usage.CDPDFC" +
+      "atalogArtifactType.Value\0222\n\013eventSource\030" +
+      "\005 \001(\0162\035.usage.CDPDFEventSource.Value\"\237\001\n" +
+      "\"CDPDFCatalogArtifactVersionCreated\022\021\n\tv" +
+      "ersionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n\003cr" +
+      "n\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\0222\n\013eventSourc" +
+      "e\030\005 \001(\0162\035.usage.CDPDFEventSource.Value\"\237" +
+      "\001\n\"CDPDFCatalogArtifactVersionDeleted\022\021\n" +
+      "\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n\003" +
+      "crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\0222\n\013eventSou" +
+      "rce\030\005 \001(\0162\035.usage.CDPDFEventSource.Value" +
+      "\"\324\001\n\037CDPDFCatalogCollectionLifecycle\022\013\n\003" +
+      "crn\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\031\n\021flowDefi" +
+      "nitionIds\030\003 \003(\t\022B\n\006action\030\004 \001(\01622.usage." +
+      "CDPDFCatalogCollectionLifecycleAction.Va" +
+      "lue\0222\n\013eventSource\030\005 \001(\0162\035.usage.CDPDFEv" +
+      "entSource.Value\"\200\001\n%CDPDFCatalogCollecti" +
+      "onLifecycleAction\"W\n\005Value\022\t\n\005UNSET\020\000\022\013\n" +
+      "\007CREATED\020\001\022\013\n\007DELETED\020\002\022\013\n\007UPDATED\020\003\022\034\n\030" +
+      "FLOW_DEFINITION_ASSIGNED\020\004\"l\n\025CDPDFFlowD" +
+      "esignAction\"S\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007CREAT" +
+      "ED\020\001\022\n\n\006OPENED\020\002\022\n\n\006CLOSED\020\003\022\013\n\007DELETED\020" +
+      "\004\022\r\n\tPUBLISHED\020\005\"\236\002\n\030CDPDFFlowDesignLife" +
+      "cycle\022\026\n\016flowDesignerId\030\001 \001(\t\0222\n\006action\030" +
+      "\002 \001(\0162\".usage.CDPDFFlowDesignAction.Valu" +
+      "e\022\024\n\014dfServiceCrn\030\003 \001(\t\022\023\n\013dfServiceId\030\004" +
+      " \001(\t\022\026\n\016environmentCrn\030\005 \001(\t\022\021\n\taccountI" +
+      "d\030\006 \001(\t\022\020\n\010username\030\007 \001(\t\022\020\n\010actorCrn\030\010 " +
+      "\001(\t\022\033\n\023basisFlowVersionCrn\030\t \001(\t\022\037\n\027publ" +
+      "ishedFlowVersionCrn\030\n \001(\t\"\332\003\n\"CDPDFShare" +
+      "dParameterGroupLifecycle\022\030\n\020parameterGro" +
+      "upId\030\001 \001(\t\022\031\n\021parameterGroupCrn\030\002 \001(\t\022\032\n" +
+      "\022parameterGroupName\030\003 \001(\t\022<\n\006action\030\004 \001(" +
+      "\0162,.usage.CDPDFSharedParameterGroupActio" +
+      "n.Value\022\026\n\016parameterCount\030\005 \001(\005\022 \n\030assoc" +
+      "iatedFlowDraftCount\030\006 \001(\005\022\024\n\014dfServiceCr" +
+      "n\030\007 \001(\t\022\023\n\013dfServiceId\030\010 \001(\t\022\026\n\016environm" +
+      "entCrn\030\t \001(\t\022\020\n\010username\030\n \001(\t\022J\n\024parame" +
+      "terGroupSource\030\013 \001(\0162,.usage.CDPDFShared" +
+      "ParameterGroupSource.Value\022%\n\031associated" +
+      "DeploymentCount\030\014 \001(\005B\002\030\001\022#\n\033associatedD" +
+      "eployedFlowCount\030\r \001(\005\"\235\001\n\037CDPDFSharedPa" +
+      "rameterGroupAction\"z\n\005Value\022\t\n\005UNSET\020\000\022\013" +
+      "\n\007CREATED\020\001\022\013\n\007DELETED\020\002\022\013\n\007UPDATED\020\003\022&\n" +
+      "\036FLOW_DRAFT_ASSOCIATION_UPDATED\020\004\032\002\010\001\022\027\n" +
+      "\023ASSOCIATION_UPDATED\020\005\"w\n\037CDPDFSharedPar" +
+      "ameterGroupSource\"T\n\005Value\022\t\n\005LOCAL\020\000\022\025\n" +
+      "\021SHARED_FLOW_DRAFT\020\001\022\n\n\006SHARED\020\002\022\035\n\031SHAR" +
+      "ED_PARAMETER_PROVIDER\020\003\"\315\010\n\022CDPDFService" +
+      "Status\"\266\010\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020ENABLE_RE" +
+      "QUESTED\020\001\022\026\n\022ENABLE_IN_PROGRESS\020\002\022\024\n\020ENA" +
+      "BLE_COMPLETED\020\003\022\021\n\rENABLE_FAILED\020\004\022\025\n\021DI" +
+      "SABLE_REQUESTED\020\005\022\027\n\023DISABLE_IN_PROGRESS" +
+      "\020\006\022\025\n\021DISABLE_COMPLETED\020\007\022\022\n\016DISABLE_FAI" +
+      "LED\020\010\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022UPDATE_IN" +
+      "_PROGRESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022\024\n\020UPDATE" +
+      "_COMPLETED\020\014\022\023\n\017RESET_REQUESTED\020\r\022\025\n\021RES" +
+      "ET_IN_PROGRESS\020\016\022\023\n\017RESET_COMPLETED\020\017\022\020\n" +
+      "\014RESET_FAILED\020\020\022\014\n\010ORPHANED\020\021\022\030\n\024ORPHANE" +
+      "D_NOT_ENABLED\020\022\022\016\n\nUNORPHANED\020\023\022\025\n\021UPGRA" +
+      "DE_REQUESTED\020\024\022\022\n\016UPGRADE_FAILED\020\025\022\025\n\021UP" +
+      "GRADE_COMPLETED\020\026\022#\n\037UPGRADE_K8S_VERSION" +
+      "_IN_PROGRESS\020\027\022 \n\034UPGRADE_WORKLOAD_IN_PR" +
+      "OGRESS\020\030\022\030\n\024ROLLBACK_IN_PROGRESS\020\031\022#\n\037UP" +
+      "GRADE_DEPLOYMENTS_IN_PROGRESS\020\032\022%\n!PEM_C" +
+      "ERTIFICATE_RENEWAL_REQUESTED\020\033\022\'\n#PEM_CE" +
+      "RTIFICATE_RENEWAL_IN_PROGRESS\020\034\022\"\n\036PEM_C" +
+      "ERTIFICATE_RENEWAL_FAILED\020\035\022%\n!PEM_CERTI" +
+      "FICATE_RENEWAL_SUCCEEDED\020\036\022\026\n\022ROLLBACK_C" +
+      "OMPLETED\020\037\022\023\n\017ROLLBACK_FAILED\020 \022\035\n\031ABORT" +
+      "_UPGRADE_IN_PROGRESS\020!\022\033\n\027ABORT_UPGRADE_" +
+      "COMPLETED\020\"\022\030\n\024ABORT_UPGRADE_FAILED\020#\022!\n" +
+      "\035ENABLE_VALIDATION_IN_PROGRESS\020$\022 \n\034DB_R" +
+      "OTATE_PASSWORD_REQUESTED\020%\022\"\n\036DB_ROTATE_" +
+      "PASSWORD_IN_PROGRESS\020&\022\035\n\031DB_ROTATE_PASS" +
+      "WORD_FAILED\020\'\022 \n\034DB_ROTATE_PASSWORD_SUCC" +
+      "EEDED\020(\"\232\001\n\025CDPDFOperationDetails\022\n\n\002id\030" +
+      "\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\022\n" +
+      "\nworkflowId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t\0222\n\013even" +
+      "tSource\030\006 \001(\0162\035.usage.CDPDFEventSource.V" +
+      "alue\"\210\005\n\025CDPDFServiceRequested\0226\n\020operat" +
+      "ionDetails\030\001 \001(\0132\034.usage.CDPDFOperationD" +
+      "etails\022\026\n\016environmentCrn\030\002 \001(\t\022D\n\017enviro" +
+      "nmentType\030\003 \001(\0162+.usage.CDPEnvironmentsE" +
+      "nvironmentType.Value\022\024\n\014instanceType\030\004 \001" +
+      "(\t\022\020\n\010minNodes\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022\030" +
+      "\n\020k8sServerVersion\030\007 \001(\t\022\017\n\007version\030\010 \001(" +
+      "\t\022\026\n\016publicEndpoint\030\t \001(\010\022\030\n\020accessRestr" +
+      "icted\030\n \001(\010\022/\n\006status\030\013 \001(\0162\037.usage.CDPD" +
+      "FServiceStatus.Value\022$\n\034loadBalancerAcce" +
+      "ssRestricted\030\014 \001(\010\022\020\n\010actorCrn\030\r \001(\t\022\026\n\016" +
+      "privateCluster\030\016 \001(\010\022\026\n\016runValidations\030\017" +
+      " \001(\010\022\032\n\022userDefinedRouting\030\020 \001(\010\022\025\n\rcust" +
+      "omPodCidr\030\021 \001(\010\022\031\n\021customServiceCidr\030\022 \001" +
+      "(\010\022\020\n\010userTags\030\023 \001(\t\022\030\n\020updateNodeImages" +
+      "\030\024 \001(\010\022\026\n\016workloadRegion\030\025 \001(\t\022\027\n\017enviro" +
+      "nmentName\030\026 \001(\t\"\352\001\n\031CDPDFServiceStatusCh" +
+      "anged\0226\n\020operationDetails\030\001 \001(\0132\034.usage." +
+      "CDPDFOperationDetails\0222\n\toldStatus\030\002 \001(\016" +
+      "2\037.usage.CDPDFServiceStatus.Value\0222\n\tnew" +
+      "Status\030\003 \001(\0162\037.usage.CDPDFServiceStatus." +
+      "Value\022\025\n\rfailureReason\030\004 \001(\t\022\026\n\016environm" +
+      "entCrn\030\005 \001(\t\"\264\004\n\034CDPDFServiceUpgradeRequ" +
       "ested\0226\n\020operationDetails\030\001 \001(\0132\034.usage." +
       "CDPDFOperationDetails\022\026\n\016environmentCrn\030" +
-      "\002 \001(\t\022\032\n\022dataFlowServiceCrn\030\003 \001(\t\022\027\n\017dep" +
-      "loyedFlowCrn\030\004 \001(\t\022\025\n\rdeploymentCrn\030\005 \001(" +
-      "\t\022\030\n\020deployedFlowName\030\006 \001(\t\022\026\n\016deploymen" +
-      "tName\030\007 \001(\t\0224\n\006status\030\010 \001(\0162$.usage.CDPD" +
-      "FDeployedFlowStatus.Value\022\026\n\016parameterCo" +
-      "unt\030\t \001(\005\022\027\n\017assetReferences\030\n \001(\010\022\021\n\tre" +
-      "adyFlow\030\013 \001(\010\022\026\n\016flowVersionCrn\030\014 \001(\t\022\020\n" +
-      "\010username\030\r \001(\t\022\032\n\022niFiComponentsUsed\030\016 " +
-      "\001(\t\022\020\n\010kpiCount\030\017 \001(\005\"\367\002\n\036CDPDFDeployedF" +
-      "lowStatusChanged\0226\n\020operationDetails\030\001 \001" +
-      "(\0132\034.usage.CDPDFOperationDetails\022\032\n\022data" +
-      "FlowServiceCrn\030\002 \001(\t\022\027\n\017deployedFlowCrn\030" +
-      "\003 \001(\t\022\030\n\020deployedFlowName\030\004 \001(\t\022\026\n\016deplo" +
-      "ymentName\030\005 \001(\t\0227\n\toldStatus\030\006 \001(\0162$.usa" +
-      "ge.CDPDFDeployedFlowStatus.Value\0227\n\tnewS" +
-      "tatus\030\007 \001(\0162$.usage.CDPDFDeployedFlowSta" +
-      "tus.Value\022\025\n\rfailureReason\030\010 \001(\t\022\026\n\016flow" +
-      "VersionCrn\030\t \001(\t\022\025\n\rdeploymentCrn\030\n \001(\t\"" +
-      "\207\004\n\'CDPDFDeployedFlowVersionChangeReques" +
-      "ted\0226\n\020operationDetails\030\001 \001(\0132\034.usage.CD" +
-      "PDFOperationDetails\022\026\n\016environmentCrn\030\002 " +
-      "\001(\t\022\032\n\022dataFlowServiceCrn\030\003 \001(\t\022\031\n\021dataF" +
-      "lowServiceId\030\004 \001(\t\022\027\n\017deployedFlowCrn\030\005 " +
-      "\001(\t\022\025\n\rdeploymentCrn\030\006 \001(\t\022\030\n\020deployedFl" +
-      "owName\030\007 \001(\t\022\026\n\016deploymentName\030\010 \001(\t\022\031\n\021" +
-      "oldFlowVersionCrn\030\t \001(\t\022\031\n\021newFlowVersio" +
-      "nCrn\030\n \001(\t\0224\n\006status\030\013 \001(\0162$.usage.CDPDF" +
-      "DeployedFlowStatus.Value\022G\n\010strategy\030\014 \001" +
-      "(\01625.usage.CDPDFDeploymentFlowVersionCha" +
-      "ngeStrategy.Value\022\"\n\032waitForFlowToStopIn" +
-      "Minutes\030\r \001(\r\022\032\n\022niFiComponentsUsed\030\016 \001(" +
-      "\t\"\314\001\n\033CDPDFDeployedFlowKpiCreated\022\n\n\002id\030" +
-      "\001 \001(\t\022\026\n\016deployedFlowId\030\002 \001(\t\022\026\n\016environ" +
-      "mentCrn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\022*\n\nkpiD" +
-      "etails\030\005 \001(\0132\026.usage.CDPDFKpiDetails\0222\n\013" +
-      "eventSource\030\006 \001(\0162\035.usage.CDPDFEventSour" +
-      "ce.Value\"\314\001\n\033CDPDFDeployedFlowKpiUpdated" +
-      "\022\n\n\002id\030\001 \001(\t\022\026\n\016deployedFlowId\030\002 \001(\t\022\026\n\016" +
-      "environmentCrn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\022" +
-      "*\n\nkpiDetails\030\005 \001(\0132\026.usage.CDPDFKpiDeta" +
-      "ils\0222\n\013eventSource\030\006 \001(\0162\035.usage.CDPDFEv" +
-      "entSource.Value\"]\n\033CDPDFDeployedFlowKpiD" +
-      "eleted\022\n\n\002id\030\001 \001(\t\0222\n\013eventSource\030\002 \001(\0162" +
-      "\035.usage.CDPDFEventSource.Value\"\270\001\n\030CDPDF" +
-      "InfrastructureEvent\022\026\n\016environmentCrn\030\001 " +
-      "\001(\t\022\023\n\013dataflowCrn\030\002 \001(\t\022\027\n\017environmentN" +
-      "ame\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\022\021\n\talertTyp" +
-      "e\030\005 \001(\t\022\023\n\013description\030\006 \001(\t\022\033\n\023activeDe" +
-      "ploymentCrn\030\007 \001(\t\"t\n\025CDPUDXBundleInitiat" +
-      "ed\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDPUDX" +
-      "BundleDetails\022\024\n\014initiatorCrn\030\002 \001(\t\022\022\n\nc" +
-      "aseNumber\030\003 \001(\t\"g\n\024CDPUDXBundleReceived\022" +
-      "1\n\rbundleDetails\030\001 \001(\0132\032.usage.CDPUDXBun" +
-      "dleDetails\022\014\n\004host\030\002 \001(\t\022\016\n\006status\030\003 \001(\t" +
-      "\"q\n\023CDPUDXBundleDetails\022\021\n\taccountId\030\001 \001" +
-      "(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016environmentCrn\030\003 \001(\t" +
-      "\022\023\n\013resourceCrn\030\004 \001(\t\022\014\n\004type\030\005 \001(\t\"\212\001\n\030" +
-      "CDPDFServiceNodesChanged\022\n\n\002id\030\001 \001(\t\022\013\n\003" +
-      "crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\026\n\016environm" +
-      "entCrn\030\004 \001(\t\022\024\n\014oldNodeCount\030\005 \001(\005\022\024\n\014ne" +
-      "wNodeCount\030\006 \001(\005\"\301\001\n\032CDPDFDeploymentPods" +
-      "Changed\022\n\n\002id\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\tacco" +
-      "untId\030\003 \001(\t\022\026\n\016environmentCrn\030\004 \001(\t\022\031\n\021d" +
-      "ataFlowServiceId\030\005 \001(\t\022\032\n\022dataFlowServic" +
-      "eCrn\030\006 \001(\t\022\023\n\013oldPodCount\030\007 \001(\005\022\023\n\013newPo" +
-      "dCount\030\010 \001(\005\"?\n\017CDPDFKpiDetails\022\r\n\005scope" +
-      "\030\001 \001(\t\022\016\n\006metric\030\002 \001(\t\022\r\n\005alert\030\003 \001(\010\"\310\001" +
-      "\n\031CDPDFDeploymentKpiCreated\022\n\n\002id\030\001 \001(\t\022" +
-      "\024\n\014deploymentId\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t" +
-      "\022\026\n\016environmentCrn\030\004 \001(\t\022*\n\nkpiDetails\030\005" +
-      " \001(\0132\026.usage.CDPDFKpiDetails\0222\n\013eventSou" +
-      "rce\030\006 \001(\0162\035.usage.CDPDFEventSource.Value" +
-      "\"\310\001\n\031CDPDFDeploymentKpiUpdated\022\n\n\002id\030\001 \001" +
-      "(\t\022\024\n\014deploymentId\030\002 \001(\t\022\021\n\taccountId\030\003 " +
-      "\001(\t\022\026\n\016environmentCrn\030\004 \001(\t\022*\n\nkpiDetail" +
-      "s\030\005 \001(\0132\026.usage.CDPDFKpiDetails\0222\n\013event" +
-      "Source\030\006 \001(\0162\035.usage.CDPDFEventSource.Va" +
-      "lue\"[\n\031CDPDFDeploymentKpiDeleted\022\n\n\002id\030\001" +
-      " \001(\t\0222\n\013eventSource\030\002 \001(\0162\035.usage.CDPDFE" +
-      "ventSource.Value\"\306\002\n)CDPDFDeploymentNifi" +
-      "VersionUpdateRequested\0226\n\020operationDetai" +
-      "ls\030\001 \001(\0132\034.usage.CDPDFOperationDetails\022\026" +
-      "\n\016environmentCrn\030\002 \001(\t\022\031\n\021dataFlowServic" +
-      "eId\030\003 \001(\t\022\032\n\022dataFlowServiceCrn\030\004 \001(\t\022\026\n" +
-      "\016oldNifiVersion\030\005 \001(\t\022\026\n\016newNifiVersion\030" +
-      "\006 \001(\t\0222\n\006status\030\007 \001(\0162\".usage.CDPDFDeplo" +
-      "ymentStatus.Value\022\026\n\016flowVersionCrn\030\010 \001(" +
-      "\t\022\026\n\016deploymentName\030\t \001(\t\"\275\003\n)CDPDFDeplo" +
-      "ymentFlowVersionChangeRequested\0226\n\020opera" +
-      "tionDetails\030\001 \001(\0132\034.usage.CDPDFOperation" +
-      "Details\022\026\n\016environmentCrn\030\002 \001(\t\022\031\n\021dataF" +
-      "lowServiceId\030\003 \001(\t\022\032\n\022dataFlowServiceCrn" +
-      "\030\004 \001(\t\022\031\n\021oldFlowVersionCrn\030\005 \001(\t\022\031\n\021new" +
-      "FlowVersionCrn\030\006 \001(\t\0222\n\006status\030\007 \001(\0162\".u" +
-      "sage.CDPDFDeploymentStatus.Value\022\026\n\016depl" +
-      "oymentName\030\010 \001(\t\022G\n\010strategy\030\t \001(\01625.usa" +
-      "ge.CDPDFDeploymentFlowVersionChangeStrat" +
-      "egy.Value\022\"\n\032waitForFlowToStopInMinutes\030" +
-      "\n \001(\r\022\032\n\022niFiComponentsUsed\030\013 \001(\t\"\331\001\n\"CD" +
-      "PCMLServingEndpointDeployedEvent\022\023\n\013reso" +
-      "urceCrn\030\001 \001(\t\022\024\n\014resourceType\030\002 \001(\t\022\027\n\017r" +
-      "esourceVersion\030\003 \001(\t\022\016\n\006userId\030\004 \001(\r\022\017\n\007" +
-      "modelID\030\005 \001(\t\022\021\n\tmodelName\030\006 \001(\t\022\024\n\014mode" +
-      "lVersion\030\007 \001(\t\022\013\n\003cpu\030\010 \001(\002\022\013\n\003mem\030\t \001(\002" +
-      "\022\013\n\003gpu\030\n \001(\002\"\232\001\n(CDPDFDeploymentFlowVer" +
-      "sionChangeStrategy\"n\n\005Value\022\t\n\005UNSET\020\000\022\031" +
-      "\n\025STOP_AND_PROCESS_DATA\020\001\022\031\n\025STOP_AND_EM" +
-      "PTY_QUEUES\020\002\022$\n ONLY_RESTART_AFFECTED_CO" +
-      "MPONENTS\020\003\"O\n\022CDPDFProjectAction\"9\n\005Valu" +
-      "e\022\t\n\005UNSET\020\000\022\013\n\007CREATED\020\001\022\013\n\007DELETED\020\002\022\013" +
-      "\n\007UPDATED\020\003\"\213\002\n\025CDPDFProjectLifecycle\022\021\n" +
-      "\tprojectId\030\001 \001(\t\022\022\n\nprojectCrn\030\002 \001(\t\022/\n\006" +
-      "action\030\003 \001(\0162\037.usage.CDPDFProjectAction." +
-      "Value\022\024\n\014dfServiceCrn\030\004 \001(\t\022\023\n\013dfService" +
-      "Id\030\005 \001(\t\022\026\n\016environmentCrn\030\006 \001(\t\022\021\n\tacco" +
-      "untId\030\007 \001(\t\022\020\n\010actorCrn\030\010 \001(\t\0222\n\013eventSo" +
-      "urce\030\t \001(\0162\035.usage.CDPDFEventSource.Valu" +
-      "e\"\352\002\n CDPDFDiagnosticRequestCollection\022\014" +
-      "\n\004uuid\030\001 \001(\t\022S\n\036cdpDFDiagnosticCollectio" +
-      "nScope\030\002 \001(\0162+.usage.CDPDFDiagnosticColl" +
-      "ectionScope.Value\022\026\n\016deploymentCrns\030\003 \003(" +
-      "\t\022K\n\032cdpDFDiagnosticDestination\030\004 \001(\0162\'." +
-      "usage.CDPDFDiagnosticDestination.Value\022\021" +
-      "\n\tstartTime\030\005 \001(\004\022\017\n\007endTime\030\006 \001(\004\022\036\n\026in" +
-      "cludeNifiDiagnostics\030\007 \001(\010\022\022\n\ncaseNumber" +
-      "\030\010 \001(\t\022\016\n\006status\030\t \001(\t\022\026\n\016environmentCrn" +
-      "\030\n \001(\t\"P\n\032CDPDFDiagnosticDestination\"2\n\005" +
-      "Value\022\t\n\005UNSET\020\000\022\021\n\rCLOUD_STORAGE\020\001\022\013\n\007S" +
-      "UPPORT\020\002\"^\n\036CDPDFDiagnosticCollectionSco" +
-      "pe\"<\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003ALL\020\001\022\017\n\013ENVIR" +
-      "ONMENT\020\002\022\016\n\nDEPLOYMENT\020\003\"\355\001\n\030CDPDFProjec" +
-      "tResourceType\"\320\001\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nDE" +
-      "PLOYMENT\020\001\022\034\n\030CUSTOM_NAR_CONFIGURATION\020\002" +
-      "\022\026\n\022INBOUND_CONNECTION\020\003\022\016\n\nFLOW_DRAFT\020\004" +
-      "\022\020\n\014TEST_SESSION\020\005\022\036\n\032TEST_SESSION_CONFI" +
-      "GURATION\020\006\022\037\n\033CUSTOM_PYTHON_CONFIGURATIO" +
-      "N\020\007\022\023\n\017PARAMETER_GROUP\020\010\"\233\002\n\034CDPDFProjec" +
-      "tResourceAssigned\022\022\n\nresourceId\030\001 \001(\t\022;\n" +
-      "\014resourceType\030\002 \001(\0162%.usage.CDPDFProject" +
-      "ResourceType.Value\022\021\n\tprojectId\030\003 \001(\t\022\022\n" +
-      "\nprojectCrn\030\004 \001(\t\022\025\n\rprevProjectId\030\005 \001(\t" +
-      "\022\026\n\016prevProjectCrn\030\006 \001(\t\022\024\n\014dfServiceCrn" +
-      "\030\007 \001(\t\022\023\n\013dfServiceId\030\010 \001(\t\022\026\n\016environme" +
-      "ntCrn\030\t \001(\t\022\021\n\taccountId\030\n \001(\t\"\364\002\n\020CDPDF" +
-      "ActiveAlert\022\n\n\002id\030\001 \001(\t\022\027\n\017firstOccurren" +
-      "ce\030\002 \001(\004\022\014\n\004name\030\003 \001(\t\022\023\n\013description\030\004 " +
-      "\001(\t\0221\n\010severity\030\005 \001(\0162\037.usage.CDPDFEvent" +
-      "Severity.Value\022\023\n\013referenceId\030\006 \001(\t\022;\n\rr" +
-      "eferenceType\030\007 \001(\0162$.usage.CDPDFEventRef" +
-      "erenceType.Value\022.\n\talertType\030\010 \001(\0162\033.us" +
-      "age.CDPDFAlertType.Value\022\032\n\022dataFlowServ" +
-      "iceCrn\030\t \001(\t\022\031\n\021dataFlowServiceId\030\n \001(\t\022",
-      "\026\n\016environmentCrn\030\013 \001(\t\022\024\n\014runTimestamp\030" +
-      "\014 \001(\004\"T\n\022CDPDFEventSeverity\">\n\005Value\022\t\n\005" +
-      "UNSET\020\000\022\t\n\005ERROR\020\001\022\010\n\004WARN\020\002\022\010\n\004INFO\020\003\022\013" +
-      "\n\007UNKNOWN\020\004\"N\n\027CDPDFEventReferenceType\"3" +
-      "\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nDEPLOYMENT\020\001\022\017\n\013EN" +
-      "VIRONMENT\020\002\"\310\010\n\016CDPDFAlertType\"\265\010\n\005Value" +
-      "\022\t\n\005UNSET\020\000\022\032\n\026CLOUDBREAK_ERROR_ALERT\020\001\022" +
-      "\035\n\031AT_CAPACITY_WARNING_ALERT\020\002\022\"\n\036KPI_OU" +
-      "T_OF_RANGE_WARNING_ALERT\020\003\022\"\n\036CANNOT_AUT" +
-      "OSCALE_WARNING_ALERT\020\004\022$\n ENVIRONMENT_OR" +
-      "PHANED_ERROR_ALERT\020\005\022#\n\037ENVIRONMENT_ORPH" +
-      "ANED_WARN_ALERT\020\006\022)\n%WORKLOAD_HEARTBEAT_" +
-      "MISSING_WARN_ALERT\020\007\022+\n\'DEPLOYMENT_HEART" +
-      "BEAT_MISSING_WARN_ALERT\020\010\022#\n\037PROMETHEUS_" +
-      "MEMORY_WARNING_ALERT\020\t\022\035\n\031METERING_DBUS_" +
-      "ERROR_ALERT\020\n\022\032\n\026METERING_WARNING_ALERT\020" +
-      "\013\022\030\n\024METERING_ERROR_ALERT\020\014\022,\n(CERTIFICA" +
-      "TES_EXPIRING_SOON_WARNING_ALERT\020\r\022$\n CER" +
-      "TIFICATES_EXPIRED_ERROR_ALERT\020\016\022\036\n\032CERTI" +
-      "FICATES_RENEWED_ALERT\020\017\022&\n\"UNUSED_DEPLOY" +
-      "MENT_BAD_HEALTH_ALERT\020\020\022\034\n\030SDX_OUTPUT_UP" +
-      "DATED_ALERT\020\021\022\035\n\031METRICS_UNAVAILABLE_ALE" +
-      "RT\020\022\022\037\n\033AWAITING_UPGRADE_INFO_ALERT\020\023\022\"\n" +
-      "\036ALERTMANAGER_UNAVAILABLE_ALERT\020\024\022\"\n\036KUB" +
-      "E_METRICS_UNAVAILABLE_ALERT\020\025\022\032\n\026DEPLOYM" +
-      "ENT_NOT_HEALTHY\020\026\022\036\n\032OFFLOAD_TIME_WARNIN" +
-      "G_ALERT\020\027\022\034\n\030MINIFI_UNAVAILABLE_ALERT\020\030\022" +
-      "\031\n\025POD_UNAVAILABLE_ALERT\020\031\022!\n\035STATEFULSE" +
-      "T_UNAVAILABLE_ALERT\020\032\022 \n\034DEPLOYMENT_UNAV" +
-      "AILABLE_ALERT\020\033\022\031\n\025JOB_UNAVAILABLE_ALERT" +
-      "\020\034\022\030\n\024MEMORY_WARNING_ALERT\020\035\022\027\n\023NIFI_BUL" +
-      "LETIN_ALERT\020\036\022*\n&MANUAL_RESOURCE_CLEANUP" +
-      "_REQUIRED_ALERT\020\037\022\013\n\007UNKNOWN\020 \"\250\003\n\033CDPDF" +
-      "FlowMigrationLifecycle\022\021\n\taccountId\030\001 \001(" +
-      "\t\022\026\n\016environmentCrn\030\002 \001(\t\022\024\n\014dfServiceCr" +
-      "n\030\003 \001(\t\022\023\n\013migrationId\030\004 \001(\t\022\026\n\016flowVers" +
-      "ionCrn\030\005 \001(\t\022\026\n\016flowDesignerId\030\006 \001(\t\0225\n\006" +
-      "status\030\007 \001(\0162%.usage.CDPDFFlowMigrationS" +
-      "tatus.Value\022\026\n\016processorCount\030\010 \001(\r\022\036\n\026c" +
-      "ontrollerServiceCount\030\t \001(\r\022\031\n\021manualSte" +
-      "psNeeded\030\n \001(\r\022 \n\030manualVerificationNeed" +
-      "ed\030\013 \001(\r\022\025\n\rfailureReason\030\014 \001(\t\022\022\n\nworkf" +
-      "lowId\030\r \001(\t\022\r\n\005runId\030\016 \001(\t\022\035\n\025canBeOpene" +
-      "dInDesigner\030\017 \001(\010\"\233\001\n\030CDPDFFlowMigration" +
-      "Status\"\177\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007CREATED\020\001\022" +
-      "\n\n\006QUEUED\020\002\022\017\n\013IN_PROGRESS\020\003\022\027\n\023MIGRATIO" +
-      "N_COMPLETED\020\004\022\034\n\030DRAFT_CREATION_COMPLETE" +
-      "D\020\005\022\n\n\006FAILED\020\006\"\370\001\n\030CDPDFFlowDraftDefini" +
-      "tion\022\021\n\taccountId\030\001 \001(\t\022\026\n\016environmentCr" +
-      "n\030\002 \001(\t\022\024\n\014dfServiceCrn\030\003 \001(\t\022\021\n\tcreated" +
-      "At\030\004 \001(\004\022\021\n\tupdatedAt\030\005 \001(\004\022\032\n\022niFiCompo" +
-      "nentsUsed\030\006 \001(\t\022\025\n\rcontentFormat\030\007 \001(\t\022\n" +
-      "\n\002id\030\010 \001(\t\022\014\n\004name\030\t \001(\t\022\020\n\010revision\030\n \001" +
-      "(\004\022\026\n\016runtimeVersion\030\013 \001(\t\"I\n\023AutoscaleP" +
-      "olicyType\"2\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nTIME_BA" +
-      "SED\020\001\022\016\n\nLOAD_BASED\020\002\"\275\001\n\034CDPAutoscalePo" +
-      "licyDefinition\022=\n\023autoscalePolicyType\030\001 " +
-      "\001(\0162 .usage.AutoscalePolicyType.Value\022!\n" +
-      "\031autoscalePolicyParameters\030\002 \001(\t\022\034\n\024auto" +
-      "scalingHostGroup\030\003 \001(\t\022\035\n\025autoscalingPol" +
-      "icyName\030\004 \001(\t\"\201\001\n\032AutoscaleScalingStatus" +
-      "Type\"c\n\005Value\022\t\n\005UNSET\020\000\022\025\n\021SCALING_REQU" +
-      "ESTED\020\001\022\032\n\026SCALING_REQUEST_FAILED\020\002\022\034\n\030A" +
-      "UTOSCALE_TRIGGER_FAILED\020\003\"P\n\036AutoscaleSc" +
-      "alingAdjustmentType\".\n\005Value\022\t\n\005UNSET\020\000\022" +
-      "\013\n\007REGULAR\020\001\022\r\n\tSTOPSTART\020\002\"\233\003\n\032CDPAutos" +
-      "caleTriggerDetails\022\021\n\taccountId\030\001 \001(\t\022\023\n" +
-      "\013clusterName\030\002 \001(\t\022\022\n\nclusterCrn\030\003 \001(\t\022H" +
-      "\n\033autoscalingPolicyDefinition\030\004 \001(\0132#.us" +
-      "age.CDPAutoscalePolicyDefinition\022\"\n\032orig" +
-      "inalHostGroupNodeCount\030\005 \001(\005\022!\n\031desiredH" +
-      "ostGroupNodeCount\030\006 \001(\005\022\031\n\021autoscalingAc" +
-      "tion\030\007 \001(\t\022@\n\017autoscaleStatus\030\010 \001(\0162\'.us" +
-      "age.AutoscaleScalingStatusType.Value\022S\n\036" +
-      "autoscaleScalingAdjustmentType\030\t \001(\0162+.u" +
-      "sage.AutoscaleScalingAdjustmentType.Valu" +
-      "e\"b\n\034CDPDatahubAutoscaleTriggered\022B\n\027aut" +
-      "oscaleTriggerDetails\030\001 \001(\0132!.usage.CDPAu" +
-      "toscaleTriggerDetails\"\366\001\n CDPDatahubAuto" +
-      "scaleConfigChanged\022\017\n\007userCrn\030\001 \001(\t\022\032\n\022a" +
-      "utoscalingEnabled\030\002 \001(\010\022H\n\033autoscalingPo" +
-      "licyDefinition\030\003 \003(\0132#.usage.CDPAutoscal" +
-      "ePolicyDefinition\022\021\n\taccountId\030\004 \001(\t\022\023\n\013" +
-      "clusterName\030\005 \001(\t\022\022\n\nclusterCrn\030\006 \001(\t\022\037\n" +
-      "\027stopStartScalingEnabled\030\007 \001(\010\"G\n\025CDPNet" +
-      "workCheckResult\".\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nS" +
-      "UCCESSFUL\020\001\022\n\n\006FAILED\020\002\"\262\001\n\023CDPNetworkCh" +
-      "eckType\"\232\001\n\005Value\022\t\n\005UNSET\020\000\022\006\n\002S3\020\001\022\007\n\003" +
-      "STS\020\002\022\n\n\006ADLSV2\020\003\022\016\n\nAZURE_MGMT\020\004\022\007\n\003GCS" +
-      "\020\005\022\024\n\020CLOUDERA_ARCHIVE\020\006\022\013\n\007DATABUS\020\007\022\016\n" +
-      "\nDATABUS_S3\020\010\022\035\n\031SERVICE_DELIVERY_CACHE_" +
-      "S3\020\t\"\276\002\n\017CDPNetworkCheck\022.\n\004type\030\001 \001(\0162 " +
-      ".usage.CDPNetworkCheckType.Value\0222\n\006resu" +
-      "lt\030\002 \001(\0162\".usage.CDPNetworkCheckResult.V" +
-      "alue\022\021\n\taccountId\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\022\031\n\021" +
-      "failedHostsJoined\030\006 \001(\t\022\023\n\013clusterName\030\007" +
-      " \001(\t\022\023\n\013clusterType\030\010 \001(\t\022\026\n\016environment" +
-      "Crn\030\t \001(\t\022D\n\017environmentType\030\n \001(\0162+.usa" +
-      "ge.CDPEnvironmentsEnvironmentType.ValueJ" +
-      "\004\010\005\020\006\"c\n\017CDPDWXHiveQuery\022\022\n\ncomputeCRN\030\001" +
-      " \001(\t\022\023\n\013hiveQueryId\030\002 \001(\t\022\014\n\004user\030\003 \001(\t\022" +
-      "\031\n\021executionTimeinMs\030\004 \001(\003\"\363\003\n\024CDPCDWRes" +
-      "ourceStatus\"\332\003\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020CREA" +
-      "TE_REQUESTED\020\001\022\024\n\020CREATE_SUCCEEDED\020\002\022\021\n\r" +
-      "CREATE_FAILED\020\003\022\024\n\020DELETE_REQUESTED\020\004\022\024\n" +
-      "\020DELETE_SUCCEEDED\020\005\022\021\n\rDELETE_FAILED\020\006\022\023" +
-      "\n\017START_REQUESTED\020\007\022\031\n\025START_ASYNC_SUCCE" +
-      "EDED\020\010\022\023\n\017START_SUCCEEDED\020\t\022\020\n\014START_FAI" +
-      "LED\020\n\022\022\n\016STOP_REQUESTED\020\013\022\022\n\016STOP_SUCCEE" +
-      "DED\020\014\022\017\n\013STOP_FAILED\020\r\022\024\n\020UPDATE_REQUEST" +
-      "ED\020\016\022\032\n\026UPDATE_ASYNC_SUCCEEDED\020\017\022\024\n\020UPDA" +
-      "TE_SUCCEEDED\020\020\022\021\n\rUPDATE_FAILED\020\021\022\025\n\021UPG" +
-      "RADE_REQUESTED\020\022\022\033\n\027UPGRADE_ASYNC_SUCCEE" +
-      "DED\020\023\022\025\n\021UPGRADE_SUCCEEDED\020\024\022\022\n\016UPGRADE_" +
-      "FAILED\020\025\"\233\002\n\020CDPCDWUsageEvent\022\021\n\taccount" +
-      "Id\030\001 \001(\t\022\027\n\017environmentName\030\002 \001(\t\022D\n\017env" +
-      "ironmentType\030\003 \001(\0162+.usage.CDPEnvironmen" +
-      "tsEnvironmentType.Value\022\021\n\tclusterId\030\004 \001" +
-      "(\t\0225\n\014resourceType\030\005 \001(\0162\037.usage.CDPCDWR" +
-      "esourceType.Value\022\022\n\nresourceId\030\006 \001(\t\022\021\n" +
-      "\tcomponent\030\007 \001(\t\022\021\n\teventType\030\010 \001(\t\022\021\n\te" +
-      "ventData\030\t \001(\t\"\213\001\n\022CDPCDWResourceType\"u\n" +
-      "\005Value\022\t\n\005UNSET\020\000\022\017\n\013ENVIRONMENT\020\001\022\024\n\020DA" +
-      "TABASE_CATALOG\020\002\022\025\n\021VIRTUAL_WAREHOUSE\020\003\022" +
-      "\026\n\022DATA_VISUALIZATION\020\004\022\013\n\007CDW_HUE\020\005\"\240\002\n" +
-      "\032CDPCDWEnvironmentRequested\022\n\n\002id\030\001 \001(\t\022" +
-      "\021\n\taccountId\030\002 \001(\t\022\026\n\016environmentCrn\030\003 \001" +
-      "(\t\022\027\n\017environmentName\030\004 \001(\t\022D\n\017environme" +
-      "ntType\030\005 \001(\0162+.usage.CDPEnvironmentsEnvi" +
-      "ronmentType.Value\022\020\n\010actorCrn\030\006 \001(\t\0221\n\006s" +
-      "tatus\030\007 \001(\0162!.usage.CDPCDWResourceStatus" +
-      ".Value\022\021\n\tenableDas\030\010 \001(\010\022\024\n\014enableCdwHu" +
-      "e\030\t \001(\010\"\324\001\n\036CDPCDWEnvironmentStatusChang" +
-      "ed\022\n\n\002id\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\0224\n\told" +
-      "Status\030\003 \001(\0162!.usage.CDPCDWResourceStatu" +
-      "s.Value\0224\n\tnewStatus\030\004 \001(\0162!.usage.CDPCD" +
-      "WResourceStatus.Value\022\025\n\rfailureReason\030\005" +
-      " \001(\t\022\020\n\010actorCrn\030\006 \001(\t\";\n\023CDPCDWDBCatalo" +
-      "gType\"$\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003SDX\020\001\022\007\n\003CD" +
-      "W\020\002\"\345\001\n\030CDPCDWDBCatalogRequested\022\n\n\002id\030\001" +
-      " \001(\t\022\021\n\taccountId\030\002 \001(\t\022\025\n\rdbCatalogName" +
-      "\030\003 \001(\t\0227\n\rdbCatalogType\030\004 \001(\0162 .usage.CD" +
-      "PCDWDBCatalogType.Value\022\025\n\renvironmentId" +
-      "\030\005 \001(\t\022\020\n\010actorCrn\030\006 \001(\t\0221\n\006status\030\007 \001(\016" +
-      "2!.usage.CDPCDWResourceStatus.Value\"\322\001\n\034" +
-      "CDPCDWDBCatalogStatusChanged\022\n\n\002id\030\001 \001(\t" +
-      "\022\021\n\taccountId\030\002 \001(\t\0224\n\toldStatus\030\003 \001(\0162!" +
-      ".usage.CDPCDWResourceStatus.Value\0224\n\tnew" +
+      "\002 \001(\t\022D\n\017environmentType\030\003 \001(\0162+.usage.C" +
+      "DPEnvironmentsEnvironmentType.Value\022\024\n\014i" +
+      "nstanceType\030\004 \001(\t\022\020\n\010minNodes\030\005 \001(\005\022\020\n\010m" +
+      "axNodes\030\006 \001(\005\022\033\n\023newK8sServerVersion\030\007 \001" +
+      "(\t\022\033\n\023oldK8sServerVersion\030\010 \001(\t\022\022\n\nnewVe" +
+      "rsion\030\t \001(\t\022\022\n\noldVersion\030\n \001(\t\022\026\n\016publi" +
+      "cEndpoint\030\013 \001(\010\022\030\n\020accessRestricted\030\014 \001(" +
+      "\010\022/\n\006status\030\r \001(\0162\037.usage.CDPDFServiceSt" +
+      "atus.Value\022$\n\034loadBalancerAccessRestrict" +
+      "ed\030\016 \001(\010\022\020\n\010actorCrn\030\017 \001(\t\022\026\n\016runValidat" +
+      "ions\030\020 \001(\010\022\026\n\016workloadRegion\030\021 \001(\t\022\027\n\017en" +
+      "vironmentName\030\022 \001(\t\"\323\002\n CDPDFServiceUpgr" +
+      "adeStatusChanged\0226\n\020operationDetails\030\001 \001" +
+      "(\0132\034.usage.CDPDFOperationDetails\0222\n\toldS" +
+      "tatus\030\002 \001(\0162\037.usage.CDPDFServiceStatus.V" +
+      "alue\0222\n\tnewStatus\030\003 \001(\0162\037.usage.CDPDFSer" +
+      "viceStatus.Value\022\025\n\rfailureReason\030\004 \001(\t\022" +
+      "\026\n\016environmentCrn\030\005 \001(\t\022\022\n\nnewVersion\030\006 " +
+      "\001(\t\022\022\n\noldVersion\030\007 \001(\t\022\033\n\023newK8sServerV" +
+      "ersion\030\010 \001(\t\022\033\n\023oldK8sServerVersion\030\t \001(" +
+      "\t\"\252\r\n\025CDPDFDeploymentStatus\"\220\r\n\005Value\022\t\n" +
+      "\005UNSET\020\000\022\024\n\020CREATE_REQUESTED\020\001\022\026\n\022CREATE" +
+      "_IN_PROGRESS\020\002\022\024\n\020CREATE_COMPLETED\020\003\022\021\n\r" +
+      "CREATE_FAILED\020\004\022\027\n\023TERMINATE_REQUESTED\020\005" +
+      "\022\031\n\025TERMINATE_IN_PROGRESS\020\006\022\027\n\023TERMINATE" +
+      "_COMPLETED\020\007\022\024\n\020TERMINATE_FAILED\020\010\022\024\n\020UP" +
+      "DATE_REQUESTED\020\t\022\026\n\022UPDATE_IN_PROGRESS\020\n" +
+      "\022\024\n\020UPDATE_COMPLETED\020\013\022\021\n\rUPDATE_FAILED\020" +
+      "\014\022!\n\035NIFI_VERSION_UPDATE_REQUESTED\020\r\022#\n\037" +
+      "NIFI_VERSION_UPDATE_IN_PROGRESS\020\016\022!\n\035NIF" +
+      "I_VERSION_UPDATE_COMPLETED\020\017\022\036\n\032NIFI_VER" +
+      "SION_UPDATE_FAILED\020\020\022(\n$CANCEL_NIFI_VERS" +
+      "ION_UPDATE_REQUESTED\020\021\022*\n&CANCEL_NIFI_VE" +
+      "RSION_UPDATE_IN_PROGRESS\020\022\022(\n$CANCEL_NIF" +
+      "I_VERSION_UPDATE_COMPLETED\020\023\022%\n!CANCEL_N" +
+      "IFI_VERSION_UPDATE_FAILED\020\024\022\032\n\026SUSPEND_F" +
+      "LOW_REQUESTED\020\025\022\034\n\030SUSPEND_FLOW_IN_PROGR" +
+      "ESS\020\026\022\032\n\026SUSPEND_FLOW_COMPLETED\020\027\022\027\n\023SUS" +
+      "PEND_FLOW_FAILED\020\030\022\030\n\024START_FLOW_REQUEST" +
+      "ED\020\031\022\032\n\026START_FLOW_IN_PROGRESS\020\032\022\030\n\024STAR" +
+      "T_FLOW_COMPLETED\020\033\022\025\n\021START_FLOW_FAILED\020" +
+      "\034\022\025\n\021UPGRADE_REQUESTED\020!\022\027\n\023UPGRADE_IN_P" +
+      "ROGRESS\020\035\022\025\n\021UPGRADE_COMPLETED\020\036\022\022\n\016UPGR" +
+      "ADE_FAILED\020\037\022\030\n\024ROLLBACK_IN_PROGRESS\020 \022\026" +
+      "\n\022ROLLBACK_REQUESTED\020\"\022\023\n\017ROLLBACK_FAILE" +
+      "D\020#\022\026\n\022ROLLBACK_COMPLETED\020$\022\027\n\023STOP_FLOW" +
+      "_REQUESTED\020%\022\031\n\025STOP_FLOW_IN_PROGRESS\020&\022" +
+      "\027\n\023STOP_FLOW_COMPLETED\020\'\022\024\n\020STOP_FLOW_FA" +
+      "ILED\020(\022\025\n\021SUSPEND_REQUESTED\020)\022\027\n\023SUSPEND" +
+      "_IN_PROGRESS\020*\022\025\n\021SUSPEND_COMPLETED\020+\022\022\n" +
+      "\016SUSPEND_FAILED\020,\022\024\n\020RESUME_REQUESTED\020-\022" +
+      "\026\n\022RESUME_IN_PROGRESS\020.\022\024\n\020RESUME_COMPLE" +
+      "TED\020/\022\021\n\rRESUME_FAILED\0200\022!\n\035FLOW_VERSION" +
+      "_CHANGE_REQUESTED\0201\022#\n\037FLOW_VERSION_CHAN" +
+      "GE_IN_PROGRESS\0202\022!\n\035FLOW_VERSION_CHANGE_" +
+      "COMPLETED\0203\022\036\n\032FLOW_VERSION_CHANGE_FAILE" +
+      "D\0204\022*\n&FLOW_VERSION_CHANGE_PREPARATION_F" +
+      "AILED\0205\022(\n$CANCEL_FLOW_VERSION_CHANGE_RE" +
+      "QUESTED\0206\022*\n&CANCEL_FLOW_VERSION_CHANGE_" +
+      "IN_PROGRESS\0207\022(\n$CANCEL_FLOW_VERSION_CHA" +
+      "NGE_COMPLETED\0208\022%\n!CANCEL_FLOW_VERSION_C" +
+      "HANGE_FAILED\0209\022\034\n\030TEST_SESSION_NOT_HEALT" +
+      "HY\020:\022\030\n\024TEST_SESSION_HEALTHY\020;\"\250\001\n\031CDPDF" +
+      "DeploymentProjectTag\022\n\n\002id\030\001 \001(\t\022\013\n\003crn\030" +
+      "\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\026\n\016environmentC" +
+      "rn\030\004 \001(\t\022\031\n\021dataFlowServiceId\030\005 \001(\t\022\032\n\022d" +
+      "ataFlowServiceCrn\030\006 \001(\t\022\020\n\010userTags\030\007 \001(" +
+      "\t\"\271\006\n\030CDPDFDeploymentRequested\0226\n\020operat" +
+      "ionDetails\030\001 \001(\0132\034.usage.CDPDFOperationD" +
+      "etails\022\026\n\016environmentCrn\030\002 \001(\t\022\026\n\016parame" +
+      "terCount\030\003 \001(\005\022\020\n\010kpiCount\030\004 \001(\005\022\032\n\022auto" +
+      "scalingEnabled\030\005 \001(\010\022\020\n\010minNodes\030\006 \001(\005\022\020" +
+      "\n\010maxNodes\030\007 \001(\005\022\020\n\010nodeType\030\010 \001(\t\022\023\n\013ni" +
+      "fiVersion\030\t \001(\t\0222\n\006status\030\n \001(\0162\".usage." +
+      "CDPDFDeploymentStatus.Value\022\027\n\017assetRefe" +
+      "rences\030\013 \001(\010\022\021\n\treadyFlow\030\014 \001(\010\022\026\n\016flowV" +
+      "ersionCrn\030\r \001(\t\022\026\n\016deploymentName\030\016 \001(\t\022" +
+      "\036\n\026customNarConfiguration\030\017 \001(\010\022 \n\030suppo" +
+      "rtInboundConnection\030\020 \001(\010\022\023\n\013testSession" +
+      "\030\021 \001(\010\022\026\n\016flowDesignerId\030\022 \001(\t\022\020\n\010userna" +
+      "me\030\023 \001(\t\022\032\n\022dataFlowServiceCrn\030\024 \001(\t\022\026\n\016" +
+      "deploymentSize\030\025 \001(\t\022\032\n\022nodeStorageProfi" +
+      "le\030\026 \001(\t\022%\n\035flowMetricsAutoscalingEnable" +
+      "d\030\027 \001(\010\022!\n\031customPythonConfiguration\030\030 \001" +
+      "(\010\022\r\n\005cores\030\031 \001(\001\022\016\n\006memory\030\032 \001(\001\022\032\n\022con" +
+      "tentRepoProfile\030\033 \001(\t\022\035\n\025provenanceRepoP" +
+      "rofile\030\034 \001(\t\022\033\n\023flowFileRepoProfile\030\035 \001(" +
+      "\t\022\032\n\022niFiComponentsUsed\030\036 \001(\t\"\277\002\n\034CDPDFD" +
+      "eploymentStatusChanged\0226\n\020operationDetai" +
+      "ls\030\001 \001(\0132\034.usage.CDPDFOperationDetails\0225" +
+      "\n\toldStatus\030\002 \001(\0162\".usage.CDPDFDeploymen" +
+      "tStatus.Value\0225\n\tnewStatus\030\003 \001(\0162\".usage" +
+      ".CDPDFDeploymentStatus.Value\022\025\n\rfailureR" +
+      "eason\030\004 \001(\t\022\026\n\016flowVersionCrn\030\005 \001(\t\022\026\n\016d" +
+      "eploymentName\030\006 \001(\t\022\026\n\016flowDesignerId\030\007 " +
+      "\001(\t\022\032\n\022dataFlowServiceCrn\030\010 \001(\t\"\256\001\n\030CDPD" +
+      "FDeploymentPodStatus\022\n\n\002id\030\001 \001(\t\022\013\n\003crn\030" +
+      "\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\026\n\016environmentC" +
+      "rn\030\004 \001(\t\022\031\n\021dataFlowServiceId\030\005 \001(\t\022\032\n\022d" +
+      "ataFlowServiceCrn\030\006 \001(\t\022\027\n\017currentPodCou" +
+      "nt\030\007 \001(\005\"\321\002\n\037CDPDFDeploymentUpgradeReque" +
+      "sted\0226\n\020operationDetails\030\001 \001(\0132\034.usage.C" +
+      "DPDFOperationDetails\022\026\n\016environmentCrn\030\002" +
+      " \001(\t\022\031\n\021dataFlowServiceId\030\003 \001(\t\022\032\n\022dataF" +
+      "lowServiceCrn\030\004 \001(\t\022\026\n\016oldNifiVersion\030\005 " +
+      "\001(\t\022\026\n\016newNifiVersion\030\006 \001(\t\0222\n\006status\030\007 " +
+      "\001(\0162\".usage.CDPDFDeploymentStatus.Value\022" +
+      "\026\n\016flowVersionCrn\030\010 \001(\t\022\026\n\016deploymentNam" +
+      "e\030\t \001(\t\022\023\n\013parentRunId\030\n \001(\t\"\227\003\n#CDPDFDe" +
+      "ploymentUpgradeStatusChanged\0226\n\020operatio" +
+      "nDetails\030\001 \001(\0132\034.usage.CDPDFOperationDet" +
+      "ails\0225\n\toldStatus\030\002 \001(\0162\".usage.CDPDFDep" +
+      "loymentStatus.Value\0225\n\tnewStatus\030\003 \001(\0162\"" +
+      ".usage.CDPDFDeploymentStatus.Value\022\025\n\rfa" +
+      "ilureReason\030\004 \001(\t\022\026\n\016flowVersionCrn\030\005 \001(" +
+      "\t\022\026\n\016deploymentName\030\006 \001(\t\022\032\n\022dataFlowSer" +
+      "viceCrn\030\007 \001(\t\022\031\n\021dataFlowServiceId\030\010 \001(\t" +
+      "\022\026\n\016environmentCrn\030\t \001(\t\022\026\n\016oldNifiVersi" +
+      "on\030\n \001(\t\022\026\n\016newNifiVersion\030\013 \001(\tJ\004\010\014\020\r\"\215" +
+      "\010\n\027CDPDFDeployedFlowStatus\"\361\007\n\005Value\022\t\n\005" +
+      "UNSET\020\000\022\024\n\020CREATE_REQUESTED\020\001\022\026\n\022CREATE_" +
+      "IN_PROGRESS\020\002\022\024\n\020CREATE_COMPLETED\020\003\022\021\n\rC" +
+      "REATE_FAILED\020\004\022\024\n\020DELETE_REQUESTED\020\005\022\026\n\022" +
+      "DELETE_IN_PROGRESS\020\006\022\024\n\020DELETE_COMPLETED" +
+      "\020\007\022\021\n\rDELETE_FAILED\020\010\022\024\n\020UPDATE_REQUESTE" +
+      "D\020\t\022\026\n\022UPDATE_IN_PROGRESS\020\n\022\024\n\020UPDATE_CO" +
+      "MPLETED\020\013\022\021\n\rUPDATE_FAILED\020\014\022\030\n\024START_FL" +
+      "OW_REQUESTED\020\r\022\032\n\026START_FLOW_IN_PROGRESS" +
+      "\020\016\022\030\n\024START_FLOW_COMPLETED\020\017\022\025\n\021START_FL" +
+      "OW_FAILED\020\020\022\027\n\023STOP_FLOW_REQUESTED\020\021\022\031\n\025" +
+      "STOP_FLOW_IN_PROGRESS\020\022\022\027\n\023STOP_FLOW_COM" +
+      "PLETED\020\023\022\024\n\020STOP_FLOW_FAILED\020\024\022!\n\035FLOW_V" +
+      "ERSION_CHANGE_REQUESTED\020\025\022#\n\037FLOW_VERSIO" +
+      "N_CHANGE_IN_PROGRESS\020\026\022!\n\035FLOW_VERSION_C" +
+      "HANGE_COMPLETED\020\027\022\036\n\032FLOW_VERSION_CHANGE" +
+      "_FAILED\020\030\022*\n&FLOW_VERSION_CHANGE_PREPARA" +
+      "TION_FAILED\020\031\022(\n$CANCEL_FLOW_VERSION_CHA" +
+      "NGE_REQUESTED\020\032\022*\n&CANCEL_FLOW_VERSION_C" +
+      "HANGE_IN_PROGRESS\020\033\022(\n$CANCEL_FLOW_VERSI" +
+      "ON_CHANGE_COMPLETED\020\034\022%\n!CANCEL_FLOW_VER" +
+      "SION_CHANGE_FAILED\020\035\022\025\n\021SUSPEND_REQUESTE" +
+      "D\020\036\022\027\n\023SUSPEND_IN_PROGRESS\020\037\022\025\n\021SUSPEND_" +
+      "COMPLETED\020 \022\022\n\016SUSPEND_FAILED\020!\022\024\n\020RESUM" +
+      "E_REQUESTED\020\"\022\026\n\022RESUME_IN_PROGRESS\020#\022\024\n" +
+      "\020RESUME_COMPLETED\020$\022\021\n\rRESUME_FAILED\020%\"\274" +
+      "\003\n\032CDPDFDeployedFlowRequested\0226\n\020operati" +
+      "onDetails\030\001 \001(\0132\034.usage.CDPDFOperationDe" +
+      "tails\022\026\n\016environmentCrn\030\002 \001(\t\022\032\n\022dataFlo" +
+      "wServiceCrn\030\003 \001(\t\022\027\n\017deployedFlowCrn\030\004 \001" +
+      "(\t\022\025\n\rdeploymentCrn\030\005 \001(\t\022\030\n\020deployedFlo" +
+      "wName\030\006 \001(\t\022\026\n\016deploymentName\030\007 \001(\t\0224\n\006s" +
+      "tatus\030\010 \001(\0162$.usage.CDPDFDeployedFlowSta" +
+      "tus.Value\022\026\n\016parameterCount\030\t \001(\005\022\027\n\017ass" +
+      "etReferences\030\n \001(\010\022\021\n\treadyFlow\030\013 \001(\010\022\026\n" +
+      "\016flowVersionCrn\030\014 \001(\t\022\020\n\010username\030\r \001(\t\022" +
+      "\032\n\022niFiComponentsUsed\030\016 \001(\t\022\020\n\010kpiCount\030" +
+      "\017 \001(\005\"\367\002\n\036CDPDFDeployedFlowStatusChanged" +
+      "\0226\n\020operationDetails\030\001 \001(\0132\034.usage.CDPDF" +
+      "OperationDetails\022\032\n\022dataFlowServiceCrn\030\002" +
+      " \001(\t\022\027\n\017deployedFlowCrn\030\003 \001(\t\022\030\n\020deploye" +
+      "dFlowName\030\004 \001(\t\022\026\n\016deploymentName\030\005 \001(\t\022" +
+      "7\n\toldStatus\030\006 \001(\0162$.usage.CDPDFDeployed" +
+      "FlowStatus.Value\0227\n\tnewStatus\030\007 \001(\0162$.us" +
+      "age.CDPDFDeployedFlowStatus.Value\022\025\n\rfai" +
+      "lureReason\030\010 \001(\t\022\026\n\016flowVersionCrn\030\t \001(\t" +
+      "\022\025\n\rdeploymentCrn\030\n \001(\t\"\207\004\n\'CDPDFDeploye" +
+      "dFlowVersionChangeRequested\0226\n\020operation" +
+      "Details\030\001 \001(\0132\034.usage.CDPDFOperationDeta" +
+      "ils\022\026\n\016environmentCrn\030\002 \001(\t\022\032\n\022dataFlowS" +
+      "erviceCrn\030\003 \001(\t\022\031\n\021dataFlowServiceId\030\004 \001" +
+      "(\t\022\027\n\017deployedFlowCrn\030\005 \001(\t\022\025\n\rdeploymen" +
+      "tCrn\030\006 \001(\t\022\030\n\020deployedFlowName\030\007 \001(\t\022\026\n\016" +
+      "deploymentName\030\010 \001(\t\022\031\n\021oldFlowVersionCr" +
+      "n\030\t \001(\t\022\031\n\021newFlowVersionCrn\030\n \001(\t\0224\n\006st" +
+      "atus\030\013 \001(\0162$.usage.CDPDFDeployedFlowStat" +
+      "us.Value\022G\n\010strategy\030\014 \001(\01625.usage.CDPDF" +
+      "DeploymentFlowVersionChangeStrategy.Valu" +
+      "e\022\"\n\032waitForFlowToStopInMinutes\030\r \001(\r\022\032\n" +
+      "\022niFiComponentsUsed\030\016 \001(\t\"\314\001\n\033CDPDFDeplo" +
+      "yedFlowKpiCreated\022\n\n\002id\030\001 \001(\t\022\026\n\016deploye" +
+      "dFlowId\030\002 \001(\t\022\026\n\016environmentCrn\030\003 \001(\t\022\021\n" +
+      "\taccountId\030\004 \001(\t\022*\n\nkpiDetails\030\005 \001(\0132\026.u" +
+      "sage.CDPDFKpiDetails\0222\n\013eventSource\030\006 \001(" +
+      "\0162\035.usage.CDPDFEventSource.Value\"\314\001\n\033CDP" +
+      "DFDeployedFlowKpiUpdated\022\n\n\002id\030\001 \001(\t\022\026\n\016" +
+      "deployedFlowId\030\002 \001(\t\022\026\n\016environmentCrn\030\003" +
+      " \001(\t\022\021\n\taccountId\030\004 \001(\t\022*\n\nkpiDetails\030\005 " +
+      "\001(\0132\026.usage.CDPDFKpiDetails\0222\n\013eventSour" +
+      "ce\030\006 \001(\0162\035.usage.CDPDFEventSource.Value\"" +
+      "]\n\033CDPDFDeployedFlowKpiDeleted\022\n\n\002id\030\001 \001" +
+      "(\t\0222\n\013eventSource\030\002 \001(\0162\035.usage.CDPDFEve" +
+      "ntSource.Value\"\270\001\n\030CDPDFInfrastructureEv" +
+      "ent\022\026\n\016environmentCrn\030\001 \001(\t\022\023\n\013dataflowC" +
+      "rn\030\002 \001(\t\022\027\n\017environmentName\030\003 \001(\t\022\021\n\tacc" +
+      "ountId\030\004 \001(\t\022\021\n\talertType\030\005 \001(\t\022\023\n\013descr" +
+      "iption\030\006 \001(\t\022\033\n\023activeDeploymentCrn\030\007 \001(" +
+      "\t\"t\n\025CDPUDXBundleInitiated\0221\n\rbundleDeta" +
+      "ils\030\001 \001(\0132\032.usage.CDPUDXBundleDetails\022\024\n" +
+      "\014initiatorCrn\030\002 \001(\t\022\022\n\ncaseNumber\030\003 \001(\t\"" +
+      "g\n\024CDPUDXBundleReceived\0221\n\rbundleDetails" +
+      "\030\001 \001(\0132\032.usage.CDPUDXBundleDetails\022\014\n\004ho" +
+      "st\030\002 \001(\t\022\016\n\006status\030\003 \001(\t\"q\n\023CDPUDXBundle" +
+      "Details\022\021\n\taccountId\030\001 \001(\t\022\014\n\004uuid\030\002 \001(\t" +
+      "\022\026\n\016environmentCrn\030\003 \001(\t\022\023\n\013resourceCrn\030" +
+      "\004 \001(\t\022\014\n\004type\030\005 \001(\t\"\212\001\n\030CDPDFServiceNode" +
+      "sChanged\022\n\n\002id\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\tacc" +
+      "ountId\030\003 \001(\t\022\026\n\016environmentCrn\030\004 \001(\t\022\024\n\014" +
+      "oldNodeCount\030\005 \001(\005\022\024\n\014newNodeCount\030\006 \001(\005" +
+      "\"\301\001\n\032CDPDFDeploymentPodsChanged\022\n\n\002id\030\001 " +
+      "\001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\026\n\016e" +
+      "nvironmentCrn\030\004 \001(\t\022\031\n\021dataFlowServiceId" +
+      "\030\005 \001(\t\022\032\n\022dataFlowServiceCrn\030\006 \001(\t\022\023\n\013ol" +
+      "dPodCount\030\007 \001(\005\022\023\n\013newPodCount\030\010 \001(\005\"?\n\017" +
+      "CDPDFKpiDetails\022\r\n\005scope\030\001 \001(\t\022\016\n\006metric" +
+      "\030\002 \001(\t\022\r\n\005alert\030\003 \001(\010\"\310\001\n\031CDPDFDeploymen" +
+      "tKpiCreated\022\n\n\002id\030\001 \001(\t\022\024\n\014deploymentId\030" +
+      "\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\026\n\016environmentC" +
+      "rn\030\004 \001(\t\022*\n\nkpiDetails\030\005 \001(\0132\026.usage.CDP" +
+      "DFKpiDetails\0222\n\013eventSource\030\006 \001(\0162\035.usag" +
+      "e.CDPDFEventSource.Value\"\310\001\n\031CDPDFDeploy" +
+      "mentKpiUpdated\022\n\n\002id\030\001 \001(\t\022\024\n\014deployment" +
+      "Id\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\026\n\016environme" +
+      "ntCrn\030\004 \001(\t\022*\n\nkpiDetails\030\005 \001(\0132\026.usage." +
+      "CDPDFKpiDetails\0222\n\013eventSource\030\006 \001(\0162\035.u" +
+      "sage.CDPDFEventSource.Value\"[\n\031CDPDFDepl" +
+      "oymentKpiDeleted\022\n\n\002id\030\001 \001(\t\0222\n\013eventSou" +
+      "rce\030\002 \001(\0162\035.usage.CDPDFEventSource.Value" +
+      "\"\306\002\n)CDPDFDeploymentNifiVersionUpdateReq" +
+      "uested\0226\n\020operationDetails\030\001 \001(\0132\034.usage" +
+      ".CDPDFOperationDetails\022\026\n\016environmentCrn" +
+      "\030\002 \001(\t\022\031\n\021dataFlowServiceId\030\003 \001(\t\022\032\n\022dat" +
+      "aFlowServiceCrn\030\004 \001(\t\022\026\n\016oldNifiVersion\030" +
+      "\005 \001(\t\022\026\n\016newNifiVersion\030\006 \001(\t\0222\n\006status\030" +
+      "\007 \001(\0162\".usage.CDPDFDeploymentStatus.Valu" +
+      "e\022\026\n\016flowVersionCrn\030\010 \001(\t\022\026\n\016deploymentN" +
+      "ame\030\t \001(\t\"\275\003\n)CDPDFDeploymentFlowVersion" +
+      "ChangeRequested\0226\n\020operationDetails\030\001 \001(" +
+      "\0132\034.usage.CDPDFOperationDetails\022\026\n\016envir" +
+      "onmentCrn\030\002 \001(\t\022\031\n\021dataFlowServiceId\030\003 \001" +
+      "(\t\022\032\n\022dataFlowServiceCrn\030\004 \001(\t\022\031\n\021oldFlo" +
+      "wVersionCrn\030\005 \001(\t\022\031\n\021newFlowVersionCrn\030\006" +
+      " \001(\t\0222\n\006status\030\007 \001(\0162\".usage.CDPDFDeploy" +
+      "mentStatus.Value\022\026\n\016deploymentName\030\010 \001(\t" +
+      "\022G\n\010strategy\030\t \001(\01625.usage.CDPDFDeployme" +
+      "ntFlowVersionChangeStrategy.Value\022\"\n\032wai" +
+      "tForFlowToStopInMinutes\030\n \001(\r\022\032\n\022niFiCom" +
+      "ponentsUsed\030\013 \001(\t\"\331\001\n\"CDPCMLServingEndpo" +
+      "intDeployedEvent\022\023\n\013resourceCrn\030\001 \001(\t\022\024\n" +
+      "\014resourceType\030\002 \001(\t\022\027\n\017resourceVersion\030\003" +
+      " \001(\t\022\016\n\006userId\030\004 \001(\r\022\017\n\007modelID\030\005 \001(\t\022\021\n" +
+      "\tmodelName\030\006 \001(\t\022\024\n\014modelVersion\030\007 \001(\t\022\013" +
+      "\n\003cpu\030\010 \001(\002\022\013\n\003mem\030\t \001(\002\022\013\n\003gpu\030\n \001(\002\"\232\001" +
+      "\n(CDPDFDeploymentFlowVersionChangeStrate" +
+      "gy\"n\n\005Value\022\t\n\005UNSET\020\000\022\031\n\025STOP_AND_PROCE" +
+      "SS_DATA\020\001\022\031\n\025STOP_AND_EMPTY_QUEUES\020\002\022$\n " +
+      "ONLY_RESTART_AFFECTED_COMPONENTS\020\003\"O\n\022CD" +
+      "PDFProjectAction\"9\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007" +
+      "CREATED\020\001\022\013\n\007DELETED\020\002\022\013\n\007UPDATED\020\003\"\213\002\n\025" +
+      "CDPDFProjectLifecycle\022\021\n\tprojectId\030\001 \001(\t" +
+      "\022\022\n\nprojectCrn\030\002 \001(\t\022/\n\006action\030\003 \001(\0162\037.u" +
+      "sage.CDPDFProjectAction.Value\022\024\n\014dfServi" +
+      "ceCrn\030\004 \001(\t\022\023\n\013dfServiceId\030\005 \001(\t\022\026\n\016envi" +
+      "ronmentCrn\030\006 \001(\t\022\021\n\taccountId\030\007 \001(\t\022\020\n\010a" +
+      "ctorCrn\030\010 \001(\t\0222\n\013eventSource\030\t \001(\0162\035.usa" +
+      "ge.CDPDFEventSource.Value\"\352\002\n CDPDFDiagn" +
+      "osticRequestCollection\022\014\n\004uuid\030\001 \001(\t\022S\n\036" +
+      "cdpDFDiagnosticCollectionScope\030\002 \001(\0162+.u" +
+      "sage.CDPDFDiagnosticCollectionScope.Valu" +
+      "e\022\026\n\016deploymentCrns\030\003 \003(\t\022K\n\032cdpDFDiagno" +
+      "sticDestination\030\004 \001(\0162\'.usage.CDPDFDiagn" +
+      "osticDestination.Value\022\021\n\tstartTime\030\005 \001(" +
+      "\004\022\017\n\007endTime\030\006 \001(\004\022\036\n\026includeNifiDiagnos" +
+      "tics\030\007 \001(\010\022\022\n\ncaseNumber\030\010 \001(\t\022\016\n\006status" +
+      "\030\t \001(\t\022\026\n\016environmentCrn\030\n \001(\t\"P\n\032CDPDFD" +
+      "iagnosticDestination\"2\n\005Value\022\t\n\005UNSET\020\000" +
+      "\022\021\n\rCLOUD_STORAGE\020\001\022\013\n\007SUPPORT\020\002\"^\n\036CDPD" +
+      "FDiagnosticCollectionScope\"<\n\005Value\022\t\n\005U" +
+      "NSET\020\000\022\007\n\003ALL\020\001\022\017\n\013ENVIRONMENT\020\002\022\016\n\nDEPL" +
+      "OYMENT\020\003\"\355\001\n\030CDPDFProjectResourceType\"\320\001" +
+      "\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nDEPLOYMENT\020\001\022\034\n\030CU" +
+      "STOM_NAR_CONFIGURATION\020\002\022\026\n\022INBOUND_CONN" +
+      "ECTION\020\003\022\016\n\nFLOW_DRAFT\020\004\022\020\n\014TEST_SESSION" +
+      "\020\005\022\036\n\032TEST_SESSION_CONFIGURATION\020\006\022\037\n\033CU" +
+      "STOM_PYTHON_CONFIGURATION\020\007\022\023\n\017PARAMETER" +
+      "_GROUP\020\010\"\233\002\n\034CDPDFProjectResourceAssigne" +
+      "d\022\022\n\nresourceId\030\001 \001(\t\022;\n\014resourceType\030\002 " +
+      "\001(\0162%.usage.CDPDFProjectResourceType.Val" +
+      "ue\022\021\n\tprojectId\030\003 \001(\t\022\022\n\nprojectCrn\030\004 \001(" +
+      "\t\022\025\n\rprevProjectId\030\005 \001(\t\022\026\n\016prevProjectC" +
+      "rn\030\006 \001(\t\022\024\n\014dfServiceCrn\030\007 \001(\t\022\023\n\013dfServ" +
+      "iceId\030\010 \001(\t\022\026\n\016environmentCrn\030\t \001(\t\022\021\n\ta" +
+      "ccountId\030\n \001(\t\"\364\002\n\020CDPDFActiveAlert\022\n\n\002i",
+      "d\030\001 \001(\t\022\027\n\017firstOccurrence\030\002 \001(\004\022\014\n\004name" +
+      "\030\003 \001(\t\022\023\n\013description\030\004 \001(\t\0221\n\010severity\030" +
+      "\005 \001(\0162\037.usage.CDPDFEventSeverity.Value\022\023" +
+      "\n\013referenceId\030\006 \001(\t\022;\n\rreferenceType\030\007 \001" +
+      "(\0162$.usage.CDPDFEventReferenceType.Value" +
+      "\022.\n\talertType\030\010 \001(\0162\033.usage.CDPDFAlertTy" +
+      "pe.Value\022\032\n\022dataFlowServiceCrn\030\t \001(\t\022\031\n\021" +
+      "dataFlowServiceId\030\n \001(\t\022\026\n\016environmentCr" +
+      "n\030\013 \001(\t\022\024\n\014runTimestamp\030\014 \001(\004\"T\n\022CDPDFEv" +
+      "entSeverity\">\n\005Value\022\t\n\005UNSET\020\000\022\t\n\005ERROR" +
+      "\020\001\022\010\n\004WARN\020\002\022\010\n\004INFO\020\003\022\013\n\007UNKNOWN\020\004\"N\n\027C" +
+      "DPDFEventReferenceType\"3\n\005Value\022\t\n\005UNSET" +
+      "\020\000\022\016\n\nDEPLOYMENT\020\001\022\017\n\013ENVIRONMENT\020\002\"\310\010\n\016" +
+      "CDPDFAlertType\"\265\010\n\005Value\022\t\n\005UNSET\020\000\022\032\n\026C" +
+      "LOUDBREAK_ERROR_ALERT\020\001\022\035\n\031AT_CAPACITY_W" +
+      "ARNING_ALERT\020\002\022\"\n\036KPI_OUT_OF_RANGE_WARNI" +
+      "NG_ALERT\020\003\022\"\n\036CANNOT_AUTOSCALE_WARNING_A" +
+      "LERT\020\004\022$\n ENVIRONMENT_ORPHANED_ERROR_ALE" +
+      "RT\020\005\022#\n\037ENVIRONMENT_ORPHANED_WARN_ALERT\020" +
+      "\006\022)\n%WORKLOAD_HEARTBEAT_MISSING_WARN_ALE" +
+      "RT\020\007\022+\n\'DEPLOYMENT_HEARTBEAT_MISSING_WAR" +
+      "N_ALERT\020\010\022#\n\037PROMETHEUS_MEMORY_WARNING_A" +
+      "LERT\020\t\022\035\n\031METERING_DBUS_ERROR_ALERT\020\n\022\032\n" +
+      "\026METERING_WARNING_ALERT\020\013\022\030\n\024METERING_ER" +
+      "ROR_ALERT\020\014\022,\n(CERTIFICATES_EXPIRING_SOO" +
+      "N_WARNING_ALERT\020\r\022$\n CERTIFICATES_EXPIRE" +
+      "D_ERROR_ALERT\020\016\022\036\n\032CERTIFICATES_RENEWED_" +
+      "ALERT\020\017\022&\n\"UNUSED_DEPLOYMENT_BAD_HEALTH_" +
+      "ALERT\020\020\022\034\n\030SDX_OUTPUT_UPDATED_ALERT\020\021\022\035\n" +
+      "\031METRICS_UNAVAILABLE_ALERT\020\022\022\037\n\033AWAITING" +
+      "_UPGRADE_INFO_ALERT\020\023\022\"\n\036ALERTMANAGER_UN" +
+      "AVAILABLE_ALERT\020\024\022\"\n\036KUBE_METRICS_UNAVAI" +
+      "LABLE_ALERT\020\025\022\032\n\026DEPLOYMENT_NOT_HEALTHY\020" +
+      "\026\022\036\n\032OFFLOAD_TIME_WARNING_ALERT\020\027\022\034\n\030MIN" +
+      "IFI_UNAVAILABLE_ALERT\020\030\022\031\n\025POD_UNAVAILAB" +
+      "LE_ALERT\020\031\022!\n\035STATEFULSET_UNAVAILABLE_AL" +
+      "ERT\020\032\022 \n\034DEPLOYMENT_UNAVAILABLE_ALERT\020\033\022" +
+      "\031\n\025JOB_UNAVAILABLE_ALERT\020\034\022\030\n\024MEMORY_WAR" +
+      "NING_ALERT\020\035\022\027\n\023NIFI_BULLETIN_ALERT\020\036\022*\n" +
+      "&MANUAL_RESOURCE_CLEANUP_REQUIRED_ALERT\020" +
+      "\037\022\013\n\007UNKNOWN\020 \"\250\003\n\033CDPDFFlowMigrationLif" +
+      "ecycle\022\021\n\taccountId\030\001 \001(\t\022\026\n\016environment" +
+      "Crn\030\002 \001(\t\022\024\n\014dfServiceCrn\030\003 \001(\t\022\023\n\013migra" +
+      "tionId\030\004 \001(\t\022\026\n\016flowVersionCrn\030\005 \001(\t\022\026\n\016" +
+      "flowDesignerId\030\006 \001(\t\0225\n\006status\030\007 \001(\0162%.u" +
+      "sage.CDPDFFlowMigrationStatus.Value\022\026\n\016p" +
+      "rocessorCount\030\010 \001(\r\022\036\n\026controllerService" +
+      "Count\030\t \001(\r\022\031\n\021manualStepsNeeded\030\n \001(\r\022 " +
+      "\n\030manualVerificationNeeded\030\013 \001(\r\022\025\n\rfail" +
+      "ureReason\030\014 \001(\t\022\022\n\nworkflowId\030\r \001(\t\022\r\n\005r" +
+      "unId\030\016 \001(\t\022\035\n\025canBeOpenedInDesigner\030\017 \001(" +
+      "\010\"\233\001\n\030CDPDFFlowMigrationStatus\"\177\n\005Value\022" +
+      "\t\n\005UNSET\020\000\022\013\n\007CREATED\020\001\022\n\n\006QUEUED\020\002\022\017\n\013I" +
+      "N_PROGRESS\020\003\022\027\n\023MIGRATION_COMPLETED\020\004\022\034\n" +
+      "\030DRAFT_CREATION_COMPLETED\020\005\022\n\n\006FAILED\020\006\"" +
+      "\370\001\n\030CDPDFFlowDraftDefinition\022\021\n\taccountI" +
+      "d\030\001 \001(\t\022\026\n\016environmentCrn\030\002 \001(\t\022\024\n\014dfSer" +
+      "viceCrn\030\003 \001(\t\022\021\n\tcreatedAt\030\004 \001(\004\022\021\n\tupda" +
+      "tedAt\030\005 \001(\004\022\032\n\022niFiComponentsUsed\030\006 \001(\t\022" +
+      "\025\n\rcontentFormat\030\007 \001(\t\022\n\n\002id\030\010 \001(\t\022\014\n\004na" +
+      "me\030\t \001(\t\022\020\n\010revision\030\n \001(\004\022\026\n\016runtimeVer" +
+      "sion\030\013 \001(\t\"I\n\023AutoscalePolicyType\"2\n\005Val" +
+      "ue\022\t\n\005UNSET\020\000\022\016\n\nTIME_BASED\020\001\022\016\n\nLOAD_BA" +
+      "SED\020\002\"\275\001\n\034CDPAutoscalePolicyDefinition\022=" +
+      "\n\023autoscalePolicyType\030\001 \001(\0162 .usage.Auto" +
+      "scalePolicyType.Value\022!\n\031autoscalePolicy" +
+      "Parameters\030\002 \001(\t\022\034\n\024autoscalingHostGroup" +
+      "\030\003 \001(\t\022\035\n\025autoscalingPolicyName\030\004 \001(\t\"\201\001" +
+      "\n\032AutoscaleScalingStatusType\"c\n\005Value\022\t\n" +
+      "\005UNSET\020\000\022\025\n\021SCALING_REQUESTED\020\001\022\032\n\026SCALI" +
+      "NG_REQUEST_FAILED\020\002\022\034\n\030AUTOSCALE_TRIGGER" +
+      "_FAILED\020\003\"P\n\036AutoscaleScalingAdjustmentT" +
+      "ype\".\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007REGULAR\020\001\022\r\n\t" +
+      "STOPSTART\020\002\"\233\003\n\032CDPAutoscaleTriggerDetai" +
+      "ls\022\021\n\taccountId\030\001 \001(\t\022\023\n\013clusterName\030\002 \001" +
+      "(\t\022\022\n\nclusterCrn\030\003 \001(\t\022H\n\033autoscalingPol" +
+      "icyDefinition\030\004 \001(\0132#.usage.CDPAutoscale" +
+      "PolicyDefinition\022\"\n\032originalHostGroupNod" +
+      "eCount\030\005 \001(\005\022!\n\031desiredHostGroupNodeCoun" +
+      "t\030\006 \001(\005\022\031\n\021autoscalingAction\030\007 \001(\t\022@\n\017au" +
+      "toscaleStatus\030\010 \001(\0162\'.usage.AutoscaleSca" +
+      "lingStatusType.Value\022S\n\036autoscaleScaling" +
+      "AdjustmentType\030\t \001(\0162+.usage.AutoscaleSc" +
+      "alingAdjustmentType.Value\"b\n\034CDPDatahubA" +
+      "utoscaleTriggered\022B\n\027autoscaleTriggerDet" +
+      "ails\030\001 \001(\0132!.usage.CDPAutoscaleTriggerDe" +
+      "tails\"\366\001\n CDPDatahubAutoscaleConfigChang" +
+      "ed\022\017\n\007userCrn\030\001 \001(\t\022\032\n\022autoscalingEnable" +
+      "d\030\002 \001(\010\022H\n\033autoscalingPolicyDefinition\030\003" +
+      " \003(\0132#.usage.CDPAutoscalePolicyDefinitio" +
+      "n\022\021\n\taccountId\030\004 \001(\t\022\023\n\013clusterName\030\005 \001(" +
+      "\t\022\022\n\nclusterCrn\030\006 \001(\t\022\037\n\027stopStartScalin" +
+      "gEnabled\030\007 \001(\010\"G\n\025CDPNetworkCheckResult\"" +
+      ".\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nSUCCESSFUL\020\001\022\n\n\006F" +
+      "AILED\020\002\"\262\001\n\023CDPNetworkCheckType\"\232\001\n\005Valu" +
+      "e\022\t\n\005UNSET\020\000\022\006\n\002S3\020\001\022\007\n\003STS\020\002\022\n\n\006ADLSV2\020" +
+      "\003\022\016\n\nAZURE_MGMT\020\004\022\007\n\003GCS\020\005\022\024\n\020CLOUDERA_A" +
+      "RCHIVE\020\006\022\013\n\007DATABUS\020\007\022\016\n\nDATABUS_S3\020\010\022\035\n" +
+      "\031SERVICE_DELIVERY_CACHE_S3\020\t\"\276\002\n\017CDPNetw" +
+      "orkCheck\022.\n\004type\030\001 \001(\0162 .usage.CDPNetwor" +
+      "kCheckType.Value\0222\n\006result\030\002 \001(\0162\".usage" +
+      ".CDPNetworkCheckResult.Value\022\021\n\taccountI" +
+      "d\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\022\031\n\021failedHostsJoine" +
+      "d\030\006 \001(\t\022\023\n\013clusterName\030\007 \001(\t\022\023\n\013clusterT" +
+      "ype\030\010 \001(\t\022\026\n\016environmentCrn\030\t \001(\t\022D\n\017env" +
+      "ironmentType\030\n \001(\0162+.usage.CDPEnvironmen" +
+      "tsEnvironmentType.ValueJ\004\010\005\020\006\"c\n\017CDPDWXH" +
+      "iveQuery\022\022\n\ncomputeCRN\030\001 \001(\t\022\023\n\013hiveQuer" +
+      "yId\030\002 \001(\t\022\014\n\004user\030\003 \001(\t\022\031\n\021executionTime" +
+      "inMs\030\004 \001(\003\"\363\003\n\024CDPCDWResourceStatus\"\332\003\n\005" +
+      "Value\022\t\n\005UNSET\020\000\022\024\n\020CREATE_REQUESTED\020\001\022\024" +
+      "\n\020CREATE_SUCCEEDED\020\002\022\021\n\rCREATE_FAILED\020\003\022" +
+      "\024\n\020DELETE_REQUESTED\020\004\022\024\n\020DELETE_SUCCEEDE" +
+      "D\020\005\022\021\n\rDELETE_FAILED\020\006\022\023\n\017START_REQUESTE" +
+      "D\020\007\022\031\n\025START_ASYNC_SUCCEEDED\020\010\022\023\n\017START_" +
+      "SUCCEEDED\020\t\022\020\n\014START_FAILED\020\n\022\022\n\016STOP_RE" +
+      "QUESTED\020\013\022\022\n\016STOP_SUCCEEDED\020\014\022\017\n\013STOP_FA" +
+      "ILED\020\r\022\024\n\020UPDATE_REQUESTED\020\016\022\032\n\026UPDATE_A" +
+      "SYNC_SUCCEEDED\020\017\022\024\n\020UPDATE_SUCCEEDED\020\020\022\021" +
+      "\n\rUPDATE_FAILED\020\021\022\025\n\021UPGRADE_REQUESTED\020\022" +
+      "\022\033\n\027UPGRADE_ASYNC_SUCCEEDED\020\023\022\025\n\021UPGRADE" +
+      "_SUCCEEDED\020\024\022\022\n\016UPGRADE_FAILED\020\025\"\233\002\n\020CDP" +
+      "CDWUsageEvent\022\021\n\taccountId\030\001 \001(\t\022\027\n\017envi" +
+      "ronmentName\030\002 \001(\t\022D\n\017environmentType\030\003 \001" +
+      "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
+      "e.Value\022\021\n\tclusterId\030\004 \001(\t\0225\n\014resourceTy" +
+      "pe\030\005 \001(\0162\037.usage.CDPCDWResourceType.Valu" +
+      "e\022\022\n\nresourceId\030\006 \001(\t\022\021\n\tcomponent\030\007 \001(\t" +
+      "\022\021\n\teventType\030\010 \001(\t\022\021\n\teventData\030\t \001(\t\"\213" +
+      "\001\n\022CDPCDWResourceType\"u\n\005Value\022\t\n\005UNSET\020" +
+      "\000\022\017\n\013ENVIRONMENT\020\001\022\024\n\020DATABASE_CATALOG\020\002" +
+      "\022\025\n\021VIRTUAL_WAREHOUSE\020\003\022\026\n\022DATA_VISUALIZ" +
+      "ATION\020\004\022\013\n\007CDW_HUE\020\005\"\240\002\n\032CDPCDWEnvironme" +
+      "ntRequested\022\n\n\002id\030\001 \001(\t\022\021\n\taccountId\030\002 \001" +
+      "(\t\022\026\n\016environmentCrn\030\003 \001(\t\022\027\n\017environmen" +
+      "tName\030\004 \001(\t\022D\n\017environmentType\030\005 \001(\0162+.u" +
+      "sage.CDPEnvironmentsEnvironmentType.Valu" +
+      "e\022\020\n\010actorCrn\030\006 \001(\t\0221\n\006status\030\007 \001(\0162!.us" +
+      "age.CDPCDWResourceStatus.Value\022\021\n\tenable" +
+      "Das\030\010 \001(\010\022\024\n\014enableCdwHue\030\t \001(\010\"\324\001\n\036CDPC" +
+      "DWEnvironmentStatusChanged\022\n\n\002id\030\001 \001(\t\022\021" +
+      "\n\taccountId\030\002 \001(\t\0224\n\toldStatus\030\003 \001(\0162!.u" +
+      "sage.CDPCDWResourceStatus.Value\0224\n\tnewSt" +
+      "atus\030\004 \001(\0162!.usage.CDPCDWResourceStatus." +
+      "Value\022\025\n\rfailureReason\030\005 \001(\t\022\020\n\010actorCrn" +
+      "\030\006 \001(\t\";\n\023CDPCDWDBCatalogType\"$\n\005Value\022\t" +
+      "\n\005UNSET\020\000\022\007\n\003SDX\020\001\022\007\n\003CDW\020\002\"\345\001\n\030CDPCDWDB" +
+      "CatalogRequested\022\n\n\002id\030\001 \001(\t\022\021\n\taccountI" +
+      "d\030\002 \001(\t\022\025\n\rdbCatalogName\030\003 \001(\t\0227\n\rdbCata" +
+      "logType\030\004 \001(\0162 .usage.CDPCDWDBCatalogTyp" +
+      "e.Value\022\025\n\renvironmentId\030\005 \001(\t\022\020\n\010actorC" +
+      "rn\030\006 \001(\t\0221\n\006status\030\007 \001(\0162!.usage.CDPCDWR" +
+      "esourceStatus.Value\"\322\001\n\034CDPCDWDBCatalogS" +
+      "tatusChanged\022\n\n\002id\030\001 \001(\t\022\021\n\taccountId\030\002 " +
+      "\001(\t\0224\n\toldStatus\030\003 \001(\0162!.usage.CDPCDWRes" +
+      "ourceStatus.Value\0224\n\tnewStatus\030\004 \001(\0162!.u" +
+      "sage.CDPCDWResourceStatus.Value\022\025\n\rfailu" +
+      "reReason\030\005 \001(\t\022\020\n\010actorCrn\030\006 \001(\t\"F\n\032CDPC" +
+      "DWVirtualWarehouseType\"(\n\005Value\022\t\n\005UNSET" +
+      "\020\000\022\010\n\004HIVE\020\001\022\n\n\006IMPALA\020\002\"\302\002\n\037CDPCDWVirtu" +
+      "alWarehouseRequested\022\n\n\002id\030\001 \001(\t\022\021\n\tacco" +
+      "untId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022\034\n\024virtualWareh" +
+      "ouseName\030\004 \001(\t\022E\n\024virtualWarehouseType\030\005" +
+      " \001(\0162\'.usage.CDPCDWVirtualWarehouseType." +
+      "Value\022\023\n\013dbCatalogId\030\006 \001(\t\022\020\n\010actorCrn\030\007" +
+      " \001(\t\0221\n\006status\030\010 \001(\0162!.usage.CDPCDWResou" +
+      "rceStatus.Value\022\020\n\010minNodes\030\t \001(\005\022\020\n\010max" +
+      "Nodes\030\n \001(\005\022\020\n\010userTags\030\013 \001(\t\"\346\001\n#CDPCDW" +
+      "VirtualWarehouseStatusChanged\022\n\n\002id\030\001 \001(" +
+      "\t\022\021\n\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0224\n\told" +
       "Status\030\004 \001(\0162!.usage.CDPCDWResourceStatu" +
-      "s.Value\022\025\n\rfailureReason\030\005 \001(\t\022\020\n\010actorC" +
-      "rn\030\006 \001(\t\"F\n\032CDPCDWVirtualWarehouseType\"(" +
-      "\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004HIVE\020\001\022\n\n\006IMPALA\020\002" +
-      "\"\302\002\n\037CDPCDWVirtualWarehouseRequested\022\n\n\002" +
-      "id\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t" +
-      "\022\034\n\024virtualWarehouseName\030\004 \001(\t\022E\n\024virtua" +
-      "lWarehouseType\030\005 \001(\0162\'.usage.CDPCDWVirtu" +
-      "alWarehouseType.Value\022\023\n\013dbCatalogId\030\006 \001" +
-      "(\t\022\020\n\010actorCrn\030\007 \001(\t\0221\n\006status\030\010 \001(\0162!.u" +
-      "sage.CDPCDWResourceStatus.Value\022\020\n\010minNo" +
-      "des\030\t \001(\005\022\020\n\010maxNodes\030\n \001(\005\022\020\n\010userTags\030" +
-      "\013 \001(\t\"\346\001\n#CDPCDWVirtualWarehouseStatusCh" +
-      "anged\022\n\n\002id\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n\003" +
-      "crn\030\003 \001(\t\0224\n\toldStatus\030\004 \001(\0162!.usage.CDP" +
-      "CDWResourceStatus.Value\0224\n\tnewStatus\030\005 \001" +
-      "(\0162!.usage.CDPCDWResourceStatus.Value\022\025\n" +
-      "\rfailureReason\030\006 \001(\t\022\020\n\010actorCrn\030\007 \001(\t\"|" +
-      "\n\"CDPCDWVirtualWarehouseNodesChanged\022\n\n\002" +
-      "id\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t" +
-      "\022\024\n\014oldNodeCount\030\004 \001(\005\022\024\n\014newNodeCount\030\005" +
-      " \001(\005\"=\n\034CDPCDWRealTimeEventStoreType\"\035\n\005" +
-      "Value\022\t\n\005UNSET\020\000\022\t\n\005DRUID\020\001\"\272\002\n!CDPCDWRe" +
-      "alTimeEventStoreRequested\022\n\n\002id\030\001 \001(\t\022\021\n" +
-      "\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022\036\n\026realTim" +
-      "eEventStoreName\030\004 \001(\t\022I\n\026realTimeEventSt" +
-      "oreType\030\005 \001(\0162).usage.CDPCDWRealTimeEven" +
-      "tStoreType.Value\022\025\n\renvironmentId\030\006 \001(\t\022" +
-      "\020\n\010actorCrn\030\007 \001(\t\0221\n\006status\030\010 \001(\0162!.usag" +
-      "e.CDPCDWResourceStatus.Value\022\020\n\010minNodes" +
-      "\030\t \001(\005\022\020\n\010maxNodes\030\n \001(\005\"\350\001\n%CDPCDWRealT" +
-      "imeEventStoreStatusChanged\022\n\n\002id\030\001 \001(\t\022\021" +
-      "\n\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0224\n\toldSta" +
-      "tus\030\004 \001(\0162!.usage.CDPCDWResourceStatus.V" +
-      "alue\0224\n\tnewStatus\030\005 \001(\0162!.usage.CDPCDWRe" +
-      "sourceStatus.Value\022\025\n\rfailureReason\030\006 \001(" +
-      "\t\022\020\n\010actorCrn\030\007 \001(\t\"V\n\017CDPCDEDBDetails\022\022" +
-      "\n\nserverType\030\001 \001(\t\022\025\n\rinstanceClass\030\002 \001(" +
-      "\t\022\030\n\020highAvailability\030\003 \001(\010\"\353\003\n\026CDPCDESe" +
-      "rviceRequested\022\n\n\002id\030\001 \001(\t\022\021\n\taccountId\030" +
-      "\002 \001(\t\022\026\n\016environmentCrn\030\003 \001(\t\022\022\n\ncluster" +
-      "Crn\030\004 \001(\t\022D\n\017environmentType\030\005 \001(\0162+.usa" +
-      "ge.CDPEnvironmentsEnvironmentType.Value\022" +
-      "\022\n\ncreatorCrn\030\006 \001(\t\022\022\n\ncdeVersion\030\007 \001(\t\022" +
-      "<\n\021cdpCDEAwsMetadata\030\010 \001(\0132\037.usage.CDPCD" +
-      "EAWSServiceMetadataH\000\022@\n\023cdpCDEAzureMeta" +
-      "data\030\t \001(\0132!.usage.CDPCDEAzureServiceMet" +
-      "adataH\000\022\020\n\010userTags\030\014 \001(\t\022\016\n\006status\030\017 \001(" +
-      "\t\022\022\n\nproperties\030\016 \001(\t\022\031\n\021kubernetesVersi" +
-      "on\030\020 \001(\t\022)\n\tdbDetails\030\021 \001(\0132\026.usage.CDPC" +
-      "DEDBDetailsB\n\n\010metadataJ\004\010\n\020\013J\004\010\013\020\014J\004\010\r\020" +
-      "\016\"\223\001\n\032CDPCDEServiceStatusChanged\022\n\n\002id\030\001" +
-      " \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\020\n\010liftieId\030\003 \001" +
-      "(\t\022\021\n\taccountId\030\004 \001(\t\022\016\n\006status\030\t \001(\t\022\016\n" +
-      "\006reason\030\010 \001(\tJ\004\010\005\020\006J\004\010\006\020\007J\004\010\007\020\010\"\364\002\n\035CDPC" +
-      "DEVirtualClusterRequested\022\n\n\002id\030\001 \001(\t\022\022\n" +
-      "\nclusterCrn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\021\n\t" +
-      "creatorId\030\004 \001(\t\022\022\n\ncdeVersion\030\005 \001(\t\022\024\n\014c" +
-      "puRequested\030\006 \001(\r\022\027\n\017memoryRequested\030\007 \001" +
-      "(\t\022\024\n\014sparkVersion\030\010 \001(\t\022\023\n\013sparkOSName\030" +
-      "\r \001(\t\022\016\n\006status\030\013 \001(\t\022\022\n\nproperties\030\n \001(" +
-      "\t\022?\n\021spotInstanceUsage\030\014 \001(\0162$.usage.CDP" +
-      "CDESpotInstanceUsage.Value\022\036\n\026computeOve" +
-      "rrideEnabled\030\016 \001(\t\022\024\n\014sparkConfigs\030\017 \001(\t" +
-      "J\004\010\t\020\n\"\302\002\n\034CDPCDEVirtualClusterModified\022" +
-      "\n\n\002id\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\021\n\taccou" +
-      "ntId\030\003 \001(\t\022\021\n\tcreatorId\030\004 \001(\t\022\022\n\ncdeVers" +
-      "ion\030\005 \001(\t\022\024\n\014cpuRequested\030\006 \001(\r\022\027\n\017memor" +
-      "yRequested\030\007 \001(\t\022\022\n\nproperties\030\010 \001(\t\022\016\n\006" +
-      "status\030\t \001(\t\022?\n\021spotInstanceUsage\030\n \001(\0162" +
-      "$.usage.CDPCDESpotInstanceUsage.Value\022\036\n" +
-      "\026computeOverrideEnabled\030\013 \001(\t\022\024\n\014sparkCo" +
-      "nfigs\030\014 \001(\t\"M\n\027CDPCDESpotInstanceUsage\"2" +
-      "\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007DEFAULT\020\001\022\007\n\003ALL\020\002" +
-      "\022\010\n\004NONE\020\003\"\210\001\n!CDPCDEVirtualClusterStatu" +
-      "sChanged\022\n\n\002id\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t" +
-      "\022\021\n\taccountId\030\003 \001(\t\022\016\n\006status\030\010 \001(\t\022\016\n\006r" +
-      "eason\030\007 \001(\tJ\004\010\004\020\005J\004\010\005\020\006J\004\010\006\020\007\"\242\002\n\035CDPCDE" +
-      "ServiceUpgradeRequested\022\n\n\002id\030\001 \001(\t\022\022\n\nc" +
-      "lusterCrn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\023\n\013fr" +
-      "omVersion\030\004 \001(\t\022\021\n\ttoVersion\030\005 \001(\t\022\031\n\021ku" +
-      "bernetesUpgrade\030\006 \001(\010\022 \n\030currentKubernet" +
-      "esVersion\030\007 \001(\t\022\037\n\027targetKubernetesVersi" +
-      "on\030\010 \001(\t\022\022\n\nworkflowId\030\t \001(\t\022\014\n\004step\030\n \001" +
-      "(\t\022\017\n\007isRetry\030\013 \001(\010\022\025\n\rattemptNumber\030\014 \001" +
-      "(\005\"x\n!CDPCDEServiceUpgradeStatusChanged\022" +
-      "\n\n\002id\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\022\n\nworkf" +
-      "lowId\030\003 \001(\t\022\017\n\007details\030\004 \001(\t\022\016\n\006status\030\005" +
-      " \001(\t\"f\n\035CDPCDEActiveServicesHeartbeat\022E\n" +
-      "\032cdpCDEActiveServiceDetails\030\001 \003(\0132!.usag" +
-      "e.CDPCDEActiveServiceDetails\"\216\002\n\032CDPCDEA" +
-      "ctiveServiceDetails\022\n\n\002id\030\001 \001(\t\022\021\n\taccou" +
-      "ntId\030\002 \001(\t\022\026\n\016environmentCrn\030\003 \001(\t\022\022\n\ncl" +
-      "usterCrn\030\004 \001(\t\022D\n\017environmentType\030\005 \001(\0162" +
-      "+.usage.CDPEnvironmentsEnvironmentType.V" +
-      "alue\022\022\n\ncdeVersion\030\006 \001(\t\022\016\n\006status\030\007 \001(\t" +
-      "\022\031\n\021kubernetesVersion\030\010 \001(\t\022 \n\030numActive" +
-      "VirtualClusters\030\t \001(\005\"V\n\027CDPCDEActiveVCH" +
-      "eartbeat\022;\n\025cdpCDEActiveVCDetails\030\001 \003(\0132" +
-      "\034.usage.CDPCDEActiveVCDetails\"\277\001\n\025CDPCDE" +
-      "ActiveVCDetails\022\n\n\002id\030\001 \001(\t\022\021\n\tclusterId" +
-      "\030\002 \001(\t\022\022\n\nclusterCrn\030\003 \001(\t\022\021\n\taccountId\030" +
-      "\004 \001(\t\022\024\n\014sparkVersion\030\005 \001(\t\022\016\n\006status\030\006 " +
-      "\001(\t\022\017\n\007appTier\030\007 \001(\t\022\023\n\013sparkOSName\030\010 \001(" +
-      "\t\022\024\n\014sparkConfigs\030\t \001(\t\"\276\002\n\031CDPCDEJobRun" +
-      "StatusChanged\022\022\n\nclusterCrn\030\001 \001(\t\022\014\n\004vcI" +
-      "d\030\002 \001(\t\022\r\n\005runId\030\003 \001(\t\022\014\n\004user\030\010 \001(\t\022\016\n\006" +
-      "status\030\004 \001(\t\022+\n\njobDetails\030\005 \001(\0132\027.usage" +
-      ".CDPCDEJobDetails\022\017\n\007started\030\006 \001(\004\022\r\n\005en" +
-      "ded\030\007 \001(\004\022\020\n\010duration\030\t \001(\005\022\016\n\006client\030\n " +
-      "\001(\t\022\'\n\010metadata\030\013 \001(\0132\025.usage.CDPCDEMeta" +
-      "data\022\034\n\024computeConfiguration\030\014 \001(\t\022\034\n\024in" +
-      "stanceSparkConfigs\030\r \001(\t\"\304\001\n\020CDPCDEJobCr" +
-      "eated\022\022\n\nclusterCrn\030\001 \001(\t\022\014\n\004vcId\030\002 \001(\t\022" +
-      "$\n\003job\030\003 \001(\0132\027.usage.CDPCDEJobDetails\022/\n" +
-      "\teventType\030\004 \001(\0162\034.usage.CDPCDEEventType" +
-      ".Value\022\016\n\006client\030\005 \001(\t\022\'\n\010metadata\030\013 \001(\013" +
-      "2\025.usage.CDPCDEMetadata\"\353\002\n\026CDPCDESessio" +
-      "nRequested\022\021\n\tclusterId\030\001 \001(\t\022\022\n\ncluster" +
-      "Crn\030\002 \001(\t\022\014\n\004vcId\030\003 \001(\t\022\n\n\002id\030\004 \001(\t\022\017\n\007c" +
-      "reator\030\005 \001(\t\022\023\n\013description\030\006 \001(\t\022\014\n\004typ" +
-      "e\030\007 \001(\t\022\013\n\003ttl\030\010 \001(\t\0221\n\020interactiveSpark" +
-      "\030\t \001(\0132\027.usage.InteractiveSpark\0224\n\016resou" +
-      "rceMounts\030\n \003(\0132\034.usage.CDPCDEResourceDe" +
-      "tails\022\016\n\006client\030\013 \001(\t\022\017\n\007created\030\014 \001(\004\022\'" +
-      "\n\010metadata\030\r \001(\0132\025.usage.CDPCDEMetadata\022" +
-      "\034\n\024instanceSparkConfigs\030\016 \001(\t\"O\n CDPCDES" +
-      "uspendResumeOperationType\"+\n\005Value\022\t\n\005UN" +
-      "SET\020\000\022\013\n\007SUSPEND\020\001\022\n\n\006RESUME\020\002\"\201\001\n+CDPCD" +
-      "EAppInstanceSuspendResumeOperationType\"R" +
-      "\n\005Value\022\026\n\022APP_INSTANCE_UNSET\020\000\022\030\n\024APP_I" +
-      "NSTANCE_SUSPEND\020\001\022\027\n\023APP_INSTANCE_RESUME" +
-      "\020\002\"\231\002\n\'CDPCDEAppInstanceSuspendResumeReq" +
-      "uested\022\021\n\tclusterID\030\001 \001(\t\022\022\n\ninstanceID\030" +
-      "\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\022\n\nclusterCrn\030\004" +
-      " \001(\t\022\020\n\010actorCrn\030\005 \001(\t\022\022\n\ncdeVersion\030\006 \001" +
-      "(\t\022O\n\roperationType\030\007 \001(\01628.usage.CDPCDE" +
-      "AppInstanceSuspendResumeOperationType.Va" +
-      "lue\022\025\n\rattemptNumber\030\010 \001(\005\022\022\n\nworkflowId" +
-      "\030\t \001(\t\"\260\001\n+CDPCDEAppInstanceSuspendResum" +
-      "eStatusChanged\022\021\n\tclusterID\030\001 \001(\t\022\022\n\nins" +
-      "tanceID\030\002 \001(\t\022\022\n\nclusterCrn\030\003 \001(\t\022\021\n\tacc" +
-      "ountId\030\004 \001(\t\022\022\n\nworkflowId\030\005 \001(\t\022\016\n\006stat" +
-      "us\030\006 \001(\t\022\017\n\007details\030\007 \001(\t\"\366\001\n#CDPCDEServ" +
-      "iceSuspendResumeRequested\022\021\n\tclusterID\030\001" +
-      " \001(\t\022\021\n\taccountId\030\002 \001(\t\022\022\n\nclusterCrn\030\003 " +
-      "\001(\t\022\020\n\010actorCrn\030\004 \001(\t\022\022\n\ncdeVersion\030\005 \001(" +
-      "\t\022D\n\roperationType\030\006 \001(\0162-.usage.CDPCDES" +
-      "uspendResumeOperationType.Value\022\025\n\rattem" +
-      "ptNumber\030\007 \001(\005\022\022\n\nworkflowId\030\010 \001(\t\"\230\001\n\'C" +
-      "DPCDEServiceSuspendResumeStatusChanged\022\021" +
-      "\n\tclusterID\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\021\n" +
-      "\taccountId\030\003 \001(\t\022\022\n\nworkflowId\030\004 \001(\t\022\016\n\006" +
-      "status\030\005 \001(\t\022\017\n\007details\030\006 \001(\t\"`\n\035CDPCDES" +
-      "erviceMaintenancePhase\"?\n\005Value\022\t\n\005UNSET" +
-      "\020\000\022\025\n\021ENTER_MAINTENANCE\020\001\022\024\n\020QUIT_MAINTE" +
-      "NANCE\020\002\"\\\n%CDPCDEServiceMaintenanceOpera" +
-      "tionType\"3\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007UPGRADE\020" +
-      "\001\022\022\n\016SUSPEND_RESUME\020\002\"\314\002\n!CDPCDEServiceM" +
-      "aintenanceRequested\022\021\n\tclusterID\030\001 \001(\t\022\021" +
-      "\n\taccountId\030\002 \001(\t\022\022\n\nclusterCrn\030\003 \001(\t\022\022\n" +
-      "\ncreatorCrn\030\004 \001(\t\022\022\n\ncdeVersion\030\005 \001(\t\022D\n" +
-      "\020maintenancePhase\030\006 \001(\0162*.usage.CDPCDESe" +
-      "rviceMaintenancePhase.Value\022T\n\030maintenan" +
-      "ceOperationType\030\007 \001(\01622.usage.CDPCDEServ" +
-      "iceMaintenanceOperationType.Value\022\025\n\ratt" +
-      "emptNumber\030\010 \001(\005\022\022\n\nworkflowId\030\t \001(\t\"\226\001\n" +
-      "%CDPCDEServiceMaintenanceStatusChanged\022\021" +
-      "\n\tclusterID\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\021\n" +
-      "\taccountId\030\003 \001(\t\022\022\n\nworkflowId\030\004 \001(\t\022\016\n\006" +
-      "status\030\005 \001(\t\022\017\n\007details\030\006 \001(\t\"\254\002\n\020Intera" +
-      "ctiveSpark\022\023\n\013driverCores\030\001 \001(\005\022\025\n\rexecu" +
-      "torCores\030\002 \001(\005\022\024\n\014driverMemory\030\003 \001(\t\022\026\n\016" +
-      "executorMemory\030\004 \001(\t\022\024\n\014numExecutors\030\005 \001" +
-      "(\005\022\017\n\007numJars\030\006 \001(\005\022\020\n\010numFiles\030\007 \001(\005\022\022\n" +
-      "\nnumPyFiles\030\010 \001(\005\022/\n\004conf\030\t \003(\0132!.usage." +
-      "InteractiveSpark.ConfEntry\022\023\n\013IdleTimeou" +
-      "t\030\n \001(\t\032+\n\tConfEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005val" +
-      "ue\030\002 \001(\t:\0028\001\"\331\001\n\031CDPCDESessionStateChang" +
-      "ed\022\021\n\tclusterId\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(" +
-      "\t\022\014\n\004vcId\030\003 \001(\t\022\n\n\002id\030\004 \001(\t\022\020\n\010newState\030" +
-      "\005 \001(\t\022\020\n\010oldState\030\006 \001(\t\022\014\n\004type\030\007 \001(\t\022\020\n" +
-      "\010duration\030\010 \001(\004\022\016\n\006client\030\t \001(\t\022\'\n\010metad" +
-      "ata\030\013 \001(\0132\025.usage.CDPCDEMetadata\"\275\002\n\036CDP" +
-      "CDESessionStatementExecuted\022\021\n\tclusterId" +
-      "\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\014\n\004vcId\030\003 \001(\t" +
-      "\022\021\n\tsessionId\030\004 \001(\t\022\024\n\014sessionState\030\005 \001(" +
-      "\t\022\014\n\004type\030\006 \001(\t\022\031\n\021statementNumChars\030\007 \001" +
-      "(\005\022\036\n\026statementSubmittedTime\030\010 \001(\004\022!\n\031st" +
-      "atementExecutionStarted\030\t \001(\004\022#\n\033stateme" +
-      "ntExecutionCompleted\030\n \001(\004\022\016\n\006client\030\013 \001" +
-      "(\t\022\034\n\024statementNumNewLines\030\014 \001(\005\"M\n\017CDPC" +
-      "DEEventType\":\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007CREAT" +
-      "ED\020\001\022\014\n\010MODIFIED\020\002\022\013\n\007DELETED\020\003\"\323\001\n\025CDPC" +
-      "DEResourceCreated\022\022\n\nclusterCrn\030\001 \001(\t\022\014\n" +
-      "\004vcId\030\002 \001(\t\022.\n\010resource\030\003 \001(\0132\034.usage.CD" +
-      "PCDEResourceDetails\022/\n\teventType\030\004 \001(\0162\034" +
-      ".usage.CDPCDEEventType.Value\022\016\n\006client\030\005" +
-      " \001(\t\022\'\n\010metadata\030\013 \001(\0132\025.usage.CDPCDEMet" +
-      "adata\"?\n\016CDPCDEMetadata\022-\n\013cliMetadata\030\001" +
-      " \001(\0132\030.usage.CDPCDECliMetadata\"$\n\021CDPCDE" +
-      "CliMetadata\022\017\n\007version\030\001 \001(\t\"\246\001\n\030CDPCDEA" +
-      "WSServiceMetadata\022\030\n\020minimumInstances\030\001 " +
-      "\001(\005\022\030\n\020maximumInstances\030\002 \001(\005\022\034\n\024minimum" +
-      "SpotInstances\030\003 \001(\005\022\034\n\024maximumSpotInstan" +
-      "ces\030\004 \001(\005\022\024\n\014instanceType\030\005 \001(\tJ\004\010\006\020\007\"l\n" +
-      "\032CDPCDEAzureServiceMetadata\022\030\n\020minimumIn" +
-      "stances\030\001 \001(\005\022\030\n\020maximumInstances\030\002 \001(\005\022" +
-      "\024\n\014instanceType\030\003 \001(\tJ\004\010\004\020\005\"\373\002\n\020CDPCDEJo" +
-      "bDetails\022\017\n\007jobName\030\001 \001(\t\022\017\n\007jobType\030\002 \001" +
-      "(\t\022\020\n\010schedule\030\003 \001(\t\022/\n\tresources\030\004 \003(\0132" +
-      "\034.usage.CDPCDEResourceDetails\022\031\n\021jobConf" +
-      "igurations\030\005 \001(\t\022\025\n\rpythonVersion\030\006 \001(\t\022" +
-      "\024\n\014driverMemory\030\007 \001(\t\022\026\n\016executorMemory\030" +
-      "\010 \001(\t\022\025\n\rexecutorCores\030\t \001(\005\022\023\n\013driverCo" +
-      "res\030\n \001(\005\022\020\n\010logLevel\030\013 \001(\t\022\025\n\rpipelines" +
-      "Used\030\014 \001(\010\022/\n\007airflow\030\r \001(\0132\036.usage.CDPC" +
-      "DEAirflowJobDetails\022\034\n\024computeConfigurat" +
-      "ion\030\016 \001(\t\"K\n\027CDPCDEAirflowJobDetails\0220\n\n" +
-      "fileMounts\030\001 \003(\0132\034.usage.CDPCDEResourceD" +
-      "etails\"y\n\025CDPCDEResourceDetails\022\014\n\004name\030" +
-      "\001 \001(\t\022\014\n\004type\030\002 \001(\t\0229\n\014pyenvDetails\030\003 \001(" +
-      "\0132!.usage.CDPCDEPyenvResourceDetailsH\000B\t" +
-      "\n\007details\"\241\001\n\032CDPCDEPyenvResourceDetails" +
-      "\022\030\n\020numberOfPackages\030\001 \001(\003\022\016\n\006status\030\002 \001" +
-      "(\t\022\024\n\014statusReason\030\003 \001(\t\022\034\n\024buildDuratio" +
-      "nSeconds\030\004 \001(\003\022\016\n\006sizeMb\030\005 \001(\003\022\025\n\rnumber" +
-      "OfFiles\030\006 \001(\003\"\354\001\n\013CDPCDVEvent\022\021\n\teventTy" +
-      "pe\030\001 \001(\t\022\021\n\teventTime\030\002 \001(\t\022\017\n\007userCrn\030\003" +
-      " \001(\t\022\022\n\ncustomerId\030\004 \001(\t\022\023\n\013accountName\030" +
-      "\005 \001(\t\022\022\n\ncdvVersion\030\006 \001(\t\022\r\n\005cdvId\030\007 \001(\t" +
-      "\022\014\n\004size\030\010 \001(\t\022\013\n\003cpu\030\t \001(\005\022\016\n\006memory\030\n " +
-      "\001(\005\022\027\n\017environmentName\030\013 \001(\t\022\026\n\016environm" +
-      "entCrn\030\014 \001(\t\"\332\002\n\025CDPVMDiagnosticsEvent\022\014" +
-      "\n\004uuid\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\021\n\tacc" +
-      "ountId\030\003 \001(\t\022\023\n\013description\030\004 \001(\t\022=\n\013des" +
-      "tination\030\005 \001(\0162(.usage.CDPVMDiagnosticsD" +
-      "estination.Value\0223\n\006result\030\006 \001(\0162#.usage" +
-      ".CDPVMDiagnosticsResult.Value\022=\n\013failure" +
-      "Type\030\007 \001(\0162(.usage.CDPVMDiagnosticsFailu" +
-      "reType.Value\022\026\n\016failureMessage\030\010 \001(\t\022\027\n\017" +
-      "inputParameters\030\t \001(\t\022\022\n\ncaseNumber\030\n \001(" +
-      "\t\"m\n\033CDPVMDiagnosticsDestination\"N\n\005Valu" +
-      "e\022\t\n\005UNSET\020\000\022\t\n\005LOCAL\020\001\022\021\n\rCLOUD_STORAGE" +
-      "\020\002\022\013\n\007SUPPORT\020\003\022\017\n\013ENGINEERING\020\004\"H\n\026CDPV" +
-      "MDiagnosticsResult\".\n\005Value\022\t\n\005UNSET\020\000\022\016" +
-      "\n\nSUCCESSFUL\020\001\022\n\n\006FAILED\020\002\"\312\002\n\033CDPVMDiag" +
-      "nosticsFailureType\"\252\002\n\005Value\022\t\n\005UNSET\020\000\022" +
-      "\033\n\027SALT_VALIDATION_FAILURE\020\001\022\032\n\026INITIALI" +
-      "ZATION_FAILURE\020\002\022\036\n\032UMS_RESOURCE_CHECK_F" +
-      "AILURE\020\003\022\036\n\032PREFLIGHT_VM_CHECK_FAILURE\020\004" +
-      "\022\026\n\022COLLECTION_FAILURE\020\005\022\022\n\016UPLOAD_FAILU",
-      "RE\020\006\022\023\n\017CLEANUP_FAILURE\020\007\022\036\n\032SALT_PILLAR" +
-      "_UPDATE_FAILURE\020\010\022\035\n\031SALT_STATE_UPDATE_F" +
-      "AILURE\020\t\022\035\n\031TELEMETRY_UPGRADE_FAILURE\020\n\"" +
-      "\215\002\n\022CDPDiagnosticEvent\022\023\n\013resourceCrn\030\001 " +
-      "\001(\t\022\021\n\taccountId\030\002 \001(\t\022-\n\013serviceType\030\003 " +
-      "\001(\0162\030.usage.ServiceType.Value\0220\n\006result\030" +
-      "\004 \001(\0162 .usage.CDPDiagnosticResult.Value\022" +
-      "\017\n\007details\030\005 \001(\t\022\026\n\016failureMessage\030\006 \001(\t" +
-      "\022\026\n\016environmentCrn\030\007 \001(\t\022\027\n\017environmentN" +
-      "ame\030\010 \001(\t\022\024\n\014eventDetails\030\t \001(\t\"\222\002\n\013Serv" +
-      "iceType\"\202\002\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007DATAHUB\020" +
-      "\001\022\024\n\020MACHINE_LEARNING\020\002\022\022\n\016DATA_WAREHOUS" +
-      "E\020\003\022\024\n\020DATA_ENGINEERING\020\004\022\022\n\016OPERATIONAL" +
-      "_DB\020\005\022\r\n\tDATA_FLOW\020\006\022\017\n\013ENVIRONMENT\020\007\022\n\n" +
-      "\006LIFTIE\020\010\022\021\n\rOBSERVABILITY\020\t\022\020\n\014AI_INFER" +
-      "ENCE\020\n\022\020\n\014PRIVATE_LINK\020\013\022 \n\034CLOUDERA_LAK" +
-      "EHOUSE_OPTIMIZER\020\014\022\010\n\004CDSH\020\r\"\231\001\n\023CDPDiag" +
-      "nosticResult\"\201\001\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020DBU" +
-      "S_UNAVAILABLE\020\001\022\027\n\023METERING_HB_FAILURE\020\002" +
-      "\022\031\n\025CLUSTER_NOT_REACHABLE\020\003\022#\n\037METERING_" +
-      "MONITORING_UNAVAILABLE\020\004\"\212\001\n\022CDPStackPat" +
-      "chEvent\022\023\n\013resourceCrn\030\001 \001(\t\022\026\n\016stackPat" +
-      "chType\030\002 \001(\t\0226\n\teventType\030\003 \001(\0162#.usage." +
-      "CDPStackPatchEventType.Value\022\017\n\007message\030" +
-      "\004 \001(\t\"T\n\026CDPStackPatchEventType\":\n\005Value" +
-      "\022\t\n\005UNSET\020\000\022\014\n\010AFFECTED\020\001\022\013\n\007SUCCESS\020\002\022\013" +
-      "\n\007FAILURE\020\003\"n\n\030CDPPEMCertificateCreated\022" +
-      ">\n\016requestDetails\030\001 \001(\0132&.usage.CDPPEMCe" +
-      "rtificateRequestDetails\022\022\n\nworkflowId\030\002 " +
-      "\001(\t\"\217\001\n\030CDPPEMCertificateRenewed\022>\n\016requ" +
-      "estDetails\030\001 \001(\0132&.usage.CDPPEMCertifica" +
-      "teRequestDetails\022\022\n\nworkflowId\030\002 \001(\t\022\037\n\027" +
-      "prevCertificateProvider\030\003 \001(\t\"t\n\030CDPPEMC" +
-      "ertificateRevoked\022>\n\016requestDetails\030\001 \001(" +
-      "\0132&.usage.CDPPEMCertificateRequestDetail" +
-      "s\022\030\n\020revocationReason\030\002 \001(\t\"\326\001\n\037CDPPEMCe" +
-      "rtificateRequestDetails\022\021\n\taccountId\030\001 \001" +
-      "(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\022\n\nclientName\030\003 \001" +
-      "(\t\022\030\n\020certSerialNumber\030\004 \001(\t\022\013\n\003san\030\005 \001(" +
-      "\t\022\017\n\007sanHash\030\006 \001(\t\022\021\n\tnotBefore\030\007 \001(\t\022\020\n" +
-      "\010notAfter\030\010 \001(\t\022\033\n\023certificateProvider\030\t" +
-      " \001(\t\"\213\002\n\014RMUsageEvent\022\021\n\trequestId\030\001 \001(\t" +
-      "\022\020\n\010actorCrn\030\002 \001(\t\022\022\n\ncontroller\030\003 \001(\t\022\024" +
-      "\n\014eventStarted\030\004 \001(\004\022\025\n\reventFinished\030\005 " +
-      "\001(\004\022\024\n\014resultStatus\030\006 \001(\r\0224\n\013eventSource" +
-      "\030\007 \001(\0162\037.usage.RMUsageEventSource.Value\022" +
-      "\025\n\rrequestLength\030\010 \001(\004\022\026\n\016responseLength" +
-      "\030\t \001(\004\022\032\n\022applicationVersion\030\n \001(\t\"9\n\022RM" +
-      "UsageEventSource\"#\n\005Value\022\t\n\005UNSET\020\000\022\006\n\002" +
-      "UI\020\001\022\007\n\003CLI\020\002\"\313\001\n\034CDPSaltPasswordRotatio" +
-      "nEvent\022\023\n\013resourceCrn\030\001 \001(\t\022?\n\006reason\030\002 " +
-      "\001(\0162/.usage.CDPSaltPasswordRotationEvent" +
-      "Reason.Value\022D\n\013eventResult\030\003 \001(\0162/.usag" +
-      "e.CDPSaltPasswordRotationEventResult.Val" +
-      "ue\022\017\n\007message\030\004 \001(\t\"c\n\"CDPSaltPasswordRo" +
-      "tationEventReason\"=\n\005Value\022\t\n\005UNSET\020\000\022\n\n" +
-      "\006MANUAL\020\001\022\013\n\007EXPIRED\020\002\022\020\n\014UNAUTHORIZED\020\003" +
-      "\"R\n\"CDPSaltPasswordRotationEventResult\"," +
-      "\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007SUCCESS\020\001\022\013\n\007FAILU" +
-      "RE\020\002\"\360\002\n\025CDPAssignTrialAccount\022\021\n\taccoun" +
-      "tId\030\001 \001(\t\022\016\n\006userId\030\002 \001(\t\022\036\n\026managedSkyn" +
-      "etAccountId\030\003 \001(\t\022\036\n\026identityProviderUse" +
-      "rId\030\004 \001(\t\022\025\n\rsfdcContactId\030\005 \001(\t\022/\n\017cdpT" +
-      "rialDetails\030\006 \001(\0132\026.usage.CDPTrialDetail" +
-      "s\0227\n\023cdpTrialEnvironment\030\007 \001(\0132\032.usage.C" +
-      "DPTrialEnvironment\0221\n\006status\030\010 \001(\0162!.usa" +
-      "ge.CDPAssignTrialStatus.Value\022\017\n\007trialId" +
-      "\030\t \001(\t\022\026\n\016cloudAccountId\030\n \001(\t\022\027\n\017userEm" +
-      "ailDomain\030\013 \001(\t\"\257\001\n\034CDPTrialAccountStatu" +
-      "sChanged\022\021\n\taccountId\030\001 \001(\t\0222\n\022oldCdpTri" +
-      "alDetails\030\002 \001(\0132\026.usage.CDPTrialDetails\022" +
-      "2\n\022newCdpTrialDetails\030\003 \001(\0132\026.usage.CDPT" +
-      "rialDetails\022\024\n\014initiatorCrn\030\004 \001(\t\"p\n\017CDP" +
-      "TrialDetails\022(\n\006status\030\001 \001(\0162\030.usage.Tri" +
-      "alStatus.Value\022\021\n\tstartTime\030\002 \001(\004\022\017\n\007end" +
-      "Time\030\003 \001(\004\022\017\n\007trialId\030\004 \001(\t\"?\n\013TrialStat" +
-      "us\"0\n\005Value\022\n\n\006ACTIVE\020\000\022\013\n\007EXPIRED\020\001\022\016\n\n" +
-      "TERMINATED\020\002\"\\\n\023CDPTrialEnvironment\022\013\n\003c" +
-      "rn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022*\n\tworkloads\030\003 \003(" +
-      "\0132\027.usage.CDPTrialWorkload\"X\n\020CDPTrialWo" +
-      "rkload\022\017\n\007pattern\030\001 \001(\t\0223\n\006status\030\002 \001(\0162" +
-      "#.usage.CDPTrialWorkloadStatus.Value\"]\n\026" +
-      "CDPTrialWorkloadStatus\"C\n\005Value\022\020\n\014NOT_D" +
-      "EPLOYED\020\000\022\032\n\026DEPLOYMENT_IN_PROGRESS\020\001\022\014\n" +
-      "\010DEPLOYED\020\002\"U\n\024CDPAssignTrialStatus\"=\n\005V" +
-      "alue\022\r\n\tREQUESTED\020\000\022\014\n\010ASSIGNED\020\001\022\n\n\006FAI" +
-      "LED\020\002\022\013\n\007INVITED\020\003\"2\n\027CDPVerticalScaleDe" +
-      "tails\022\027\n\017newInstanceType\030\001 \001(\t\"\317\001\n\rCDPRe" +
-      "cipeType\"\275\001\n\005Value\022\013\n\007UNKNOWN\020\000\022\036\n\032PRE_C" +
-      "LOUDERA_MANAGER_START\020\001\022\032\n\026PRE_SERVICE_D" +
-      "EPLOYMENT\020\002\022\023\n\017PRE_TERMINATION\020\003\022\037\n\033POST" +
-      "_CLOUDERA_MANAGER_START\020\004\022\030\n\024POST_CLUSTE" +
-      "R_INSTALL\020\005\022\033\n\027POST_SERVICE_DEPLOYMENT\020\006" +
-      "\"]\n\017CDPRecipeStatus\"J\n\005Value\022\013\n\007UNKNOWN\020" +
-      "\000\022\013\n\007CREATED\020\001\022\014\n\010ATTACHED\020\002\022\014\n\010DETACHED" +
-      "\020\003\022\013\n\007DELETED\020\004\"\301\001\n\016CDPRecipeEvent\022,\n\006st" +
-      "atus\030\001 \001(\0162\034.usage.CDPRecipeStatus.Value" +
-      "\022\021\n\trecipeCrn\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022(\n\004typ" +
-      "e\030\004 \001(\0162\032.usage.CDPRecipeType.Value\022\021\n\th" +
-      "ostGroup\030\005 \001(\t\022\020\n\010stackCrn\030\006 \001(\t\022\021\n\tacco" +
-      "untId\030\007 \001(\t\"\210\001\n\035CDPClusterCreationRecipe" +
-      "Event\022\020\n\010stackCrn\030\001 \001(\t\022\023\n\013recipeCount\030\002" +
-      " \001(\005\022\023\n\013typeDetails\030\003 \001(\t\022\030\n\020hostGroupDe" +
-      "tails\030\004 \001(\t\022\021\n\taccountId\030\005 \001(\t\"\352\004\n\026CDPME" +
-      "MValidationResult\022\023\n\013resourceCrn\030\001 \001(\t\022\021" +
-      "\n\taccountId\030\002 \001(\t\022-\n\013serviceType\030\003 \001(\0162\030" +
-      ".usage.ServiceType.Value\022\026\n\016startTimesta" +
-      "mp\030\004 \001(\004\022\024\n\014endTimestamp\030\005 \001(\004\022\r\n\005error\030" +
-      "\006 \001(\t\022 \n\030nodeCountFromUsageEvents\030\007 \001(\005\022" +
-      "\037\n\027nodeCountFromHeartbeats\030\010 \001(\005\0223\n\006stat" +
-      "us\030\t \001(\0162#.usage.CDPMEMValidationStatus." +
-      "Value\022\032\n\022lastEventTimestamp\030\n \001(\004\022\027\n\017usa" +
-      "geEventCount\030\013 \001(\005\022\033\n\023validationTimestam" +
-      "p\030\014 \001(\004\022\024\n\014validationID\030\r \001(\004\022\024\n\014errorDe" +
-      "tails\030\016 \001(\t\022\031\n\021validationDetails\030\017 \001(\t\0225" +
-      "\n\007version\030\020 \001(\0162$.usage.CDPMEMValidation" +
-      "Version.Value\022\024\n\014instanceType\030\021 \001(\t\022\026\n\016s" +
-      "erviceFeature\030\022 \001(\t\022!\n\031meteringValidatio" +
-      "nDetails\030\023 \001(\t\022#\n\033usageEventValidationDe" +
-      "tails\030\024 \001(\t\"D\n\026CDPMEMValidationStatus\"*\n" +
-      "\005Value\022\t\n\005UNSET\020\000\022\n\n\006PASSED\020\001\022\n\n\006FAILED\020" +
-      "\002\"2\n\027CDPMEMValidationVersion\"\027\n\005Value\022\006\n" +
-      "\002V1\020\000\022\006\n\002V2\020\001\"\307\001\n\"CDPEnvironmentProxyCon" +
-      "figEditEvent\022\026\n\016environmentCrn\030\001 \001(\t\022\026\n\016" +
-      "proxyConfigCrn\030\002 \001(\t\022\036\n\026previousProxyCon" +
-      "figCrn\030\003 \001(\t\022@\n\006result\030\004 \001(\01620.usage.CDP" +
-      "EnvironmentProxyConfigEditResult.Value\022\017" +
-      "\n\007message\030\005 \001(\t\"\237\001\n#CDPEnvironmentProxyC" +
-      "onfigEditResult\"x\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007S" +
-      "UCCESS\020\001\022\027\n\023ENVIRONMENT_FAILURE\020\002\022\023\n\017FRE" +
-      "EIPA_FAILURE\020\003\022\024\n\020DATALAKE_FAILURE\020\004\022\023\n\017" +
-      "DATAHUB_FAILURE\020\005\"\271\002\n\017K8SEngineStatus\022\020\n" +
-      "\010engineId\030\001 \001(\t\022*\n\006status\030\002 \001(\0162\032.usage." +
-      "WorkloadEventStatus\022\r\n\005podIP\030\003 \001(\t\022\021\n\too" +
-      "mKilled\030\004 \001(\010\022\023\n\013k8sExitCode\030\005 \001(\005\022\021\n\tk8" +
-      "sSignal\030\006 \001(\005\022\022\n\nk8sMessage\030\007 \001(\t\022\021\n\tk8s" +
-      "Reason\030\010 \001(\t\022\024\n\014k8sStartedAt\030\t \001(\004\022\025\n\rk8" +
-      "sFinishedAt\030\n \001(\004\022\r\n\005found\030\013 \001(\010\022;\n\021inte" +
-      "rnalErrorCode\030\014 \001(\0162 .usage.WorkloadInte" +
-      "rnalErrorCode\":\n\021UsageRuntimeAddon\022\022\n\nun" +
-      "iqueName\030\001 \001(\t\022\021\n\tcomponent\030\002 \001(\t\"P\n\014Usa" +
-      "geRuntime\022\016\n\006kernel\030\001 \001(\t\022\016\n\006editor\030\002 \001(" +
-      "\t\022\017\n\007version\030\003 \001(\t\022\017\n\007edition\030\004 \001(\t\"\242\002\n\021" +
-      "SessionStartEvent\022\013\n\003cpu\030\002 \001(\002\022\013\n\003mem\030\003 " +
-      "\001(\002\022\013\n\003gpu\030\004 \001(\r\022\016\n\006userId\030\005 \001(\r\022\021\n\tproj" +
-      "ectId\030\006 \001(\r\022\016\n\006kernel\030\007 \001(\t\022\r\n\005image\030\t \001" +
-      "(\t\022\020\n\010engineId\030\n \001(\t\022\013\n\003cli\030\013 \001(\010\022/\n\017k8S" +
-      "EngineStatus\030\014 \001(\0132\026.usage.K8SEngineStat" +
-      "us\022$\n\007runtime\030\r \001(\0132\023.usage.UsageRuntime" +
-      "\022(\n\006addons\030\016 \003(\0132\030.usage.UsageRuntimeAdd" +
-      "onJ\004\010\001\020\002\"\370\001\n\017EngineStopEvent\022\016\n\006userId\030\001" +
-      " \001(\r\022\021\n\tprojectId\030\002 \001(\r\022\020\n\010engineId\030\003 \001(" +
-      "\t\0227\n\010killedBy\030\004 \001(\0162%.usage.EngineStopEv" +
-      "ent.KilledByReason\022/\n\017k8SEngineStatus\030\006 " +
-      "\001(\0132\026.usage.K8SEngineStatus\"@\n\016KilledByR" +
-      "eason\022\013\n\007UNKNOWN\020\000\022\010\n\004USER\020\001\022\013\n\007TIMEOUT\020" +
-      "\002\022\n\n\006FAILED\020\003J\004\010\005\020\006\"\330\002\n\021EngineDeleteEven" +
-      "t\022\020\n\010engineId\030\001 \001(\t\022A\n\017deletedByReason\030\002" +
-      " \001(\0162(.usage.EngineDeleteEvent.DeletedBy" +
-      "Reason\022/\n\017k8SEngineStatus\030\003 \001(\0132\026.usage." +
-      "K8SEngineStatus\"\274\001\n\017DeletedByReason\022\013\n\007U" +
-      "NKNOWN\020\000\022\020\n\014IDLE_TIMEOUT\020\001\022\016\n\nDB_NO_INFO" +
-      "\020\002\022\032\n\026K8S_HAS_TERMINATE_INFO\020\003\022\032\n\026DB_HAS" +
-      "_STOPPING_STATUS\020\004\022\025\n\021DB_IN_ERROR_STATE\020" +
-      "\005\022\037\n\033START_STOP_SCHEDULE_TIMEOUT\020\006\022\n\n\006NO" +
-      "_APP\020\007\"l\n\024EngineHeartBeatEvent\022\020\n\010engine" +
-      "Id\030\001 \001(\t\022\021\n\tengineAge\030\002 \001(\001\022/\n\017k8SEngine" +
-      "Status\030\003 \001(\0132\026.usage.K8SEngineStatus\"\256\002\n" +
-      "\rJobStartEvent\022\014\n\004type\030\001 \001(\t\022\013\n\003cpu\030\002 \001(" +
-      "\002\022\013\n\003mem\030\003 \001(\002\022\013\n\003gpu\030\004 \001(\r\022\016\n\006userId\030\005 " +
-      "\001(\r\022\021\n\tprojectId\030\006 \001(\r\022\016\n\006kernel\030\007 \001(\t\022\r" +
-      "\n\005image\030\t \001(\t\022\020\n\010engineId\030\n \001(\t\022/\n\017k8SEn" +
-      "gineStatus\030\013 \001(\0132\026.usage.K8SEngineStatus" +
-      "\022\r\n\005jobId\030\014 \001(\r\022$\n\007runtime\030\r \001(\0132\023.usage" +
-      ".UsageRuntime\022(\n\006addons\030\016 \003(\0132\030.usage.Us" +
-      "ageRuntimeAddonJ\004\010\010\020\t\"\265\002\n\031JobCreatedOrMo" +
-      "difiedEvent\022\016\n\006userId\030\001 \001(\r\022\021\n\tprojectId" +
-      "\030\002 \001(\r\022\r\n\005jobId\030\003 \001(\r\022\020\n\010schedule\030\004 \001(\t\022" +
-      "\016\n\006kernel\030\005 \001(\t\022\031\n\021includeConsoleLog\030\006 \001" +
-      "(\010\022\025\n\rnotifySuccess\030\007 \001(\r\022\025\n\rnotifyFailu" +
-      "re\030\010 \001(\r\022\025\n\rnotifyTimeout\030\t \001(\r\022\025\n\rnotif" +
-      "yStopped\030\n \001(\r\022\014\n\004file\030\013 \001(\t\022\031\n\021reportAt" +
-      "tachments\030\014 \001(\t\022$\n\007runtime\030\r \001(\0132\023.usage" +
-      ".UsageRuntime\"\257\002\n\024ExperimentStartEvent\022\013" +
-      "\n\003cpu\030\001 \001(\002\022\013\n\003mem\030\002 \001(\002\022\013\n\003gpu\030\003 \001(\r\022\016\n" +
-      "\006userId\030\004 \001(\r\022\021\n\tprojectId\030\005 \001(\r\022\016\n\006kern" +
-      "el\030\006 \001(\t\022\014\n\004file\030\007 \001(\t\022\r\n\005runId\030\010 \001(\r\022\r\n" +
-      "\005image\030\t \001(\t\022\020\n\010engineId\030\n \001(\t\022/\n\017k8SEng" +
-      "ineStatus\030\013 \001(\0132\026.usage.K8SEngineStatus\022" +
+      "s.Value\0224\n\tnewStatus\030\005 \001(\0162!.usage.CDPCD" +
+      "WResourceStatus.Value\022\025\n\rfailureReason\030\006" +
+      " \001(\t\022\020\n\010actorCrn\030\007 \001(\t\"|\n\"CDPCDWVirtualW" +
+      "arehouseNodesChanged\022\n\n\002id\030\001 \001(\t\022\021\n\tacco" +
+      "untId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022\024\n\014oldNodeCount" +
+      "\030\004 \001(\005\022\024\n\014newNodeCount\030\005 \001(\005\"=\n\034CDPCDWRe" +
+      "alTimeEventStoreType\"\035\n\005Value\022\t\n\005UNSET\020\000" +
+      "\022\t\n\005DRUID\020\001\"\272\002\n!CDPCDWRealTimeEventStore" +
+      "Requested\022\n\n\002id\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t" +
+      "\022\013\n\003crn\030\003 \001(\t\022\036\n\026realTimeEventStoreName\030" +
+      "\004 \001(\t\022I\n\026realTimeEventStoreType\030\005 \001(\0162)." +
+      "usage.CDPCDWRealTimeEventStoreType.Value" +
+      "\022\025\n\renvironmentId\030\006 \001(\t\022\020\n\010actorCrn\030\007 \001(" +
+      "\t\0221\n\006status\030\010 \001(\0162!.usage.CDPCDWResource" +
+      "Status.Value\022\020\n\010minNodes\030\t \001(\005\022\020\n\010maxNod" +
+      "es\030\n \001(\005\"\350\001\n%CDPCDWRealTimeEventStoreSta" +
+      "tusChanged\022\n\n\002id\030\001 \001(\t\022\021\n\taccountId\030\002 \001(" +
+      "\t\022\013\n\003crn\030\003 \001(\t\0224\n\toldStatus\030\004 \001(\0162!.usag" +
+      "e.CDPCDWResourceStatus.Value\0224\n\tnewStatu" +
+      "s\030\005 \001(\0162!.usage.CDPCDWResourceStatus.Val" +
+      "ue\022\025\n\rfailureReason\030\006 \001(\t\022\020\n\010actorCrn\030\007 " +
+      "\001(\t\"V\n\017CDPCDEDBDetails\022\022\n\nserverType\030\001 \001" +
+      "(\t\022\025\n\rinstanceClass\030\002 \001(\t\022\030\n\020highAvailab" +
+      "ility\030\003 \001(\010\"\353\003\n\026CDPCDEServiceRequested\022\n" +
+      "\n\002id\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\026\n\016environ" +
+      "mentCrn\030\003 \001(\t\022\022\n\nclusterCrn\030\004 \001(\t\022D\n\017env" +
+      "ironmentType\030\005 \001(\0162+.usage.CDPEnvironmen" +
+      "tsEnvironmentType.Value\022\022\n\ncreatorCrn\030\006 " +
+      "\001(\t\022\022\n\ncdeVersion\030\007 \001(\t\022<\n\021cdpCDEAwsMeta" +
+      "data\030\010 \001(\0132\037.usage.CDPCDEAWSServiceMetad" +
+      "ataH\000\022@\n\023cdpCDEAzureMetadata\030\t \001(\0132!.usa" +
+      "ge.CDPCDEAzureServiceMetadataH\000\022\020\n\010userT" +
+      "ags\030\014 \001(\t\022\016\n\006status\030\017 \001(\t\022\022\n\nproperties\030" +
+      "\016 \001(\t\022\031\n\021kubernetesVersion\030\020 \001(\t\022)\n\tdbDe" +
+      "tails\030\021 \001(\0132\026.usage.CDPCDEDBDetailsB\n\n\010m" +
+      "etadataJ\004\010\n\020\013J\004\010\013\020\014J\004\010\r\020\016\"\223\001\n\032CDPCDEServ" +
+      "iceStatusChanged\022\n\n\002id\030\001 \001(\t\022\022\n\nclusterC" +
+      "rn\030\002 \001(\t\022\020\n\010liftieId\030\003 \001(\t\022\021\n\taccountId\030" +
+      "\004 \001(\t\022\016\n\006status\030\t \001(\t\022\016\n\006reason\030\010 \001(\tJ\004\010" +
+      "\005\020\006J\004\010\006\020\007J\004\010\007\020\010\"\364\002\n\035CDPCDEVirtualCluster" +
+      "Requested\022\n\n\002id\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(" +
+      "\t\022\021\n\taccountId\030\003 \001(\t\022\021\n\tcreatorId\030\004 \001(\t\022" +
+      "\022\n\ncdeVersion\030\005 \001(\t\022\024\n\014cpuRequested\030\006 \001(" +
+      "\r\022\027\n\017memoryRequested\030\007 \001(\t\022\024\n\014sparkVersi" +
+      "on\030\010 \001(\t\022\023\n\013sparkOSName\030\r \001(\t\022\016\n\006status\030" +
+      "\013 \001(\t\022\022\n\nproperties\030\n \001(\t\022?\n\021spotInstanc" +
+      "eUsage\030\014 \001(\0162$.usage.CDPCDESpotInstanceU" +
+      "sage.Value\022\036\n\026computeOverrideEnabled\030\016 \001" +
+      "(\t\022\024\n\014sparkConfigs\030\017 \001(\tJ\004\010\t\020\n\"\302\002\n\034CDPCD" +
+      "EVirtualClusterModified\022\n\n\002id\030\001 \001(\t\022\022\n\nc" +
+      "lusterCrn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\021\n\tcr" +
+      "eatorId\030\004 \001(\t\022\022\n\ncdeVersion\030\005 \001(\t\022\024\n\014cpu" +
+      "Requested\030\006 \001(\r\022\027\n\017memoryRequested\030\007 \001(\t" +
+      "\022\022\n\nproperties\030\010 \001(\t\022\016\n\006status\030\t \001(\t\022?\n\021" +
+      "spotInstanceUsage\030\n \001(\0162$.usage.CDPCDESp" +
+      "otInstanceUsage.Value\022\036\n\026computeOverride" +
+      "Enabled\030\013 \001(\t\022\024\n\014sparkConfigs\030\014 \001(\t\"M\n\027C" +
+      "DPCDESpotInstanceUsage\"2\n\005Value\022\t\n\005UNSET" +
+      "\020\000\022\013\n\007DEFAULT\020\001\022\007\n\003ALL\020\002\022\010\n\004NONE\020\003\"\210\001\n!C" +
+      "DPCDEVirtualClusterStatusChanged\022\n\n\002id\030\001" +
+      " \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\021\n\taccountId\030\003 " +
+      "\001(\t\022\016\n\006status\030\010 \001(\t\022\016\n\006reason\030\007 \001(\tJ\004\010\004\020" +
+      "\005J\004\010\005\020\006J\004\010\006\020\007\"\242\002\n\035CDPCDEServiceUpgradeRe" +
+      "quested\022\n\n\002id\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022" +
+      "\021\n\taccountId\030\003 \001(\t\022\023\n\013fromVersion\030\004 \001(\t\022" +
+      "\021\n\ttoVersion\030\005 \001(\t\022\031\n\021kubernetesUpgrade\030" +
+      "\006 \001(\010\022 \n\030currentKubernetesVersion\030\007 \001(\t\022" +
+      "\037\n\027targetKubernetesVersion\030\010 \001(\t\022\022\n\nwork" +
+      "flowId\030\t \001(\t\022\014\n\004step\030\n \001(\t\022\017\n\007isRetry\030\013 " +
+      "\001(\010\022\025\n\rattemptNumber\030\014 \001(\005\"x\n!CDPCDEServ" +
+      "iceUpgradeStatusChanged\022\n\n\002id\030\001 \001(\t\022\022\n\nc" +
+      "lusterCrn\030\002 \001(\t\022\022\n\nworkflowId\030\003 \001(\t\022\017\n\007d" +
+      "etails\030\004 \001(\t\022\016\n\006status\030\005 \001(\t\"f\n\035CDPCDEAc" +
+      "tiveServicesHeartbeat\022E\n\032cdpCDEActiveSer" +
+      "viceDetails\030\001 \003(\0132!.usage.CDPCDEActiveSe" +
+      "rviceDetails\"\216\002\n\032CDPCDEActiveServiceDeta" +
+      "ils\022\n\n\002id\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\026\n\016en" +
+      "vironmentCrn\030\003 \001(\t\022\022\n\nclusterCrn\030\004 \001(\t\022D" +
+      "\n\017environmentType\030\005 \001(\0162+.usage.CDPEnvir" +
+      "onmentsEnvironmentType.Value\022\022\n\ncdeVersi" +
+      "on\030\006 \001(\t\022\016\n\006status\030\007 \001(\t\022\031\n\021kubernetesVe" +
+      "rsion\030\010 \001(\t\022 \n\030numActiveVirtualClusters\030" +
+      "\t \001(\005\"V\n\027CDPCDEActiveVCHeartbeat\022;\n\025cdpC" +
+      "DEActiveVCDetails\030\001 \003(\0132\034.usage.CDPCDEAc" +
+      "tiveVCDetails\"\277\001\n\025CDPCDEActiveVCDetails\022" +
+      "\n\n\002id\030\001 \001(\t\022\021\n\tclusterId\030\002 \001(\t\022\022\n\ncluste" +
+      "rCrn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\022\024\n\014sparkVe" +
+      "rsion\030\005 \001(\t\022\016\n\006status\030\006 \001(\t\022\017\n\007appTier\030\007" +
+      " \001(\t\022\023\n\013sparkOSName\030\010 \001(\t\022\024\n\014sparkConfig" +
+      "s\030\t \001(\t\"\276\002\n\031CDPCDEJobRunStatusChanged\022\022\n" +
+      "\nclusterCrn\030\001 \001(\t\022\014\n\004vcId\030\002 \001(\t\022\r\n\005runId" +
+      "\030\003 \001(\t\022\014\n\004user\030\010 \001(\t\022\016\n\006status\030\004 \001(\t\022+\n\n" +
+      "jobDetails\030\005 \001(\0132\027.usage.CDPCDEJobDetail" +
+      "s\022\017\n\007started\030\006 \001(\004\022\r\n\005ended\030\007 \001(\004\022\020\n\010dur" +
+      "ation\030\t \001(\005\022\016\n\006client\030\n \001(\t\022\'\n\010metadata\030" +
+      "\013 \001(\0132\025.usage.CDPCDEMetadata\022\034\n\024computeC" +
+      "onfiguration\030\014 \001(\t\022\034\n\024instanceSparkConfi" +
+      "gs\030\r \001(\t\"\304\001\n\020CDPCDEJobCreated\022\022\n\ncluster" +
+      "Crn\030\001 \001(\t\022\014\n\004vcId\030\002 \001(\t\022$\n\003job\030\003 \001(\0132\027.u" +
+      "sage.CDPCDEJobDetails\022/\n\teventType\030\004 \001(\016" +
+      "2\034.usage.CDPCDEEventType.Value\022\016\n\006client" +
+      "\030\005 \001(\t\022\'\n\010metadata\030\013 \001(\0132\025.usage.CDPCDEM" +
+      "etadata\"\353\002\n\026CDPCDESessionRequested\022\021\n\tcl" +
+      "usterId\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\014\n\004vcI" +
+      "d\030\003 \001(\t\022\n\n\002id\030\004 \001(\t\022\017\n\007creator\030\005 \001(\t\022\023\n\013" +
+      "description\030\006 \001(\t\022\014\n\004type\030\007 \001(\t\022\013\n\003ttl\030\010" +
+      " \001(\t\0221\n\020interactiveSpark\030\t \001(\0132\027.usage.I" +
+      "nteractiveSpark\0224\n\016resourceMounts\030\n \003(\0132" +
+      "\034.usage.CDPCDEResourceDetails\022\016\n\006client\030" +
+      "\013 \001(\t\022\017\n\007created\030\014 \001(\004\022\'\n\010metadata\030\r \001(\013" +
+      "2\025.usage.CDPCDEMetadata\022\034\n\024instanceSpark" +
+      "Configs\030\016 \001(\t\"O\n CDPCDESuspendResumeOper" +
+      "ationType\"+\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007SUSPEND" +
+      "\020\001\022\n\n\006RESUME\020\002\"\201\001\n+CDPCDEAppInstanceSusp" +
+      "endResumeOperationType\"R\n\005Value\022\026\n\022APP_I" +
+      "NSTANCE_UNSET\020\000\022\030\n\024APP_INSTANCE_SUSPEND\020" +
+      "\001\022\027\n\023APP_INSTANCE_RESUME\020\002\"\231\002\n\'CDPCDEApp" +
+      "InstanceSuspendResumeRequested\022\021\n\tcluste" +
+      "rID\030\001 \001(\t\022\022\n\ninstanceID\030\002 \001(\t\022\021\n\taccount" +
+      "Id\030\003 \001(\t\022\022\n\nclusterCrn\030\004 \001(\t\022\020\n\010actorCrn" +
+      "\030\005 \001(\t\022\022\n\ncdeVersion\030\006 \001(\t\022O\n\roperationT" +
+      "ype\030\007 \001(\01628.usage.CDPCDEAppInstanceSuspe" +
+      "ndResumeOperationType.Value\022\025\n\rattemptNu" +
+      "mber\030\010 \001(\005\022\022\n\nworkflowId\030\t \001(\t\"\260\001\n+CDPCD" +
+      "EAppInstanceSuspendResumeStatusChanged\022\021" +
+      "\n\tclusterID\030\001 \001(\t\022\022\n\ninstanceID\030\002 \001(\t\022\022\n" +
+      "\nclusterCrn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\022\022\n\n" +
+      "workflowId\030\005 \001(\t\022\016\n\006status\030\006 \001(\t\022\017\n\007deta" +
+      "ils\030\007 \001(\t\"\366\001\n#CDPCDEServiceSuspendResume" +
+      "Requested\022\021\n\tclusterID\030\001 \001(\t\022\021\n\taccountI" +
+      "d\030\002 \001(\t\022\022\n\nclusterCrn\030\003 \001(\t\022\020\n\010actorCrn\030" +
+      "\004 \001(\t\022\022\n\ncdeVersion\030\005 \001(\t\022D\n\roperationTy" +
+      "pe\030\006 \001(\0162-.usage.CDPCDESuspendResumeOper" +
+      "ationType.Value\022\025\n\rattemptNumber\030\007 \001(\005\022\022" +
+      "\n\nworkflowId\030\010 \001(\t\"\230\001\n\'CDPCDEServiceSusp" +
+      "endResumeStatusChanged\022\021\n\tclusterID\030\001 \001(" +
+      "\t\022\022\n\nclusterCrn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t" +
+      "\022\022\n\nworkflowId\030\004 \001(\t\022\016\n\006status\030\005 \001(\t\022\017\n\007" +
+      "details\030\006 \001(\t\"`\n\035CDPCDEServiceMaintenanc" +
+      "ePhase\"?\n\005Value\022\t\n\005UNSET\020\000\022\025\n\021ENTER_MAIN" +
+      "TENANCE\020\001\022\024\n\020QUIT_MAINTENANCE\020\002\"\\\n%CDPCD" +
+      "EServiceMaintenanceOperationType\"3\n\005Valu" +
+      "e\022\t\n\005UNSET\020\000\022\013\n\007UPGRADE\020\001\022\022\n\016SUSPEND_RES" +
+      "UME\020\002\"\314\002\n!CDPCDEServiceMaintenanceReques" +
+      "ted\022\021\n\tclusterID\030\001 \001(\t\022\021\n\taccountId\030\002 \001(" +
+      "\t\022\022\n\nclusterCrn\030\003 \001(\t\022\022\n\ncreatorCrn\030\004 \001(" +
+      "\t\022\022\n\ncdeVersion\030\005 \001(\t\022D\n\020maintenancePhas" +
+      "e\030\006 \001(\0162*.usage.CDPCDEServiceMaintenance" +
+      "Phase.Value\022T\n\030maintenanceOperationType\030" +
+      "\007 \001(\01622.usage.CDPCDEServiceMaintenanceOp" +
+      "erationType.Value\022\025\n\rattemptNumber\030\010 \001(\005" +
+      "\022\022\n\nworkflowId\030\t \001(\t\"\226\001\n%CDPCDEServiceMa" +
+      "intenanceStatusChanged\022\021\n\tclusterID\030\001 \001(" +
+      "\t\022\022\n\nclusterCrn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t" +
+      "\022\022\n\nworkflowId\030\004 \001(\t\022\016\n\006status\030\005 \001(\t\022\017\n\007" +
+      "details\030\006 \001(\t\"\254\002\n\020InteractiveSpark\022\023\n\013dr" +
+      "iverCores\030\001 \001(\005\022\025\n\rexecutorCores\030\002 \001(\005\022\024" +
+      "\n\014driverMemory\030\003 \001(\t\022\026\n\016executorMemory\030\004" +
+      " \001(\t\022\024\n\014numExecutors\030\005 \001(\005\022\017\n\007numJars\030\006 " +
+      "\001(\005\022\020\n\010numFiles\030\007 \001(\005\022\022\n\nnumPyFiles\030\010 \001(" +
+      "\005\022/\n\004conf\030\t \003(\0132!.usage.InteractiveSpark" +
+      ".ConfEntry\022\023\n\013IdleTimeout\030\n \001(\t\032+\n\tConfE" +
+      "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\331\001\n" +
+      "\031CDPCDESessionStateChanged\022\021\n\tclusterId\030" +
+      "\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022\014\n\004vcId\030\003 \001(\t\022" +
+      "\n\n\002id\030\004 \001(\t\022\020\n\010newState\030\005 \001(\t\022\020\n\010oldStat" +
+      "e\030\006 \001(\t\022\014\n\004type\030\007 \001(\t\022\020\n\010duration\030\010 \001(\004\022" +
+      "\016\n\006client\030\t \001(\t\022\'\n\010metadata\030\013 \001(\0132\025.usag" +
+      "e.CDPCDEMetadata\"\275\002\n\036CDPCDESessionStatem" +
+      "entExecuted\022\021\n\tclusterId\030\001 \001(\t\022\022\n\ncluste" +
+      "rCrn\030\002 \001(\t\022\014\n\004vcId\030\003 \001(\t\022\021\n\tsessionId\030\004 " +
+      "\001(\t\022\024\n\014sessionState\030\005 \001(\t\022\014\n\004type\030\006 \001(\t\022" +
+      "\031\n\021statementNumChars\030\007 \001(\005\022\036\n\026statementS" +
+      "ubmittedTime\030\010 \001(\004\022!\n\031statementExecution" +
+      "Started\030\t \001(\004\022#\n\033statementExecutionCompl" +
+      "eted\030\n \001(\004\022\016\n\006client\030\013 \001(\t\022\034\n\024statementN" +
+      "umNewLines\030\014 \001(\005\"M\n\017CDPCDEEventType\":\n\005V" +
+      "alue\022\t\n\005UNSET\020\000\022\013\n\007CREATED\020\001\022\014\n\010MODIFIED" +
+      "\020\002\022\013\n\007DELETED\020\003\"\323\001\n\025CDPCDEResourceCreate" +
+      "d\022\022\n\nclusterCrn\030\001 \001(\t\022\014\n\004vcId\030\002 \001(\t\022.\n\010r" +
+      "esource\030\003 \001(\0132\034.usage.CDPCDEResourceDeta" +
+      "ils\022/\n\teventType\030\004 \001(\0162\034.usage.CDPCDEEve" +
+      "ntType.Value\022\016\n\006client\030\005 \001(\t\022\'\n\010metadata" +
+      "\030\013 \001(\0132\025.usage.CDPCDEMetadata\"?\n\016CDPCDEM" +
+      "etadata\022-\n\013cliMetadata\030\001 \001(\0132\030.usage.CDP" +
+      "CDECliMetadata\"$\n\021CDPCDECliMetadata\022\017\n\007v" +
+      "ersion\030\001 \001(\t\"\246\001\n\030CDPCDEAWSServiceMetadat" +
+      "a\022\030\n\020minimumInstances\030\001 \001(\005\022\030\n\020maximumIn" +
+      "stances\030\002 \001(\005\022\034\n\024minimumSpotInstances\030\003 " +
+      "\001(\005\022\034\n\024maximumSpotInstances\030\004 \001(\005\022\024\n\014ins" +
+      "tanceType\030\005 \001(\tJ\004\010\006\020\007\"l\n\032CDPCDEAzureServ" +
+      "iceMetadata\022\030\n\020minimumInstances\030\001 \001(\005\022\030\n" +
+      "\020maximumInstances\030\002 \001(\005\022\024\n\014instanceType\030" +
+      "\003 \001(\tJ\004\010\004\020\005\"\373\002\n\020CDPCDEJobDetails\022\017\n\007jobN" +
+      "ame\030\001 \001(\t\022\017\n\007jobType\030\002 \001(\t\022\020\n\010schedule\030\003" +
+      " \001(\t\022/\n\tresources\030\004 \003(\0132\034.usage.CDPCDERe" +
+      "sourceDetails\022\031\n\021jobConfigurations\030\005 \001(\t" +
+      "\022\025\n\rpythonVersion\030\006 \001(\t\022\024\n\014driverMemory\030" +
+      "\007 \001(\t\022\026\n\016executorMemory\030\010 \001(\t\022\025\n\rexecuto" +
+      "rCores\030\t \001(\005\022\023\n\013driverCores\030\n \001(\005\022\020\n\010log" +
+      "Level\030\013 \001(\t\022\025\n\rpipelinesUsed\030\014 \001(\010\022/\n\007ai" +
+      "rflow\030\r \001(\0132\036.usage.CDPCDEAirflowJobDeta" +
+      "ils\022\034\n\024computeConfiguration\030\016 \001(\t\"K\n\027CDP" +
+      "CDEAirflowJobDetails\0220\n\nfileMounts\030\001 \003(\013" +
+      "2\034.usage.CDPCDEResourceDetails\"y\n\025CDPCDE" +
+      "ResourceDetails\022\014\n\004name\030\001 \001(\t\022\014\n\004type\030\002 " +
+      "\001(\t\0229\n\014pyenvDetails\030\003 \001(\0132!.usage.CDPCDE" +
+      "PyenvResourceDetailsH\000B\t\n\007details\"\241\001\n\032CD" +
+      "PCDEPyenvResourceDetails\022\030\n\020numberOfPack" +
+      "ages\030\001 \001(\003\022\016\n\006status\030\002 \001(\t\022\024\n\014statusReas" +
+      "on\030\003 \001(\t\022\034\n\024buildDurationSeconds\030\004 \001(\003\022\016" +
+      "\n\006sizeMb\030\005 \001(\003\022\025\n\rnumberOfFiles\030\006 \001(\003\"\354\001" +
+      "\n\013CDPCDVEvent\022\021\n\teventType\030\001 \001(\t\022\021\n\teven" +
+      "tTime\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\022\n\ncustomer" +
+      "Id\030\004 \001(\t\022\023\n\013accountName\030\005 \001(\t\022\022\n\ncdvVers" +
+      "ion\030\006 \001(\t\022\r\n\005cdvId\030\007 \001(\t\022\014\n\004size\030\010 \001(\t\022\013" +
+      "\n\003cpu\030\t \001(\005\022\016\n\006memory\030\n \001(\005\022\027\n\017environme" +
+      "ntName\030\013 \001(\t\022\026\n\016environmentCrn\030\014 \001(\t\"\332\002\n" +
+      "\025CDPVMDiagnosticsEvent\022\014\n\004uuid\030\001 \001(\t\022\023\n\013" +
+      "resourceCrn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\023\n\013" +
+      "description\030\004 \001(\t\022=\n\013destination\030\005 \001(\0162(" +
+      ".usage.CDPVMDiagnosticsDestination.Value" +
+      "\0223\n\006result\030\006 \001(\0162#.usage.CDPVMDiagnostic" +
+      "sResult.Value\022=\n\013failureType\030\007 \001(\0162(.usa" +
+      "ge.CDPVMDiagnosticsFailureType.Value\022\026\n\016" +
+      "failureMessage\030\010 \001(\t\022\027\n\017inputParameters\030" +
+      "\t \001(\t\022\022\n\ncaseNumber\030\n \001(\t\"m\n\033CDPVMDiagno" +
+      "sticsDestination\"N\n\005Value\022\t\n\005UNSET\020\000\022\t\n\005" +
+      "LOCAL\020\001\022\021\n\rCLOUD_STORAGE\020\002\022\013\n\007SUPPORT\020\003\022",
+      "\017\n\013ENGINEERING\020\004\"H\n\026CDPVMDiagnosticsResu" +
+      "lt\".\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nSUCCESSFUL\020\001\022\n" +
+      "\n\006FAILED\020\002\"\312\002\n\033CDPVMDiagnosticsFailureTy" +
+      "pe\"\252\002\n\005Value\022\t\n\005UNSET\020\000\022\033\n\027SALT_VALIDATI" +
+      "ON_FAILURE\020\001\022\032\n\026INITIALIZATION_FAILURE\020\002" +
+      "\022\036\n\032UMS_RESOURCE_CHECK_FAILURE\020\003\022\036\n\032PREF" +
+      "LIGHT_VM_CHECK_FAILURE\020\004\022\026\n\022COLLECTION_F" +
+      "AILURE\020\005\022\022\n\016UPLOAD_FAILURE\020\006\022\023\n\017CLEANUP_" +
+      "FAILURE\020\007\022\036\n\032SALT_PILLAR_UPDATE_FAILURE\020" +
+      "\010\022\035\n\031SALT_STATE_UPDATE_FAILURE\020\t\022\035\n\031TELE" +
+      "METRY_UPGRADE_FAILURE\020\n\"\215\002\n\022CDPDiagnosti" +
+      "cEvent\022\023\n\013resourceCrn\030\001 \001(\t\022\021\n\taccountId" +
+      "\030\002 \001(\t\022-\n\013serviceType\030\003 \001(\0162\030.usage.Serv" +
+      "iceType.Value\0220\n\006result\030\004 \001(\0162 .usage.CD" +
+      "PDiagnosticResult.Value\022\017\n\007details\030\005 \001(\t" +
+      "\022\026\n\016failureMessage\030\006 \001(\t\022\026\n\016environmentC" +
+      "rn\030\007 \001(\t\022\027\n\017environmentName\030\010 \001(\t\022\024\n\014eve" +
+      "ntDetails\030\t \001(\t\"\222\002\n\013ServiceType\"\202\002\n\005Valu" +
+      "e\022\t\n\005UNSET\020\000\022\013\n\007DATAHUB\020\001\022\024\n\020MACHINE_LEA" +
+      "RNING\020\002\022\022\n\016DATA_WAREHOUSE\020\003\022\024\n\020DATA_ENGI" +
+      "NEERING\020\004\022\022\n\016OPERATIONAL_DB\020\005\022\r\n\tDATA_FL" +
+      "OW\020\006\022\017\n\013ENVIRONMENT\020\007\022\n\n\006LIFTIE\020\010\022\021\n\rOBS" +
+      "ERVABILITY\020\t\022\020\n\014AI_INFERENCE\020\n\022\020\n\014PRIVAT" +
+      "E_LINK\020\013\022 \n\034CLOUDERA_LAKEHOUSE_OPTIMIZER" +
+      "\020\014\022\010\n\004CDSH\020\r\"\231\001\n\023CDPDiagnosticResult\"\201\001\n" +
+      "\005Value\022\t\n\005UNSET\020\000\022\024\n\020DBUS_UNAVAILABLE\020\001\022" +
+      "\027\n\023METERING_HB_FAILURE\020\002\022\031\n\025CLUSTER_NOT_" +
+      "REACHABLE\020\003\022#\n\037METERING_MONITORING_UNAVA" +
+      "ILABLE\020\004\"\212\001\n\022CDPStackPatchEvent\022\023\n\013resou" +
+      "rceCrn\030\001 \001(\t\022\026\n\016stackPatchType\030\002 \001(\t\0226\n\t" +
+      "eventType\030\003 \001(\0162#.usage.CDPStackPatchEve" +
+      "ntType.Value\022\017\n\007message\030\004 \001(\t\"T\n\026CDPStac" +
+      "kPatchEventType\":\n\005Value\022\t\n\005UNSET\020\000\022\014\n\010A" +
+      "FFECTED\020\001\022\013\n\007SUCCESS\020\002\022\013\n\007FAILURE\020\003\"n\n\030C" +
+      "DPPEMCertificateCreated\022>\n\016requestDetail" +
+      "s\030\001 \001(\0132&.usage.CDPPEMCertificateRequest" +
+      "Details\022\022\n\nworkflowId\030\002 \001(\t\"\217\001\n\030CDPPEMCe" +
+      "rtificateRenewed\022>\n\016requestDetails\030\001 \001(\013" +
+      "2&.usage.CDPPEMCertificateRequestDetails" +
+      "\022\022\n\nworkflowId\030\002 \001(\t\022\037\n\027prevCertificateP" +
+      "rovider\030\003 \001(\t\"t\n\030CDPPEMCertificateRevoke" +
+      "d\022>\n\016requestDetails\030\001 \001(\0132&.usage.CDPPEM" +
+      "CertificateRequestDetails\022\030\n\020revocationR" +
+      "eason\030\002 \001(\t\"\326\001\n\037CDPPEMCertificateRequest" +
+      "Details\022\021\n\taccountId\030\001 \001(\t\022\022\n\nclusterCrn" +
+      "\030\002 \001(\t\022\022\n\nclientName\030\003 \001(\t\022\030\n\020certSerial" +
+      "Number\030\004 \001(\t\022\013\n\003san\030\005 \001(\t\022\017\n\007sanHash\030\006 \001" +
+      "(\t\022\021\n\tnotBefore\030\007 \001(\t\022\020\n\010notAfter\030\010 \001(\t\022" +
+      "\033\n\023certificateProvider\030\t \001(\t\"\213\002\n\014RMUsage" +
+      "Event\022\021\n\trequestId\030\001 \001(\t\022\020\n\010actorCrn\030\002 \001" +
+      "(\t\022\022\n\ncontroller\030\003 \001(\t\022\024\n\014eventStarted\030\004" +
+      " \001(\004\022\025\n\reventFinished\030\005 \001(\004\022\024\n\014resultSta" +
+      "tus\030\006 \001(\r\0224\n\013eventSource\030\007 \001(\0162\037.usage.R" +
+      "MUsageEventSource.Value\022\025\n\rrequestLength" +
+      "\030\010 \001(\004\022\026\n\016responseLength\030\t \001(\004\022\032\n\022applic" +
+      "ationVersion\030\n \001(\t\"9\n\022RMUsageEventSource" +
+      "\"#\n\005Value\022\t\n\005UNSET\020\000\022\006\n\002UI\020\001\022\007\n\003CLI\020\002\"\313\001" +
+      "\n\034CDPSaltPasswordRotationEvent\022\023\n\013resour" +
+      "ceCrn\030\001 \001(\t\022?\n\006reason\030\002 \001(\0162/.usage.CDPS" +
+      "altPasswordRotationEventReason.Value\022D\n\013" +
+      "eventResult\030\003 \001(\0162/.usage.CDPSaltPasswor" +
+      "dRotationEventResult.Value\022\017\n\007message\030\004 " +
+      "\001(\t\"c\n\"CDPSaltPasswordRotationEventReaso" +
+      "n\"=\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006MANUAL\020\001\022\013\n\007EXP" +
+      "IRED\020\002\022\020\n\014UNAUTHORIZED\020\003\"R\n\"CDPSaltPassw" +
+      "ordRotationEventResult\",\n\005Value\022\t\n\005UNSET" +
+      "\020\000\022\013\n\007SUCCESS\020\001\022\013\n\007FAILURE\020\002\"\360\002\n\025CDPAssi" +
+      "gnTrialAccount\022\021\n\taccountId\030\001 \001(\t\022\016\n\006use" +
+      "rId\030\002 \001(\t\022\036\n\026managedSkynetAccountId\030\003 \001(" +
+      "\t\022\036\n\026identityProviderUserId\030\004 \001(\t\022\025\n\rsfd" +
+      "cContactId\030\005 \001(\t\022/\n\017cdpTrialDetails\030\006 \001(" +
+      "\0132\026.usage.CDPTrialDetails\0227\n\023cdpTrialEnv" +
+      "ironment\030\007 \001(\0132\032.usage.CDPTrialEnvironme" +
+      "nt\0221\n\006status\030\010 \001(\0162!.usage.CDPAssignTria" +
+      "lStatus.Value\022\017\n\007trialId\030\t \001(\t\022\026\n\016cloudA" +
+      "ccountId\030\n \001(\t\022\027\n\017userEmailDomain\030\013 \001(\t\"" +
+      "\257\001\n\034CDPTrialAccountStatusChanged\022\021\n\tacco" +
+      "untId\030\001 \001(\t\0222\n\022oldCdpTrialDetails\030\002 \001(\0132" +
+      "\026.usage.CDPTrialDetails\0222\n\022newCdpTrialDe" +
+      "tails\030\003 \001(\0132\026.usage.CDPTrialDetails\022\024\n\014i" +
+      "nitiatorCrn\030\004 \001(\t\"p\n\017CDPTrialDetails\022(\n\006" +
+      "status\030\001 \001(\0162\030.usage.TrialStatus.Value\022\021" +
+      "\n\tstartTime\030\002 \001(\004\022\017\n\007endTime\030\003 \001(\004\022\017\n\007tr" +
+      "ialId\030\004 \001(\t\"?\n\013TrialStatus\"0\n\005Value\022\n\n\006A" +
+      "CTIVE\020\000\022\013\n\007EXPIRED\020\001\022\016\n\nTERMINATED\020\002\"\\\n\023" +
+      "CDPTrialEnvironment\022\013\n\003crn\030\001 \001(\t\022\014\n\004name" +
+      "\030\002 \001(\t\022*\n\tworkloads\030\003 \003(\0132\027.usage.CDPTri" +
+      "alWorkload\"X\n\020CDPTrialWorkload\022\017\n\007patter" +
+      "n\030\001 \001(\t\0223\n\006status\030\002 \001(\0162#.usage.CDPTrial" +
+      "WorkloadStatus.Value\"]\n\026CDPTrialWorkload" +
+      "Status\"C\n\005Value\022\020\n\014NOT_DEPLOYED\020\000\022\032\n\026DEP" +
+      "LOYMENT_IN_PROGRESS\020\001\022\014\n\010DEPLOYED\020\002\"U\n\024C" +
+      "DPAssignTrialStatus\"=\n\005Value\022\r\n\tREQUESTE" +
+      "D\020\000\022\014\n\010ASSIGNED\020\001\022\n\n\006FAILED\020\002\022\013\n\007INVITED" +
+      "\020\003\"2\n\027CDPVerticalScaleDetails\022\027\n\017newInst" +
+      "anceType\030\001 \001(\t\"\317\001\n\rCDPRecipeType\"\275\001\n\005Val" +
+      "ue\022\013\n\007UNKNOWN\020\000\022\036\n\032PRE_CLOUDERA_MANAGER_" +
+      "START\020\001\022\032\n\026PRE_SERVICE_DEPLOYMENT\020\002\022\023\n\017P" +
+      "RE_TERMINATION\020\003\022\037\n\033POST_CLOUDERA_MANAGE" +
+      "R_START\020\004\022\030\n\024POST_CLUSTER_INSTALL\020\005\022\033\n\027P" +
+      "OST_SERVICE_DEPLOYMENT\020\006\"]\n\017CDPRecipeSta" +
+      "tus\"J\n\005Value\022\013\n\007UNKNOWN\020\000\022\013\n\007CREATED\020\001\022\014" +
+      "\n\010ATTACHED\020\002\022\014\n\010DETACHED\020\003\022\013\n\007DELETED\020\004\"" +
+      "\301\001\n\016CDPRecipeEvent\022,\n\006status\030\001 \001(\0162\034.usa" +
+      "ge.CDPRecipeStatus.Value\022\021\n\trecipeCrn\030\002 " +
+      "\001(\t\022\014\n\004name\030\003 \001(\t\022(\n\004type\030\004 \001(\0162\032.usage." +
+      "CDPRecipeType.Value\022\021\n\thostGroup\030\005 \001(\t\022\020" +
+      "\n\010stackCrn\030\006 \001(\t\022\021\n\taccountId\030\007 \001(\t\"\210\001\n\035" +
+      "CDPClusterCreationRecipeEvent\022\020\n\010stackCr" +
+      "n\030\001 \001(\t\022\023\n\013recipeCount\030\002 \001(\005\022\023\n\013typeDeta" +
+      "ils\030\003 \001(\t\022\030\n\020hostGroupDetails\030\004 \001(\t\022\021\n\ta" +
+      "ccountId\030\005 \001(\t\"\352\004\n\026CDPMEMValidationResul" +
+      "t\022\023\n\013resourceCrn\030\001 \001(\t\022\021\n\taccountId\030\002 \001(" +
+      "\t\022-\n\013serviceType\030\003 \001(\0162\030.usage.ServiceTy" +
+      "pe.Value\022\026\n\016startTimestamp\030\004 \001(\004\022\024\n\014endT" +
+      "imestamp\030\005 \001(\004\022\r\n\005error\030\006 \001(\t\022 \n\030nodeCou" +
+      "ntFromUsageEvents\030\007 \001(\005\022\037\n\027nodeCountFrom" +
+      "Heartbeats\030\010 \001(\005\0223\n\006status\030\t \001(\0162#.usage" +
+      ".CDPMEMValidationStatus.Value\022\032\n\022lastEve" +
+      "ntTimestamp\030\n \001(\004\022\027\n\017usageEventCount\030\013 \001" +
+      "(\005\022\033\n\023validationTimestamp\030\014 \001(\004\022\024\n\014valid" +
+      "ationID\030\r \001(\004\022\024\n\014errorDetails\030\016 \001(\t\022\031\n\021v" +
+      "alidationDetails\030\017 \001(\t\0225\n\007version\030\020 \001(\0162" +
+      "$.usage.CDPMEMValidationVersion.Value\022\024\n" +
+      "\014instanceType\030\021 \001(\t\022\026\n\016serviceFeature\030\022 " +
+      "\001(\t\022!\n\031meteringValidationDetails\030\023 \001(\t\022#" +
+      "\n\033usageEventValidationDetails\030\024 \001(\t\"D\n\026C" +
+      "DPMEMValidationStatus\"*\n\005Value\022\t\n\005UNSET\020" +
+      "\000\022\n\n\006PASSED\020\001\022\n\n\006FAILED\020\002\"2\n\027CDPMEMValid" +
+      "ationVersion\"\027\n\005Value\022\006\n\002V1\020\000\022\006\n\002V2\020\001\"\307\001" +
+      "\n\"CDPEnvironmentProxyConfigEditEvent\022\026\n\016" +
+      "environmentCrn\030\001 \001(\t\022\026\n\016proxyConfigCrn\030\002" +
+      " \001(\t\022\036\n\026previousProxyConfigCrn\030\003 \001(\t\022@\n\006" +
+      "result\030\004 \001(\01620.usage.CDPEnvironmentProxy" +
+      "ConfigEditResult.Value\022\017\n\007message\030\005 \001(\t\"" +
+      "\237\001\n#CDPEnvironmentProxyConfigEditResult\"" +
+      "x\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007SUCCESS\020\001\022\027\n\023ENVI" +
+      "RONMENT_FAILURE\020\002\022\023\n\017FREEIPA_FAILURE\020\003\022\024" +
+      "\n\020DATALAKE_FAILURE\020\004\022\023\n\017DATAHUB_FAILURE\020" +
+      "\005\"\271\002\n\017K8SEngineStatus\022\020\n\010engineId\030\001 \001(\t\022" +
+      "*\n\006status\030\002 \001(\0162\032.usage.WorkloadEventSta" +
+      "tus\022\r\n\005podIP\030\003 \001(\t\022\021\n\toomKilled\030\004 \001(\010\022\023\n" +
+      "\013k8sExitCode\030\005 \001(\005\022\021\n\tk8sSignal\030\006 \001(\005\022\022\n" +
+      "\nk8sMessage\030\007 \001(\t\022\021\n\tk8sReason\030\010 \001(\t\022\024\n\014" +
+      "k8sStartedAt\030\t \001(\004\022\025\n\rk8sFinishedAt\030\n \001(" +
+      "\004\022\r\n\005found\030\013 \001(\010\022;\n\021internalErrorCode\030\014 " +
+      "\001(\0162 .usage.WorkloadInternalErrorCode\":\n" +
+      "\021UsageRuntimeAddon\022\022\n\nuniqueName\030\001 \001(\t\022\021" +
+      "\n\tcomponent\030\002 \001(\t\"P\n\014UsageRuntime\022\016\n\006ker" +
+      "nel\030\001 \001(\t\022\016\n\006editor\030\002 \001(\t\022\017\n\007version\030\003 \001" +
+      "(\t\022\017\n\007edition\030\004 \001(\t\"\242\002\n\021SessionStartEven" +
+      "t\022\013\n\003cpu\030\002 \001(\002\022\013\n\003mem\030\003 \001(\002\022\013\n\003gpu\030\004 \001(\r" +
+      "\022\016\n\006userId\030\005 \001(\r\022\021\n\tprojectId\030\006 \001(\r\022\016\n\006k" +
+      "ernel\030\007 \001(\t\022\r\n\005image\030\t \001(\t\022\020\n\010engineId\030\n" +
+      " \001(\t\022\013\n\003cli\030\013 \001(\010\022/\n\017k8SEngineStatus\030\014 \001" +
+      "(\0132\026.usage.K8SEngineStatus\022$\n\007runtime\030\r " +
+      "\001(\0132\023.usage.UsageRuntime\022(\n\006addons\030\016 \003(\013" +
+      "2\030.usage.UsageRuntimeAddonJ\004\010\001\020\002\"\370\001\n\017Eng" +
+      "ineStopEvent\022\016\n\006userId\030\001 \001(\r\022\021\n\tprojectI" +
+      "d\030\002 \001(\r\022\020\n\010engineId\030\003 \001(\t\0227\n\010killedBy\030\004 " +
+      "\001(\0162%.usage.EngineStopEvent.KilledByReas" +
+      "on\022/\n\017k8SEngineStatus\030\006 \001(\0132\026.usage.K8SE" +
+      "ngineStatus\"@\n\016KilledByReason\022\013\n\007UNKNOWN" +
+      "\020\000\022\010\n\004USER\020\001\022\013\n\007TIMEOUT\020\002\022\n\n\006FAILED\020\003J\004\010" +
+      "\005\020\006\"\330\002\n\021EngineDeleteEvent\022\020\n\010engineId\030\001 " +
+      "\001(\t\022A\n\017deletedByReason\030\002 \001(\0162(.usage.Eng" +
+      "ineDeleteEvent.DeletedByReason\022/\n\017k8SEng" +
+      "ineStatus\030\003 \001(\0132\026.usage.K8SEngineStatus\"" +
+      "\274\001\n\017DeletedByReason\022\013\n\007UNKNOWN\020\000\022\020\n\014IDLE" +
+      "_TIMEOUT\020\001\022\016\n\nDB_NO_INFO\020\002\022\032\n\026K8S_HAS_TE" +
+      "RMINATE_INFO\020\003\022\032\n\026DB_HAS_STOPPING_STATUS" +
+      "\020\004\022\025\n\021DB_IN_ERROR_STATE\020\005\022\037\n\033START_STOP_" +
+      "SCHEDULE_TIMEOUT\020\006\022\n\n\006NO_APP\020\007\"l\n\024Engine" +
+      "HeartBeatEvent\022\020\n\010engineId\030\001 \001(\t\022\021\n\tengi" +
+      "neAge\030\002 \001(\001\022/\n\017k8SEngineStatus\030\003 \001(\0132\026.u" +
+      "sage.K8SEngineStatus\"\256\002\n\rJobStartEvent\022\014" +
+      "\n\004type\030\001 \001(\t\022\013\n\003cpu\030\002 \001(\002\022\013\n\003mem\030\003 \001(\002\022\013" +
+      "\n\003gpu\030\004 \001(\r\022\016\n\006userId\030\005 \001(\r\022\021\n\tprojectId" +
+      "\030\006 \001(\r\022\016\n\006kernel\030\007 \001(\t\022\r\n\005image\030\t \001(\t\022\020\n" +
+      "\010engineId\030\n \001(\t\022/\n\017k8SEngineStatus\030\013 \001(\013" +
+      "2\026.usage.K8SEngineStatus\022\r\n\005jobId\030\014 \001(\r\022" +
+      "$\n\007runtime\030\r \001(\0132\023.usage.UsageRuntime\022(\n" +
+      "\006addons\030\016 \003(\0132\030.usage.UsageRuntimeAddonJ" +
+      "\004\010\010\020\t\"\265\002\n\031JobCreatedOrModifiedEvent\022\016\n\006u" +
+      "serId\030\001 \001(\r\022\021\n\tprojectId\030\002 \001(\r\022\r\n\005jobId\030" +
+      "\003 \001(\r\022\020\n\010schedule\030\004 \001(\t\022\016\n\006kernel\030\005 \001(\t\022" +
+      "\031\n\021includeConsoleLog\030\006 \001(\010\022\025\n\rnotifySucc" +
+      "ess\030\007 \001(\r\022\025\n\rnotifyFailure\030\010 \001(\r\022\025\n\rnoti" +
+      "fyTimeout\030\t \001(\r\022\025\n\rnotifyStopped\030\n \001(\r\022\014" +
+      "\n\004file\030\013 \001(\t\022\031\n\021reportAttachments\030\014 \001(\t\022" +
+      "$\n\007runtime\030\r \001(\0132\023.usage.UsageRuntime\"\257\002" +
+      "\n\024ExperimentStartEvent\022\013\n\003cpu\030\001 \001(\002\022\013\n\003m" +
+      "em\030\002 \001(\002\022\013\n\003gpu\030\003 \001(\r\022\016\n\006userId\030\004 \001(\r\022\021\n" +
+      "\tprojectId\030\005 \001(\r\022\016\n\006kernel\030\006 \001(\t\022\014\n\004file" +
+      "\030\007 \001(\t\022\r\n\005runId\030\010 \001(\r\022\r\n\005image\030\t \001(\t\022\020\n\010" +
+      "engineId\030\n \001(\t\022/\n\017k8SEngineStatus\030\013 \001(\0132" +
+      "\026.usage.K8SEngineStatus\022$\n\007runtime\030\014 \001(\013" +
+      "2\023.usage.UsageRuntime\022(\n\006addons\030\r \003(\0132\030." +
+      "usage.UsageRuntimeAddon\"j\n\017ExperimentEve" +
+      "nt\022\021\n\tprojectId\030\001 \001(\t\022\016\n\006userId\030\002 \001(\r\022\024\n" +
+      "\014experimentId\030\003 \001(\t\022\016\n\006status\030\004 \001(\t\022\016\n\006a" +
+      "ction\030\005 \001(\t\"\341\001\n\022ExperimentRunEvent\022\021\n\tpr" +
+      "ojectId\030\001 \001(\t\022\016\n\006userId\030\002 \001(\r\022\024\n\014experim" +
+      "entId\030\003 \001(\t\022\r\n\005runId\030\004 \001(\t\022\016\n\006status\030\005 \001" +
+      "(\t\022\016\n\006action\030\006 \001(\t\022\014\n\004tags\030\007 \001(\r\022\016\n\006para" +
+      "ms\030\t \001(\r\022\021\n\tartifacts\030\n \001(\r\022\017\n\007history\030\013" +
+      " \001(\t\022\017\n\007version\030\014 \001(\t\022\020\n\010engineId\030\r \001(\t\"" +
+      "\225\002\n\022ModelDeployedEvent\022\013\n\003cpu\030\001 \001(\002\022\013\n\003m" +
+      "em\030\002 \001(\002\022\013\n\003gpu\030\003 \001(\r\022\016\n\006userId\030\004 \001(\r\022\021\n" +
+      "\tprojectId\030\005 \001(\r\022\016\n\006kernel\030\006 \001(\t\022\014\n\004file" +
+      "\030\007 \001(\t\022\020\n\010replicas\030\010 \001(\r\022\r\n\005image\030\t \001(\t\022" +
+      "\024\n\014functionName\030\n \001(\t\022\020\n\010engineId\030\013 \001(\t\022" +
       "$\n\007runtime\030\014 \001(\0132\023.usage.UsageRuntime\022(\n" +
       "\006addons\030\r \003(\0132\030.usage.UsageRuntimeAddon\"" +
-      "j\n\017ExperimentEvent\022\021\n\tprojectId\030\001 \001(\t\022\016\n" +
-      "\006userId\030\002 \001(\r\022\024\n\014experimentId\030\003 \001(\t\022\016\n\006s" +
-      "tatus\030\004 \001(\t\022\016\n\006action\030\005 \001(\t\"\341\001\n\022Experime" +
-      "ntRunEvent\022\021\n\tprojectId\030\001 \001(\t\022\016\n\006userId\030" +
-      "\002 \001(\r\022\024\n\014experimentId\030\003 \001(\t\022\r\n\005runId\030\004 \001" +
-      "(\t\022\016\n\006status\030\005 \001(\t\022\016\n\006action\030\006 \001(\t\022\014\n\004ta" +
-      "gs\030\007 \001(\r\022\016\n\006params\030\t \001(\r\022\021\n\tartifacts\030\n " +
-      "\001(\r\022\017\n\007history\030\013 \001(\t\022\017\n\007version\030\014 \001(\t\022\020\n" +
-      "\010engineId\030\r \001(\t\"\225\002\n\022ModelDeployedEvent\022\013" +
-      "\n\003cpu\030\001 \001(\002\022\013\n\003mem\030\002 \001(\002\022\013\n\003gpu\030\003 \001(\r\022\016\n" +
-      "\006userId\030\004 \001(\r\022\021\n\tprojectId\030\005 \001(\r\022\016\n\006kern" +
-      "el\030\006 \001(\t\022\014\n\004file\030\007 \001(\t\022\020\n\010replicas\030\010 \001(\r" +
-      "\022\r\n\005image\030\t \001(\t\022\024\n\014functionName\030\n \001(\t\022\020\n" +
-      "\010engineId\030\013 \001(\t\022$\n\007runtime\030\014 \001(\0132\023.usage" +
-      ".UsageRuntime\022(\n\006addons\030\r \003(\0132\030.usage.Us" +
-      "ageRuntimeAddon\"\201\003\n\030ApplicationDeployedE" +
-      "vent\022\013\n\003cpu\030\001 \001(\002\022\013\n\003mem\030\002 \001(\002\022\013\n\003gpu\030\003 " +
-      "\001(\r\022\016\n\006userId\030\004 \001(\r\022\021\n\tprojectId\030\005 \001(\r\022\016" +
-      "\n\006kernel\030\006 \001(\t\022\014\n\004file\030\007 \001(\t\022\r\n\005image\030\010 " +
-      "\001(\t\022\021\n\tsubdomain\030\t \001(\t\022\020\n\010engineId\030\n \001(\t" +
-      "\022\025\n\rapplicationId\030\013 \001(\r\022$\n\007runtime\030\014 \001(\013" +
-      "2\023.usage.UsageRuntime\022(\n\006addons\030\r \003(\0132\030." +
-      "usage.UsageRuntimeAddon\022@\n\013embeddedApp\030\016" +
-      " \001(\0162+.usage.ApplicationDeployedEvent.Em" +
-      "beddedApp\" \n\013EmbeddedApp\022\010\n\004NONE\020\000\022\007\n\003CD" +
-      "V\020\001\"\325\001\n!ApplicationCreatedOrModifiedEven" +
-      "t\022\025\n\rapplicationId\030\001 \001(\r\022[\n\024bypassAuthen" +
-      "tication\030\002 \001(\0162=.usage.ApplicationCreate" +
-      "dOrModifiedEvent.BypassAuthentication\"<\n" +
-      "\024BypassAuthentication\022\017\n\013NOT_CHANGED\020\000\022\t" +
-      "\n\005FALSE\020\001\022\010\n\004TRUE\020\002\"\362\003\n\023ProjectCreatedEv" +
-      "ent\022\016\n\006userId\030\001 \001(\r\0225\n\010userType\030\002 \001(\0162#." +
-      "usage.ProjectCreatedEvent.UserType\022\017\n\007ow" +
-      "nerId\030\003 \001(\r\022\021\n\tprojectId\030\004 \001(\r\022-\n\004type\030\005" +
-      " \001(\0162\037.usage.ProjectCreatedEvent.Type\022\023\n" +
-      "\013isPrototype\030\006 \001(\010\022\016\n\006gitUrl\030\007 \001(\t\022=\n\nvi" +
-      "sibility\030\010 \001(\0162).usage.ProjectCreatedEve" +
-      "nt.VisibilityType\022\027\n\017forkedProjectId\030\t \001" +
-      "(\r\"+\n\010UserType\022\010\n\004USER\020\000\022\025\n\021USER_ORGANIZ" +
-      "ATION\020\001\"Z\n\004Type\022\024\n\020BUILTIN_TEMPLATE\020\000\022\023\n" +
-      "\017CUSTOM_TEMPLATE\020\001\022\007\n\003GIT\020\002\022\t\n\005LOCAL\020\003\022\t" +
-      "\n\005BLANK\020\004\022\010\n\004FORK\020\005\";\n\016VisibilityType\022\013\n" +
-      "\007PRIVATE\020\000\022\020\n\014ORGANIZATION\020\001\022\n\n\006PUBLIC\020\002" +
-      "\"?\n\027PrototypeCompletedEvent\022\021\n\tprojectId" +
-      "\030\001 \001(\r\022\021\n\tsucceeded\030\002 \001(\010\"\260\001\n\nLoginEvent" +
-      "\022\016\n\006userId\030\001 \001(\r\022\024\n\014usernameHash\030\002 \001(\t\022\017" +
-      "\n\007isAdmin\030\003 \001(\010\022\022\n\nisBusiness\030\004 \001(\010\022,\n\010a" +
-      "uthType\030\005 \001(\0162\032.usage.LoginEvent.AuthTyp" +
-      "e\")\n\010AuthType\022\t\n\005LOCAL\020\000\022\010\n\004LDAP\020\001\022\010\n\004SA" +
-      "ML\020\002\"\035\n\013LogoutEvent\022\016\n\006userId\030\001 \001(\r\"\200\001\n\020" +
-      "WorkerStartEvent\022\016\n\006userId\030\001 \001(\r\022\021\n\tproj" +
-      "ectId\030\002 \001(\r\022\020\n\010engineId\030\003 \001(\t\022\020\n\010masterI" +
-      "d\030\004 \001(\t\022\013\n\003cpu\030\005 \001(\002\022\013\n\003mem\030\006 \001(\002\022\013\n\003gpu" +
-      "\030\007 \001(\r\"\210\001\n\022SparkExecutorEvent\022\022\n\nexecuto" +
-      "rId\030\001 \001(\t\022\016\n\006action\030\002 \001(\t\022\020\n\010masterId\030\003 " +
-      "\001(\t\022\013\n\003cpu\030\004 \001(\003\022\013\n\003mem\030\005 \001(\003\022\013\n\003gpu\030\006 \001" +
-      "(\003\022\025\n\rapplicationId\030\007 \001(\t\"\243\002\n\031DataConnec" +
-      "tionActionEvent\022\016\n\006userId\030\001 \001(\r\022\021\n\tproje" +
-      "ctId\030\002 \001(\r\022\030\n\020dataConnectionId\030\003 \001(\r\022\032\n\022" +
-      "dataConnectionType\030\004 \001(\t\022\035\n\025workspaceCon" +
-      "nectionId\030\005 \001(\r\022\026\n\016autoDiscovered\030\006 \001(\010\022" +
-      "\033\n\023isProjectConnection\030\007 \001(\010\022\034\n\024dataConn" +
-      "ectionAction\030\010 \001(\t\022\034\n\024virtualWarehouseNa" +
-      "me\030\t \001(\t\022\013\n\003crn\030\n \001(\t\022\020\n\010engineId\030\013 \001(\t\"" +
-      "q\n\035ApplicationMetricsReportEvent\022\020\n\010engi" +
-      "neId\030\001 \001(\t\022\025\n\rapplicationId\030\002 \001(\r\022\021\n\teve" +
-      "ntType\030\003 \001(\t\022\024\n\014eventDetails\030\004 \001(\t\"\236\001\n\024M" +
-      "odelV2UploadedEvent\022\017\n\007modelId\030\001 \001(\t\022\026\n\016" +
-      "modelVersionId\030\002 \001(\t\022\025\n\rversionNumber\030\003 " +
-      "\001(\r\022\024\n\014experimentId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t" +
-      "\022\016\n\006userId\030\006 \001(\r\022\021\n\tprojectId\030\007 \001(\r\"`\n\024R" +
-      "MGeneralPolicyStats\022\022\n\ntotalCount\030\001 \001(\005\022" +
-      "\033\n\023successfulJobsCount\030\002 \001(\005\022\027\n\017failedJo" +
-      "bsCount\030\003 \001(\005\"\250\001\n\022RMCloudPolicyStats\022\022\n\n" +
-      "totalCount\030\001 \001(\005\022\026\n\016awsPolicyCount\030\002 \001(\005" +
-      "\022\030\n\020azurePolicyCount\030\003 \001(\005\022\026\n\016gcpPolicyC" +
-      "ount\030\004 \001(\005\022\033\n\023successfulJobsCount\030\005 \001(\005\022" +
-      "\027\n\017failedJobsCount\030\006 \001(\005\"\341\003\n\021RMUsageStat" +
-      "istics\022\031\n\021totalClusterCount\030\001 \001(\005\022\030\n\020tot" +
-      "alPolicyCount\030\002 \001(\005\0224\n\017hdfsPolicyStats\030\003" +
-      " \001(\0132\033.usage.RMGeneralPolicyStats\0224\n\017hiv" +
-      "ePolicyStats\030\004 \001(\0132\033.usage.RMGeneralPoli" +
-      "cyStats\0225\n\020hbasePolicyStats\030\005 \001(\0132\033.usag" +
-      "e.RMGeneralPolicyStats\022:\n\027cloudToCloudPo" +
-      "licyStats\030\006 \001(\0132\031.usage.RMCloudPolicySta" +
-      "ts\022;\n\030cloudToOnPremPolicyStats\030\007 \001(\0132\031.u" +
-      "sage.RMCloudPolicyStats\022;\n\030onPremToCloud" +
-      "PolicyStats\030\010 \001(\0132\031.usage.RMCloudPolicyS" +
-      "tats\022 \n\030totalSuccessfulJobsCount\030\t \001(\005\022\034" +
-      "\n\024totalFailedJobsCount\030\n \001(\005\"\230\001\n\027CDPSecr" +
-      "etRotationStatus\"}\n\005Value\022\013\n\007UNKNOWN\020\000\022\013" +
-      "\n\007STARTED\020\001\022\014\n\010FINISHED\020\002\022\n\n\006FAILED\020\003\022\024\n" +
-      "\020ROLLBACK_STARTED\020\004\022\025\n\021ROLLBACK_FINISHED" +
-      "\020\005\022\023\n\017ROLLBACK_FAILED\020\006\"\232\001\n\026CDPSecretRot" +
-      "ationEvent\0224\n\006status\030\001 \001(\0162$.usage.CDPSe" +
-      "cretRotationStatus.Value\022\023\n\013resourceCrn\030" +
-      "\002 \001(\t\022\022\n\nsecretType\030\003 \001(\t\022\016\n\006reason\030\004 \001(" +
-      "\t\022\021\n\taccountId\030\005 \001(\t\"\271\001\n\032CDPProviderSync" +
-      "StateChange\022=\n\toperation\030\001 \001(\0162*.usage.C" +
-      "DPProviderSyncStateOperation.Value\022\023\n\013re" +
-      "sourceCrn\030\002 \001(\t\022\021\n\tsyncState\030\003 \001(\t\022\016\n\006re" +
-      "ason\030\004 \001(\t\022\021\n\ttimestamp\030\005 \001(\004\022\021\n\taccount" +
-      "Id\030\006 \001(\t\"M\n\035CDPProviderSyncStateOperatio" +
-      "n\",\n\005Value\022\013\n\007UNKNOWN\020\000\022\t\n\005ADDED\020\001\022\013\n\007RE" +
-      "MOVED\020\002\"8\n\025RMPolicyCreationEvent\022\014\n\004type" +
-      "\030\001 \001(\t\022\021\n\tdirection\030\002 \001(\t\"\363\005\n\033CDPCDEBack" +
-      "upRestoreComplete\022\n\n\002id\030\001 \001(\t\022\022\n\ncdeVers" +
-      "ion\030\002 \001(\t\0221\n\nbackupType\030\003 \001(\0162\035.usage.CD" +
-      "PCDEBackupType.Value\022\021\n\tclusterId\030\004 \001(\t\022" +
-      "\022\n\nclusterCrn\030\005 \001(\t\022=\n\013clusterMeta\030\006 \001(\013" +
-      "2&.usage.CDPCDEClusterDefinitionMetadata" +
-      "H\000\0227\n\rvcContentMeta\030\007 \001(\0132\036.usage.CDPCDE" +
-      "VCContentMetadataH\000\022\014\n\004user\030\010 \001(\t\022D\n\017env" +
-      "ironmentType\030\t \001(\0162+.usage.CDPEnvironmen" +
-      "tsEnvironmentType.Value\022\026\n\016environmentCr" +
-      "n\030\n \001(\t\022>\n\roperationType\030\013 \001(\0162\'.usage.C" +
-      "DPCDEArchiveOperationType.Value\022@\n\023archi" +
-      "veLocationType\030\014 \001(\0162#.usage.CDEArchiveL" +
-      "ocationType.Value\0226\n\006status\030\r \001(\0162&.usag" +
-      "e.CDPCDEBackupRestoreStatus.Value\022\025\n\rfai" +
-      "lureReason\030\016 \001(\t\022\027\n\017totalDurationMS\030\017 \001(" +
-      "\003\0222\n\010entities\030\020 \003(\0132 .usage.CDPCDEBackup" +
-      "RestoreEntity\022\021\n\tsizeBytes\030\021 \001(\003\022\017\n\007numJ" +
-      "obs\030\022 \001(\005\022\022\n\nnumJobRuns\030\023 \001(\005\022\024\n\014numReso" +
-      "urces\030\024 \001(\005B\n\n\010metadata\"\'\n\027CDPCDEVCConte" +
-      "ntMetadata\022\014\n\004vcId\030\001 \001(\t\"7\n\037CDPCDECluste" +
-      "rDefinitionMetadata\022\024\n\014cdeCpVersion\030\001 \001(" +
-      "\t\"\223\002\n\031CDPCDEBackupRestoreEntity\0229\n\nentit" +
-      "yType\030\001 \001(\0162%.usage.CDPCDEBackupRestoreE" +
-      "ntity.Type\022\021\n\textraType\030\002 \001(\t\0220\n\006status\030" +
-      "\003 \001(\0162 .usage.CDEEntityStatusType.Value\022" +
-      "\025\n\rfailureReason\030\004 \001(\t\022\022\n\ndurationMS\030\005 \001" +
-      "(\003\022\021\n\tsizeBytes\030\006 \001(\003\"8\n\004Type\022\t\n\005UNSET\020\000" +
-      "\022\007\n\003JOB\020\001\022\014\n\010RESOURCE\020\002\022\016\n\nCREDENTIAL\020\003\"" +
-      "h\n\023CDEEntityStatusType\"Q\n\005Value\022\t\n\005UNSET" +
-      "\020\000\022\t\n\005ERROR\020\001\022\n\n\006REUSED\020\002\022\013\n\007RENAMED\020\003\022\013" +
-      "\n\007CREATED\020\004\022\014\n\010EXPORTED\020\005\"U\n\026CDEArchiveL" +
-      "ocationType\";\n\005Value\022\t\n\005UNSET\020\000\022\t\n\005LOCAL" +
-      "\020\001\022\n\n\006REMOTE\020\002\022\020\n\014REMOTE_LOCAL\020\003\"N\n\020CDPC" +
-      "DEBackupType\":\n\005Value\022\t\n\005UNSET\020\000\022\026\n\022CLUS" +
-      "TER_DEFINITION\020\001\022\016\n\nVC_CONTENT\020\002\"I\n\032CDPC" +
-      "DEArchiveOperationType\"+\n\005Value\022\t\n\005UNSET" +
-      "\020\000\022\n\n\006BACKUP\020\001\022\013\n\007RESTORE\020\002\"a\n\031CDPCDEBac" +
-      "kupRestoreStatus\"D\n\005Value\022\t\n\005UNSET\020\000\022\016\n\n" +
-      "SUCCESSFUL\020\001\022\n\n\006FAILED\020\002\022\024\n\020PARTIALLY_FA" +
-      "ILED\020\003\"\247\004\n\033CDPCODCreateDatabaseRequest\022\024" +
-      "\n\014databaseName\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\026\n\016env" +
-      "ironmentCrn\030\003 \001(\t\022\027\n\017environmentName\030\004 \001" +
-      "(\t\022\022\n\ncreatorCrn\030\005 \001(\t\022\024\n\014creationDate\030\006" +
-      " \001(\003\022\016\n\006status\030\007 \001(\t\022\021\n\tdbVersion\030\010 \001(\t\022" +
-      "\025\n\rscalingPolicy\030\t \001(\t\022\020\n\010features\030\n \001(\t" +
-      "\022\027\n\017dbEdgeNodeCount\030\013 \001(\005\022\021\n\tscaleType\030\014" +
-      " \001(\t\022\023\n\013clusterType\030\r \001(\t\022\031\n\021computeNode" +
-      "sCount\030\016 \001(\005\022\036\n\026totalComputeNodesCount\030\017" +
-      " \001(\005\022\036\n\026clouderaRuntimeVersion\030\020 \001(\t\022\036\n\026" +
-      "clouderaManagerVersion\030\021 \001(\t\022\024\n\014numEdgeN" +
-      "odes\030\022 \001(\005\022\023\n\013storageType\030\023 \001(\t\022@\n\030stora" +
-      "geDetailsForWorkers\030\024 \003(\0132\036.usage.Storag" +
-      "eDetailsForWorker\022\025\n\rcloudPlatform\030\025 \001(\t" +
-      "\"V\n\027StorageDetailsForWorker\022\023\n\013volumeCou" +
-      "nt\030\001 \001(\005\022\022\n\nvolumeSize\030\002 \001(\005\022\022\n\nvolumeTy" +
-      "pe\030\003 \001(\t\"\276\003\n\027CDPCODAutoScalingConfig\022\024\n\014" +
-      "databaseName\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\036\n\026targe" +
-      "tedValueForMetric\030\003 \001(\003\022\022\n\nmetricName\030\004 " +
-      "\001(\t\022\035\n\025maxWorkersForDatabase\030\005 \001(\005\022\032\n\022ma" +
-      "xWorkersPerBatch\030\006 \001(\005\022\035\n\025minWorkersForD" +
-      "atabase\030\007 \001(\005\022\030\n\020evaluationPeriod\030\010 \001(\003\022" +
-      "\025\n\rminimumValues\030\t \001(\005\022\033\n\023minimumBlockCa" +
-      "cheGb\030\n \001(\005\022\036\n\026maxHdfsUsagePercentage\030\013 " +
-      "\001(\005\022!\n\031maxRegionsPerRegionServer\030\014 \001(\005\022\031" +
-      "\n\021maxCpuUtilization\030\r \001(\005\022\"\n\032maxComputeN" +
-      "odesForDatabase\030\016 \001(\005\022\"\n\032minComputeNodes" +
-      "ForDatabase\030\017 \001(\005\"i\n\035CDPCODStorageDetail" +
-      "sForWorker\022\013\n\003crn\030\001 \001(\t\022\023\n\013volumeCount\030\002" +
-      " \001(\005\022\022\n\nvolumeSize\030\003 \001(\005\022\022\n\nvolumeType\030\004" +
-      " \001(\t\"\231\001\n\033CDPUINewLandingPageFeedback\022\017\n\007" +
-      "userCrn\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\024\n\014howD" +
-      "oYouLike\030\003 \001(\t\022\017\n\007message\030\004 \001(\t\022\031\n\021openT" +
-      "oBeContacted\030\005 \001(\010\022\024\n\014skipFeedback\030\006 \001(\010" +
-      "\"\204\001\n!CDPUISwitchNewLandingPageFeedback\022\017" +
-      "\n\007userCrn\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\024\n\014sw" +
-      "itchReason\030\003 \001(\t\022\017\n\007message\030\004 \001(\t\022\024\n\014ski" +
-      "pFeedback\030\005 \001(\010\"\257\002\n\"CDPCMLModelRegistryB" +
-      "ackupRequested\022\030\n\020modelRegistryCrn\030\001 \001(\t" +
-      "\022\021\n\tbackupCrn\030\002 \001(\t\022\022\n\nbackupName\030\003 \001(\t\022" +
-      "\021\n\taccountId\030\004 \001(\t\022D\n\017environmentType\030\005 " +
-      "\001(\0162+.usage.CDPEnvironmentsEnvironmentTy" +
-      "pe.Value\022\026\n\016environmentCrn\030\006 \001(\t\022\022\n\ncmlV" +
-      "ersion\030\007 \001(\t\022\034\n\024modelRegistryVersion\030\010 \001" +
-      "(\t\022\021\n\trequestId\030\t \001(\t\022\022\n\ntenantType\030\n \001(" +
-      "\t\"\260\002\n#CDPCMLModelRegistryRestoreRequeste" +
-      "d\022\030\n\020modelRegistryCrn\030\001 \001(\t\022\021\n\tbackupCrn" +
-      "\030\002 \001(\t\022\022\n\nbackupName\030\003 \001(\t\022\021\n\taccountId\030" +
-      "\004 \001(\t\022D\n\017environmentType\030\005 \001(\0162+.usage.C" +
-      "DPEnvironmentsEnvironmentType.Value\022\026\n\016e" +
-      "nvironmentCrn\030\006 \001(\t\022\022\n\ncmlVersion\030\007 \001(\t\022" +
-      "\034\n\024modelRegistryVersion\030\010 \001(\t\022\021\n\trequest" +
-      "Id\030\t \001(\t\022\022\n\ntenantType\030\n \001(\t\"\211\002\n#CDPCMLM" +
-      "odelRegistryUpgradeRequested\022\030\n\020modelReg" +
-      "istryCrn\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022D\n\017env" +
-      "ironmentType\030\003 \001(\0162+.usage.CDPEnvironmen" +
-      "tsEnvironmentType.Value\022\026\n\016environmentCr" +
-      "n\030\004 \001(\t\022\022\n\ncmlVersion\030\005 \001(\t\022\034\n\024modelRegi" +
-      "stryVersion\030\006 \001(\t\022\021\n\trequestId\030\007 \001(\t\022\022\n\n" +
-      "tenantType\030\010 \001(\t\"\336\001\n\033CDPCloudPrivateLink" +
-      "Creation\022\021\n\taccountId\030\001 \001(\t\022\023\n\013resourceC" +
-      "rn\030\002 \001(\t\022\025\n\rcloudProvider\030\003 \001(\t\022\031\n\021servi" +
-      "ceComponents\030\004 \001(\t\022\016\n\006region\030\005 \001(\t\022\030\n\020er" +
-      "rorDescription\030\006 \001(\t\022;\n\006status\030\007 \001(\0162+.u",
-      "sage.CloudPrivatelinkCreationStatus.Valu" +
-      "e\"\336\001\n\033CDPCloudPrivateLinkDeletion\022\021\n\tacc" +
-      "ountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\025\n\rclo" +
-      "udProvider\030\003 \001(\t\022\031\n\021serviceComponents\030\004 " +
-      "\001(\t\022\016\n\006region\030\005 \001(\t\022\030\n\020errorDescription\030" +
-      "\006 \001(\t\022;\n\006status\030\007 \001(\0162+.usage.CloudPriva" +
-      "telinkDeletionStatus.Value\"\331\001\n&CDPCloudP" +
-      "rivateLinkAccessAuthorization\022\021\n\taccount" +
-      "Id\030\001 \001(\t\022\025\n\rcloudProvider\030\002 \001(\t\022\016\n\006regio" +
-      "n\030\003 \001(\t\022\030\n\020errorDescription\030\004 \001(\t\022F\n\006sta" +
-      "tus\030\005 \001(\01626.usage.CloudPrivatelinkAccess" +
-      "AuthorizationStatus.Value\022\023\n\013resourceCrn" +
-      "\030\006 \001(\t\"\323\001\n#CDPCloudPrivateLinkAccessRevo" +
-      "cation\022\021\n\taccountId\030\001 \001(\t\022\025\n\rcloudProvid" +
-      "er\030\002 \001(\t\022\016\n\006region\030\003 \001(\t\022\030\n\020errorDescrip" +
-      "tion\030\004 \001(\t\022C\n\006status\030\005 \001(\01623.usage.Cloud" +
-      "PrivatelinkAccessRevocationStatus.Value\022" +
-      "\023\n\013resourceCrn\030\006 \001(\t\"e\n\036CloudPrivatelink" +
-      "CreationStatus\"C\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nSU" +
-      "CCESSFUL\020\001\022\n\n\006FAILED\020\002\022\023\n\017PARTIAL_SUCCES" +
-      "S\020\003\"e\n\036CloudPrivatelinkDeletionStatus\"C\n" +
-      "\005Value\022\t\n\005UNSET\020\000\022\016\n\nSUCCESSFUL\020\001\022\n\n\006FAI" +
-      "LED\020\002\022\023\n\017PARTIAL_SUCCESS\020\003\"p\n)CloudPriva" +
-      "telinkAccessAuthorizationStatus\"C\n\005Value" +
-      "\022\t\n\005UNSET\020\000\022\016\n\nSUCCESSFUL\020\001\022\n\n\006FAILED\020\002\022" +
-      "\023\n\017PARTIAL_SUCCESS\020\003\"m\n&CloudPrivatelink" +
-      "AccessRevocationStatus\"C\n\005Value\022\t\n\005UNSET" +
-      "\020\000\022\016\n\nSUCCESSFUL\020\001\022\n\n\006FAILED\020\002\022\023\n\017PARTIA" +
-      "L_SUCCESS\020\003\"\231\001\n!CDPClassicClusterHostDis" +
-      "tribution\022\020\n\010hostname\030\001 \001(\t\022\021\n\tipAddress" +
-      "\030\002 \001(\t\022\030\n\020distributionType\030\003 \001(\t\022\030\n\020dist" +
-      "ributionName\030\004 \001(\t\022\033\n\023distributionVersio" +
-      "n\030\005 \001(\t\"\322\002\n\036CDPClassicClusterStatusChang" +
-      "ed\022\021\n\taccountId\030\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(" +
-      "\t\022-\n\006status\030\003 \001(\0162\035.usage.CDPClusterStat" +
-      "us.Value\022\030\n\020errorDescription\030\004 \001(\t\022\023\n\013cl" +
-      "usterType\030\005 \001(\t\022\035\n\025registrationTimestamp" +
-      "\030\006 \001(\004\022#\n\033lastSuccessfulSyncTimestamp\030\007 " +
-      "\001(\004\022\026\n\016environmentCrn\030\010 \001(\t\022\026\n\016datacente" +
-      "rName\030\t \001(\t\0227\n\005hosts\030\n \003(\0132(.usage.CDPCl" +
-      "assicClusterHostDistribution\"\256\001\n&CDPOnPr" +
-      "emisesControlPlaneStatusChanged\022\021\n\taccou" +
-      "ntId\030\001 \001(\t\022\016\n\006pvcCrn\030\002 \001(\t\022\014\n\004name\030\003 \001(\t" +
-      "\0229\n\006status\030\004 \001(\0162).usage.OnPremisesContr" +
-      "olPlaneStatus.Value\022\030\n\020errorDescription\030" +
-      "\005 \001(\t\"\353\001\n$CDPOnPremisesConnectionStatusC" +
-      "hanged\022\021\n\taccountId\030\001 \001(\t\022\025\n\rconnectionC" +
-      "rn\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\0226\n\006status\030\004 \001(\0162&" +
-      ".usage.OnPremiseConnectionStatus.Value\022\020" +
-      "\n\010agentCrn\030\005 \001(\t\022\021\n\tcreatedAt\030\006 \001(\004\022\024\n\014l" +
-      "astActiveAt\030\007 \001(\004\022\030\n\020errorDescription\030\010 " +
-      "\001(\t\"\333\001\n\023CDPCDLStatusChanged\0223\n\016clusterDe" +
-      "tails\030\001 \001(\0132\033.usage.CDPCDLClusterDetails" +
-      "\022=\n\023statusChangeDetails\030\002 \001(\0132 .usage.CD" +
-      "PCDLStatusChangeDetails\0225\n\017workflowDetai" +
-      "ls\030\003 \001(\0132\034.usage.CDPCDLWorkflowDetails\022\031" +
-      "\n\021additionalDetails\030\004 \001(\t\"\274\002\n\024CDPCDLClus" +
-      "terDetails\022\024\n\014datalakeName\030\001 \001(\t\022\023\n\013data" +
-      "lakeCrn\030\002 \001(\t\022\027\n\017environmentName\030\003 \001(\t\022\026" +
-      "\n\016environmentCrn\030\004 \001(\t\022\021\n\taccountId\030\005 \001(" +
-      "\t\022\030\n\020rangerRAZEnabled\030\006 \001(\010\022\026\n\016multiAZEn" +
-      "abled\030\007 \001(\010\022?\n\rcloudProvider\030\010 \001(\0162(.usa" +
-      "ge.CDPCloudProviderVariantType.Value\022\017\n\007" +
-      "runtime\030\t \001(\t\022\035\n\025usingExternalDatabase\030\n" +
-      " \001(\010\022\022\n\nlayoutName\030\013 \001(\t\"\215\001\n\031CDPCDLStatu" +
-      "sChangeDetails\022\016\n\006userID\030\001 \001(\t\022\026\n\016previo" +
-      "usStatus\030\002 \001(\t\022\034\n\024previousStatusReason\030\003" +
-      " \001(\t\022\021\n\tnewStatus\030\004 \001(\t\022\027\n\017newStatusReas" +
-      "on\030\005 \001(\t\"\222\001\n\025CDPCDLWorkflowDetails\022\022\n\nwo" +
-      "rkflowID\030\001 \001(\t\022\021\n\trequestID\030\002 \001(\t\022\021\n\tsta" +
-      "rtTime\030\003 \001(\t\022\017\n\007endTime\030\004 \001(\t\022\026\n\016workflo" +
-      "wFailed\030\005 \001(\010\022\026\n\016failureMessage\030\006 \001(\t\"\317\001" +
-      "\n\016CDPFreeIPASync\0224\n\020operationDetails\030\001 \001" +
-      "(\0132\032.usage.CDPOperationDetails\0228\n\016freeIP" +
-      "ADetails\030\002 \001(\0132 .usage.CDPFreeIPAExtende" +
-      "dDetails\0225\n\rstatusDetails\030\003 \001(\0132\036.usage." +
-      "CDPFreeIPAStatusDetails\022\026\n\016environmentCr" +
-      "n\030\004 \001(\t\"\216\002\n\022CDPEnvironmentSync\0224\n\020operat" +
-      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
-      "ails\022\016\n\006status\030\002 \001(\t\0228\n\022environmentDetai" +
-      "ls\030\003 \001(\0132\034.usage.CDPEnvironmentDetails\022M" +
-      "\n\027telemetryFeatureDetails\030\004 \001(\0132,.usage." +
-      "CDPEnvironmentTelemetryFeatureDetails\022)\n" +
-      "\007freeIPA\030\005 \001(\0132\030.usage.CDPFreeIPADetails" +
-      "\"Q\n\032CDPEnvironmentDeletionType\"3\n\005Value\022" +
-      "\t\n\005UNSET\020\000\022\010\n\004NONE\020\001\022\n\n\006SIMPLE\020\002\022\t\n\005FORC" +
-      "E\020\003\"\257\001\n\035CDPDataCatalogDataShareStatus\"\215\001" +
-      "\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020CREATE_SUCCEEDED\020\001" +
-      "\022\021\n\rCREATE_FAILED\020\002\022\024\n\020DELETE_SUCCEEDED\020" +
-      "\003\022\021\n\rDELETE_FAILED\020\004\022\024\n\020UPDATE_SUCCEEDED" +
-      "\020\005\022\021\n\rUPDATE_FAILED\020\006\"\275\001\n CDPDataCatalog" +
-      "DataShareRequested\022\014\n\004name\030\001 \001(\t\022\020\n\010acto" +
-      "rCrn\030\002 \001(\t\022\026\n\016environmentCrn\030\003 \001(\t\022\023\n\013da" +
-      "talakeCrn\030\004 \001(\t\022\020\n\010IsShared\030\005 \001(\010\022:\n\006sta" +
-      "tus\030\006 \001(\0162*.usage.CDPDataCatalogDataShar" +
-      "eStatus.Value\"\234\002\n\026CDPCloudbreakFlowEvent" +
-      "\022\023\n\013resourceCrn\030\001 \001(\t\022\031\n\021rootFlowChainTy" +
-      "pe\030\002 \001(\t\022\033\n\023actualFlowChainType\030\003 \001(\t\022\023\n" +
-      "\013flowChainId\030\004 \001(\t\022\020\n\010flowType\030\005 \001(\t\022\016\n\006" +
-      "flowId\030\006 \001(\t\022\021\n\tstateType\030\007 \001(\t\022\021\n\tflowS" +
-      "tate\030\010 \001(\t\022\021\n\tflowEvent\030\t \001(\t\022\021\n\tedgeSta" +
-      "te\030\n \001(\010\022\016\n\006reason\030\013 \001(\t\022\021\n\trequestId\030\014 " +
-      "\001(\t\022\017\n\007service\030\r \001(\t\"\251\001\n\tModelMeta\022\"\n\006fo" +
-      "rmat\030\001 \001(\0162\022.usage.ModelFormat\022(\n\tcontai" +
-      "ner\030\002 \001(\0162\025.usage.ModelContainer\022\036\n\004task" +
-      "\030\003 \001(\0162\020.usage.ModelTask\022 \n\030transformer_" +
-      "architecture\030\004 \001(\t\022\014\n\004chat\030\005 \001(\010\"<\n\tURLS" +
-      "ource\022\013\n\003url\030\001 \001(\t\022\"\n\010metadata\030\002 \001(\0132\020.u" +
-      "sage.ModelMeta\"S\n\010HFSource\022\020\n\010model_id\030\001" +
-      " \001(\t\022\"\n\010metadata\030\002 \001(\0132\020.usage.ModelMeta" +
-      "\022\021\n\tapi_token\030\003 \001(\t\"\200\001\n\tNGCSource\022\020\n\010mod" +
-      "el_id\030\001 \001(\t\022\031\n\021ngc_model_profile\030\002 \001(\t\022\"" +
-      "\n\010metadata\030\003 \001(\0132\020.usage.ModelMeta\022\021\n\tap" +
-      "i_token\030\004 \001(\t\022\017\n\007release\030\005 \001(\t\"3\n\016Regist" +
-      "rySource\022\020\n\010model_id\030\001 \001(\t\022\017\n\007version\030\002 " +
-      "\001(\005\"\277\001\n\013ModelSource\022&\n\nurl_source\030\001 \001(\0132" +
-      "\020.usage.URLSourceH\000\022$\n\thf_source\030\002 \001(\0132\017" +
-      ".usage.HFSourceH\000\022&\n\nngc_source\030\003 \001(\0132\020." +
-      "usage.NGCSourceH\000\0220\n\017registry_source\030\004 \001" +
-      "(\0132\025.usage.RegistrySourceH\000B\010\n\006source\"B\n" +
-      "\tResources\022\017\n\007req_cpu\030\001 \001(\t\022\022\n\nreq_memor" +
-      "y\030\002 \001(\t\022\020\n\010num_gpus\030\003 \001(\t\"\365\001\n\021Autoscalin" +
-      "gConfig\022\016\n\006metric\030\001 \001(\t\022\016\n\006target\030\002 \001(\t\022" +
-      "\032\n\022target_utilization\030\003 \001(\t\022\037\n\027scale_to_" +
-      "zero_retention\030\004 \001(\t\022\030\n\020activation_scale" +
-      "\030\005 \001(\t\022\030\n\020scale_down_delay\030\006 \001(\t\022\037\n\027pani" +
-      "c_window_percentage\030\007 \001(\t\022\027\n\017panic_thres" +
-      "hold\030\010 \001(\t\022\025\n\rstable_window\030\t \001(\t\"o\n\013Aut" +
-      "oscaling\022\024\n\014min_replicas\030\001 \001(\t\022\024\n\014max_re" +
-      "plicas\030\002 \001(\t\0224\n\022autoscaling_config\030\005 \001(\013" +
-      "2\030.usage.AutoscalingConfig\"\317\002\n\016VLLMEngin" +
-      "eArgs\022\r\n\005dtype\030\001 \001(\t\022\035\n\025enable_prefix_ca" +
-      "ching\030\002 \001(\010\022\036\n\026gpu_memory_utilization\030\003 " +
-      "\001(\002\022\023\n\013load_format\030\004 \001(\t\022\030\n\020max_model_le" +
-      "ngth\030\005 \001(\005\022\036\n\026max_num_batched_tokens\030\006 \001" +
-      "(\005\022\024\n\014max_num_seqs\030\007 \001(\005\022\024\n\014quantization" +
-      "\030\010 \001(\t\022\025\n\renforce_eager\030\t \001(\010\022\031\n\021trust_r" +
-      "emote_code\030\n \001(\010\022\026\n\016kv_cache_dtype\030\013 \001(\t" +
-      "\022\022\n\nblock_size\030\014 \001(\005\022\026\n\016cpu_offload_gb\030\r" +
-      " \001(\005\"2\n\023EnvironmentVariable\022\014\n\004name\030\001 \001(" +
-      "\t\022\r\n\005value\030\002 \001(\t\"d\n\032ApplicationContainer" +
-      "Source\022\013\n\003url\030\001 \001(\t\0229\n\025environment_varia" +
-      "bles\030\002 \003(\0132\032.usage.EnvironmentVariable\"\220" +
-      "\001\n\032ApplicationDirectorySource\022\013\n\003url\030\001 \001" +
-      "(\t\022\023\n\013entry_point\030\002 \001(\t\022\025\n\rruntime_image" +
-      "\030\003 \001(\t\0229\n\025environment_variables\030\004 \003(\0132\032." +
-      "usage.EnvironmentVariable\"\233\001\n\021Applicatio" +
-      "nSource\022=\n\020container_source\030\001 \001(\0132!.usag" +
-      "e.ApplicationContainerSourceH\000\022=\n\020direct" +
-      "ory_source\030\002 \001(\0132!.usage.ApplicationDire" +
-      "ctorySourceH\000B\010\n\006source\"\273\005\n+CDPCMLServin" +
-      "gEndpointDeployedOrUpdatedEvent\022\024\n\014resou" +
-      "rce_crn\030\001 \001(\t\022\025\n\rresource_type\030\002 \001(\t\022\030\n\020" +
-      "resource_version\030\003 \001(\t\022\025\n\rusername_hash\030" +
-      "\004 \001(\t\022\021\n\tnamespace\030\005 \001(\t\022\032\n\022endpoint_nam" +
-      "e_hash\030\006 \001(\t\022\027\n\017model_name_hash\030\007 \001(\t\022\"\n" +
-      "\006source\030\010 \001(\0132\022.usage.ModelSource\022#\n\tres" +
-      "ources\030\t \001(\0132\020.usage.Resources\022\'\n\013autosc" +
-      "aling\030\n \001(\0132\022.usage.Autoscaling\022\017\n\007traff" +
-      "ic\030\013 \001(\t\022/\n\020vllm_engine_args\030\014 \001(\0132\025.usa" +
-      "ge.VLLMEngineArgs\022\025\n\rinstance_type\030\r \001(\t" +
-      "\022\021\n\tis_update\030\016 \001(\010\022(\n\014runtime_info\030\017 \001(" +
-      "\0132\022.usage.RuntimeInfo\022\024\n\014api_standard\030\020 " +
-      "\001(\t\022\031\n\021has_chat_template\030\021 \001(\010\022\027\n\017deploy" +
-      "ment_mode\030\022 \001(\t\022\024\n\014model_format\030\023 \001(\t\022\022\n" +
-      "\nmodel_task\030\024 \001(\t\022\032\n\022model_architecture\030" +
-      "\025 \001(\t\022\024\n\014endpoint_crn\030\026 \001(\t\0228\n\024optimizat" +
-      "ion_profile\030\027 \001(\0132\032.usage.OptimizationPr" +
-      "ofile\"\317\001\n\013RuntimeInfo\022\024\n\014display_name\030\001 " +
-      "\001(\t\022\017\n\007version\030\002 \001(\t\022\030\n\020image_identifier" +
-      "\030\003 \001(\t\022\026\n\014vllm_version\030\004 \001(\tH\000\022&\n\034transf" +
-      "ormers_library_version\030\005 \001(\tH\000\022\026\n\016latest" +
-      "_version\030\006 \001(\010\022\024\n\014runtime_name\030\007 \001(\tB\021\n\017" +
-      "version_details\"\205\002\n\023OptimizationProfile\022" +
-      "\013\n\003gpu\030\001 \001(\t\022\022\n\ngpu_device\030\002 \001(\t\022\021\n\tgpu_" +
-      "count\030\003 \001(\t\022\021\n\tprecision\030\004 \001(\t\022\017\n\007releas" +
-      "e\030\005 \001(\t\022*\n\014embed_config\030\006 \001(\0132\022.usage.Em" +
-      "bedConfigH\000\0226\n\017text_gen_config\030\007 \001(\0132\033.u" +
-      "sage.TextGenerationConfigH\000\022(\n\013rank_conf" +
-      "ig\030\010 \001(\0132\021.usage.RankConfigH\000B\010\n\006config\"" +
-      "3\n\013EmbedConfig\022\021\n\tDimension\030\010 \001(\005\022\021\n\tMax" +
-      "Tokens\030\t \001(\005\"P\n\024TextGenerationConfig\022\021\n\t" +
-      "LLMEngine\030\001 \001(\t\022\024\n\014MaxImageSize\030\002 \001(\t\022\017\n" +
-      "\007profile\030\003 \001(\t\"4\n\nRankConfig\022\021\n\tMaxToken" +
-      "s\030\001 \001(\005\022\023\n\013MaxPassages\030\002 \001(\005\"\341\001\n(CDPCMLS" +
-      "ervingEndpointStartedStoppedEvent\022\024\n\014res" +
-      "ource_crn\030\001 \001(\t\022\025\n\rresource_type\030\002 \001(\t\022\030" +
-      "\n\020resource_version\030\003 \001(\t\022\025\n\rusername_has" +
-      "h\030\004 \001(\t\022\021\n\tnamespace\030\005 \001(\t\022\032\n\022endpoint_n" +
-      "ame_hash\030\006 \001(\t\022\022\n\nis_stopped\030\007 \001(\010\022\024\n\014en" +
-      "dpoint_crn\030\010 \001(\t\"\306\001\n!CDPCMLServingEndpoi" +
-      "ntDeletedEvent\022\024\n\014resource_crn\030\001 \001(\t\022\025\n\r" +
-      "resource_type\030\002 \001(\t\022\030\n\020resource_version\030" +
-      "\003 \001(\t\022\025\n\rusername_hash\030\004 \001(\t\022\021\n\tnamespac" +
-      "e\030\005 \001(\t\022\032\n\022endpoint_name_hash\030\006 \001(\t\022\024\n\014e" +
-      "ndpoint_crn\030\007 \001(\t\"\217\003\n%CDPCMLServingAppli" +
-      "cationDeployedEvent\022\024\n\014resource_crn\030\001 \001(" +
-      "\t\022\025\n\rresource_type\030\002 \001(\t\022\030\n\020resource_ver" +
-      "sion\030\003 \001(\t\022\025\n\rusername_hash\030\004 \001(\t\022\021\n\tnam" +
-      "espace\030\005 \001(\t\022\035\n\025application_name_hash\030\006 " +
-      "\001(\t\022(\n\006source\030\010 \001(\0132\030.usage.ApplicationS" +
-      "ource\022#\n\tresources\030\t \001(\0132\020.usage.Resourc" +
-      "es\022\'\n\013autoscaling\030\n \001(\0132\022.usage.Autoscal" +
-      "ing\022\017\n\007traffic\030\013 \001(\t\022\025\n\rinstance_type\030\r " +
-      "\001(\t\022\021\n\tis_update\030\016 \001(\010\022\027\n\017application_cr" +
-      "n\030\017 \001(\tJ\004\010\007\020\010J\004\010\014\020\r\"\317\001\n$CDPCMLServingApp" +
-      "licationDeletedEvent\022\024\n\014resource_crn\030\001 \001" +
-      "(\t\022\025\n\rresource_type\030\002 \001(\t\022\030\n\020resource_ve" +
-      "rsion\030\003 \001(\t\022\025\n\rusername_hash\030\004 \001(\t\022\021\n\tna" +
-      "mespace\030\005 \001(\t\022\035\n\025application_name_hash\030\006" +
-      " \001(\t\022\027\n\017application_crn\030\007 \001(\t\"o\n\035CDPCMLA" +
-      "iStudioDeploymentEvent\022\021\n\tprojectId\030\001 \001(" +
-      "\r\022\022\n\nstudioName\030\002 \001(\t\022\021\n\teventType\030\003 \001(\t" +
-      "\022\024\n\014eventDetails\030\004 \001(\t\"e\n\024NotificationSe" +
-      "verity\"M\n\005Value\022\t\n\005UNSET\020\000\022\t\n\005DEBUG\020\001\022\010\n" +
-      "\004INFO\020\002\022\013\n\007WARNING\020\003\022\t\n\005ERROR\020\004\022\014\n\010CRITI" +
-      "CAL\020\005\"{\n\026NotificationFormFactor\"a\n\005Value" +
-      "\022\t\n\005UNSET\020\000\022\020\n\014SUBSCRIPTION\020\001\022\025\n\021DISTRIB" +
-      "UTION_LIST\020\002\022$\n SYSTEM_MANAGED_DISTRIBUT" +
-      "ION_LIST\020\003\"P\n\013ChannelType\"A\n\005Value\022\t\n\005UN" +
-      "SET\020\000\022\t\n\005EMAIL\020\001\022\n\n\006IN_APP\020\002\022\013\n\007CONSOLE\020" +
-      "\003\022\t\n\005SLACK\020\004\"\272\001\n\020NotificationType\"\245\001\n\005Va" +
-      "lue\022\t\n\005UNSET\020\000\022\032\n\026AZURE_DEFAULT_OUTBOUND" +
-      "\020\001\022\026\n\022STACK_PROVISIONING\020\002\022\024\n\020STACK_STAR" +
-      "T_STOP\020\003\022\020\n\014STACK_RESIZE\020\004\022\021\n\rSTACK_UPGR" +
-      "ADE\020\005\022\020\n\014STACK_REPAIR\020\006\022\020\n\014STACK_HEALTH\020" +
-      "\007\"\244\003\n\032CDPCBNotificationSentEvent\022\n\n\002id\030\001" +
-      " \001(\003\022?\n\024notificationSeverity\030\002 \001(\0162!.usa" +
-      "ge.NotificationSeverity.Value\0227\n\020notific" +
-      "ationType\030\003 \001(\0162\035.usage.NotificationType" +
-      ".Value\022-\n\013channelType\030\004 \001(\0162\030.usage.Chan" +
-      "nelType.Value\022\024\n\014resourceName\030\005 \001(\t\022\023\n\013r" +
-      "esourceCrn\030\006 \001(\t\022\014\n\004name\030\007 \001(\t\022\021\n\taccoun" +
-      "tId\030\010 \001(\t\022\017\n\007message\030\t \001(\t\022\021\n\tcreatedAt\030" +
-      "\n \001(\004\022\016\n\006sentAt\030\013 \001(\004\022\014\n\004sent\030\014 \001(\010\022C\n\026n" +
-      "otificationFormFactor\030\r \001(\0162#.usage.Noti" +
-      "ficationFormFactor.Value*\220\001\n\023WorkloadEve" +
-      "ntStatus\022\016\n\nSCHEDULING\020\000\022\014\n\010STARTING\020\001\022\013" +
-      "\n\007RUNNING\020\002\022\014\n\010STOPPING\020\003\022\013\n\007STOPPED\020\004\022\013" +
-      "\n\007UNKNOWN\020\005\022\013\n\007PENDING\020\006\022\r\n\tSUCCEEDED\020\007\022" +
-      "\n\n\006FAILED\020\010*\201\002\n\031WorkloadInternalErrorCod" +
-      "e\022\024\n\020UNKNOWN_INTERNAL\020\000\022$\n QUOTA_REQUEST" +
-      "S_CPU_NOT_SPECIFIED\020\001\022\'\n#QUOTA_REQUESTS_" +
-      "MEMORY_NOT_SPECIFIED\020\002\022\031\n\025QUOTA_REQUESTS" +
-      "_MEMORY\020\003\022\026\n\022QUOTA_REQUESTS_CPU\020\004\022\023\n\017QUO" +
-      "TA_COUNT_POD\020\005\022\026\n\022QUOTA_REQUESTS_GPU\020\006\022\037" +
-      "\n\033NOT_ENOUGH_RESOURCE_REQUEST\020\007*J\n\013Model" +
-      "Format\022\022\n\016FORMAT_UNKNOWN\020\000\022\010\n\004ONNX\020\001\022\014\n\010" +
-      "TENSORRT\020\002\022\017\n\013TRANSFORMER\020\003*H\n\016ModelCont" +
-      "ainer\022\025\n\021CONTAINER_UNKNOWN\020\000\022\n\n\006MLFLOW\020\001" +
-      "\022\n\n\006TRITON\020\002\022\007\n\003RAW\020\003*\226\001\n\tModelTask\022\020\n\014T" +
-      "ASK_UNKNOWN\020\000\022\r\n\tINFERENCE\020\001\022\023\n\017TEXT_GEN" +
-      "ERATION\020\002\022\t\n\005EMBED\020\003\022\033\n\027TEXT_TO_TEXT_GEN" +
-      "ERATION\020\004\022\022\n\016CLASSIFICATION\020\005\022\r\n\tFILL_MA" +
-      "SK\020\006\022\010\n\004RANK\020\007BV\n-com.cloudera.thunderhe" +
-      "ad.service.common.usageB\nUsageProtoZ\031com" +
-      "/cloudera/cdp/protobufb\006proto3"
+      "\201\003\n\030ApplicationDeployedEvent\022\013\n\003cpu\030\001 \001(" +
+      "\002\022\013\n\003mem\030\002 \001(\002\022\013\n\003gpu\030\003 \001(\r\022\016\n\006userId\030\004 " +
+      "\001(\r\022\021\n\tprojectId\030\005 \001(\r\022\016\n\006kernel\030\006 \001(\t\022\014" +
+      "\n\004file\030\007 \001(\t\022\r\n\005image\030\010 \001(\t\022\021\n\tsubdomain" +
+      "\030\t \001(\t\022\020\n\010engineId\030\n \001(\t\022\025\n\rapplicationI" +
+      "d\030\013 \001(\r\022$\n\007runtime\030\014 \001(\0132\023.usage.UsageRu" +
+      "ntime\022(\n\006addons\030\r \003(\0132\030.usage.UsageRunti" +
+      "meAddon\022@\n\013embeddedApp\030\016 \001(\0162+.usage.App" +
+      "licationDeployedEvent.EmbeddedApp\" \n\013Emb" +
+      "eddedApp\022\010\n\004NONE\020\000\022\007\n\003CDV\020\001\"\325\001\n!Applicat" +
+      "ionCreatedOrModifiedEvent\022\025\n\rapplication" +
+      "Id\030\001 \001(\r\022[\n\024bypassAuthentication\030\002 \001(\0162=" +
+      ".usage.ApplicationCreatedOrModifiedEvent" +
+      ".BypassAuthentication\"<\n\024BypassAuthentic" +
+      "ation\022\017\n\013NOT_CHANGED\020\000\022\t\n\005FALSE\020\001\022\010\n\004TRU" +
+      "E\020\002\"\362\003\n\023ProjectCreatedEvent\022\016\n\006userId\030\001 " +
+      "\001(\r\0225\n\010userType\030\002 \001(\0162#.usage.ProjectCre" +
+      "atedEvent.UserType\022\017\n\007ownerId\030\003 \001(\r\022\021\n\tp" +
+      "rojectId\030\004 \001(\r\022-\n\004type\030\005 \001(\0162\037.usage.Pro" +
+      "jectCreatedEvent.Type\022\023\n\013isPrototype\030\006 \001" +
+      "(\010\022\016\n\006gitUrl\030\007 \001(\t\022=\n\nvisibility\030\010 \001(\0162)" +
+      ".usage.ProjectCreatedEvent.VisibilityTyp" +
+      "e\022\027\n\017forkedProjectId\030\t \001(\r\"+\n\010UserType\022\010" +
+      "\n\004USER\020\000\022\025\n\021USER_ORGANIZATION\020\001\"Z\n\004Type\022" +
+      "\024\n\020BUILTIN_TEMPLATE\020\000\022\023\n\017CUSTOM_TEMPLATE" +
+      "\020\001\022\007\n\003GIT\020\002\022\t\n\005LOCAL\020\003\022\t\n\005BLANK\020\004\022\010\n\004FOR" +
+      "K\020\005\";\n\016VisibilityType\022\013\n\007PRIVATE\020\000\022\020\n\014OR" +
+      "GANIZATION\020\001\022\n\n\006PUBLIC\020\002\"?\n\027PrototypeCom" +
+      "pletedEvent\022\021\n\tprojectId\030\001 \001(\r\022\021\n\tsuccee" +
+      "ded\030\002 \001(\010\"\260\001\n\nLoginEvent\022\016\n\006userId\030\001 \001(\r" +
+      "\022\024\n\014usernameHash\030\002 \001(\t\022\017\n\007isAdmin\030\003 \001(\010\022" +
+      "\022\n\nisBusiness\030\004 \001(\010\022,\n\010authType\030\005 \001(\0162\032." +
+      "usage.LoginEvent.AuthType\")\n\010AuthType\022\t\n" +
+      "\005LOCAL\020\000\022\010\n\004LDAP\020\001\022\010\n\004SAML\020\002\"\035\n\013LogoutEv" +
+      "ent\022\016\n\006userId\030\001 \001(\r\"\200\001\n\020WorkerStartEvent" +
+      "\022\016\n\006userId\030\001 \001(\r\022\021\n\tprojectId\030\002 \001(\r\022\020\n\010e" +
+      "ngineId\030\003 \001(\t\022\020\n\010masterId\030\004 \001(\t\022\013\n\003cpu\030\005" +
+      " \001(\002\022\013\n\003mem\030\006 \001(\002\022\013\n\003gpu\030\007 \001(\r\"\210\001\n\022Spark" +
+      "ExecutorEvent\022\022\n\nexecutorId\030\001 \001(\t\022\016\n\006act" +
+      "ion\030\002 \001(\t\022\020\n\010masterId\030\003 \001(\t\022\013\n\003cpu\030\004 \001(\003" +
+      "\022\013\n\003mem\030\005 \001(\003\022\013\n\003gpu\030\006 \001(\003\022\025\n\rapplicatio" +
+      "nId\030\007 \001(\t\"\243\002\n\031DataConnectionActionEvent\022" +
+      "\016\n\006userId\030\001 \001(\r\022\021\n\tprojectId\030\002 \001(\r\022\030\n\020da" +
+      "taConnectionId\030\003 \001(\r\022\032\n\022dataConnectionTy" +
+      "pe\030\004 \001(\t\022\035\n\025workspaceConnectionId\030\005 \001(\r\022" +
+      "\026\n\016autoDiscovered\030\006 \001(\010\022\033\n\023isProjectConn" +
+      "ection\030\007 \001(\010\022\034\n\024dataConnectionAction\030\010 \001" +
+      "(\t\022\034\n\024virtualWarehouseName\030\t \001(\t\022\013\n\003crn\030" +
+      "\n \001(\t\022\020\n\010engineId\030\013 \001(\t\"q\n\035ApplicationMe" +
+      "tricsReportEvent\022\020\n\010engineId\030\001 \001(\t\022\025\n\rap" +
+      "plicationId\030\002 \001(\r\022\021\n\teventType\030\003 \001(\t\022\024\n\014" +
+      "eventDetails\030\004 \001(\t\"\236\001\n\024ModelV2UploadedEv" +
+      "ent\022\017\n\007modelId\030\001 \001(\t\022\026\n\016modelVersionId\030\002" +
+      " \001(\t\022\025\n\rversionNumber\030\003 \001(\r\022\024\n\014experimen" +
+      "tId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t\022\016\n\006userId\030\006 \001(\r" +
+      "\022\021\n\tprojectId\030\007 \001(\r\"`\n\024RMGeneralPolicySt" +
+      "ats\022\022\n\ntotalCount\030\001 \001(\005\022\033\n\023successfulJob" +
+      "sCount\030\002 \001(\005\022\027\n\017failedJobsCount\030\003 \001(\005\"\250\001" +
+      "\n\022RMCloudPolicyStats\022\022\n\ntotalCount\030\001 \001(\005" +
+      "\022\026\n\016awsPolicyCount\030\002 \001(\005\022\030\n\020azurePolicyC" +
+      "ount\030\003 \001(\005\022\026\n\016gcpPolicyCount\030\004 \001(\005\022\033\n\023su" +
+      "ccessfulJobsCount\030\005 \001(\005\022\027\n\017failedJobsCou" +
+      "nt\030\006 \001(\005\"\341\003\n\021RMUsageStatistics\022\031\n\021totalC" +
+      "lusterCount\030\001 \001(\005\022\030\n\020totalPolicyCount\030\002 " +
+      "\001(\005\0224\n\017hdfsPolicyStats\030\003 \001(\0132\033.usage.RMG" +
+      "eneralPolicyStats\0224\n\017hivePolicyStats\030\004 \001" +
+      "(\0132\033.usage.RMGeneralPolicyStats\0225\n\020hbase" +
+      "PolicyStats\030\005 \001(\0132\033.usage.RMGeneralPolic" +
+      "yStats\022:\n\027cloudToCloudPolicyStats\030\006 \001(\0132" +
+      "\031.usage.RMCloudPolicyStats\022;\n\030cloudToOnP" +
+      "remPolicyStats\030\007 \001(\0132\031.usage.RMCloudPoli" +
+      "cyStats\022;\n\030onPremToCloudPolicyStats\030\010 \001(" +
+      "\0132\031.usage.RMCloudPolicyStats\022 \n\030totalSuc" +
+      "cessfulJobsCount\030\t \001(\005\022\034\n\024totalFailedJob" +
+      "sCount\030\n \001(\005\"\230\001\n\027CDPSecretRotationStatus" +
+      "\"}\n\005Value\022\013\n\007UNKNOWN\020\000\022\013\n\007STARTED\020\001\022\014\n\010F" +
+      "INISHED\020\002\022\n\n\006FAILED\020\003\022\024\n\020ROLLBACK_STARTE" +
+      "D\020\004\022\025\n\021ROLLBACK_FINISHED\020\005\022\023\n\017ROLLBACK_F" +
+      "AILED\020\006\"\232\001\n\026CDPSecretRotationEvent\0224\n\006st" +
+      "atus\030\001 \001(\0162$.usage.CDPSecretRotationStat" +
+      "us.Value\022\023\n\013resourceCrn\030\002 \001(\t\022\022\n\nsecretT" +
+      "ype\030\003 \001(\t\022\016\n\006reason\030\004 \001(\t\022\021\n\taccountId\030\005" +
+      " \001(\t\"\271\001\n\032CDPProviderSyncStateChange\022=\n\to" +
+      "peration\030\001 \001(\0162*.usage.CDPProviderSyncSt" +
+      "ateOperation.Value\022\023\n\013resourceCrn\030\002 \001(\t\022" +
+      "\021\n\tsyncState\030\003 \001(\t\022\016\n\006reason\030\004 \001(\t\022\021\n\tti" +
+      "mestamp\030\005 \001(\004\022\021\n\taccountId\030\006 \001(\t\"M\n\035CDPP" +
+      "roviderSyncStateOperation\",\n\005Value\022\013\n\007UN" +
+      "KNOWN\020\000\022\t\n\005ADDED\020\001\022\013\n\007REMOVED\020\002\"8\n\025RMPol" +
+      "icyCreationEvent\022\014\n\004type\030\001 \001(\t\022\021\n\tdirect" +
+      "ion\030\002 \001(\t\"\363\005\n\033CDPCDEBackupRestoreComplet" +
+      "e\022\n\n\002id\030\001 \001(\t\022\022\n\ncdeVersion\030\002 \001(\t\0221\n\nbac" +
+      "kupType\030\003 \001(\0162\035.usage.CDPCDEBackupType.V" +
+      "alue\022\021\n\tclusterId\030\004 \001(\t\022\022\n\nclusterCrn\030\005 " +
+      "\001(\t\022=\n\013clusterMeta\030\006 \001(\0132&.usage.CDPCDEC" +
+      "lusterDefinitionMetadataH\000\0227\n\rvcContentM" +
+      "eta\030\007 \001(\0132\036.usage.CDPCDEVCContentMetadat" +
+      "aH\000\022\014\n\004user\030\010 \001(\t\022D\n\017environmentType\030\t \001" +
+      "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
+      "e.Value\022\026\n\016environmentCrn\030\n \001(\t\022>\n\ropera" +
+      "tionType\030\013 \001(\0162\'.usage.CDPCDEArchiveOper" +
+      "ationType.Value\022@\n\023archiveLocationType\030\014" +
+      " \001(\0162#.usage.CDEArchiveLocationType.Valu" +
+      "e\0226\n\006status\030\r \001(\0162&.usage.CDPCDEBackupRe" +
+      "storeStatus.Value\022\025\n\rfailureReason\030\016 \001(\t" +
+      "\022\027\n\017totalDurationMS\030\017 \001(\003\0222\n\010entities\030\020 " +
+      "\003(\0132 .usage.CDPCDEBackupRestoreEntity\022\021\n" +
+      "\tsizeBytes\030\021 \001(\003\022\017\n\007numJobs\030\022 \001(\005\022\022\n\nnum" +
+      "JobRuns\030\023 \001(\005\022\024\n\014numResources\030\024 \001(\005B\n\n\010m" +
+      "etadata\"\'\n\027CDPCDEVCContentMetadata\022\014\n\004vc" +
+      "Id\030\001 \001(\t\"7\n\037CDPCDEClusterDefinitionMetad" +
+      "ata\022\024\n\014cdeCpVersion\030\001 \001(\t\"\223\002\n\031CDPCDEBack" +
+      "upRestoreEntity\0229\n\nentityType\030\001 \001(\0162%.us" +
+      "age.CDPCDEBackupRestoreEntity.Type\022\021\n\tex" +
+      "traType\030\002 \001(\t\0220\n\006status\030\003 \001(\0162 .usage.CD" +
+      "EEntityStatusType.Value\022\025\n\rfailureReason" +
+      "\030\004 \001(\t\022\022\n\ndurationMS\030\005 \001(\003\022\021\n\tsizeBytes\030" +
+      "\006 \001(\003\"8\n\004Type\022\t\n\005UNSET\020\000\022\007\n\003JOB\020\001\022\014\n\010RES" +
+      "OURCE\020\002\022\016\n\nCREDENTIAL\020\003\"h\n\023CDEEntityStat" +
+      "usType\"Q\n\005Value\022\t\n\005UNSET\020\000\022\t\n\005ERROR\020\001\022\n\n" +
+      "\006REUSED\020\002\022\013\n\007RENAMED\020\003\022\013\n\007CREATED\020\004\022\014\n\010E" +
+      "XPORTED\020\005\"U\n\026CDEArchiveLocationType\";\n\005V" +
+      "alue\022\t\n\005UNSET\020\000\022\t\n\005LOCAL\020\001\022\n\n\006REMOTE\020\002\022\020" +
+      "\n\014REMOTE_LOCAL\020\003\"N\n\020CDPCDEBackupType\":\n\005" +
+      "Value\022\t\n\005UNSET\020\000\022\026\n\022CLUSTER_DEFINITION\020\001" +
+      "\022\016\n\nVC_CONTENT\020\002\"I\n\032CDPCDEArchiveOperati" +
+      "onType\"+\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006BACKUP\020\001\022\013" +
+      "\n\007RESTORE\020\002\"a\n\031CDPCDEBackupRestoreStatus" +
+      "\"D\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nSUCCESSFUL\020\001\022\n\n\006" +
+      "FAILED\020\002\022\024\n\020PARTIALLY_FAILED\020\003\"\247\004\n\033CDPCO" +
+      "DCreateDatabaseRequest\022\024\n\014databaseName\030\001" +
+      " \001(\t\022\013\n\003crn\030\002 \001(\t\022\026\n\016environmentCrn\030\003 \001(" +
+      "\t\022\027\n\017environmentName\030\004 \001(\t\022\022\n\ncreatorCrn" +
+      "\030\005 \001(\t\022\024\n\014creationDate\030\006 \001(\003\022\016\n\006status\030\007" +
+      " \001(\t\022\021\n\tdbVersion\030\010 \001(\t\022\025\n\rscalingPolicy" +
+      "\030\t \001(\t\022\020\n\010features\030\n \001(\t\022\027\n\017dbEdgeNodeCo" +
+      "unt\030\013 \001(\005\022\021\n\tscaleType\030\014 \001(\t\022\023\n\013clusterT" +
+      "ype\030\r \001(\t\022\031\n\021computeNodesCount\030\016 \001(\005\022\036\n\026" +
+      "totalComputeNodesCount\030\017 \001(\005\022\036\n\026cloudera" +
+      "RuntimeVersion\030\020 \001(\t\022\036\n\026clouderaManagerV" +
+      "ersion\030\021 \001(\t\022\024\n\014numEdgeNodes\030\022 \001(\005\022\023\n\013st" +
+      "orageType\030\023 \001(\t\022@\n\030storageDetailsForWork" +
+      "ers\030\024 \003(\0132\036.usage.StorageDetailsForWorke" +
+      "r\022\025\n\rcloudPlatform\030\025 \001(\t\"V\n\027StorageDetai" +
+      "lsForWorker\022\023\n\013volumeCount\030\001 \001(\005\022\022\n\nvolu" +
+      "meSize\030\002 \001(\005\022\022\n\nvolumeType\030\003 \001(\t\"\276\003\n\027CDP" +
+      "CODAutoScalingConfig\022\024\n\014databaseName\030\001 \001" +
+      "(\t\022\013\n\003crn\030\002 \001(\t\022\036\n\026targetedValueForMetri" +
+      "c\030\003 \001(\003\022\022\n\nmetricName\030\004 \001(\t\022\035\n\025maxWorker" +
+      "sForDatabase\030\005 \001(\005\022\032\n\022maxWorkersPerBatch" +
+      "\030\006 \001(\005\022\035\n\025minWorkersForDatabase\030\007 \001(\005\022\030\n" +
+      "\020evaluationPeriod\030\010 \001(\003\022\025\n\rminimumValues" +
+      "\030\t \001(\005\022\033\n\023minimumBlockCacheGb\030\n \001(\005\022\036\n\026m" +
+      "axHdfsUsagePercentage\030\013 \001(\005\022!\n\031maxRegion" +
+      "sPerRegionServer\030\014 \001(\005\022\031\n\021maxCpuUtilizat" +
+      "ion\030\r \001(\005\022\"\n\032maxComputeNodesForDatabase\030" +
+      "\016 \001(\005\022\"\n\032minComputeNodesForDatabase\030\017 \001(" +
+      "\005\"i\n\035CDPCODStorageDetailsForWorker\022\013\n\003cr" +
+      "n\030\001 \001(\t\022\023\n\013volumeCount\030\002 \001(\005\022\022\n\nvolumeSi" +
+      "ze\030\003 \001(\005\022\022\n\nvolumeType\030\004 \001(\t\"\231\001\n\033CDPUINe" +
+      "wLandingPageFeedback\022\017\n\007userCrn\030\001 \001(\t\022\021\n" +
+      "\taccountId\030\002 \001(\t\022\024\n\014howDoYouLike\030\003 \001(\t\022\017" +
+      "\n\007message\030\004 \001(\t\022\031\n\021openToBeContacted\030\005 \001" +
+      "(\010\022\024\n\014skipFeedback\030\006 \001(\010\"\204\001\n!CDPUISwitch" +
+      "NewLandingPageFeedback\022\017\n\007userCrn\030\001 \001(\t\022" +
+      "\021\n\taccountId\030\002 \001(\t\022\024\n\014switchReason\030\003 \001(\t" +
+      "\022\017\n\007message\030\004 \001(\t\022\024\n\014skipFeedback\030\005 \001(\010\"" +
+      "\257\002\n\"CDPCMLModelRegistryBackupRequested\022\030" +
+      "\n\020modelRegistryCrn\030\001 \001(\t\022\021\n\tbackupCrn\030\002 " +
+      "\001(\t\022\022\n\nbackupName\030\003 \001(\t\022\021\n\taccountId\030\004 \001" +
+      "(\t\022D\n\017environmentType\030\005 \001(\0162+.usage.CDPE" +
+      "nvironmentsEnvironmentType.Value\022\026\n\016envi" +
+      "ronmentCrn\030\006 \001(\t\022\022\n\ncmlVersion\030\007 \001(\t\022\034\n\024" +
+      "modelRegistryVersion\030\010 \001(\t\022\021\n\trequestId\030" +
+      "\t \001(\t\022\022\n\ntenantType\030\n \001(\t\"\260\002\n#CDPCMLMode" +
+      "lRegistryRestoreRequested\022\030\n\020modelRegist" +
+      "ryCrn\030\001 \001(\t\022\021\n\tbackupCrn\030\002 \001(\t\022\022\n\nbackup" +
+      "Name\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\022D\n\017environ" +
+      "mentType\030\005 \001(\0162+.usage.CDPEnvironmentsEn" +
+      "vironmentType.Value\022\026\n\016environmentCrn\030\006 " +
+      "\001(\t\022\022\n\ncmlVersion\030\007 \001(\t\022\034\n\024modelRegistry" +
+      "Version\030\010 \001(\t\022\021\n\trequestId\030\t \001(\t\022\022\n\ntena" +
+      "ntType\030\n \001(\t\"\211\002\n#CDPCMLModelRegistryUpgr" +
+      "adeRequested\022\030\n\020modelRegistryCrn\030\001 \001(\t\022\021" +
+      "\n\taccountId\030\002 \001(\t\022D\n\017environmentType\030\003 \001" +
+      "(\0162+.usage.CDPEnvironmentsEnvironmentTyp",
+      "e.Value\022\026\n\016environmentCrn\030\004 \001(\t\022\022\n\ncmlVe" +
+      "rsion\030\005 \001(\t\022\034\n\024modelRegistryVersion\030\006 \001(" +
+      "\t\022\021\n\trequestId\030\007 \001(\t\022\022\n\ntenantType\030\010 \001(\t" +
+      "\"\336\001\n\033CDPCloudPrivateLinkCreation\022\021\n\tacco" +
+      "untId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\025\n\rclou" +
+      "dProvider\030\003 \001(\t\022\031\n\021serviceComponents\030\004 \001" +
+      "(\t\022\016\n\006region\030\005 \001(\t\022\030\n\020errorDescription\030\006" +
+      " \001(\t\022;\n\006status\030\007 \001(\0162+.usage.CloudPrivat" +
+      "elinkCreationStatus.Value\"\336\001\n\033CDPCloudPr" +
+      "ivateLinkDeletion\022\021\n\taccountId\030\001 \001(\t\022\023\n\013" +
+      "resourceCrn\030\002 \001(\t\022\025\n\rcloudProvider\030\003 \001(\t" +
+      "\022\031\n\021serviceComponents\030\004 \001(\t\022\016\n\006region\030\005 " +
+      "\001(\t\022\030\n\020errorDescription\030\006 \001(\t\022;\n\006status\030" +
+      "\007 \001(\0162+.usage.CloudPrivatelinkDeletionSt" +
+      "atus.Value\"\331\001\n&CDPCloudPrivateLinkAccess" +
+      "Authorization\022\021\n\taccountId\030\001 \001(\t\022\025\n\rclou" +
+      "dProvider\030\002 \001(\t\022\016\n\006region\030\003 \001(\t\022\030\n\020error" +
+      "Description\030\004 \001(\t\022F\n\006status\030\005 \001(\01626.usag" +
+      "e.CloudPrivatelinkAccessAuthorizationSta" +
+      "tus.Value\022\023\n\013resourceCrn\030\006 \001(\t\"\323\001\n#CDPCl" +
+      "oudPrivateLinkAccessRevocation\022\021\n\taccoun" +
+      "tId\030\001 \001(\t\022\025\n\rcloudProvider\030\002 \001(\t\022\016\n\006regi" +
+      "on\030\003 \001(\t\022\030\n\020errorDescription\030\004 \001(\t\022C\n\006st" +
+      "atus\030\005 \001(\01623.usage.CloudPrivatelinkAcces" +
+      "sRevocationStatus.Value\022\023\n\013resourceCrn\030\006" +
+      " \001(\t\"e\n\036CloudPrivatelinkCreationStatus\"C" +
+      "\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nSUCCESSFUL\020\001\022\n\n\006FA" +
+      "ILED\020\002\022\023\n\017PARTIAL_SUCCESS\020\003\"e\n\036CloudPriv" +
+      "atelinkDeletionStatus\"C\n\005Value\022\t\n\005UNSET\020" +
+      "\000\022\016\n\nSUCCESSFUL\020\001\022\n\n\006FAILED\020\002\022\023\n\017PARTIAL" +
+      "_SUCCESS\020\003\"p\n)CloudPrivatelinkAccessAuth" +
+      "orizationStatus\"C\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nS" +
+      "UCCESSFUL\020\001\022\n\n\006FAILED\020\002\022\023\n\017PARTIAL_SUCCE" +
+      "SS\020\003\"m\n&CloudPrivatelinkAccessRevocation" +
+      "Status\"C\n\005Value\022\t\n\005UNSET\020\000\022\016\n\nSUCCESSFUL" +
+      "\020\001\022\n\n\006FAILED\020\002\022\023\n\017PARTIAL_SUCCESS\020\003\"\231\001\n!" +
+      "CDPClassicClusterHostDistribution\022\020\n\010hos" +
+      "tname\030\001 \001(\t\022\021\n\tipAddress\030\002 \001(\t\022\030\n\020distri" +
+      "butionType\030\003 \001(\t\022\030\n\020distributionName\030\004 \001" +
+      "(\t\022\033\n\023distributionVersion\030\005 \001(\t\"\322\002\n\036CDPC" +
+      "lassicClusterStatusChanged\022\021\n\taccountId\030" +
+      "\001 \001(\t\022\022\n\nclusterCrn\030\002 \001(\t\022-\n\006status\030\003 \001(" +
+      "\0162\035.usage.CDPClusterStatus.Value\022\030\n\020erro" +
+      "rDescription\030\004 \001(\t\022\023\n\013clusterType\030\005 \001(\t\022" +
+      "\035\n\025registrationTimestamp\030\006 \001(\004\022#\n\033lastSu" +
+      "ccessfulSyncTimestamp\030\007 \001(\004\022\026\n\016environme" +
+      "ntCrn\030\010 \001(\t\022\026\n\016datacenterName\030\t \001(\t\0227\n\005h" +
+      "osts\030\n \003(\0132(.usage.CDPClassicClusterHost" +
+      "Distribution\"\256\001\n&CDPOnPremisesControlPla" +
+      "neStatusChanged\022\021\n\taccountId\030\001 \001(\t\022\016\n\006pv" +
+      "cCrn\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\0229\n\006status\030\004 \001(\016" +
+      "2).usage.OnPremisesControlPlaneStatus.Va" +
+      "lue\022\030\n\020errorDescription\030\005 \001(\t\"\353\001\n$CDPOnP" +
+      "remisesConnectionStatusChanged\022\021\n\taccoun" +
+      "tId\030\001 \001(\t\022\025\n\rconnectionCrn\030\002 \001(\t\022\014\n\004name" +
+      "\030\003 \001(\t\0226\n\006status\030\004 \001(\0162&.usage.OnPremise" +
+      "ConnectionStatus.Value\022\020\n\010agentCrn\030\005 \001(\t" +
+      "\022\021\n\tcreatedAt\030\006 \001(\004\022\024\n\014lastActiveAt\030\007 \001(" +
+      "\004\022\030\n\020errorDescription\030\010 \001(\t\"\333\001\n\023CDPCDLSt" +
+      "atusChanged\0223\n\016clusterDetails\030\001 \001(\0132\033.us" +
+      "age.CDPCDLClusterDetails\022=\n\023statusChange" +
+      "Details\030\002 \001(\0132 .usage.CDPCDLStatusChange" +
+      "Details\0225\n\017workflowDetails\030\003 \001(\0132\034.usage" +
+      ".CDPCDLWorkflowDetails\022\031\n\021additionalDeta" +
+      "ils\030\004 \001(\t\"\274\002\n\024CDPCDLClusterDetails\022\024\n\014da" +
+      "talakeName\030\001 \001(\t\022\023\n\013datalakeCrn\030\002 \001(\t\022\027\n" +
+      "\017environmentName\030\003 \001(\t\022\026\n\016environmentCrn" +
+      "\030\004 \001(\t\022\021\n\taccountId\030\005 \001(\t\022\030\n\020rangerRAZEn" +
+      "abled\030\006 \001(\010\022\026\n\016multiAZEnabled\030\007 \001(\010\022?\n\rc" +
+      "loudProvider\030\010 \001(\0162(.usage.CDPCloudProvi" +
+      "derVariantType.Value\022\017\n\007runtime\030\t \001(\t\022\035\n" +
+      "\025usingExternalDatabase\030\n \001(\010\022\022\n\nlayoutNa" +
+      "me\030\013 \001(\t\"\215\001\n\031CDPCDLStatusChangeDetails\022\016" +
+      "\n\006userID\030\001 \001(\t\022\026\n\016previousStatus\030\002 \001(\t\022\034" +
+      "\n\024previousStatusReason\030\003 \001(\t\022\021\n\tnewStatu" +
+      "s\030\004 \001(\t\022\027\n\017newStatusReason\030\005 \001(\t\"\222\001\n\025CDP" +
+      "CDLWorkflowDetails\022\022\n\nworkflowID\030\001 \001(\t\022\021" +
+      "\n\trequestID\030\002 \001(\t\022\021\n\tstartTime\030\003 \001(\t\022\017\n\007" +
+      "endTime\030\004 \001(\t\022\026\n\016workflowFailed\030\005 \001(\010\022\026\n" +
+      "\016failureMessage\030\006 \001(\t\"\317\001\n\016CDPFreeIPASync" +
+      "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
+      "erationDetails\0228\n\016freeIPADetails\030\002 \001(\0132 " +
+      ".usage.CDPFreeIPAExtendedDetails\0225\n\rstat" +
+      "usDetails\030\003 \001(\0132\036.usage.CDPFreeIPAStatus" +
+      "Details\022\026\n\016environmentCrn\030\004 \001(\t\"\216\002\n\022CDPE" +
+      "nvironmentSync\0224\n\020operationDetails\030\001 \001(\013" +
+      "2\032.usage.CDPOperationDetails\022\016\n\006status\030\002" +
+      " \001(\t\0228\n\022environmentDetails\030\003 \001(\0132\034.usage" +
+      ".CDPEnvironmentDetails\022M\n\027telemetryFeatu" +
+      "reDetails\030\004 \001(\0132,.usage.CDPEnvironmentTe" +
+      "lemetryFeatureDetails\022)\n\007freeIPA\030\005 \001(\0132\030" +
+      ".usage.CDPFreeIPADetails\"Q\n\032CDPEnvironme" +
+      "ntDeletionType\"3\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004NO" +
+      "NE\020\001\022\n\n\006SIMPLE\020\002\022\t\n\005FORCE\020\003\"\257\001\n\035CDPDataC" +
+      "atalogDataShareStatus\"\215\001\n\005Value\022\t\n\005UNSET" +
+      "\020\000\022\024\n\020CREATE_SUCCEEDED\020\001\022\021\n\rCREATE_FAILE" +
+      "D\020\002\022\024\n\020DELETE_SUCCEEDED\020\003\022\021\n\rDELETE_FAIL" +
+      "ED\020\004\022\024\n\020UPDATE_SUCCEEDED\020\005\022\021\n\rUPDATE_FAI" +
+      "LED\020\006\"\275\001\n CDPDataCatalogDataShareRequest" +
+      "ed\022\014\n\004name\030\001 \001(\t\022\020\n\010actorCrn\030\002 \001(\t\022\026\n\016en" +
+      "vironmentCrn\030\003 \001(\t\022\023\n\013datalakeCrn\030\004 \001(\t\022" +
+      "\020\n\010IsShared\030\005 \001(\010\022:\n\006status\030\006 \001(\0162*.usag" +
+      "e.CDPDataCatalogDataShareStatus.Value\"\234\002" +
+      "\n\026CDPCloudbreakFlowEvent\022\023\n\013resourceCrn\030" +
+      "\001 \001(\t\022\031\n\021rootFlowChainType\030\002 \001(\t\022\033\n\023actu" +
+      "alFlowChainType\030\003 \001(\t\022\023\n\013flowChainId\030\004 \001" +
+      "(\t\022\020\n\010flowType\030\005 \001(\t\022\016\n\006flowId\030\006 \001(\t\022\021\n\t" +
+      "stateType\030\007 \001(\t\022\021\n\tflowState\030\010 \001(\t\022\021\n\tfl" +
+      "owEvent\030\t \001(\t\022\021\n\tedgeState\030\n \001(\010\022\016\n\006reas" +
+      "on\030\013 \001(\t\022\021\n\trequestId\030\014 \001(\t\022\017\n\007service\030\r" +
+      " \001(\t\"\251\001\n\tModelMeta\022\"\n\006format\030\001 \001(\0162\022.usa" +
+      "ge.ModelFormat\022(\n\tcontainer\030\002 \001(\0162\025.usag" +
+      "e.ModelContainer\022\036\n\004task\030\003 \001(\0162\020.usage.M" +
+      "odelTask\022 \n\030transformer_architecture\030\004 \001" +
+      "(\t\022\014\n\004chat\030\005 \001(\010\"<\n\tURLSource\022\013\n\003url\030\001 \001" +
+      "(\t\022\"\n\010metadata\030\002 \001(\0132\020.usage.ModelMeta\"S" +
+      "\n\010HFSource\022\020\n\010model_id\030\001 \001(\t\022\"\n\010metadata" +
+      "\030\002 \001(\0132\020.usage.ModelMeta\022\021\n\tapi_token\030\003 " +
+      "\001(\t\"\200\001\n\tNGCSource\022\020\n\010model_id\030\001 \001(\t\022\031\n\021n" +
+      "gc_model_profile\030\002 \001(\t\022\"\n\010metadata\030\003 \001(\013" +
+      "2\020.usage.ModelMeta\022\021\n\tapi_token\030\004 \001(\t\022\017\n" +
+      "\007release\030\005 \001(\t\"3\n\016RegistrySource\022\020\n\010mode" +
+      "l_id\030\001 \001(\t\022\017\n\007version\030\002 \001(\005\"\277\001\n\013ModelSou" +
+      "rce\022&\n\nurl_source\030\001 \001(\0132\020.usage.URLSourc" +
+      "eH\000\022$\n\thf_source\030\002 \001(\0132\017.usage.HFSourceH" +
+      "\000\022&\n\nngc_source\030\003 \001(\0132\020.usage.NGCSourceH" +
+      "\000\0220\n\017registry_source\030\004 \001(\0132\025.usage.Regis" +
+      "trySourceH\000B\010\n\006source\"B\n\tResources\022\017\n\007re" +
+      "q_cpu\030\001 \001(\t\022\022\n\nreq_memory\030\002 \001(\t\022\020\n\010num_g" +
+      "pus\030\003 \001(\t\"\365\001\n\021AutoscalingConfig\022\016\n\006metri" +
+      "c\030\001 \001(\t\022\016\n\006target\030\002 \001(\t\022\032\n\022target_utiliz" +
+      "ation\030\003 \001(\t\022\037\n\027scale_to_zero_retention\030\004" +
+      " \001(\t\022\030\n\020activation_scale\030\005 \001(\t\022\030\n\020scale_" +
+      "down_delay\030\006 \001(\t\022\037\n\027panic_window_percent" +
+      "age\030\007 \001(\t\022\027\n\017panic_threshold\030\010 \001(\t\022\025\n\rst" +
+      "able_window\030\t \001(\t\"o\n\013Autoscaling\022\024\n\014min_" +
+      "replicas\030\001 \001(\t\022\024\n\014max_replicas\030\002 \001(\t\0224\n\022" +
+      "autoscaling_config\030\005 \001(\0132\030.usage.Autosca" +
+      "lingConfig\"\317\002\n\016VLLMEngineArgs\022\r\n\005dtype\030\001" +
+      " \001(\t\022\035\n\025enable_prefix_caching\030\002 \001(\010\022\036\n\026g" +
+      "pu_memory_utilization\030\003 \001(\002\022\023\n\013load_form" +
+      "at\030\004 \001(\t\022\030\n\020max_model_length\030\005 \001(\005\022\036\n\026ma" +
+      "x_num_batched_tokens\030\006 \001(\005\022\024\n\014max_num_se" +
+      "qs\030\007 \001(\005\022\024\n\014quantization\030\010 \001(\t\022\025\n\renforc" +
+      "e_eager\030\t \001(\010\022\031\n\021trust_remote_code\030\n \001(\010" +
+      "\022\026\n\016kv_cache_dtype\030\013 \001(\t\022\022\n\nblock_size\030\014" +
+      " \001(\005\022\026\n\016cpu_offload_gb\030\r \001(\005\"2\n\023Environm" +
+      "entVariable\022\014\n\004name\030\001 \001(\t\022\r\n\005value\030\002 \001(\t" +
+      "\"d\n\032ApplicationContainerSource\022\013\n\003url\030\001 " +
+      "\001(\t\0229\n\025environment_variables\030\002 \003(\0132\032.usa" +
+      "ge.EnvironmentVariable\"\220\001\n\032ApplicationDi" +
+      "rectorySource\022\013\n\003url\030\001 \001(\t\022\023\n\013entry_poin" +
+      "t\030\002 \001(\t\022\025\n\rruntime_image\030\003 \001(\t\0229\n\025enviro" +
+      "nment_variables\030\004 \003(\0132\032.usage.Environmen" +
+      "tVariable\"\233\001\n\021ApplicationSource\022=\n\020conta" +
+      "iner_source\030\001 \001(\0132!.usage.ApplicationCon" +
+      "tainerSourceH\000\022=\n\020directory_source\030\002 \001(\013" +
+      "2!.usage.ApplicationDirectorySourceH\000B\010\n" +
+      "\006source\"\273\005\n+CDPCMLServingEndpointDeploye" +
+      "dOrUpdatedEvent\022\024\n\014resource_crn\030\001 \001(\t\022\025\n" +
+      "\rresource_type\030\002 \001(\t\022\030\n\020resource_version" +
+      "\030\003 \001(\t\022\025\n\rusername_hash\030\004 \001(\t\022\021\n\tnamespa" +
+      "ce\030\005 \001(\t\022\032\n\022endpoint_name_hash\030\006 \001(\t\022\027\n\017" +
+      "model_name_hash\030\007 \001(\t\022\"\n\006source\030\010 \001(\0132\022." +
+      "usage.ModelSource\022#\n\tresources\030\t \001(\0132\020.u" +
+      "sage.Resources\022\'\n\013autoscaling\030\n \001(\0132\022.us" +
+      "age.Autoscaling\022\017\n\007traffic\030\013 \001(\t\022/\n\020vllm" +
+      "_engine_args\030\014 \001(\0132\025.usage.VLLMEngineArg" +
+      "s\022\025\n\rinstance_type\030\r \001(\t\022\021\n\tis_update\030\016 " +
+      "\001(\010\022(\n\014runtime_info\030\017 \001(\0132\022.usage.Runtim" +
+      "eInfo\022\024\n\014api_standard\030\020 \001(\t\022\031\n\021has_chat_" +
+      "template\030\021 \001(\010\022\027\n\017deployment_mode\030\022 \001(\t\022" +
+      "\024\n\014model_format\030\023 \001(\t\022\022\n\nmodel_task\030\024 \001(" +
+      "\t\022\032\n\022model_architecture\030\025 \001(\t\022\024\n\014endpoin" +
+      "t_crn\030\026 \001(\t\0228\n\024optimization_profile\030\027 \001(" +
+      "\0132\032.usage.OptimizationProfile\"\317\001\n\013Runtim" +
+      "eInfo\022\024\n\014display_name\030\001 \001(\t\022\017\n\007version\030\002" +
+      " \001(\t\022\030\n\020image_identifier\030\003 \001(\t\022\026\n\014vllm_v" +
+      "ersion\030\004 \001(\tH\000\022&\n\034transformers_library_v" +
+      "ersion\030\005 \001(\tH\000\022\026\n\016latest_version\030\006 \001(\010\022\024" +
+      "\n\014runtime_name\030\007 \001(\tB\021\n\017version_details\"" +
+      "\205\002\n\023OptimizationProfile\022\013\n\003gpu\030\001 \001(\t\022\022\n\n" +
+      "gpu_device\030\002 \001(\t\022\021\n\tgpu_count\030\003 \001(\t\022\021\n\tp" +
+      "recision\030\004 \001(\t\022\017\n\007release\030\005 \001(\t\022*\n\014embed" +
+      "_config\030\006 \001(\0132\022.usage.EmbedConfigH\000\0226\n\017t" +
+      "ext_gen_config\030\007 \001(\0132\033.usage.TextGenerat" +
+      "ionConfigH\000\022(\n\013rank_config\030\010 \001(\0132\021.usage" +
+      ".RankConfigH\000B\010\n\006config\"3\n\013EmbedConfig\022\021" +
+      "\n\tDimension\030\010 \001(\005\022\021\n\tMaxTokens\030\t \001(\005\"P\n\024" +
+      "TextGenerationConfig\022\021\n\tLLMEngine\030\001 \001(\t\022" +
+      "\024\n\014MaxImageSize\030\002 \001(\t\022\017\n\007profile\030\003 \001(\t\"4" +
+      "\n\nRankConfig\022\021\n\tMaxTokens\030\001 \001(\005\022\023\n\013MaxPa" +
+      "ssages\030\002 \001(\005\"\341\001\n(CDPCMLServingEndpointSt" +
+      "artedStoppedEvent\022\024\n\014resource_crn\030\001 \001(\t\022" +
+      "\025\n\rresource_type\030\002 \001(\t\022\030\n\020resource_versi" +
+      "on\030\003 \001(\t\022\025\n\rusername_hash\030\004 \001(\t\022\021\n\tnames" +
+      "pace\030\005 \001(\t\022\032\n\022endpoint_name_hash\030\006 \001(\t\022\022" +
+      "\n\nis_stopped\030\007 \001(\010\022\024\n\014endpoint_crn\030\010 \001(\t" +
+      "\"\306\001\n!CDPCMLServingEndpointDeletedEvent\022\024" +
+      "\n\014resource_crn\030\001 \001(\t\022\025\n\rresource_type\030\002 " +
+      "\001(\t\022\030\n\020resource_version\030\003 \001(\t\022\025\n\rusernam" +
+      "e_hash\030\004 \001(\t\022\021\n\tnamespace\030\005 \001(\t\022\032\n\022endpo" +
+      "int_name_hash\030\006 \001(\t\022\024\n\014endpoint_crn\030\007 \001(" +
+      "\t\"\217\003\n%CDPCMLServingApplicationDeployedEv" +
+      "ent\022\024\n\014resource_crn\030\001 \001(\t\022\025\n\rresource_ty" +
+      "pe\030\002 \001(\t\022\030\n\020resource_version\030\003 \001(\t\022\025\n\rus" +
+      "ername_hash\030\004 \001(\t\022\021\n\tnamespace\030\005 \001(\t\022\035\n\025" +
+      "application_name_hash\030\006 \001(\t\022(\n\006source\030\010 " +
+      "\001(\0132\030.usage.ApplicationSource\022#\n\tresourc" +
+      "es\030\t \001(\0132\020.usage.Resources\022\'\n\013autoscalin" +
+      "g\030\n \001(\0132\022.usage.Autoscaling\022\017\n\007traffic\030\013" +
+      " \001(\t\022\025\n\rinstance_type\030\r \001(\t\022\021\n\tis_update" +
+      "\030\016 \001(\010\022\027\n\017application_crn\030\017 \001(\tJ\004\010\007\020\010J\004\010" +
+      "\014\020\r\"\317\001\n$CDPCMLServingApplicationDeletedE" +
+      "vent\022\024\n\014resource_crn\030\001 \001(\t\022\025\n\rresource_t" +
+      "ype\030\002 \001(\t\022\030\n\020resource_version\030\003 \001(\t\022\025\n\ru" +
+      "sername_hash\030\004 \001(\t\022\021\n\tnamespace\030\005 \001(\t\022\035\n" +
+      "\025application_name_hash\030\006 \001(\t\022\027\n\017applicat" +
+      "ion_crn\030\007 \001(\t\"o\n\035CDPCMLAiStudioDeploymen" +
+      "tEvent\022\021\n\tprojectId\030\001 \001(\r\022\022\n\nstudioName\030" +
+      "\002 \001(\t\022\021\n\teventType\030\003 \001(\t\022\024\n\014eventDetails" +
+      "\030\004 \001(\t\"e\n\024NotificationSeverity\"M\n\005Value\022" +
+      "\t\n\005UNSET\020\000\022\t\n\005DEBUG\020\001\022\010\n\004INFO\020\002\022\013\n\007WARNI" +
+      "NG\020\003\022\t\n\005ERROR\020\004\022\014\n\010CRITICAL\020\005\"{\n\026Notific" +
+      "ationFormFactor\"a\n\005Value\022\t\n\005UNSET\020\000\022\020\n\014S" +
+      "UBSCRIPTION\020\001\022\025\n\021DISTRIBUTION_LIST\020\002\022$\n " +
+      "SYSTEM_MANAGED_DISTRIBUTION_LIST\020\003\"P\n\013Ch" +
+      "annelType\"A\n\005Value\022\t\n\005UNSET\020\000\022\t\n\005EMAIL\020\001" +
+      "\022\n\n\006IN_APP\020\002\022\013\n\007CONSOLE\020\003\022\t\n\005SLACK\020\004\"\272\001\n" +
+      "\020NotificationType\"\245\001\n\005Value\022\t\n\005UNSET\020\000\022\032" +
+      "\n\026AZURE_DEFAULT_OUTBOUND\020\001\022\026\n\022STACK_PROV" +
+      "ISIONING\020\002\022\024\n\020STACK_START_STOP\020\003\022\020\n\014STAC" +
+      "K_RESIZE\020\004\022\021\n\rSTACK_UPGRADE\020\005\022\020\n\014STACK_R" +
+      "EPAIR\020\006\022\020\n\014STACK_HEALTH\020\007\"\244\003\n\032CDPCBNotif" +
+      "icationSentEvent\022\n\n\002id\030\001 \001(\003\022?\n\024notifica" +
+      "tionSeverity\030\002 \001(\0162!.usage.NotificationS" +
+      "everity.Value\0227\n\020notificationType\030\003 \001(\0162" +
+      "\035.usage.NotificationType.Value\022-\n\013channe" +
+      "lType\030\004 \001(\0162\030.usage.ChannelType.Value\022\024\n" +
+      "\014resourceName\030\005 \001(\t\022\023\n\013resourceCrn\030\006 \001(\t" +
+      "\022\014\n\004name\030\007 \001(\t\022\021\n\taccountId\030\010 \001(\t\022\017\n\007mes" +
+      "sage\030\t \001(\t\022\021\n\tcreatedAt\030\n \001(\004\022\016\n\006sentAt\030" +
+      "\013 \001(\004\022\014\n\004sent\030\014 \001(\010\022C\n\026notificationFormF" +
+      "actor\030\r \001(\0162#.usage.NotificationFormFact" +
+      "or.Value*\220\001\n\023WorkloadEventStatus\022\016\n\nSCHE" +
+      "DULING\020\000\022\014\n\010STARTING\020\001\022\013\n\007RUNNING\020\002\022\014\n\010S" +
+      "TOPPING\020\003\022\013\n\007STOPPED\020\004\022\013\n\007UNKNOWN\020\005\022\013\n\007P" +
+      "ENDING\020\006\022\r\n\tSUCCEEDED\020\007\022\n\n\006FAILED\020\010*\201\002\n\031" +
+      "WorkloadInternalErrorCode\022\024\n\020UNKNOWN_INT" +
+      "ERNAL\020\000\022$\n QUOTA_REQUESTS_CPU_NOT_SPECIF" +
+      "IED\020\001\022\'\n#QUOTA_REQUESTS_MEMORY_NOT_SPECI" +
+      "FIED\020\002\022\031\n\025QUOTA_REQUESTS_MEMORY\020\003\022\026\n\022QUO" +
+      "TA_REQUESTS_CPU\020\004\022\023\n\017QUOTA_COUNT_POD\020\005\022\026" +
+      "\n\022QUOTA_REQUESTS_GPU\020\006\022\037\n\033NOT_ENOUGH_RES" +
+      "OURCE_REQUEST\020\007*J\n\013ModelFormat\022\022\n\016FORMAT" +
+      "_UNKNOWN\020\000\022\010\n\004ONNX\020\001\022\014\n\010TENSORRT\020\002\022\017\n\013TR" +
+      "ANSFORMER\020\003*H\n\016ModelContainer\022\025\n\021CONTAIN" +
+      "ER_UNKNOWN\020\000\022\n\n\006MLFLOW\020\001\022\n\n\006TRITON\020\002\022\007\n\003" +
+      "RAW\020\003*\226\001\n\tModelTask\022\020\n\014TASK_UNKNOWN\020\000\022\r\n" +
+      "\tINFERENCE\020\001\022\023\n\017TEXT_GENERATION\020\002\022\t\n\005EMB" +
+      "ED\020\003\022\033\n\027TEXT_TO_TEXT_GENERATION\020\004\022\022\n\016CLA" +
+      "SSIFICATION\020\005\022\r\n\tFILL_MASK\020\006\022\010\n\004RANK\020\007BV" +
+      "\n-com.cloudera.thunderhead.service.commo" +
+      "n.usageB\nUsageProtoZ\031com/cloudera/cdp/pr" +
+      "otobufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -2750,6 +2750,26 @@ message CDPClusterStatus {
     ADD_VOLUMES_FINISHED = 84;
     // The status when adding additional volumes to instances has failed.
     ADD_VOLUMES_FAILED = 85;
+
+    // The status when ZooKeeper to KRaft migration configuration has completed successfully.
+    KRAFT_MIGRATION_CONFIGURATION_FINISHED = 86;
+    // The status when ZooKeeper to KRaft migration configuration has failed.
+    KRAFT_MIGRATION_CONFIGURATION_FAILED = 87;
+
+    // The status when ZooKeeper to KRaft migration has completed successfully.
+    KRAFT_MIGRATION_FINISHED = 88;
+    // The status when ZooKeeper to KRaft migration has failed.
+    KRAFT_MIGRATION_FAILED = 89;
+
+    // The status when ZooKeeper to KRaft migration finalization has completed successfully.
+    KRAFT_MIGRATION_FINALIZATION_FINISHED = 90;
+    // The status when ZooKeeper to KRaft migration finalization has failed.
+    KRAFT_MIGRATION_FINALIZATION_FAILED = 91;
+
+    // The status when ZooKeeper to KRaft migration rollback has completed successfully.
+    KRAFT_MIGRATION_ROLLBACK_FINISHED = 92;
+    // The status when ZooKeeper to KRaft migration rollback has failed.
+    KRAFT_MIGRATION_ROLLBACK_FAILED = 93;
   }
 }
 

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.KRAFT_MIGRATION_ROLLBACK_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.KRAFT_MIGRATION_ROLLBACK_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackState.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED_STATE;
@@ -17,15 +20,19 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class MigrateZookeeperToKraftRollbackFlowConfig extends StackStatusFinalizerAbstractFlowConfig<MigrateZookeeperToKraftRollbackState,
-        MigrateZookeeperToKraftRollbackStateSelectors> implements RetryableFlowConfiguration<MigrateZookeeperToKraftRollbackStateSelectors> {
+        MigrateZookeeperToKraftRollbackStateSelectors> implements RetryableFlowConfiguration<MigrateZookeeperToKraftRollbackStateSelectors>,
+        ClusterUseCaseAware {
 
     private static final List<Transition<MigrateZookeeperToKraftRollbackState, MigrateZookeeperToKraftRollbackStateSelectors>> TRANSITIONS =
             new Transition.Builder<MigrateZookeeperToKraftRollbackState, MigrateZookeeperToKraftRollbackStateSelectors>()
@@ -90,5 +97,16 @@ public class MigrateZookeeperToKraftRollbackFlowConfig extends StackStatusFinali
     @Override
     public MigrateZookeeperToKraftRollbackStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED_STATE.equals(flowState)) {
+            return KRAFT_MIGRATION_ROLLBACK_FINISHED;
+        } else if (ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED_STATE.equals(flowState)) {
+            return KRAFT_MIGRATION_ROLLBACK_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }
