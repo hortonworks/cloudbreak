@@ -370,8 +370,7 @@ public enum EnvironmentStatus {
         return ImmutableSet.of(
                         Set.of(ARCHIVED,
                                 CREATE_FAILED,
-                                DELETE_FAILED,
-                                FREEIPA_DELETED_ON_PROVIDER_SIDE),
+                                DELETE_FAILED),
                         DELETE_IN_PROGRESS_STATES,
                         CREATE_IN_PROGRESS_STATES)
                 .stream().flatMap(Collection::stream).collect(Collectors.toList());

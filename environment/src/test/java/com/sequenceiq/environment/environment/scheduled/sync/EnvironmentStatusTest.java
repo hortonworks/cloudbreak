@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.scheduled.sync;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -102,6 +103,28 @@ class EnvironmentStatusTest {
                 environment,
                 EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE,
                 ResourceEvent.ENVIRONMENT_SYNC_FINISHED);
+    }
+
+    @Test
+    @DisplayName(
+            "GIVEN an environment with FreeIpa deleted on provider side " +
+                    "WHEN FreeIpa is available again (e.g. after rebuild) " +
+                    "THEN environment status should be updated to available"
+    )
+    void recoveredAfterFreeIpaRebuild() {
+        environment.setStatus(EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE);
+        setFreeIpaStatus(Status.AVAILABLE);
+        underTest.executeJob(jobExecutionContext);
+
+        verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                environment,
+                EnvironmentStatus.AVAILABLE,
+                ResourceEvent.ENVIRONMENT_SYNC_FINISHED);
+    }
+
+    @Test
+    void freeIpaDeletedOnProviderSideIsNotSkippedFromStatusChecker() {
+        assertFalse(EnvironmentStatus.skipFromStatusChecker().contains(EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE));
     }
 
     private void setFreeIpaStatus(Status freeIpaStatus) {

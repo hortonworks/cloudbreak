@@ -23,7 +23,7 @@ class EnvironmentStackPatchResourceServiceTest {
             "ENV_STOPPED, false, false",
             "DELETE_FAILED, false, true",
             "CREATE_FAILED, false, true",
-            "FREEIPA_DELETED_ON_PROVIDER_SIDE, false, true",
+            "FREEIPA_DELETED_ON_PROVIDER_SIDE, false, false",
             "CREATION_INITIATED, false, true",
             "DELETE_INITIATED, false, true",
             "ARCHIVED, true, true",
