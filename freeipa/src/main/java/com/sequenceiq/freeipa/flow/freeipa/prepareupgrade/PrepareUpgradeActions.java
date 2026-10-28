@@ -133,6 +133,8 @@ public class PrepareUpgradeActions {
             protected void prepareExecution(PrepareUpgradeTriggerEvent payload, Map<Object, Object> variables) {
                 setOperationId(variables, payload.getOperationId());
                 variables.put(PREPARE_UPGRADE_TRIGGER_EVENT, payload);
+                setChainedAction(variables, payload.isChained());
+                setFinalChain(variables, payload.isFinalChain());
             }
 
             @Override
@@ -500,9 +502,13 @@ public class PrepareUpgradeActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 String operationId = getOperationId(variables);
-                operationService.completeOperation(context.getStack().getAccountId(), operationId,
-                        List.of(), List.of());
-                stackUpdater().updateStackStatus(context.getStack(), AVAILABLE, "FreeIPA upgrade preparation completed");
+                if (isChainedAction(variables) && !isFinalChain(variables)) {
+                    stackUpdater().updateStackStatus(context.getStack(), CLUSTER_OPERATION, "FreeIPA upgrade preparation completed");
+                } else {
+                    operationService.completeOperation(context.getStack().getAccountId(), operationId,
+                            List.of(), List.of());
+                    stackUpdater().updateStackStatus(context.getStack(), AVAILABLE, "FreeIPA upgrade preparation completed");
+                }
                 getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(),
                         FREEIPA_PREPARE_UPGRADE_FINISHED);
                 sendEvent(context, new StackEvent(PREPARE_UPGRADE_FINALIZED_EVENT.event(), payload.getResourceId()));

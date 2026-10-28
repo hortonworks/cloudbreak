@@ -311,6 +311,24 @@ class PrepareUpgradeFlowIntegrationTest {
     }
 
     @Test
+    public void testChainedNonFinalFlowDoesNotCompleteOperation() {
+        stack.setCloudPlatform("AZURE");
+
+        testFlow(true, false);
+
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
+                "Preparing image on cloud provider side");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, CLUSTER_OPERATION,
+                "FreeIPA upgrade preparation completed");
+        stackStatusVerify.verifyNoMoreInteractions();
+
+        verify(stackUpdater, never()).updateStackStatus(eq(stack), eq(AVAILABLE), any(String.class));
+        verify(operationService, never()).completeOperation(any(), any(), any(), any());
+        verify(operationService, never()).failOperation(any(), any(), any(), any(), any());
+    }
+
+    @Test
     public void testAzureImageFallbackSetsFallbackImage() throws Exception {
         stack.setCloudPlatform("AZURE");
         when(imageFallbackService.imageFallbackPermitted(any(String.class), eq(stack))).thenReturn(true);
@@ -432,7 +450,11 @@ class PrepareUpgradeFlowIntegrationTest {
     }
 
     private void testFlow() {
-        FlowIdentifier flowIdentifier = triggerFlow();
+        testFlow(false, false);
+    }
+
+    private void testFlow(boolean chained, boolean finalChain) {
+        FlowIdentifier flowIdentifier = triggerFlow(chained, finalChain);
         letItFlow(flowIdentifier);
         flowFinishedSuccessfully();
     }
@@ -441,9 +463,9 @@ class PrepareUpgradeFlowIntegrationTest {
         assertTrue(flowRegister.getRunningFlowIds().isEmpty(), "flow has not finished");
     }
 
-    private FlowIdentifier triggerFlow() {
+    private FlowIdentifier triggerFlow(boolean chained, boolean finalChain) {
         PrepareUpgradeTriggerEvent triggerEvent = new PrepareUpgradeTriggerEvent(
-                PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), STACK_ID, OPERATION_ID, new ImageSettingsRequest());
+                PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), STACK_ID, OPERATION_ID, new ImageSettingsRequest(), false, chained, finalChain);
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> freeIpaFlowManager.notify(triggerEvent.selector(), triggerEvent));

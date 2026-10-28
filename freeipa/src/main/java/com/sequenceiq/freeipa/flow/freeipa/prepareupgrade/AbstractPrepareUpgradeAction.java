@@ -17,6 +17,7 @@ import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConvert
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
+import com.sequenceiq.freeipa.flow.chain.FlowChainAwareAction;
 import com.sequenceiq.freeipa.flow.freeipa.prepareupgrade.event.PrepareUpgradeFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
@@ -26,7 +27,7 @@ import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 public abstract class AbstractPrepareUpgradeAction<P extends Payload>
         extends AbstractStackAction<PrepareUpgradeState, PrepareUpgradeEvent, StackContext, P>
-        implements OperationAwareAction {
+        implements OperationAwareAction, FlowChainAwareAction {
 
     @Inject
     private StackService stackService;

@@ -111,7 +111,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
 
     private List<PrepareUpgradeTriggerEvent> createPrepareUpgradeEvent(UpgradeEvent event) {
         return List.of(new PrepareUpgradeTriggerEvent(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), event.getResourceId(),
-                event.getOperationId(), event.getImageSettingsRequest(), event.isNeedMigration()));
+                event.getOperationId(), event.getImageSettingsRequest(), event.isNeedMigration(), true, false));
     }
 
     private List<Selectable> createInitEvent(UpgradeEvent event) {

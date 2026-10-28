@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -89,6 +90,8 @@ class PrepareUpgradeServiceTest {
         PrepareUpgradeTriggerEvent triggerEvent = triggerCaptor.getValue();
         assertEquals(STACK_ID, triggerEvent.getResourceId());
         assertEquals(OPERATION_ID, triggerEvent.getOperationId());
+        assertFalse(triggerEvent.isChained());
+        assertFalse(triggerEvent.isFinalChain());
         ImageSettingsRequest targetImage = triggerEvent.getImageSettingsRequest();
         assertEquals(SELECTED_IMAGE_ID, targetImage.getId());
         assertEquals(SELECTED_IMAGE_CATALOG, targetImage.getCatalog());

@@ -97,6 +97,8 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
         assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
         assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
+        assertTrue(prepareUpgradeTriggerEvent.isChained());
+        assertFalse(prepareUpgradeTriggerEvent.isFinalChain());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -214,6 +216,8 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
         assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
         assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
+        assertTrue(prepareUpgradeTriggerEvent.isChained());
+        assertFalse(prepareUpgradeTriggerEvent.isFinalChain());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -280,6 +284,8 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
         assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
         assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
+        assertTrue(prepareUpgradeTriggerEvent.isChained());
+        assertFalse(prepareUpgradeTriggerEvent.isFinalChain());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -353,6 +359,8 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
         assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
         assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
+        assertTrue(prepareUpgradeTriggerEvent.isChained());
+        assertFalse(prepareUpgradeTriggerEvent.isFinalChain());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -447,6 +455,8 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
         assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
         assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
+        assertTrue(prepareUpgradeTriggerEvent.isChained());
+        assertFalse(prepareUpgradeTriggerEvent.isFinalChain());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -569,6 +579,8 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
         assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
         assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
+        assertTrue(prepareUpgradeTriggerEvent.isChained());
+        assertFalse(prepareUpgradeTriggerEvent.isFinalChain());
 
         SecretRotationFlowChainTriggerEvent secretRotationTriggerEvent = (SecretRotationFlowChainTriggerEvent) queue.poll();
         assertEquals(STACK_ID, secretRotationTriggerEvent.getResourceId());
@@ -694,6 +706,8 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(OPERATION_ID, prepareUpgradeTriggerEvent.getOperationId());
         assertEquals(STACK_ID, prepareUpgradeTriggerEvent.getResourceId());
         assertEquals(PrepareUpgradeEvent.PREPARE_UPGRADE_EVENT.event(), prepareUpgradeTriggerEvent.selector());
+        assertTrue(prepareUpgradeTriggerEvent.isChained());
+        assertFalse(prepareUpgradeTriggerEvent.isFinalChain());
         assertTrue(prepareUpgradeTriggerEvent.isNeedMigration(), "needMigration must propagate to the prepare-upgrade trigger");
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();

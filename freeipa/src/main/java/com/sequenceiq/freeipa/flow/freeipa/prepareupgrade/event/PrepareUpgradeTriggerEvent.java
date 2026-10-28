@@ -13,12 +13,12 @@ public class PrepareUpgradeTriggerEvent extends StackEvent {
 
     private final boolean needMigration;
 
-    public PrepareUpgradeTriggerEvent(String selector, Long stackId, String operationId, ImageSettingsRequest imageSettingsRequest) {
-        this(selector, stackId, operationId, imageSettingsRequest, false);
-    }
+    private final boolean chained;
 
-    public PrepareUpgradeTriggerEvent(String selector, Long stackId, String operationId) {
-        this(selector, stackId, operationId, null, false);
+    private final boolean finalChain;
+
+    public PrepareUpgradeTriggerEvent(String selector, Long stackId, String operationId, ImageSettingsRequest imageSettingsRequest) {
+        this(selector, stackId, operationId, imageSettingsRequest, false, false, false);
     }
 
     @JsonCreator
@@ -27,11 +27,15 @@ public class PrepareUpgradeTriggerEvent extends StackEvent {
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("operationId") String operationId,
             @JsonProperty("imageSettingsRequest") ImageSettingsRequest imageSettingsRequest,
-            @JsonProperty("needMigration") boolean needMigration) {
+            @JsonProperty("needMigration") boolean needMigration,
+            @JsonProperty("chained") boolean chained,
+            @JsonProperty("finalChain") boolean finalChain) {
         super(selector, stackId);
         this.operationId = operationId;
         this.imageSettingsRequest = imageSettingsRequest;
         this.needMigration = needMigration;
+        this.chained = chained;
+        this.finalChain = finalChain;
     }
 
     public String getOperationId() {
@@ -46,12 +50,22 @@ public class PrepareUpgradeTriggerEvent extends StackEvent {
         return needMigration;
     }
 
+    public boolean isChained() {
+        return chained;
+    }
+
+    public boolean isFinalChain() {
+        return finalChain;
+    }
+
     @Override
     public String toString() {
         return "PrepareUpgradeTriggerEvent{" +
                 "operationId='" + operationId + '\'' +
                 ", imageSettingsRequest=" + imageSettingsRequest +
                 ", needMigration=" + needMigration +
+                ", chained=" + chained +
+                ", finalChain=" + finalChain +
                 "} " + super.toString();
     }
 }

@@ -39,9 +39,14 @@ public class SaltUpdateFinishedAction extends AbstractStackProvisionAction<Insta
 
     @Override
     protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
-        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.AVAILABLE, "Salt update finished");
         getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_SALT_UPDATE_FINISHED);
-        if (isOperationIdSet(variables) && (!isChainedAction(variables) || isFinalChain(variables))) {
+        boolean lastFlow = !isChainedAction(variables) || isFinalChain(variables);
+        if (lastFlow) {
+            stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.AVAILABLE, "Salt update finished");
+        } else {
+            stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.SALT_STATE_UPDATE_IN_PROGRESS, "Salt update finished");
+        }
+        if (isOperationIdSet(variables) && lastFlow) {
             LOGGER.debug("Complete operation with id: [{}]", getOperationId(variables));
             SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());
             operationService.completeOperation(context.getStack().getAccountId(), getOperationId(variables), Set.of(successDetails), Set.of());

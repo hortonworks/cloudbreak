@@ -6,7 +6,10 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_REFRESH_ENTI
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
@@ -89,6 +92,34 @@ class RefreshEntitlementParamsActionsTest {
     }
 
     @Test
+    void refreshFreeIpaEntitlementActionSetsAvailableStatusWhenFinalChain() throws Exception {
+        AbstractRefreshEntitlementParamsAction<RefreshEntitlementParamsTriggerEvent> action = createRefreshAction();
+        RefreshEntitlementParamsTriggerEvent payload = new RefreshEntitlementParamsTriggerEvent(
+                "selector", 1L, Map.of("entitlement", Boolean.TRUE), null, true, true, "op-1");
+        Map<Object, Object> variables = new HashMap<>();
+        doReturn(1L).when(stack).getId();
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), "ok")).when(reactorEventFactory).createEvent(any(), any());
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.AVAILABLE, "Refresh entitlement based configurations finished");
+    }
+
+    @Test
+    void refreshFreeIpaEntitlementActionDoesNotUpdateStatusWhenNotFinalChain() throws Exception {
+        AbstractRefreshEntitlementParamsAction<RefreshEntitlementParamsTriggerEvent> action = createRefreshAction();
+        RefreshEntitlementParamsTriggerEvent payload = new RefreshEntitlementParamsTriggerEvent(
+                "selector", 1L, Map.of("entitlement", Boolean.TRUE), null, true, false, "op-1");
+        Map<Object, Object> variables = new HashMap<>();
+        doReturn(1L).when(stack).getId();
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), "ok")).when(reactorEventFactory).createEvent(any(), any());
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(stackUpdater, never()).updateStackStatus(any(Stack.class), any(DetailedStackStatus.class), anyString());
+    }
+
+    @Test
     void refreshEntitlementFailedActionSendsFailedNotifications() throws Exception {
         @SuppressWarnings("unchecked")
         AbstractRefreshEntitlementParamsAction<StackFailureEvent> action =
@@ -101,14 +132,17 @@ class RefreshEntitlementParamsActionsTest {
 
         new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
 
-        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, "Refresh entitlement based configurations failed: boom");
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.UPDATE_FAILED, "Refresh entitlement based configurations failed: boom");
         verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_REFRESH_ENTITLEMENT_FAILED, List.of("boom"));
-        verify(eventSenderService).sendEventAndNotification(
-                stack,
-                "user-crn",
-                FREEIPA_UPGRADE_FAILED,
-                List.of("Refresh entitlement based configurations failed: boom")
-        );
+        verify(eventSenderService, never()).sendEventAndNotification(any(), any(), eq(FREEIPA_UPGRADE_FAILED), any());
+    }
+
+    @SuppressWarnings("unchecked")
+    private AbstractRefreshEntitlementParamsAction<RefreshEntitlementParamsTriggerEvent> createRefreshAction() {
+        AbstractRefreshEntitlementParamsAction<RefreshEntitlementParamsTriggerEvent> action =
+                (AbstractRefreshEntitlementParamsAction<RefreshEntitlementParamsTriggerEvent>) underTest.refreshFreeIPAEntitlement();
+        initActionPrivateFields(action);
+        return action;
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {
