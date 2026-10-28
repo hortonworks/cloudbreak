@@ -53,7 +53,7 @@ main() {
 
     echo "export CPUS_FOR_CLOUDBREAK=4.0" >> integcb/Profile_template
     export TARGET_BRANCH=CB-$(echo $PRODUCTION_VERSION | sed -E "s/-b[0-9]+//g")
-    make without-build && make stop-containers
+    make without-build
     git checkout -- integcb/Profile_template
     git checkout $SOURCE_BRANCH
   else
