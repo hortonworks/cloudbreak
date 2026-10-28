@@ -227,26 +227,10 @@ public class GcpProperties {
 
     public static class Credential {
 
-        private String type;
-
         private final Json json = new Json();
-
-        private final P12 p12 = new P12();
 
         public Json getJson() {
             return json;
-        }
-
-        public P12 getP12() {
-            return p12;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
         }
 
         public static class Json {
@@ -258,48 +242,6 @@ public class GcpProperties {
 
             public void setBase64(String base64) {
                 this.base64 = base64;
-            }
-        }
-
-        public static class P12 {
-            private String base64;
-
-            private String serviceAccountId;
-
-            private String serviceAccountPrivateKey;
-
-            private String projectId;
-
-            public String getBase64() {
-                return base64;
-            }
-
-            public void setBase64(String base64) {
-                this.base64 = base64;
-            }
-
-            public String getServiceAccountId() {
-                return serviceAccountId;
-            }
-
-            public void setServiceAccountId(String serviceAccountId) {
-                this.serviceAccountId = serviceAccountId;
-            }
-
-            public String getServiceAccountPrivateKey() {
-                return serviceAccountPrivateKey;
-            }
-
-            public void setServiceAccountPrivateKey(String serviceAccountPrivateKey) {
-                this.serviceAccountPrivateKey = serviceAccountPrivateKey;
-            }
-
-            public String getProjectId() {
-                return projectId;
-            }
-
-            public void setProjectId(String projectId) {
-                this.projectId = projectId;
             }
         }
     }

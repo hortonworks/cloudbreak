@@ -31,7 +31,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonParameters;
-import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.P12Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
@@ -71,8 +70,6 @@ import com.sequenceiq.it.cloudbreak.util.gcp.GcpCloudFunctionality;
 
 @Component
 public class GcpCloudProvider extends AbstractCloudProvider {
-
-    private static final String JSON_CREDENTIAL_TYPE = "json";
 
     private static final String DEFAULT_STORAGE_NAME = "apitest" + UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -381,14 +378,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
-        GcpCredentialParameters parameters;
-        String credentialType = gcpProperties.getCredential().getType();
-        if (JSON_CREDENTIAL_TYPE.equalsIgnoreCase(credentialType)) {
-            parameters = gcpCredentialParametersJson();
-        } else {
-            parameters = gcpCredentialParametersP12();
-        }
-        return credential.withGcpParameters(parameters)
+        return credential.withGcpParameters(gcpCredentialParametersJson())
                 .withCloudPlatform(CloudPlatform.GCP.name())
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription());
     }
@@ -399,19 +389,6 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         String json = gcpProperties.getCredential().getJson().getBase64();
         jsonCredentialParameters.setCredentialJson(json);
         parameters.setJson(jsonCredentialParameters);
-        return parameters;
-    }
-
-    public GcpCredentialParameters gcpCredentialParametersP12() {
-        GcpCredentialParameters parameters = new GcpCredentialParameters();
-        P12Parameters p12CredentialParameters = new P12Parameters();
-        String serviceAccountId = gcpProperties.getCredential().getP12().getServiceAccountId();
-        String projectId = gcpProperties.getCredential().getP12().getProjectId();
-        String serviceAccountPrivateKey = gcpProperties.getCredential().getP12().getServiceAccountPrivateKey();
-        p12CredentialParameters.setServiceAccountId(serviceAccountId);
-        p12CredentialParameters.setProjectId(projectId);
-        p12CredentialParameters.setServiceAccountPrivateKey(serviceAccountPrivateKey);
-        parameters.setP12(p12CredentialParameters);
         return parameters;
     }
 

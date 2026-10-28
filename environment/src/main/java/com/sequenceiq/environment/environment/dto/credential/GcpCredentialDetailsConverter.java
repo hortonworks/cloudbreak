@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.dto.credential;
 
 import static com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType.GCP_JSON;
-import static com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType.GCP_P12;
 import static com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType.UNKNOWN;
 
 import org.springframework.stereotype.Component;
@@ -29,8 +28,6 @@ public class GcpCredentialDetailsConverter implements CloudPlatformAwareCredenti
         if (gcpCredentialAttributes != null) {
             if (gcpCredentialAttributes.getJson() != null) {
                 credentialType = GCP_JSON;
-            } else if (gcpCredentialAttributes.getP12() != null) {
-                credentialType = GCP_P12;
             }
         }
         return credentialType;

@@ -1,11 +1,10 @@
 package com.sequenceiq.it.cloudbreak.util.gcp.client;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -23,7 +22,6 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.SecurityUtils;
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Builder;
@@ -31,7 +29,6 @@ import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.storage.StorageScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.asset.v1.AssetServiceClient;
 import com.google.cloud.asset.v1.AssetServiceSettings;
 import com.google.cloud.storage.Storage;
@@ -98,33 +95,17 @@ public class GcpClient {
     public GoogleCredentials buildCredentialWithScopes(List<String> scopes) {
         Credential credential = gcpProperties.getCredential();
         String credentialJson = credential.getJson().getBase64();
-        String credentialP12 = credential.getP12().getBase64();
-        GoogleCredentials googleCredentials = null;
+        if (isEmpty(credentialJson)) {
+            String message = "Cannot create GCP Client, because the JSON credential is missing!";
+            Log.error(LOGGER, message);
+            throw new RuntimeException(message);
+        }
         try {
-            if (isNotEmpty(credentialJson)) {
-                googleCredentials = GoogleCredentials
-                        .fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)))
-                        .createScoped(scopes);
-            } else if (isNotEmpty(credentialP12)) {
-                PrivateKey privateKey = SecurityUtils
-                        .loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
-                                new ByteArrayInputStream(Base64.decodeBase64(credentialP12)), "notasecret", "privatekey",
-                                "notasecret");
-
-                googleCredentials = ServiceAccountCredentials.newBuilder()
-                        .setClientEmail(credential.getP12().getServiceAccountId())
-                        .setPrivateKey(privateKey)
-                        .setScopes(scopes)
-                        .build();
-            }
+            return GoogleCredentials
+                    .fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)))
+                    .createScoped(scopes);
         } catch (Exception e) {
             throw new IllegalArgumentException("Cannot create Google Cloud Client!", e);
-        }
-        if (googleCredentials == null) {
-            Log.error(LOGGER, "Cannot create GCP Client, because of both of the JSON and P12 credentials are missing!");
-            throw new RuntimeException("Cannot create GCP Client, because of both of the JSON and P12 credentials are missing!");
-        } else {
-            return googleCredentials;
         }
     }
 
@@ -142,12 +123,7 @@ public class GcpClient {
     }
 
     protected String getProjectId() {
-        if (gcpProperties.getCredential().getP12().getProjectId() == null || gcpProperties.getCredential().getP12().getProjectId().isEmpty()) {
-            Credential credential = gcpProperties.getCredential();
-            return getProjectIdFromCredentialJson(credential.getJson().getBase64());
-        } else {
-            return gcpProperties.getCredential().getP12().getProjectId();
-        }
+        return getProjectIdFromCredentialJson(gcpProperties.getCredential().getJson().getBase64());
     }
 
     protected String getAvailabilityZone() {

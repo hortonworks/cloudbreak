@@ -7,15 +7,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.gcp.GcpCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.gcp.JsonAttributes;
-import com.sequenceiq.environment.credential.attributes.gcp.P12Attributes;
 
 @ExtendWith(MockitoExtension.class)
 public class GcpCredentialDetailsConverterTest {
+
+    private static final String LEGACY_P12_ATTRIBUTES =
+            "{\"gcp\":{\"p12\":{\"projectId\":\"p\",\"serviceAccountId\":\"s\",\"serviceAccountPrivateKey\":\"k\"}}}";
+
     @InjectMocks
     private GcpCredentialDetailsConverter underTest;
 
@@ -30,13 +34,10 @@ public class GcpCredentialDetailsConverterTest {
     }
 
     @Test
-    void convertCredentialDetailsP12() {
-        CredentialAttributes credentialAttributes = new CredentialAttributes();
-        GcpCredentialAttributes gcpCredentialAttributes = new GcpCredentialAttributes();
-        gcpCredentialAttributes.setP12(new P12Attributes());
-        credentialAttributes.setGcp(gcpCredentialAttributes);
+    void convertCredentialDetailsLegacyP12MapsToUnknown() throws Exception {
+        CredentialAttributes credentialAttributes = new Json(LEGACY_P12_ATTRIBUTES).get(CredentialAttributes.class);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        assertEquals(CredentialType.GCP_P12, builder.build().getCredentialType());
+        assertEquals(CredentialType.UNKNOWN, builder.build().getCredentialType());
     }
 
     @Test

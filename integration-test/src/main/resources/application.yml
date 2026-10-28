@@ -438,14 +438,8 @@ integrationtest:
       subnetIds:
         - private-us-west2
     credential:
-      type: json
       json:
         base64:
-      p12:
-        base64:
-        serviceAccountId:
-        serviceAccountPrivateKey:
-        projectId:
     instance:
       types:
         default: e2-highmem-8

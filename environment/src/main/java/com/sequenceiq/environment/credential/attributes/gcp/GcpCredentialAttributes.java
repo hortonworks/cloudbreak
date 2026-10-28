@@ -1,18 +1,12 @@
 package com.sequenceiq.environment.credential.attributes.gcp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+// Credentials stored before CB-35227 still carry a p12 node in their attributes JSON.
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GcpCredentialAttributes {
 
-    private P12Attributes p12;
-
     private JsonAttributes json;
-
-    public P12Attributes getP12() {
-        return p12;
-    }
-
-    public void setP12(P12Attributes p12) {
-        this.p12 = p12;
-    }
 
     public JsonAttributes getJson() {
         return json;

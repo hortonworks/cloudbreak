@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
 import com.sequenceiq.environment.credential.attributes.gcp.GcpCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.gcp.JsonAttributes;
-import com.sequenceiq.environment.credential.attributes.gcp.P12Attributes;
 
 class GcpCredentialV1ParametersToGcpCredentialAttributesConverterTest {
 
@@ -27,14 +26,6 @@ class GcpCredentialV1ParametersToGcpCredentialAttributesConverterTest {
         source.setJson(new JsonAttributes());
         GcpCredentialParameters result = underTest.convert(source, RAW_JSON);
         assertThat(result.getJson().getProjectId()).isEqualTo(MY_PROJECT_ID);
-    }
-
-    @Test
-    void testConvertProjectIdP12() {
-        GcpCredentialAttributes source = new GcpCredentialAttributes();
-        source.setP12(new P12Attributes());
-        GcpCredentialParameters result = underTest.convert(source, RAW_JSON);
-        assertThat(result.getP12().getProjectId()).isEqualTo(MY_PROJECT_ID);
     }
 
 }
