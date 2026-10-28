@@ -25,7 +25,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzUpgradeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesAddAndModificationTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRestartInstancesTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXDatahubOnSharedDlTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRestartInstancesTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildv2Tests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeFlexibleDatabaseServerTests

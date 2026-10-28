@@ -5,6 +5,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXDatahubOnSharedDlTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.dbserverencryption.GcpExternalDatabaseServerEncryptionTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeDatabaseServerTests
         excludedMethods:

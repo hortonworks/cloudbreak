@@ -11,7 +11,6 @@ tests:
         excludedMethods:
           - testSecretRotationAndMasterRepairWithTerminatedInstancesAwsNative
           - testSecretRotationAndMasterRepairWithTerminatedInstancesAws
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXGcpVolumesTest
