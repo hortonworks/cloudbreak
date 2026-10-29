@@ -13,7 +13,7 @@ runs:
         export INTEGRATIONTEST_AWS_CLOUDSTORAGE_FILESYSTEMTYPE=S3
         export INTEGRATIONTEST_OUTPUTDIR=.
         export INTEGRATIONTEST_IMAGECATALOGNAME=cloudbreak-default
-        export AWS_DEFAULT_REGION=eu-central-1
+        export AWS_DEFAULT_REGION=us-west-2
         export INTEGRATIONTEST_TIMEOUT=9000000
         export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
         export INTEGRATIONTEST_UMS_PORT=8982

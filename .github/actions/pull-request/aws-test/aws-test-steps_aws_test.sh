@@ -44,18 +44,41 @@ set -ex -o pipefail
     export INTEGRATIONTEST_USER_ACCESSKEY="Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjpjbG91ZGJyZWFrLXFlQHVtcy5tb2Nr"
     export INTEGRATIONTEST_USER_SECRETKEY="nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g="
 
-    # SSH key material from Vault (base action) is required for cluster SSH checks.
+    # SSH private key from Vault (base action) is required for cluster SSH checks.
+    # Vault holds only the private key, so the public key is derived from it (same as Harness).
+    # xtrace is off here so the key material never reaches the log.
     echo "Move private key to the workspace for SSH tests"
+    set +x
     mkdir -p integration-test
+    PEM=integration-test/seq-master.pem
+    PUB=integration-test/seq-master.pub
+    printf '%s\n' "$SEQ_PRIV_FILE" | tr -d '\r' > "$PEM"
+    # The key may arrive as a single-line PEM (newlines replaced by spaces), which no decoder reads.
+    # Rebuild it: markers on their own lines, base64 body rewrapped at 64 columns.
+    if [ "$(wc -l < "$PEM")" -le 1 ]; then
+      begin=$(grep -oE -- '-----BEGIN [A-Z0-9 ]+-----' "$PEM" | head -1) || true
+      end=$(grep -oE -- '-----END [A-Z0-9 ]+-----' "$PEM" | head -1) || true
+      body=$(sed -E "s/.*${begin}//; s/${end}.*//" "$PEM" | tr -d ' \t\r\n')
+      { printf '%s\n' "$begin"; printf '%s' "$body" | fold -w64; printf '\n%s\n' "$end"; } > "$PEM.fixed"
+      mv "$PEM.fixed" "$PEM"
+    fi
+    chmod 600 "$PEM"
+    command -v ssh-keygen >/dev/null || DEBIAN_FRONTEND=noninteractive sudo apt-get install -y openssh-client
+    : > "$PUB"
+    ssh-keygen -y -f "$PEM" > "$PUB" 2>/tmp/keygen.err || true
+    if [ ! -s "$PUB" ]; then
+      openssl rsa -in "$PEM" -pubout -out "$PUB.pem" 2>>/tmp/keygen.err \
+        && ssh-keygen -f "$PUB.pem" -i -m PKCS8 > "$PUB" 2>>/tmp/keygen.err || true
+    fi
+    if [ ! -s "$PUB" ]; then
+      echo "FATAL: could not derive SSH public key from seq-master.pem:"; cat /tmp/keygen.err
+      exit 1
+    fi
+    set -x
 
-    echo $SEQ_PRIV_FILE >> seq-master.pem
-    cp -Rv seq-master.pem integration-test/
-    SEQ_PRIV_FILE_PATH=$(find . -type f -iname "seq-master.pem")
-    chmod 600 $SEQ_PRIV_FILE_PATH
-
-    export SEQ_PRIV_FILE_NAME=$(basename "$SEQ_PRIV_FILE_PATH")
-    export INTEGRATIONTEST_DEFAULTPRIVATEKEYFILE="/it/$SEQ_PRIV_FILE_NAME"
-    export INTEGRATIONTEST_SSHPUBLICKEY="$(cat $SEQ_PUB_FILE)"
+    export SEQ_PUB_FILE="$PUB"
+    export INTEGRATIONTEST_DEFAULTPRIVATEKEYFILE="/it/$(basename "$PEM")"
+    export INTEGRATIONTEST_SSHPUBLICKEY="$(cat "$SEQ_PUB_FILE")"
 
     echo "will trigger aws build"
 
