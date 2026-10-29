@@ -9,6 +9,7 @@ buildscript {
   }
 }
 
+apply plugin: 'java-library'
 apply plugin: 'io.spring.dependency-management'
 
 dependencyManagement {

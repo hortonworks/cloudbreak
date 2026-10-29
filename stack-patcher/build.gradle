@@ -1,3 +1,5 @@
+apply plugin: 'java-library'
+
 repositories {
   maven { url = "$repoUrl" }
   mavenCentral()

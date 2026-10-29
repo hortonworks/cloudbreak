@@ -1,5 +1,5 @@
 apply plugin: 'com.google.protobuf'
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 buildscript {
   repositories {

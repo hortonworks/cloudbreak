@@ -142,9 +142,9 @@ compileJava.dependsOn cmGenerateTasks
 sourceSets {
   main {
     java {
-      srcDirs((cmApiVersions + ['model']).collect {
+      srcDir(files((cmApiVersions + ['model']).collect {
         name -> cmGeneratedDir.map { it.dir("${name}/src/main/java") }
-      })
+      }).builtBy(cmGenerateTasks))
     }
   }
 }

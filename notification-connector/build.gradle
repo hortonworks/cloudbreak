@@ -9,6 +9,7 @@ buildscript {
   }
 }
 
+apply plugin: 'java-library'
 apply plugin: 'com.google.protobuf'
 apply plugin: 'com.diffplug.spotless'
 

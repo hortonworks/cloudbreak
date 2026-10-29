@@ -31,7 +31,13 @@ plugins {
   id "com.adarshr.test-logger" version "4.0.0"
   id "com.netflix.nebula.resolution-rules" version "13.1.2"
   id 'com.diffplug.spotless' version '8.10.4'
-//  id 'nebula.lint' version '17.2.3'
+  id 'com.autonomousapps.dependency-analysis' version '3.19.2' apply false
+}
+
+// Dependency analysis (buildHealth, projectHealth, reason) is only applied when one of its tasks is requested,
+// so regular builds are not affected. Usage: ./gradlew buildHealth | ./gradlew :core:projectHealth | ./gradlew :core:reason --id <group:artifact>
+def dependencyAnalysisRequested = gradle.startParameter.taskNames.any { taskName ->
+  ['buildHealth', 'projectHealth', 'reason'].any { taskName == it || taskName.endsWith(":$it") }
 }
 
 def cmPrivateRepoUser = System.getenv("CM_PRIVATE_REPO_USER") ?: "$defaultCmPrivateRepoUser"
@@ -66,6 +72,9 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'eclipse'
   apply plugin: 'com.netflix.nebula.resolution-rules'
+  if (dependencyAnalysisRequested) {
+    apply plugin: 'com.autonomousapps.dependency-analysis'
+  }
 
   group = 'com.sequenceiq'
 

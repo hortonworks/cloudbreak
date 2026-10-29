@@ -216,6 +216,6 @@ compileJava.dependsOn tasks.openApiGenerate
 
 sourceSets {
   main {
-    java.srcDirs += "${projectDir}/src/generated/src/main/java"
+    java.srcDir(files("${projectDir}/src/generated/src/main/java").builtBy(tasks.openApiGenerate))
   }
 }
