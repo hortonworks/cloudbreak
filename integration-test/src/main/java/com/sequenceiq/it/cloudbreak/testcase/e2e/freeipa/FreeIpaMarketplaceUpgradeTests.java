@@ -64,7 +64,7 @@ public class FreeIpaMarketplaceUpgradeTests extends AbstractE2ETest {
                 .then(freeIpaAvailabilityAssertion.availableDuringOperation())
                 .await(COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE).withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(TWO_HOURS_IN_SEC)))
                 .given(FreeIpaTestDto.class)
-                .await(FREEIPA_AVAILABLE, waitForFlow().withWaitForFlow(Boolean.FALSE))
+                .await(FREEIPA_AVAILABLE, waitForFlow())
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .validate();
