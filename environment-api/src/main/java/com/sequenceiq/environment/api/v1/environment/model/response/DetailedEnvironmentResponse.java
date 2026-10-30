@@ -34,7 +34,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_CLUSTER)
     private ExternalizedComputeClusterResponse externalizedComputeCluster;
 
-    @Schema(description = EnvironmentModelDescription.MAINTENANCE_WINDOW_SCHEDULE)
+    @Schema(description = EnvironmentModelDescription.MAINTENANCE_WINDOW_SCHEDULE_ON_DESCRIBE)
     private EnvironmentMaintenanceWindowScheduleResponse maintenanceWindowSchedule;
 
     public static Builder builder() {

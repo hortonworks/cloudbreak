@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.api.v1.environment.endpoint;
 
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
+import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.MAINTENANCE_WINDOW_SCHEDULE_CREATE_EDIT_NOTES;
+import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.MAINTENANCE_WINDOW_SCHEDULE_DESCRIBE_NOTES;
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.TAG_UPDATE_PERMISSIONS_NOTES;
 
 import java.util.List;
@@ -65,14 +67,15 @@ public interface EnvironmentEndpoint {
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = EnvironmentOpDescription.CREATE, description = ENVIRONMENT_NOTES, operationId = "createEnvironmentV1",
+    @Operation(summary = EnvironmentOpDescription.CREATE, description = ENVIRONMENT_NOTES + " " + MAINTENANCE_WINDOW_SCHEDULE_CREATE_EDIT_NOTES,
+            operationId = "createEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CreateEnvironmentResponse post(@Valid EnvironmentRequest request);
 
     @GET
     @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = EnvironmentOpDescription.GET_BY_NAME, description = ENVIRONMENT_NOTES,
+    @Operation(summary = EnvironmentOpDescription.GET_BY_NAME, description = ENVIRONMENT_NOTES + " " + MAINTENANCE_WINDOW_SCHEDULE_DESCRIBE_NOTES,
             operationId = "getEnvironmentV1ByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetailedEnvironmentResponse getByName(@PathParam("name") String environmentName);
@@ -116,7 +119,7 @@ public interface EnvironmentEndpoint {
     @PUT
     @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = EnvironmentOpDescription.EDIT_BY_NAME, description = ENVIRONMENT_NOTES,
+    @Operation(summary = EnvironmentOpDescription.EDIT_BY_NAME, description = ENVIRONMENT_NOTES + " " + MAINTENANCE_WINDOW_SCHEDULE_CREATE_EDIT_NOTES,
             operationId = "editEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetailedEnvironmentResponse editByName(@PathParam("name") String environmentName, @NotNull @Valid EnvironmentEditRequest request);
@@ -190,7 +193,7 @@ public interface EnvironmentEndpoint {
     @GET
     @Path("/crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = EnvironmentOpDescription.GET_BY_CRN, description = ENVIRONMENT_NOTES,
+    @Operation(summary = EnvironmentOpDescription.GET_BY_CRN, description = ENVIRONMENT_NOTES + " " + MAINTENANCE_WINDOW_SCHEDULE_DESCRIBE_NOTES,
             operationId = "getEnvironmentV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetailedEnvironmentResponse getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
@@ -226,7 +229,7 @@ public interface EnvironmentEndpoint {
     @PUT
     @Path("/crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = EnvironmentOpDescription.EDIT_BY_CRN, description = ENVIRONMENT_NOTES,
+    @Operation(summary = EnvironmentOpDescription.EDIT_BY_CRN, description = ENVIRONMENT_NOTES + " " + MAINTENANCE_WINDOW_SCHEDULE_CREATE_EDIT_NOTES,
             operationId = "editEnvironmentV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetailedEnvironmentResponse editByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,

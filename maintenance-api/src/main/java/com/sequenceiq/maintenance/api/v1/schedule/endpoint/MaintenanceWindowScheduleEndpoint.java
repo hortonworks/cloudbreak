@@ -78,7 +78,8 @@ public interface MaintenanceWindowScheduleEndpoint {
 
     @GET
     @Path("scope/{scopeType}/scopeId/{scopeId}")
-    @Operation(summary = MaintenanceWindowScheduleOpDescription.GET, description = MaintenanceWindowScheduleOpDescription.NOTES,
+    @Operation(summary = MaintenanceWindowScheduleOpDescription.GET,
+            description = MaintenanceWindowScheduleOpDescription.NOTES + " " + MaintenanceWindowScheduleOpDescription.AUTH_NOTES,
             operationId = "getMaintenanceWindowScheduleV1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Schedule returned", useReturnTypeSchema = true),
@@ -92,7 +93,8 @@ public interface MaintenanceWindowScheduleEndpoint {
             @PathParam("scopeId") String scopeId);
 
     @POST
-    @Operation(summary = MaintenanceWindowScheduleOpDescription.CREATE, description = MaintenanceWindowScheduleOpDescription.NOTES,
+    @Operation(summary = MaintenanceWindowScheduleOpDescription.CREATE,
+            description = MaintenanceWindowScheduleOpDescription.NOTES + " " + MaintenanceWindowScheduleOpDescription.AUTH_NOTES,
             operationId = "createMaintenanceWindowScheduleV1")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Schedule created",
@@ -106,7 +108,8 @@ public interface MaintenanceWindowScheduleEndpoint {
 
     @PATCH
     @Path("scope/{scopeType}/scopeId/{scopeId}")
-    @Operation(summary = MaintenanceWindowScheduleOpDescription.UPDATE, description = MaintenanceWindowScheduleOpDescription.UPDATE_NOTES,
+    @Operation(summary = MaintenanceWindowScheduleOpDescription.UPDATE,
+            description = MaintenanceWindowScheduleOpDescription.UPDATE_NOTES + " " + MaintenanceWindowScheduleOpDescription.AUTH_NOTES,
             operationId = "updateMaintenanceWindowScheduleV1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Schedule updated", useReturnTypeSchema = true),
@@ -123,7 +126,8 @@ public interface MaintenanceWindowScheduleEndpoint {
 
     @DELETE
     @Path("scope/{scopeType}/scopeId/{scopeId}")
-    @Operation(summary = MaintenanceWindowScheduleOpDescription.DELETE, description = MaintenanceWindowScheduleOpDescription.NOTES,
+    @Operation(summary = MaintenanceWindowScheduleOpDescription.DELETE,
+            description = MaintenanceWindowScheduleOpDescription.NOTES + " " + MaintenanceWindowScheduleOpDescription.AUTH_NOTES,
             operationId = "deleteMaintenanceWindowScheduleV1")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Schedule deleted"),
@@ -138,7 +142,8 @@ public interface MaintenanceWindowScheduleEndpoint {
 
     @POST
     @Path("scope/{scopeType}/scopeId/{scopeId}/skip-next")
-    @Operation(summary = MaintenanceWindowScheduleOpDescription.SKIP, description = MaintenanceWindowScheduleOpDescription.SKIP_NOTES,
+    @Operation(summary = MaintenanceWindowScheduleOpDescription.SKIP,
+            description = MaintenanceWindowScheduleOpDescription.SKIP_NOTES + " " + MaintenanceWindowScheduleOpDescription.AUTH_NOTES,
             operationId = "skipNextMaintenanceWindowV1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Skip recorded", useReturnTypeSchema = true),
@@ -156,7 +161,8 @@ public interface MaintenanceWindowScheduleEndpoint {
 
     @DELETE
     @Path("scope/{scopeType}/scopeId/{scopeId}/skip-next")
-    @Operation(summary = MaintenanceWindowScheduleOpDescription.CANCEL_SKIP, description = MaintenanceWindowScheduleOpDescription.CANCEL_SKIP_NOTES,
+    @Operation(summary = MaintenanceWindowScheduleOpDescription.CANCEL_SKIP,
+            description = MaintenanceWindowScheduleOpDescription.CANCEL_SKIP_NOTES + " " + MaintenanceWindowScheduleOpDescription.AUTH_NOTES,
             operationId = "cancelSkipNextMaintenanceWindowV1")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Skip cancelled", useReturnTypeSchema = true),

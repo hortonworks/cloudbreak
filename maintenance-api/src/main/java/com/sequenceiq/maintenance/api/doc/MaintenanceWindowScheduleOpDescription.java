@@ -9,11 +9,19 @@ public final class MaintenanceWindowScheduleOpDescription {
     public static final String NOTES = "Account scope is derived from the authenticated user CRN. "
             + "Schedules are keyed by scopeType and scopeId (for example TENANT/accountId, ENVIRONMENT/environmentCrn).";
 
-    public static final String AUTH_NOTES = "Authorization is as follows - TENANT schedules: read requires power user or "
-            + "environment creator; write requires power user (tenant admin). ENVIRONMENT schedules: describe/edit environment on "
-            + "scopeId. DATAHUB/DATALAKE schedules: describe/write on the resource CRN (datahub/write, modifyDatalake). "
-            + "FREEIPA schedules: repair/admin/describe environment rights on scopeId. Internal task/register/run APIs are "
-            + "@InternalOnly (service identity). See maintenance-api AUTH.md for the full matrix.";
+    /**
+     * Shipped on every public schedule operation in OpenAPI; keep aligned with
+     * {@code MaintenanceWindowScheduleAuthorizationService} and {@code maintenance-api/AUTH.md}.
+     */
+    public static final String AUTH_NOTES = "Authorization (UMS) by scope — TENANT: read power user or environment creator; "
+            + "write power user (tenant admin). ENVIRONMENT on scopeId: read describeEnvironment, write editEnvironment. "
+            + "DATAHUB on scopeId: read describeDatahub, write upgradeDatahub (datahub/upgradeDatahub). "
+            + "DATALAKE on scopeId: read describeDatalake, write modifyDatalake. "
+            + "FREEIPA on scopeId: read any of repairFreeIPA, adminFreeIPA, describeEnvironment; "
+            + "write any of adminFreeIPA, editEnvironment. "
+            + "Known issue: FREEIPA-scoped schedules usually return 403 because those rights are environment-typed but "
+            + "scopeId is a FreeIPA CRN — use ENVIRONMENT scope until resolved (maintenance-api AUTH.md). "
+            + "Internal /internal/maintenance-tasks APIs are @InternalOnly (service identity).";
 
     public static final String SCOPE_TYPE = "Scope type (TENANT, ENVIRONMENT, DATAHUB, DATALAKE, FREEIPA)";
 

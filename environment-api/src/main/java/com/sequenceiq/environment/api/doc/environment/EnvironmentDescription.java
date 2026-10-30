@@ -10,6 +10,21 @@ public class EnvironmentDescription {
             + "missing permission with code 404, or a single entry with code 503 when the check itself could not be performed (for example the credential "
             + "is not allowed to read its own permissions) and therefore no individual permission can be named.";
 
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_CREATE_EDIT_NOTES =
+            "Optional maintenanceWindowSchedule on create sets an ENVIRONMENT-scoped maintenance window override for this environment "
+                    + "(after the environment CRN exists). On edit, maintenanceWindowSchedule updates that override, or clearMaintenanceWindowSchedule=true "
+                    + "removes it; those fields cannot be combined in the same edit. Any create that includes maintenanceWindowSchedule, or any edit that "
+                    + "includes maintenanceWindowSchedule or sets clearMaintenanceWindowSchedule=true, requires the Maintenance Window service to be available "
+                    + "in this region/deployment; otherwise the request is rejected with 400. Skip-next and cancel-skip use the Maintenance Window schedule "
+                    + "APIs (not Environment create/edit).";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_DESCRIBE_NOTES =
+            "Describe may include maintenanceWindowSchedule on DetailedEnvironmentV1Response when the Maintenance Window service returns an "
+                    + "ENVIRONMENT-scoped override. The field is omitted when no override exists or when maintenance is unavailable or errors "
+                    + "(non-404 failures are not surfaced on describe; the schedule field is left out so describe still succeeds). A missing "
+                    + "maintenanceWindowSchedule field does not prove that no override exists — for example Console must not treat absent as "
+                    + "\"no schedule\" without confirming maintenance health or querying the Maintenance Window schedule API.";
+
     private EnvironmentDescription() {
     }
 }

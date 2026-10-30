@@ -126,11 +126,11 @@ class MaintenanceWindowScheduleAuthorizationServiceTest {
     }
 
     @Test
-    void datahubWriteUsesDatahubWriteRight() {
-        resourceRight(AuthorizationResourceAction.UPGRADE_DATAHUB, "datahub/write", DATAHUB_CRN, true);
+    void datahubWriteUsesUpgradeDatahubRight() {
+        resourceRight(AuthorizationResourceAction.UPGRADE_DATAHUB, "datahub/upgradeDatahub", DATAHUB_CRN, true);
 
         assertThat(asUser(() -> underTest.canAccess(MaintenanceScopeType.DATAHUB, DATAHUB_CRN, WRITE))).isTrue();
-        verify(grpcUmsClient).checkResourceRight(USER_CRN, "datahub/write", DATAHUB_CRN);
+        verify(grpcUmsClient).checkResourceRight(USER_CRN, "datahub/upgradeDatahub", DATAHUB_CRN);
     }
 
     @Test

@@ -1,6 +1,7 @@
 # Maintenance Window API authorization
 
 Public schedule APIs enforce authorization. Internal task APIs under `/internal/maintenance-tasks` are **`@InternalOnly`** (service identity / internal actor CRN only; end users receive 403).
+REST paths, curl examples, and stable `operationId` values for the public schedule API are in [REST.md](REST.md). Environment create/edit/describe embed the same schedule for `ENVIRONMENT` scope (see Environment OpenAPI / `EnvironmentModelDescription`). Interactive callers use `/v1/maintenance/schedules`; internal APIs are `@InternalOnly` at runtime — schedule lookup under `/internal/maintenance-schedules` and task registration under `/internal/maintenance-tasks` (see below).
 
 ## Feature entitlement
 
@@ -53,8 +54,12 @@ Service-to-service schedule lookups and compensation: **`@InternalOnly`** with `
 | `get` | Describe-time schedule lookup under an internal actor (no public UMS check) |
 | `restore` (`PUT .../restore`) | Full-state restore by id to compensate a failed cross-service edit; reactivates the existing row (preserving its id and attached skips) and overwrites every field, including nulls |
 
+## Internal schedule lookup (`/internal/maintenance-schedules`)
+
+**GET** `/internal/maintenance-schedules/scope/{scopeType}/scopeId/{scopeId}` with query **`accountId`** (`getMaintenanceWindowScheduleInternal`): **`@InternalOnly`**. The caller must use a service/internal actor; interactive users receive **403**. Scope is supplied explicitly (`accountId` plus path scope); this path does **not** run the public UMS schedule matrix in `MaintenanceWindowScheduleAuthorizationService`. Used for service-to-service reads (for example when the Environment service serves **describe environment**, it loads optional `maintenanceWindowSchedule` onto `DetailedEnvironmentV1Response` through this internal path rather than the public schedule GET).
+
 ## Internal task APIs (`/internal/maintenance-tasks`)
 
 Register, list, update, delete tasks and report run outcomes: **`@InternalOnly`** with `@AccountId` (or `@RequestObject` with `@ResourceCrn` on peer services). Not callable by interactive users. Task APIs are not gated by `CDP_MAINTENANCE_WINDOW` (platform automation continues to register work when the entitlement is off).
 
-Implementation: `MaintenanceWindowScheduleEntitlementService`, `MaintenanceWindowScheduleAuthorizationService`, `MaintenanceWindowScheduleController` (`@CustomPermissionCheck`).
+Implementation: public schedule UMS checks — `MaintenanceWindowScheduleEntitlementService`, `MaintenanceWindowScheduleAuthorizationService`, `MaintenanceWindowScheduleController` (`@CustomPermissionCheck`); internal schedule GET — `MaintenanceWindowScheduleInternalController` (`@InternalOnly`).

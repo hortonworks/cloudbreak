@@ -235,10 +235,21 @@ public class EnvironmentModelDescription {
             "Defaults to false.";
 
     public static final String MAINTENANCE_WINDOW_SCHEDULE =
-            "Optional environment-level maintenance window schedule override (stored by the Maintenance Window service).";
+            "Optional environment-level maintenance window schedule override for this environment on create or edit. "
+                    + "Recurrence fields use string kinds (for example WEEKLY, CRON). Requires the Maintenance Window service "
+                    + "to be available in this region/deployment; otherwise create or edit requests that include this object "
+                    + "are rejected with 400.";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_ON_DESCRIBE =
+            "ENVIRONMENT-scoped maintenance window override when describe successfully loaded it from the Maintenance Window "
+                    + "service. Omitted when there is no override, when maintenance is not available in this deployment, or when "
+                    + "maintenance lookup failed (describe omits the field rather than failing). Absence does not imply no override.";
 
     public static final String CLEAR_MAINTENANCE_WINDOW_SCHEDULE =
-            "When true on edit, removes the environment-level maintenance window schedule override. Ignored when false.";
+            "When true on EnvironmentEditV1Request, removes the environment-level maintenance window schedule override. "
+                    + "Ignored when false. Cannot be combined with maintenanceWindowSchedule in the same edit request. "
+                    + "When true, requires the Maintenance Window service to be available in this region/deployment; "
+                    + "otherwise the edit is rejected with 400.";
 
     public static final String MAINTENANCE_WINDOW_SCHEDULE_NAME = "Schedule display name";
 

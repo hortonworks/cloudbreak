@@ -3,8 +3,6 @@ package com.sequenceiq.maintenance.openapi;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.ws.rs.ext.ExceptionMapper;
 
@@ -17,11 +15,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.service.openapi.JaxrsOpenApiTestReader;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.maintenance.configuration.api.EndpointConfig;
 
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.oas.models.OpenAPI;
 
 @ExtendWith(SpringExtension.class)
@@ -40,14 +38,7 @@ public class OpenApiGenerator {
 
     @Test
     public void generateSwaggerJson() throws Exception {
-        Set<String> classes = endpointConfig.getClasses().stream()
-                .map(Class::getName)
-                .collect(Collectors.toSet());
-
-        OpenAPI openAPI = new JaxrsOpenApiContextBuilder<>()
-                .resourceClasses(classes)
-                .buildContext(true)
-                .read();
+        OpenAPI openAPI = JaxrsOpenApiTestReader.read(endpointConfig.getClasses());
         Path path = Paths.get("./build/openapi/maintenance.json");
         Files.createDirectories(path.getParent());
         Files.writeString(path, Json.pretty(openAPI));
