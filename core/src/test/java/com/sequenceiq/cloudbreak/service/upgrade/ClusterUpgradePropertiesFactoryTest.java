@@ -644,6 +644,25 @@ class ClusterUpgradePropertiesFactoryTest {
     }
 
     @Test
+    void testLegacySnapshotRebuildFallsBackToDatabaseImageWithoutOriginalImage() throws Exception {
+        Stack stack = mock(Stack.class);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        when(stack.isDatalake()).thenReturn(false);
+        Image databaseImage = currentImage();
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(databaseImage);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image target = targetCatalogImage();
+        StatedImage stated = StatedImage.statedImage(target, "persisted-url", "persisted-catalog");
+        when(stackImageService.getImageModelFromStatedImage(stack, databaseImage, stated)).thenReturn(Image.builder().withImageName("target-vm").build());
+        when(clouderaManagerProductTransformer.transform(target, true, true)).thenReturn(Set.of());
+
+        ClusterUpgradeProperties properties = underTest.create(STACK_ID, null, stated,
+                new ClusterUpgradeProperties.UpgradeRequestOptions(false, false, true));
+
+        assertEquals(databaseImage.getImageId(), properties.currentImageId());
+        verifyNoInteractions(imageCatalogService);
+    }
+
+    @Test
     void testLegacyTriggerRebuildUsesOriginalImageAfterDatabaseImageWasUpdated() throws Exception {
         Stack stack = setupStack(false);
         Image original = currentImage();

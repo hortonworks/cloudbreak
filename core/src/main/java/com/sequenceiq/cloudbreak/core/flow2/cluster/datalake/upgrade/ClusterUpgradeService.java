@@ -60,10 +60,9 @@ public class ClusterUpgradeService {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE);
     }
 
-    public void clusterUpgradeFinished(long stackId, Map<String, String> currentImagePackages, ClusterUpgradeProperties properties,
-            boolean rollingUpgradeEnabled) {
+    public void clusterUpgradeFinished(long stackId, ClusterUpgradeProperties properties, boolean rollingUpgradeEnabled) {
         Optional<String> clusterStackVersion = Optional.ofNullable(properties.targetImage().runtimeVersion());
-        String currentRuntimeBuildNumber = getCurrentStackBuildNumber(currentImagePackages);
+        String currentRuntimeBuildNumber = getCurrentStackBuildNumber(properties.currentImage().packageVersions());
         boolean clusterRuntimeUpgradeNeeded =
                 isUpdateNeeded(currentRuntimeBuildNumber, properties.targetImage().cdhBuildNumber());
 
@@ -98,7 +97,7 @@ public class ClusterUpgradeService {
     }
 
     private String getCurrentStackBuildNumber(Map<String, String> currentImagePackages) {
-        return currentImagePackages.get(CDH_BUILD_NUMBER.getKey());
+        return currentImagePackages != null ? currentImagePackages.get(CDH_BUILD_NUMBER.getKey()) : null;
     }
 
     private boolean isUpdateNeeded(String currentBuildNumber, String targetBuildNumber) {

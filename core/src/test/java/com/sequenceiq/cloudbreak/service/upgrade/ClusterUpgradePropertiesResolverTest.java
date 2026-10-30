@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradeParcelSettingsPreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
@@ -85,7 +87,6 @@ class ClusterUpgradePropertiesResolverTest {
                 properties.runtimeVersion(), properties.currentOsType(), properties)));
         assertSame(properties, underTest.resolve(new ClusterUpgradeParcelSettingsPreparationEvent(STACK_ID, null, null, properties)));
         assertSame(properties, underTest.resolve(new ClusterUpgradePreparationEvent("selector", STACK_ID, null, TARGET_IMAGE_ID, properties)));
-        assertSame(properties, underTest.resolve(new ClusterUpgradeTriggerEvent("selector", STACK_ID, null, TARGET_IMAGE_ID, false, null, properties)));
         verifyNoInteractions(clusterUpgradePropertiesFactory);
     }
 
@@ -151,7 +152,7 @@ class ClusterUpgradePropertiesResolverTest {
         ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withFlags(false, false, false);
         when(clusterUpgradePropertiesFactory.create(any(ImageChangeDto.class), eq(null),
                 eq(new ClusterUpgradeProperties.UpgradeRequestOptions(false, false, false)))).thenReturn(properties);
-        ClusterUpgradeTriggerEvent event = new ClusterUpgradeTriggerEvent("selector", STACK_ID, null, TARGET_IMAGE_ID, false, null, null);
+        ClusterUpgradeTriggerEvent event = new ClusterUpgradeTriggerEvent("selector", STACK_ID, null, TARGET_IMAGE_ID, false, null);
 
         assertSame(properties, underTest.resolve(event));
         verify(clusterUpgradePropertiesFactory).create(argThat(target -> target.getStackId().equals(STACK_ID)
@@ -168,5 +169,17 @@ class ClusterUpgradePropertiesResolverTest {
 
         assertSame(properties, underTest.resolve(STACK_ID, originalImage, targetImage, true));
         verify(clusterUpgradePropertiesFactory).create(STACK_ID, originalImage, targetImage, options);
+    }
+
+    @Test
+    void testLegacyUpgradeStateFailsWithMessageWhenTargetImageIsMissing() {
+        com.sequenceiq.cloudbreak.cloud.model.Image originalImage = ClusterUpgradePropertiesTestUtils.withFlags(false, true, false).toCurrentCloudImage();
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.resolve(STACK_ID, originalImage, null, true));
+
+        assertEquals("Cluster upgrade properties cannot be rebuilt for stack " + STACK_ID + ", because neither the upgrade properties "
+                + "nor the target image is present in the flow variables.", exception.getMessage());
+        verifyNoInteractions(clusterUpgradePropertiesFactory);
     }
 }

@@ -214,6 +214,26 @@ class Flow2HandlerTest {
     }
 
     @Test
+    void testNewFlowIsInitializedWithTheContextParams() {
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
+        given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        given(flowConfig.getFlowOperationType()).willReturn(OperationType.UNKNOWN);
+        given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.ok());
+        given(flow.getCurrentState()).willReturn(flowState);
+        given(flow.sendEvent(any())).willReturn(true);
+        Map<Object, Object> contextParams = Map.of("key", "value");
+        Event<Payload> event = new Event<>(new Event.Headers(Map.of(FlowConstants.FLOW_CONTEXTPARAMS_ID, contextParams)), payload);
+        event.setKey("KEY");
+
+        underTest.accept(event);
+
+        ArgumentCaptor<Map<Object, Object>> initialized = ArgumentCaptor.forClass(Map.class);
+        verify(flow).initialize(initialized.capture());
+        assertEquals(contextParams, initialized.getValue());
+    }
+
+    @Test
     void testFlowCanNotBeSaved() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
@@ -705,6 +725,28 @@ class Flow2HandlerTest {
         RestartContext restartContext = restartContextCaptor.getValue();
         assertEquals(FLOW_ID, restartContext.getFlowId());
         assertEquals(FLOW_TRIGGER_USERCRN, restartContext.getFlowTriggerUserCrn());
+    }
+
+    @Test
+    void testRestartFlowRestoresPersistedVariables() throws TransactionExecutionException {
+        Map<Object, Object> variables = new HashMap<>(Map.of("TARGET_IMAGE", "persisted-image", "ROLLING_UPGRADE_ENABLED", true));
+        FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
+        flowLog.setVariablesJackson(TypedJsonUtil.writeValueAsStringSilent(variables));
+        flowLog.setPayloadType(ClassValue.of(TestPayload.class));
+        flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(new TestPayload(STACK_ID)));
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
+        HelloWorldFlowConfig config = mock(HelloWorldFlowConfig.class);
+        when(config.createFlow(eq(FLOW_ID), eq(FLOW_CHAIN_ID), eq(STACK_ID), any())).thenReturn(flow);
+        when(config.getFlowOperationType()).thenReturn(OperationType.UNKNOWN);
+        when(config.getRestartAction(NEXT_EVENT)).thenReturn(defaultRestartAction);
+        ReflectionTestUtils.setField(underTest, "flowConfigs", List.of(config));
+
+        underTest.restartFlow(FLOW_ID);
+
+        verify(flow).initialize("START_STATE", variables);
+        verify(flowChainHandler).restoreFlowChain(FLOW_CHAIN_ID);
+        verify(defaultRestartAction).restart(any(), any());
+        verify(flowLogService, never()).terminate(eq(STACK_ID), eq(FLOW_ID), any());
     }
 
     @Test

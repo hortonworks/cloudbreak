@@ -121,13 +121,14 @@ class ClusterUpgradeActionsTest {
     void testInitUsesResolvedRuntimeInsteadOfBaseImageVersion() throws Exception {
         ClusterUpgradeProperties properties = properties();
         Image originalImage = properties.toCurrentCloudImage();
-        ClusterUpgradeTriggerEvent trigger = new ClusterUpgradeTriggerEvent("selector", STACK_ID, null, "targetImageId", true, originalImage, properties);
+        ClusterUpgradeTriggerEvent trigger = new ClusterUpgradeTriggerEvent("selector", STACK_ID, null, "targetImageId", true, originalImage);
         AbstractClusterUpgradeAction<ClusterUpgradeTriggerEvent> action =
                 (AbstractClusterUpgradeAction<ClusterUpgradeTriggerEvent>) underTest.initClusterUpgrade();
         initAction(action);
         ReflectionTestUtils.setField(action, "clusterUpgradeTargetImageService", targetImageService);
         ArgumentCaptor<ClusterUpgradeInitRequest> emitted = ArgumentCaptor.forClass(ClusterUpgradeInitRequest.class);
         when(reactorEventFactory.createEvent(anyMap(), emitted.capture())).thenReturn(mock(Event.class));
+        when(resolver.resolve(trigger)).thenReturn(properties);
         Map<Object, Object> variables = new HashMap<>();
 
         new AbstractActionTestSupport<>(action).doExecute(context(), trigger, variables);
@@ -142,12 +143,11 @@ class ClusterUpgradeActionsTest {
         verify(clusterUpgradeService).initUpgradeCluster(STACK_ID, properties, true);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
-    void initReusesSharedPropertiesAndOriginalOsAfterImageUpdate(boolean propertiesOnPayload) throws Exception {
+    @Test
+    void initReusesSharedPropertiesAndOriginalOsAfterImageUpdate() throws Exception {
         ClusterUpgradeProperties properties = properties();
         ClusterUpgradeTriggerEvent trigger = new ClusterUpgradeTriggerEvent("selector", STACK_ID, null, properties.targetImageId(),
-                false, properties.toCloudImage(), propertiesOnPayload ? properties : null);
+                false, properties.toCloudImage());
         AbstractClusterUpgradeAction<ClusterUpgradeTriggerEvent> action =
                 (AbstractClusterUpgradeAction<ClusterUpgradeTriggerEvent>) underTest.initClusterUpgrade();
         initAction(action);
@@ -163,7 +163,7 @@ class ClusterUpgradeActionsTest {
         verify(clusterUpgradeService).initUpgradeCluster(STACK_ID, properties, properties.rollingUpgradeEnabled());
         verifyNoInteractions(resolver);
         assertThat(variables.get(FLOW_VARIABLE_NAME)).isSameAs(properties);
-        assertThat(variables.get(AbstractClusterUpgradeAction.ROLLING_UPGRADE_ENABLED)).isEqualTo(properties.rollingUpgradeEnabled());
+        assertThat(variables.get(AbstractClusterUpgradeAction.ROLLING_UPGRADE_ENABLED)).isEqualTo(trigger.isRollingUpgradeEnabled());
         assertThat(emitted.getValue().getOriginalOsType()).isEqualTo(OsType.RHEL8);
         assertThat(emitted.getValue().getTargetOsType()).isEqualTo(OsType.RHEL9);
         assertThat(emitted.getValue().getTargetRuntimeVersion()).isEqualTo("7.3.2");
@@ -203,7 +203,6 @@ class ClusterUpgradeActionsTest {
 
         assertThat(emitted.getValue().getClusterUpgradeProperties()).isSameAs(properties);
         assertThat(emitted.getValue().getOriginalImage()).isNull();
-        assertThat(emitted.getValue().getCurrentImage()).isNull();
         assertThat(emitted.getValue().getTargetStatedImage()).isNull();
         verifyNoInteractions(resolver);
     }
@@ -223,8 +222,8 @@ class ClusterUpgradeActionsTest {
         AbstractClusterUpgradeAction<?> action = (AbstractClusterUpgradeAction<?>) underTest.upgradeClusterManager();
         initAction(action);
 
-        assertThat(action.getUpgradeProperties(variables, STACK_ID)).isSameAs(properties);
-        assertThat(action.getUpgradeProperties(variables, STACK_ID)).isSameAs(properties);
+        assertThat(action.getUpgradePropertiesFromVariables(variables, STACK_ID)).isSameAs(properties);
+        assertThat(action.getUpgradePropertiesFromVariables(variables, STACK_ID)).isSameAs(properties);
         ArgumentCaptor<Image> original = ArgumentCaptor.forClass(Image.class);
         ArgumentCaptor<StatedImage> target = ArgumentCaptor.forClass(StatedImage.class);
         verify(resolver).resolve(eq(STACK_ID), original.capture(), target.capture(), eq(true));
@@ -247,7 +246,7 @@ class ClusterUpgradeActionsTest {
 
         new AbstractActionTestSupport<>(action).doExecute(context(), new ConfigureClusterManagerManagementServicesSuccess(STACK_ID), variables);
 
-        verify(clusterUpgradeService).clusterUpgradeFinished(STACK_ID, properties.currentImage().packageVersions(), properties, true);
+        verify(clusterUpgradeService).clusterUpgradeFinished(STACK_ID, properties, true);
         verifyNoInteractions(resolver);
     }
 

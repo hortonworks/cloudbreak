@@ -2,16 +2,22 @@ package com.sequenceiq.flow.core.chain;
 
 import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.tryDeserializeTriggerEvent;
 
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
@@ -19,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.FlowContextParamsUtil;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.config.FlowChainOperationTypeConfig;
@@ -27,6 +34,8 @@ import com.sequenceiq.flow.domain.FlowChainLog;
 
 @Component
 public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowChainHandler.class);
 
     @Resource
     private Map<String, FlowEventChainFactory<Payload>> flowChainConfigMap;
@@ -43,6 +52,20 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     @Inject
     private FlowChainOperationTypeConfig flowChainOperationTypeConfig;
 
+    @Inject
+    private Optional<List<InheritedFlowChainContextParamsProvider>> inheritedContextParamsProviders;
+
+    private Set<String> inheritedContextParamKeys = Set.of();
+
+    @PostConstruct
+    void initInheritedContextParamKeys() {
+        inheritedContextParamKeys = inheritedContextParamsProviders.orElse(List.of()).stream()
+                .map(InheritedFlowChainContextParamsProvider::inheritedContextParamKeys)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toUnmodifiableSet());
+        LOGGER.debug("Nested flow chains inherit the following context params: {}", inheritedContextParamKeys);
+    }
+
     @Override
     public void accept(Event<? extends Payload> event) {
         String key = event.getKey();
@@ -51,8 +74,7 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
         FlowEventChainFactory<Payload> flowEventChainFactory = flowChainConfigMap.get(key);
         String flowOperationType = flowEventChainFactory.getFlowOperationType().name();
         String flowChainId = UUID.randomUUID().toString();
-        Map<Object, Object> contextParams = event.getHeaders().get(FlowConstants.FLOW_CONTEXTPARAMS_ID);
-        contextParams = contextParams == null ? new HashMap<>() : new HashMap<>(contextParams);
+        Map<Object, Object> contextParams = FlowContextParamsUtil.filter(FlowContextParamsUtil.getContextParams(event), inheritedContextParamKeys);
         flowChains.putFlowChain(flowChainId, parentFlowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData(), contextParams));
         flowChains.addNotSavedFlowChainLog(flowChainId);
         flowStatCache.putByFlowChainId(flowChainId, event.getData().getResourceId(), flowOperationType, false);

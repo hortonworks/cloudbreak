@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -47,7 +47,7 @@ public class BaseImageUpgradeService {
     private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
 
     @Inject
-    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private UpgradePermissionProvider upgradePermissionProvider;
@@ -91,7 +91,7 @@ public class BaseImageUpgradeService {
 
     private Image getCurrentImageAndValidateComponents(StackDtoDelegate stack, UpgradeComponents components) throws CloudbreakImageNotFoundException {
         Image currentImage = componentConfigProviderService.getImage(stack.getId());
-        Set<ClouderaManagerProduct> currentProducts = clouderaManagerProductsProvider.findCdhProduct(stack.getClusterComponents())
+        Set<ClouderaManagerProduct> currentProducts = clusterComponentConfigProvider.getCdhProduct(stack.getCluster().getId())
                 .map(Set::of).orElse(Set.of());
         Image enrichedImage = baseImagePackageVersionsEnricher.enrich(currentImage, stack.getCluster().getId());
         upgradePermissionProvider.validateRequestedComponentVersions(enrichedImage.getPackageVersions(), currentProducts, components);

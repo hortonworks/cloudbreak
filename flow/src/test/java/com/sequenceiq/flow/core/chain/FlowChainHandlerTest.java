@@ -10,9 +10,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.jupiter.api.Test;
@@ -78,8 +81,12 @@ class FlowChainHandlerTest {
     private ArgumentCaptor<FlowTriggerEventQueue> eventQueueCaptor;
 
     @Test
-    void nestedChainReceivesAnIndependentCopyOfParentContext() {
-        Map<Object, Object> parentContext = Map.of("snapshot", "resolved-properties");
+    void nestedChainInheritsOnlyRegisteredKeysWithoutModifyingTheParent() {
+        InheritedFlowChainContextParamsProvider provider = () -> Set.of("snapshot", "nullable-variable");
+        ReflectionTestUtils.setField(underTest, "inheritedContextParamsProviders", Optional.of(List.of(provider)));
+        underTest.initInheritedContextParamKeys();
+        Map<Object, Object> parentContext = new HashMap<>(Map.of("snapshot", "resolved-properties", "ORIGINAL_IMAGE", "parent-image"));
+        parentContext.put("nullable-variable", null);
         Event<SimpleSelectable> event = chainEvent(Map.of(FlowConstants.FLOW_CHAIN_ID, PARENT_FLOW_CHAIN_ID,
                 FLOW_TRIGGER_USERCRN, USER_CRN, FLOW_CONTEXTPARAMS_ID, parentContext));
 
@@ -88,9 +95,24 @@ class FlowChainHandlerTest {
         ArgumentCaptor<Map<Object, Object>> context = ArgumentCaptor.forClass(Map.class);
         verify(flowChains).triggerNextFlow(anyString(), eq(USER_CRN), context.capture(), eq("PROVISION"), eq(Optional.empty()));
         verify(factory).createFlowTriggerEventQueue(eq(event.getData()), eq(context.getValue()));
-        assertThat(context.getValue()).containsExactlyInAnyOrderEntriesOf(parentContext).isNotSameAs(parentContext);
+        assertThat(context.getValue()).containsExactlyEntriesOf(Map.of("snapshot", "resolved-properties")).isNotSameAs(parentContext);
+        context.getValue().put("ORIGINAL_IMAGE", "child-image");
         context.getValue().put("child-variable", "value");
-        assertThat(parentContext).doesNotContainKey("child-variable");
+        assertThat(parentContext).containsEntry("ORIGINAL_IMAGE", "parent-image").doesNotContainKey("child-variable");
+    }
+
+    @Test
+    void nestedChainDoesNotInheritContextWithoutRegisteredKeys() {
+        ReflectionTestUtils.setField(underTest, "inheritedContextParamsProviders", Optional.empty());
+        underTest.initInheritedContextParamKeys();
+        Event<SimpleSelectable> event = chainEvent(Map.of(FlowConstants.FLOW_CHAIN_ID, PARENT_FLOW_CHAIN_ID,
+                FLOW_TRIGGER_USERCRN, USER_CRN, FLOW_CONTEXTPARAMS_ID, Map.of("ORIGINAL_IMAGE", "parent-image")));
+
+        underTest.accept(event);
+
+        ArgumentCaptor<Map<Object, Object>> context = ArgumentCaptor.forClass(Map.class);
+        verify(flowChains).triggerNextFlow(anyString(), eq(USER_CRN), context.capture(), eq("PROVISION"), eq(Optional.empty()));
+        assertThat(context.getValue()).isEmpty();
     }
 
     @Test

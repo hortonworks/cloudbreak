@@ -132,8 +132,9 @@ public class StackImageUpdateActions {
                     throw new CloudbreakServiceException(e.getMessage(), e);
                 }
                 ClusterUpgradeProperties properties = (ClusterUpgradeProperties) variables.get(FLOW_VARIABLE_NAME);
-                if (properties != null && !properties.lockComponents()
-                        && Objects.equals(properties.targetImage().imageId(), payload.getImage().getImage().getUuid())) {
+                String targetImageId = payload.getImage().getImage().getUuid();
+                if (shouldUpdateComponentsFromUpgradeProperties(properties, targetImageId)) {
+                    LOGGER.debug("Updating components of image {} from the runtime upgrade properties", targetImageId);
                     getImageComponentUpdaterService().updateComponentsForUpgrade(properties, context.getStack().getId());
                     if (properties.targetImage().isBaseImage()) {
                         getStackImageService().storeNewImageComponentWithCurrentVersions(context.getStack(), properties.toCloudImage());
@@ -141,8 +142,10 @@ public class StackImageUpdateActions {
                         getStackImageService().storeNewImageComponent(context.getStack(), properties.toCloudImage());
                     }
                 } else if (!payload.getImage().getImage().isPrewarmed()) {
+                    LOGGER.debug("Storing base image {} with the current component versions", targetImageId);
                     getStackImageService().storeNewImageComponentWithCurrentVersions(context.getStack(), payload.getImage());
                 } else {
+                    LOGGER.debug("Updating components of prewarmed image {} from the image catalog", targetImageId);
                     getImageComponentUpdaterService().updateComponentsForUpgrade(payload.getImage(), context.getStack().getId());
                     getStackImageService().storeNewImageComponent(context.getStack(), payload.getImage());
                 }
@@ -278,5 +281,29 @@ public class StackImageUpdateActions {
                         context.getStackId()));
             }
         };
+    }
+
+    /**
+     * The upgrade properties are only used when the image update runs as part of a runtime upgrade:
+     * <ul>
+     *     <li>a standalone image update (e.g. OS upgrade outside of a cluster upgrade) has no properties,</li>
+     *     <li>a locked-components upgrade keeps the component versions, so it has to follow the legacy path,</li>
+     *     <li>the properties are inherited from the parent flow chain, so they must belong to the same target image.</li>
+     * </ul>
+     * The properties can carry components supplied in the request (e.g. for a base image), which are not part of the catalog image.
+     */
+    private boolean shouldUpdateComponentsFromUpgradeProperties(ClusterUpgradeProperties properties, String targetImageId) {
+        if (properties == null) {
+            LOGGER.debug("No runtime upgrade properties are present for the image update to {}", targetImageId);
+            return false;
+        } else if (properties.lockComponents()) {
+            LOGGER.debug("Runtime upgrade properties are ignored for the image update to {} because components are locked", targetImageId);
+            return false;
+        } else if (!Objects.equals(properties.targetImage().imageId(), targetImageId)) {
+            LOGGER.debug("Runtime upgrade properties belong to image {} instead of the image update target {}, ignoring them",
+                    properties.targetImage().imageId(), targetImageId);
+            return false;
+        }
+        return true;
     }
 }

@@ -12,7 +12,6 @@ import static com.sequenceiq.flow.core.FlowConstants.FLOW_RESTARTED;
 import static com.sequenceiq.flow.core.FlowState.FlowStateConstants.INIT_STATE;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -111,7 +110,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     @Override
     public void accept(Event<? extends Payload> event) {
-        doAccept(getFlowEventContext(event), getContextParams(event));
+        doAccept(getFlowEventContext(event), FlowContextParamsUtil.getContextParams(event));
     }
 
     private void doAccept(FlowEventContext flowEventContext, Map<Object, Object> contextParams) {
@@ -675,11 +674,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private String getFlowTriggerUserCrn(Event<?> event) {
         return event.getHeaders().get(FlowConstants.FLOW_TRIGGER_USERCRN);
-    }
-
-    private Map<Object, Object> getContextParams(Event<?> event) {
-        Map<Object, Object> contextParams = event.getHeaders().get(FlowConstants.FLOW_CONTEXTPARAMS_ID);
-        return contextParams == null ? new HashMap<>() : contextParams;
     }
 
     private void logFlowId(String flowId) {

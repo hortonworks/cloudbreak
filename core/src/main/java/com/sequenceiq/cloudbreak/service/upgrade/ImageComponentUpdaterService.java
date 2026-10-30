@@ -61,12 +61,25 @@ public class ImageComponentUpdaterService {
     public void updateComponentsForUpgrade(ClusterUpgradeProperties properties, Long stackId) {
         Stack stack = stackService.getById(stackId);
         restRequestThreadLocalService.setWorkspaceId(stack.getWorkspaceId());
-        LOGGER.debug("Updating the components for target image {}", properties.targetImage().imageId());
+        ClusterUpgradeProperties.TargetImageUpgradeContext targetImage = properties.targetImage();
+        if (targetImage.isBaseImage()) {
+            updateComponentsFromProperties(properties, stack);
+        } else {
+            // The image snapshot yields the same components as the catalog lookup, including the Data Lake pre-warm parcels and CM repo validation.
+            updateComponents(StatedImage.statedImage(targetImage.toCatalogImage(), targetImage.catalogUrl(), targetImage.catalogName()), stack);
+        }
+    }
+
+    /**
+     * Base images carry no runtime components, so the components supplied in the upgrade request are persisted instead.
+     */
+    private void updateComponentsFromProperties(ClusterUpgradeProperties properties, Stack stack) {
+        LOGGER.debug("Updating the components for base image {} from the upgrade properties", properties.targetImage().imageId());
         Set<ClouderaManagerProduct> targetProducts = properties.getAllTargetProducts();
         Set<Component> targetComponents = new HashSet<>(componentConverter.fromClouderaManagerProductList(targetProducts, stack));
         targetComponents.add(componentConverter.fromClouderaManagerRepo(properties.targetImage().clouderaManagerRepo(), stack));
         if (smartRouterParcelService.getSmartRouter(targetProducts).isEmpty()) {
-            Optional.ofNullable(componentConfigProviderService.getComponent(stackId, cdhProductDetails(), SmartRouterParcelService.COMPONENT_NAME))
+            Optional.ofNullable(componentConfigProviderService.getComponent(stack.getId(), cdhProductDetails(), SmartRouterParcelService.COMPONENT_NAME))
                     .ifPresent(targetComponents::add);
         }
         stackComponentUpdater.updateComponentsByStackId(stack, targetComponents, true);

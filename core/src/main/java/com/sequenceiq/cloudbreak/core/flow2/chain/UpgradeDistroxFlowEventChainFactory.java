@@ -218,7 +218,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         } else {
             return List.of(new SetDefaultJavaVersionForUpgradeTriggerEvent(event.getResourceId()),
                     new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
-                            event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled(), currentImage, null));
+                            event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled(), currentImage));
         }
     }
 

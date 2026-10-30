@@ -11,10 +11,10 @@ import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
 public class ConfigureClusterManagerManagementServicesRequest extends StackEvent {
 
+    // TODO CB-33421: Remove once in-flight upgrade flows always carry clusterUpgradeProperties.
     private final Image originalImage;
 
-    private final Image currentImage;
-
+    // TODO CB-33421: Remove once in-flight upgrade flows always carry clusterUpgradeProperties.
     private final StatedImage targetStatedImage;
 
     private final ClusterUpgradeProperties clusterUpgradeProperties;
@@ -23,18 +23,20 @@ public class ConfigureClusterManagerManagementServicesRequest extends StackEvent
     public ConfigureClusterManagerManagementServicesRequest(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("originalImage") Image originalImage,
-            @JsonProperty("currentImage") Image currentImage,
             @JsonProperty("targetStatedImage") StatedImage targetStatedImage,
             @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties) {
         super(stackId);
         this.originalImage = originalImage;
-        this.currentImage = currentImage;
         this.targetStatedImage = targetStatedImage;
         this.clusterUpgradeProperties = clusterUpgradeProperties;
     }
 
     public ConfigureClusterManagerManagementServicesRequest(Long stackId) {
-        this(stackId, null, null, null, null);
+        this(stackId, null, null, null);
+    }
+
+    public ConfigureClusterManagerManagementServicesRequest(Long stackId, ClusterUpgradeProperties clusterUpgradeProperties) {
+        this(stackId, null, null, clusterUpgradeProperties);
     }
 
     public ClusterUpgradeProperties getClusterUpgradeProperties() {
@@ -45,20 +47,12 @@ public class ConfigureClusterManagerManagementServicesRequest extends StackEvent
         return originalImage;
     }
 
-    public Image getCurrentImage() {
-        return currentImage;
-    }
-
     public StatedImage getTargetStatedImage() {
         return targetStatedImage;
     }
 
     public Optional<Image> getOriginalImageOpt() {
         return Optional.ofNullable(originalImage);
-    }
-
-    public Optional<Image> getCurrentImageOpt() {
-        return Optional.ofNullable(currentImage);
     }
 
     public Optional<StatedImage> getTargetStatedImageOpt() {
@@ -69,7 +63,6 @@ public class ConfigureClusterManagerManagementServicesRequest extends StackEvent
     public String toString() {
         return "ConfigureClusterManagerManagementServicesRequest{" +
                 "originalImage=" + originalImage +
-                ", currentImage=" + currentImage +
                 ", targetStatedImage=" + targetStatedImage +
                 ", clusterUpgradeProperties=" + clusterUpgradeProperties +
                 "} " + super.toString();

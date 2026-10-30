@@ -12,9 +12,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.hibernate.collection.spi.PersistentSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,11 +26,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
-import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -38,6 +44,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageRegionUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,7 +66,7 @@ class BaseImageUpgradeServiceTest {
     private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
 
     @Mock
-    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Mock
     private UpgradePermissionProvider upgradePermissionProvider;
@@ -69,9 +76,8 @@ class BaseImageUpgradeServiceTest {
 
     @Test
     void selectsLatestBaseImageEvenWhenCurrentPrewarmedImageWasBuiltLater() throws Exception {
-        StackDto stack = mock(StackDto.class);
+        StackDto stack = stackDto();
         StackView stackView = mock(StackView.class);
-        when(stack.getId()).thenReturn(1L);
         when(stack.getStack()).thenReturn(stackView);
         when(stack.getWorkspaceId()).thenReturn(2L);
         when(stackView.getCloudPlatform()).thenReturn("AWS");
@@ -111,8 +117,7 @@ class BaseImageUpgradeServiceTest {
 
     @Test
     void usesGivenBaseImageFromCurrentCatalog() throws Exception {
-        StackDto stack = mock(StackDto.class);
-        when(stack.getId()).thenReturn(1L);
+        StackDto stack = stackDto();
         when(stack.getWorkspaceId()).thenReturn(2L);
         Image current = Image.builder().withImageCatalogName("catalog").withPackageVersions(Map.of()).build();
         when(componentConfigProviderService.getImage(1L)).thenReturn(current);
@@ -137,9 +142,51 @@ class BaseImageUpgradeServiceTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
+    void resolvesBaseImageWithDetachedClusterComponents(boolean reinitiation) throws Exception {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        stack.setCloudPlatform("AWS");
+        stack.setPlatformVariant("AWS");
+        stack.setRegion("eu-west-1");
+        Workspace workspace = new Workspace();
+        workspace.setId(2L);
+        stack.setWorkspace(workspace);
+        Cluster cluster = new Cluster();
+        cluster.setId(3L);
+        PersistentSet<ClusterComponent> clusterComponents = new PersistentSet<>(null);
+        cluster.setComponents(clusterComponents);
+        stack.setCluster(cluster);
+        Image current = Image.builder().withImageCatalogName("catalog").withOsType("redhat8").withArchitecture("x86_64")
+                .withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), "7.3.1")).build();
+        when(componentConfigProviderService.getImage(1L)).thenReturn(current);
+        when(baseImagePackageVersionsEnricher.enrich(current, stack)).thenReturn(current);
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion("7.3.1-1.cdh7.3.1.p1200.84201983");
+        when(clusterComponentConfigProvider.getCdhProduct(3L)).thenReturn(Optional.of(cdh));
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image base = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder().withUuid("base").build();
+        StatedImage targetImage = StatedImage.statedImage(base, "catalog-url", "catalog");
+        if (reinitiation) {
+            when(imageCatalogService.getImageByCatalogName(2L, "base", "catalog")).thenReturn(targetImage);
+        } else {
+            when(platformStringTransformer.getPlatformStringForImageCatalog("AWS", "AWS")).thenReturn(imageCatalogPlatform("AWS"));
+            when(imageRegionUpgradeImageFilter.filterByRegion(imageCatalogPlatform("AWS"), "AWS", "eu-west-1")).thenReturn(image -> true);
+            when(imageCatalogService.getLatestBaseImage(any())).thenReturn(targetImage);
+        }
+        UpgradeComponents components = new UpgradeComponents(null, null);
+
+        ImageChangeDto result = reinitiation ? underTest.createImageChangeDto(stack, components, "base")
+                : underTest.createImageChangeDto(stack, components);
+
+        assertThat(result.getImageId()).isEqualTo("base");
+        assertThat(result.getComponents()).isSameAs(components);
+        assertThat(clusterComponents.wasInitialized()).isFalse();
+        verify(clusterComponentConfigProvider).getCdhProduct(3L);
+        verify(upgradePermissionProvider).validateRequestedComponentVersions(current.getPackageVersions(), Set.of(cdh), components);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
     void rejectsDowngradeBeforeLookingUpLatestOrPinnedImage(boolean reinitiation) throws Exception {
-        StackDto stack = mock(StackDto.class);
-        when(stack.getId()).thenReturn(1L);
+        StackDto stack = stackDto();
         Image current = Image.builder().withImageId("current").withPackageVersions(Map.of()).build();
         when(componentConfigProviderService.getImage(1L)).thenReturn(current);
         ClusterView cluster = mock(ClusterView.class);
@@ -159,6 +206,15 @@ class BaseImageUpgradeServiceTest {
         }).isSameAs(failure);
 
         verifyNoInteractions(imageCatalogService, platformStringTransformer, imageRegionUpgradeImageFilter);
+    }
+
+    private StackDto stackDto() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(1L);
+        Cluster cluster = new Cluster();
+        cluster.setId(3L);
+        when(stack.getCluster()).thenReturn(cluster);
+        return stack;
     }
 
 }

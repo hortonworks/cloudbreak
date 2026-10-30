@@ -64,13 +64,12 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
+                // Stored before resolving the properties so the failure action reports the right status if resolving fails.
                 variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
                 try {
                     Long stackId = context.getStackId();
-                    ClusterUpgradeProperties properties = getUpgradeProperties(payload, variables);
+                    ClusterUpgradeProperties properties = getUpgradePropertiesFromPayload(variables, payload);
                     variables.put(ORIGINAL_IMAGE, properties.toCurrentCloudImage());
-                    variables.put(FLOW_VARIABLE_NAME, properties);
-                    variables.put(ROLLING_UPGRADE_ENABLED, properties.options().rollingUpgradeEnabled());
                     imageComponentUpdaterService.updateComponentsForUpgrade(properties, stackId);
                     clusterUpgradeTargetImageService.saveImage(stackId, properties);
                     clusterUpgradeService.initUpgradeCluster(stackId, properties, properties.options().rollingUpgradeEnabled());
@@ -110,7 +109,7 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeInitSuccess payload, Map<Object, Object> variables) {
-                ClusterUpgradeProperties properties = getUpgradeProperties(variables, payload.getResourceId());
+                ClusterUpgradeProperties properties = getUpgradePropertiesFromVariables(variables, payload.getResourceId());
                 imageComponentUpdaterService.updateComponentsForUpgrade(properties, payload.getResourceId());
                 boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
                 String targetRuntimeVersion = properties.targetImage().runtimeVersion();
@@ -138,7 +137,7 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterManagerUpgradeSuccess payload, Map<Object, Object> variables) {
-                ClusterUpgradeProperties properties = getUpgradeProperties(variables, payload.getResourceId());
+                ClusterUpgradeProperties properties = getUpgradePropertiesFromVariables(variables, payload.getResourceId());
                 imageComponentUpdaterService.updateComponentsForUpgrade(properties, payload.getResourceId());
                 boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
                 Selectable event = new ClusterUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(), rollingUpgradeEnabled,
@@ -170,8 +169,8 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeSuccess payload, Map<Object, Object> variables) {
-                ClusterUpgradeProperties properties = getUpgradeProperties(variables, payload.getResourceId());
-                Selectable event = new ConfigureClusterManagerManagementServicesRequest(context.getStackId(), null, null, null, properties);
+                ClusterUpgradeProperties properties = getUpgradePropertiesFromVariables(variables, payload.getResourceId());
+                Selectable event = new ConfigureClusterManagerManagementServicesRequest(context.getStackId(), properties);
                 sendEvent(context, event);
             }
         };
@@ -192,9 +191,8 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ConfigureClusterManagerManagementServicesSuccess payload, Map<Object, Object> variables) {
-                ClusterUpgradeProperties properties = getUpgradeProperties(variables, payload.getResourceId());
-                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), properties.currentImage().packageVersions(), properties,
-                        rollingUpgradeEnabled(variables));
+                ClusterUpgradeProperties properties = getUpgradePropertiesFromVariables(variables, payload.getResourceId());
+                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), properties, rollingUpgradeEnabled(variables));
                 stackImageService.removeImageByComponentName(context.getStackId(), TARGET_IMAGE);
                 clusterComponentUpdateService.deleteClusterComponentByComponentTypeAndStackId(context.getStackId(),
                         ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES);

@@ -91,7 +91,12 @@ public class ClusterUpgradePropertiesFactory {
     }
 
     public ClusterUpgradeProperties create(Long stackId, Image originalImage, StatedImage targetImage, ClusterUpgradeProperties.UpgradeRequestOptions options) {
-        return buildProperties(stackService.get(stackId), originalImage, targetImage, options, null);
+        try {
+            Image currentImage = originalImage != null ? originalImage : componentConfigProviderService.getImage(stackId);
+            return buildProperties(stackService.get(stackId), currentImage, targetImage, options, null);
+        } catch (CloudbreakImageNotFoundException e) {
+            throw new NotFoundException("Image not found for cluster upgrade", e);
+        }
     }
 
     private ClusterUpgradeProperties buildProperties(Stack stack, Image currentImage, StatedImage targetStatedImage,

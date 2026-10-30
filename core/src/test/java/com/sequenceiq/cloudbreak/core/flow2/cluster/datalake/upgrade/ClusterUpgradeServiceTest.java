@@ -90,13 +90,9 @@ public class ClusterUpgradeServiceTest {
     @InjectMocks
     private ClusterUpgradeService underTest;
 
-    private static ClusterUpgradeProperties createProperties(Image image) {
-        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion(image.getStackDetails().getVersion());
-        ClusterUpgradeProperties.TargetImageUpgradeContext target = new ClusterUpgradeProperties.TargetImageUpgradeContext(
-                image.getUuid(), "catalog", "catalog-url", image.getStackDetails().getVersion(), "base-image-version",
-                image.getStackDetails().getStackBuildNumber(), Map.of(), Map.of(), null, null, null, null, null, null,
-                null, Map.of(), null, null, null, Set.of(), null);
-        return new ClusterUpgradeProperties(properties.options(), properties.currentImage(), target);
+    private static ClusterUpgradeProperties createProperties(Map<String, String> currentImagePackages, Image targetImage) {
+        return ClusterUpgradePropertiesTestUtils.withCurrentPackagesAndTargetRuntime(currentImagePackages, targetImage.getUuid(),
+                targetImage.getStackDetails().getVersion(), targetImage.getStackDetails().getStackBuildNumber());
     }
 
     private static Image createImage(String cmBuildNumber, String stackBuildNumber) {
@@ -173,9 +169,9 @@ public class ClusterUpgradeServiceTest {
         // GIVEN
         Map<String, String> currentImagePackages = createPackageVersions(CURRENT_BUILD_NUMBER,
                 currentStackVersion);
-        ClusterUpgradeProperties targetImage = createProperties(createImage(CURRENT_BUILD_NUMBER, targetStackVersion));
+        ClusterUpgradeProperties properties = createProperties(currentImagePackages, createImage(CURRENT_BUILD_NUMBER, targetStackVersion));
         // WHEN
-        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage, false);
+        underTest.clusterUpgradeFinished(STACK_ID, properties, false);
         // THEN
         verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, SUCCESS_MESSAGE);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, V_7_0_2);
@@ -185,9 +181,9 @@ public class ClusterUpgradeServiceTest {
     @MethodSource("upgradeNeededImages")
     public void testClusterUpgradeFinishedWhenNeededNoStackDetails(Map<String, String> currentImagePackages, Image targetIm) {
         // GIVEN
-        ClusterUpgradeProperties targetImage = createProperties(targetIm);
+        ClusterUpgradeProperties properties = createProperties(currentImagePackages, targetIm);
         // WHEN
-        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage, false);
+        underTest.clusterUpgradeFinished(STACK_ID, properties, false);
         // THEN
         verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, SUCCESS_MESSAGE);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED,
@@ -199,12 +195,22 @@ public class ClusterUpgradeServiceTest {
         // GIVEN
         Map<String, String> currentImagePackages = createPackageVersions(CURRENT_BUILD_NUMBER,
                 CURRENT_BUILD_NUMBER);
-        ClusterUpgradeProperties targetImage = createProperties(createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER));
+        ClusterUpgradeProperties properties = createProperties(currentImagePackages, createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER));
         // WHEN
-        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage, true);
+        underTest.clusterUpgradeFinished(STACK_ID, properties, true);
         // THEN
         verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FINISHED, SUCCESS_MESSAGE);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED_NOVERSION);
+    }
+
+    @Test
+    public void testClusterUpgradeFinishedWhenCurrentImagePackagesAreMissing() {
+        ClusterUpgradeProperties properties = createProperties(null, createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER));
+
+        underTest.clusterUpgradeFinished(STACK_ID, properties, false);
+
+        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, SUCCESS_MESSAGE);
+        verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, V_7_0_2);
     }
 
     @Test
@@ -242,7 +248,7 @@ public class ClusterUpgradeServiceTest {
     @Test
     void testInitUpgradeClusterWhenRollingUpgradeIsEnabled() {
         Image image = Image.builder().withStackDetails(new ImageStackDetails(V_7_0_2, null, null)).withUuid(IMAGE_ID).build();
-        underTest.initUpgradeCluster(STACK_ID, createProperties(image), true);
+        underTest.initUpgradeCluster(STACK_ID, createProperties(Map.of(), image), true);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_ROLLING_UPGRADE, V_7_0_2, IMAGE_ID);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_STARTED, "Cluster upgrade has been started.");
     }
@@ -250,7 +256,7 @@ public class ClusterUpgradeServiceTest {
     @Test
     void testInitUpgradeClusterWhenRollingUpgradeIsDisabled() {
         Image image = Image.builder().withStackDetails(new ImageStackDetails(V_7_0_2, null, null)).withUuid(IMAGE_ID).build();
-        underTest.initUpgradeCluster(STACK_ID, createProperties(image), false);
+        underTest.initUpgradeCluster(STACK_ID, createProperties(Map.of(), image), false);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_UPGRADE, V_7_0_2, IMAGE_ID);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_STARTED, "Cluster upgrade has been started.");
     }

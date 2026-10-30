@@ -40,14 +40,11 @@ public abstract class AbstractClusterUpgradeAction<P extends Payload>
         return (Image) variables.get(ORIGINAL_IMAGE);
     }
 
-    protected ClusterUpgradeProperties getUpgradeProperties(ClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
-        if (payload.getClusterUpgradeProperties() != null) {
-            return payload.getClusterUpgradeProperties();
-        }
+    protected ClusterUpgradeProperties getUpgradePropertiesFromPayload(Map<Object, Object> variables, ClusterUpgradeTriggerEvent payload) {
         return (ClusterUpgradeProperties) variables.computeIfAbsent(FLOW_VARIABLE_NAME, key -> clusterUpgradePropertiesResolver.resolve(payload));
     }
 
-    protected ClusterUpgradeProperties getUpgradeProperties(Map<Object, Object> variables, Long stackId) {
+    protected ClusterUpgradeProperties getUpgradePropertiesFromVariables(Map<Object, Object> variables, Long stackId) {
         // TODO CB-33421: Remove fallback once in-flight flows always contain upgrade properties.
         return (ClusterUpgradeProperties) variables.computeIfAbsent(FLOW_VARIABLE_NAME,
                 key -> clusterUpgradePropertiesResolver.resolve(stackId, getOriginalImage(variables), (StatedImage) variables.get(TARGET_IMAGE),

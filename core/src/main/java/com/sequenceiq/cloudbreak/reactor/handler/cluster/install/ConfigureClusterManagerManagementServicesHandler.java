@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProviderProcessor;
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.template.ClusterManagerTemplateSyncService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -90,18 +90,8 @@ public class ConfigureClusterManagerManagementServicesHandler extends ExceptionC
 
     private void updateServiceConfigsForUpgrade(Long stackId, ConfigureClusterManagerManagementServicesRequest request)
             throws IOException, CloudbreakException {
-        Optional<com.sequenceiq.cloudbreak.cloud.model.Image> originalImageOpt = request.getOriginalImageOpt();
-        Optional<StatedImage> targetStatedImageOpt = request.getTargetStatedImageOpt();
-        Optional<String> fromCmVersionOpt = request.getClusterUpgradeProperties() != null
-                ? Optional.ofNullable(request.getClusterUpgradeProperties().currentImage().packageVersions()).map(packages -> packages.get(CM.getKey()))
-                : originalImageOpt.map(com.sequenceiq.cloudbreak.cloud.model.Image::getPackageVersions)
-                        .map(packageVersions -> packageVersions.get(CM.getKey()));
-        Optional<String> toCmVersionOpt = request.getClusterUpgradeProperties() != null
-                ? Optional.ofNullable(request.getClusterUpgradeProperties().targetImage().clouderaManagerRepo())
-                        .map(ClouderaManagerRepo::getVersion)
-                : targetStatedImageOpt.map(StatedImage::getImage)
-                        .map(Image::getPackageVersions)
-                        .map(packageVersions -> packageVersions.get(CM.getKey()));
+        Optional<String> fromCmVersionOpt = resolveFromCmVersion(request);
+        Optional<String> toCmVersionOpt = resolveToCmVersion(request);
 
         if (fromCmVersionOpt.isPresent() && toCmVersionOpt.isPresent()) {
             StackDto stack = stackDtoService.getById(stackId);
@@ -124,5 +114,27 @@ public class ConfigureClusterManagerManagementServicesHandler extends ExceptionC
             LOGGER.warn("CM version is not present for the original or target image, skipping service config update during upgrade. " +
                     "Original CM version: {}, Target CM version: {}", fromCmVersionOpt.orElse("N/A"), toCmVersionOpt.orElse("N/A"));
         }
+    }
+
+    private Optional<String> resolveFromCmVersion(ConfigureClusterManagerManagementServicesRequest request) {
+        ClusterUpgradeProperties properties = request.getClusterUpgradeProperties();
+        if (properties != null) {
+            return getCmVersion(properties.currentImage().packageVersions());
+        }
+        // TODO CB-33421: Remove legacy image fallback once in-flight flows always carry clusterUpgradeProperties.
+        return request.getOriginalImageOpt().flatMap(image -> getCmVersion(image.getPackageVersions()));
+    }
+
+    private Optional<String> resolveToCmVersion(ConfigureClusterManagerManagementServicesRequest request) {
+        ClusterUpgradeProperties properties = request.getClusterUpgradeProperties();
+        if (properties != null) {
+            return Optional.ofNullable(properties.targetImage().clouderaManagerRepo()).map(ClouderaManagerRepo::getVersion);
+        }
+        // TODO CB-33421: Remove legacy image fallback once in-flight flows always carry clusterUpgradeProperties.
+        return request.getTargetStatedImageOpt().map(StatedImage::getImage).flatMap(image -> getCmVersion(image.getPackageVersions()));
+    }
+
+    private Optional<String> getCmVersion(Map<String, String> packageVersions) {
+        return Optional.ofNullable(packageVersions).map(packages -> packages.get(CM.getKey()));
     }
 }

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradeParcelSettingsPreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
@@ -45,15 +46,16 @@ public class ClusterUpgradePropertiesResolver {
     }
 
     public ClusterUpgradeProperties resolve(ClusterUpgradeTriggerEvent event) {
-        if (event.getClusterUpgradeProperties() != null) {
-            return event.getClusterUpgradeProperties();
-        }
         LOGGER.debug("Rebuilding cluster upgrade properties for legacy upgrade trigger, target image {}", event.getImageId());
         return clusterUpgradePropertiesFactory.create(new ImageChangeDto(event.getResourceId(), event.getImageId()), event.getOriginalImage(),
                 new ClusterUpgradeProperties.UpgradeRequestOptions(DEFAULT_REPLACE_VMS, DEFAULT_LOCK_COMPONENTS, event.isRollingUpgradeEnabled()));
     }
 
     public ClusterUpgradeProperties resolve(Long resourceId, Image originalImage, StatedImage targetImage, boolean rollingUpgradeEnabled) {
+        if (targetImage == null || targetImage.getImage() == null) {
+            throw new CloudbreakServiceException(String.format("Cluster upgrade properties cannot be rebuilt for stack %s, "
+                    + "because neither the upgrade properties nor the target image is present in the flow variables.", resourceId));
+        }
         LOGGER.debug("Rebuilding cluster upgrade properties from persisted snapshots, target image {}", targetImage.getImage().getUuid());
         return clusterUpgradePropertiesFactory.create(resourceId, originalImage, targetImage,
                 new ClusterUpgradeProperties.UpgradeRequestOptions(DEFAULT_REPLACE_VMS, DEFAULT_LOCK_COMPONENTS, rollingUpgradeEnabled));

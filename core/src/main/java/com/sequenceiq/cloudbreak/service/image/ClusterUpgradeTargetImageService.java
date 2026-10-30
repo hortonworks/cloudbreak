@@ -48,6 +48,7 @@ public class ClusterUpgradeTargetImageService {
                 && targetImage.equals(imageConverter.convertJsonToImage(existingTargetImage.get().getAttributes()))) {
             LOGGER.debug("The target image {} is already present for stack {}", targetImage.getImageId(), stackId);
         } else {
+            // getImageModelFromStatedImage is not called on this path, so the user data has to be migrated explicitly
             userDataService.makeSureUserDataIsMigrated(stackId);
             existingTargetImage.ifPresent(this::removeOldTargetImage);
             Component component = new Component(ComponentType.IMAGE, TARGET_IMAGE, new Json(targetImage), stackDtoService.getStackReferenceById(stackId));

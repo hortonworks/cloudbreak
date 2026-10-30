@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 
 public class ClusterUpgradeTriggerEvent extends StackEvent {
 
@@ -20,8 +19,6 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
 
     private final Image originalImage;
 
-    private final ClusterUpgradeProperties clusterUpgradeProperties;
-
     @JsonCreator
     public ClusterUpgradeTriggerEvent(
             @JsonProperty("selector") String event,
@@ -29,17 +26,11 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("imageId") String imageId,
             @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
-            @JsonProperty("originalImage") Image originalImage,
-            @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties) {
+            @JsonProperty("originalImage") Image originalImage) {
         super(event, resourceId, accepted);
         this.imageId = imageId;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
         this.originalImage = originalImage;
-        this.clusterUpgradeProperties = clusterUpgradeProperties;
-    }
-
-    public ClusterUpgradeProperties getClusterUpgradeProperties() {
-        return clusterUpgradeProperties;
     }
 
     public String getImageId() {
@@ -59,8 +50,7 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
         return isClassAndEqualsEvent(ClusterUpgradeTriggerEvent.class, other,
                 event -> Objects.equals(imageId, event.imageId)
                         && Objects.equals(rollingUpgradeEnabled, event.rollingUpgradeEnabled)
-                        && Objects.equals(originalImage, event.originalImage)
-                        && Objects.equals(clusterUpgradeProperties, event.clusterUpgradeProperties));
+                        && Objects.equals(originalImage, event.originalImage));
     }
 
     @Override
@@ -69,7 +59,6 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
                 .add("imageId='" + imageId + "'")
                 .add("rollingUpgradeEnabled=" + rollingUpgradeEnabled)
                 .add("originalImage=" + originalImage)
-                .add("clusterUpgradeProperties=" + clusterUpgradeProperties)
                 .toString();
     }
 }

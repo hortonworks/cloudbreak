@@ -214,16 +214,40 @@ class ClusterUpgradePropertiesJsonTest {
     }
 
     @Test
-    void testUpgradeEventsPreservePropertiesAfterSerialization() throws Exception {
+    void testManagementServicesRequestPreservesPropertiesAfterSerialization() throws Exception {
         ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2");
-        ClusterUpgradeTriggerEvent upgrade = new ClusterUpgradeTriggerEvent("selector", 1L, null, properties.targetImageId(), true,
-                properties.toCurrentCloudImage(), properties);
         ConfigureClusterManagerManagementServicesRequest management = new ConfigureClusterManagerManagementServicesRequest(
-                1L, properties.toCurrentCloudImage(), properties.toCloudImage(), null, properties);
+                1L, properties.toCurrentCloudImage(), null, properties);
 
-        assertEquals(properties, JsonUtil.readValue(JsonUtil.writeValueAsString(upgrade), ClusterUpgradeTriggerEvent.class).getClusterUpgradeProperties());
         assertEquals(properties, JsonUtil.readValue(JsonUtil.writeValueAsString(management),
                 ConfigureClusterManagerManagementServicesRequest.class).getClusterUpgradeProperties());
+    }
+
+    @Test
+    void testUpgradeTriggerPreservesImageAndFlagsInFlowLogPayload() throws Exception {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2");
+        ClusterUpgradeTriggerEvent upgrade = new ClusterUpgradeTriggerEvent("selector", 1L, null, properties.targetImageId(), true,
+                properties.toCurrentCloudImage());
+
+        ClusterUpgradeTriggerEvent restored = TypedJsonUtil.readValue(TypedJsonUtil.writeValueAsStringSilent(upgrade), ClusterUpgradeTriggerEvent.class);
+
+        assertEquals(properties.targetImageId(), restored.getImageId());
+        assertEquals(properties.toCurrentCloudImage(), restored.getOriginalImage());
+        assertTrue(restored.isRollingUpgradeEnabled());
+    }
+
+    @Test
+    void testLegacyManagementServicesRequestWithCurrentImageDeserializes() throws Exception {
+        String json = """
+                {"@type":"com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesRequest",
+                "resourceId":1,"originalImage":{"imageName":"original"},"currentImage":{"imageName":"current"},
+                "targetStatedImage":null,"clusterUpgradeProperties":null}
+                """;
+
+        ConfigureClusterManagerManagementServicesRequest restored = JsonUtil.readValue(json, ConfigureClusterManagerManagementServicesRequest.class);
+
+        assertEquals("original", restored.getOriginalImage().getImageName());
+        assertNull(restored.getClusterUpgradeProperties());
     }
 
     @Test
@@ -238,6 +262,21 @@ class ClusterUpgradePropertiesJsonTest {
     }
 
     @Test
+    void testUpgradeTriggerIgnoresPropertiesFromOlderPersistedPayloads() throws Exception {
+        String json = """
+                {"@type":"com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent",
+                "selector":"CLUSTER_UPGRADE_INIT_EVENT","resourceId":1,"imageId":"target","rollingUpgradeEnabled":true,
+                "clusterUpgradeProperties":{"targetImage":{"imageId":"target"}}}
+                """;
+
+        ClusterUpgradeTriggerEvent restored = TypedJsonUtil.readValue(json, ClusterUpgradeTriggerEvent.class);
+
+        assertEquals("target", restored.getImageId());
+        assertTrue(restored.isRollingUpgradeEnabled());
+        assertFalse(JsonUtil.readTree(JsonUtil.writeValueAsString(restored)).has("clusterUpgradeProperties"));
+    }
+
+    @Test
     void testLegacyUpgradeTriggerDeserializesWithoutProperties() throws Exception {
         String json = """
                 {"@type":"com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent",
@@ -246,7 +285,6 @@ class ClusterUpgradePropertiesJsonTest {
 
         ClusterUpgradeTriggerEvent restored = JsonUtil.readValue(json, ClusterUpgradeTriggerEvent.class);
 
-        assertNull(restored.getClusterUpgradeProperties());
         assertEquals("target", restored.getImageId());
         assertTrue(restored.isRollingUpgradeEnabled());
     }

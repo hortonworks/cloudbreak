@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.cdhProductDetails;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -11,6 +12,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -20,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -28,6 +32,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -95,6 +101,7 @@ public class ImageComponentUpdaterServiceTest {
     @BeforeEach
     void setup() {
         setupStack();
+        stack.setId(STACK_ID);
         setupWorkspace();
         lenient().when(image.getUuid()).thenReturn(TARGET_IMAGE_ID);
         lenient().when(targetStatedImage.getImage()).thenReturn(image);
@@ -212,19 +219,47 @@ public class ImageComponentUpdaterServiceTest {
     }
 
     @Test
-    void prewarmedPropertiesKeepExistingClusterComponentSelection() {
-        ClusterUpgradeProperties properties = mock(ClusterUpgradeProperties.class);
-        ClusterUpgradeProperties.TargetImageUpgradeContext target = mock(ClusterUpgradeProperties.TargetImageUpgradeContext.class);
-        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion("7.13.2");
-        Component cmComponent = new Component();
-        when(properties.targetImage()).thenReturn(target);
-        when(target.clouderaManagerRepo()).thenReturn(repo);
-        when(componentConverter.fromClouderaManagerRepo(repo, stack)).thenReturn(cmComponent);
+    void prewarmedPropertiesUpdateComponentsFromTheTargetImageSnapshot() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        ImageStackDetails stackDetails = new ImageStackDetails("7.3.2", new StackRepoDetails(Map.of("redhat8", "https://runtime-repo/"), Map.of()), "1");
+        List<List<String>> preWarmParcels = List.of(List.of("FLINK-1.20", "https://flink-repo/"));
+        ClusterUpgradeProperties base = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2");
+        ClusterUpgradeProperties.TargetImageUpgradeContext target = new ClusterUpgradeProperties.TargetImageUpgradeContext(
+                TARGET_IMAGE_ID, "imageCatalogName", "imageCatalogUrl", "7.3.2", "7.3.2", "1", Map.of("cm", "7.13.2"), Map.of(), OsType.RHEL8,
+                "redhat8", "x86_64", "2024-01-01", 1L, "targetImageName", stackDetails, Map.of("redhat8", "https://cm-repo/"), preWarmParcels,
+                List.of(), null, Set.of(), null);
+        ClusterUpgradeProperties properties = new ClusterUpgradeProperties(base.options(), base.currentImage(), target);
+        Set<Component> componentsToUpdate = getComponents();
+        ArgumentCaptor<StatedImage> statedImage = ArgumentCaptor.forClass(StatedImage.class);
+        when(imageService.getComponentsWithoutUserData(eq(stack), statedImage.capture())).thenReturn(componentsToUpdate);
 
         underTest.updateComponentsForUpgrade(properties, STACK_ID);
 
-        verify(clusterComponentUpdater).updateClusterComponentsByStackId(stack, Set.of(cmComponent), true, false);
-        verifyNoInteractions(upgradeImageInfoFactory);
+        verify(restRequestThreadLocalService).setWorkspaceId(WORKSPACE_ID);
+        verify(stackComponentUpdater).updateComponentsByStackId(stack, componentsToUpdate, true);
+        verify(clusterComponentUpdater).updateClusterComponentsByStackId(stack, componentsToUpdate, true);
+        Assertions.assertThat(statedImage.getValue().getImageCatalogUrl()).isEqualTo("imageCatalogUrl");
+        Assertions.assertThat(statedImage.getValue().getImageCatalogName()).isEqualTo("imageCatalogName");
+        Image catalogImage = statedImage.getValue().getImage();
+        Assertions.assertThat(catalogImage.getUuid()).isEqualTo(TARGET_IMAGE_ID);
+        Assertions.assertThat(catalogImage.getStackDetails()).isEqualTo(stackDetails);
+        Assertions.assertThat(catalogImage.getPreWarmParcels()).isEqualTo(preWarmParcels);
+        Assertions.assertThat(catalogImage.getRepo()).containsEntry("redhat8", "https://cm-repo/");
+        verifyNoInteractions(upgradeImageInfoFactory, componentConverter, componentConfigProviderService);
+    }
+
+    @Test
+    void prewarmedPropertiesFailWhenTheImageComponentsCannotBeBuilt() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        ImageStackDetails stackDetails = new ImageStackDetails("7.3.2", new StackRepoDetails(Map.of("redhat8", "https://runtime-repo/"), Map.of()), "1");
+        ClusterUpgradeProperties base = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.3.2");
+        ClusterUpgradeProperties.TargetImageUpgradeContext target = new ClusterUpgradeProperties.TargetImageUpgradeContext(
+                TARGET_IMAGE_ID, "imageCatalogName", "imageCatalogUrl", "7.3.2", "7.3.2", "1", Map.of(), Map.of(), OsType.RHEL8,
+                "redhat8", "x86_64", "2024-01-01", 1L, "targetImageName", stackDetails, Map.of(), null, null, null, Set.of(), null);
+        ClusterUpgradeProperties properties = new ClusterUpgradeProperties(base.options(), base.currentImage(), target);
+        when(imageService.getComponentsWithoutUserData(eq(stack), any())).thenThrow(new CloudbreakImageNotFoundException("no CM repo"));
+
+        Assertions.assertThatThrownBy(() -> underTest.updateComponentsForUpgrade(properties, STACK_ID))
+                .isInstanceOf(NotFoundException.class);
+        verify(stackComponentUpdater, never()).updateComponentsByStackId(any(), any(), anyBoolean());
     }
 
     @Test
