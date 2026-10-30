@@ -64,6 +64,9 @@ do
   fi
 done < "$AUTO_TLS_INIT_FILE"
 
+# run_autotls_setup in cloudera/manager/init.sls is skipped only if this marker exists in the new certs dir
+echo $(date +%Y-%m-%d:%H:%M:%S) >> ${CERTMANAGER_DIR}/autotls_setup_success
+
 echo "$(date '+%d/%m/%Y %H:%M:%S') - Cleaning up leftover after CMCA renewal."
 rm -rf ${CERTMANAGER_DIR}_bkp_*
 rm -f ${CM_SETTINGS_FILE}.bkp.*
