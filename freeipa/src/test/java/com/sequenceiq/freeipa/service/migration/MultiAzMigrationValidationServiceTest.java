@@ -8,12 +8,15 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -259,6 +262,17 @@ class MultiAzMigrationValidationServiceTest {
         ValidationResult result = underTest.validateMultiAzMigrationRequest(ENV_CRN, ACCOUNT_ID, stack);
 
         assertResult(result, errorFragment);
+    }
+
+    @Test
+    void testValidateEnvironmentZonesWhenAvailabilityZoneOfSubnetIsMissing() {
+        DetailedEnvironmentResponse environment = mockEnvironment("AWS", new HashSet<>(Arrays.asList("us-east-1a", null)));
+        when(cachedEnvironmentClientService.getByCrn(ENV_CRN)).thenReturn(environment);
+        Stack stack = createStack(AWS_NATIVE_VARIANT, false, true, Set.of(availableInstance("i-001")), null);
+
+        ValidationResult result = underTest.validateMultiAzMigrationRequest(ENV_CRN, ACCOUNT_ID, stack);
+
+        assertResult(result, Optional.of("less than 2 distinct availability zones"));
     }
 
     private Stack createStack(String variant, boolean multiAz, boolean available, Set<InstanceMetaData> instances, ImageEntity image) {

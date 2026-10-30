@@ -56,6 +56,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
+import com.sequenceiq.freeipa.service.migration.MultiAzMigrationRebalanceService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -87,6 +88,9 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
 
     @Inject
     private OperationService operationService;
+
+    @Inject
+    private MultiAzMigrationRebalanceService multiAzMigrationRebalanceService;
 
     @Override
     public String initEvent() {
@@ -166,7 +170,7 @@ public class MultiAzMigrationFlowEventChainFactory implements FlowEventChainFact
         int instanceCountForUpscale = instanceCountForUpscale(event);
         int instanceCountForDownscale = instanceCountForDownscale(event);
         Set<String> groupNames = groupNames(event);
-        Set<String> nonPrimaryGwInstanceIdsToRecreate = event.getNonPrimaryGwInstanceIdsToRecreate();
+        Set<String> nonPrimaryGwInstanceIdsToRecreate = multiAzMigrationRebalanceService.getNonPrimaryGwInstanceIdsToRecreate(event);
         LOGGER.debug("Add scale events for non primary gateway instances. upscale count: [{}] downscale count: [{}]",
                 instanceCountForUpscale, instanceCountForDownscale);
 

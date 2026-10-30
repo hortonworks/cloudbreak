@@ -9,10 +9,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -48,6 +50,7 @@ import com.sequenceiq.freeipa.flow.freeipa.migration.MultiAzMigrationInitState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
+import com.sequenceiq.freeipa.service.migration.MultiAzMigrationRebalanceService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -72,8 +75,6 @@ class MultiAzMigrationFlowEventChainFactoryTest {
 
     private static final String NON_PGW_2 = "i-non-pgw-2";
 
-    private static final List<String> INSTANCE_IDS = List.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2);
-
     @Mock
     private InstanceGroupService instanceGroupService;
 
@@ -92,101 +93,123 @@ class MultiAzMigrationFlowEventChainFactoryTest {
     @Mock
     private OperationService operationService;
 
+    @Mock
+    private MultiAzMigrationRebalanceService multiAzMigrationRebalanceService;
+
     @InjectMocks
     private MultiAzMigrationFlowEventChainFactory underTest;
 
     static Stream<Arguments> testCreateFlowTriggerEventQueueArguments() {
         return Stream.of(
-                Arguments.of(AWS_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
-                Arguments.of(AWS_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1), false),
-                Arguments.of(AWS_VARIANT.variant(), Set.of(PRIMARY_GW), false),
+                Arguments.of(event(AWS_VARIANT.variant(), NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(event(AWS_VARIANT.variant(), NON_PGW_1), false),
+                Arguments.of(event(AWS_VARIANT.variant()), false),
 
-                Arguments.of(AWS_NATIVE_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
-                Arguments.of(AWS_NATIVE_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1), false),
-                Arguments.of(AWS_NATIVE_VARIANT.variant(), Set.of(PRIMARY_GW), false),
+                Arguments.of(event(AWS_NATIVE_VARIANT.variant(), NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(event(AWS_NATIVE_VARIANT.variant(), NON_PGW_1), false),
+                Arguments.of(event(AWS_NATIVE_VARIANT.variant()), false),
 
-                Arguments.of(AWS_NATIVE_GOV_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
-                Arguments.of(AWS_NATIVE_GOV_VARIANT.variant(), Set.of(PRIMARY_GW, NON_PGW_1), false),
-                Arguments.of(AWS_NATIVE_GOV_VARIANT.variant(), Set.of(PRIMARY_GW), false),
+                Arguments.of(event(AWS_NATIVE_GOV_VARIANT.variant(), NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(event(AWS_NATIVE_GOV_VARIANT.variant(), NON_PGW_1), false),
+                Arguments.of(event(AWS_NATIVE_GOV_VARIANT.variant()), false),
 
-                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
-                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1), false),
-                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW), false),
+                Arguments.of(event(AzureConstants.VARIANT, NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(event(AzureConstants.VARIANT, NON_PGW_1), false),
+                Arguments.of(event(AzureConstants.VARIANT), false),
 
-                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), true),
-                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW, NON_PGW_1), true),
-                Arguments.of(AzureConstants.VARIANT, Set.of(PRIMARY_GW), true),
+                Arguments.of(event(AzureConstants.VARIANT, NON_PGW_1, NON_PGW_2), true),
+                Arguments.of(event(AzureConstants.VARIANT, NON_PGW_1), true),
+                Arguments.of(event(AzureConstants.VARIANT), true),
 
-                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), false),
-                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW, NON_PGW_1), false),
-                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW), false),
-
-                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW, NON_PGW_1, NON_PGW_2), true),
-                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW, NON_PGW_1), true),
-                Arguments.of(GcpConstants.GCP_VARIANT, Set.of(PRIMARY_GW), true)
+                Arguments.of(event(GcpConstants.GCP_VARIANT, NON_PGW_1, NON_PGW_2), false),
+                Arguments.of(event(GcpConstants.GCP_VARIANT, NON_PGW_1), false),
+                Arguments.of(event(GcpConstants.GCP_VARIANT), false)
         );
     }
 
     @MethodSource("testCreateFlowTriggerEventQueueArguments")
     @ParameterizedTest
-    void testCreateFlowTriggerEventQueueWhenVariantMigrationNeeded(Variant sourceVariant, Set<String> instanceIds, boolean hasLoadBalancer) {
-        Variant targetVariant = AWS_VARIANT.variant().equals(sourceVariant) ? AWS_NATIVE_VARIANT.variant() : sourceVariant;
+    void testCreateFlowTriggerEventQueue(MultiAzMigrationEvent event, boolean hasLoadBalancer) {
         when(instanceGroupService.findGroupNamesByStackId(STACK_ID)).thenReturn(Set.of("master"));
         if (hasLoadBalancer) {
             LoadBalancer loadBalancer = mock();
             when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(loadBalancer));
         }
-        MultiAzMigrationEvent event = new MultiAzMigrationEvent(
-                FlowChainTriggers.MULTI_AZ_MIGRATION_TRIGGER_EVENT,
-                STACK_ID,
-                OPERATION_ID,
-                sourceVariant,
-                targetVariant,
-                new HashSet<>(instanceIds),
-                PRIMARY_GW);
+        Set<String> nonPrimaryGwInstanceIdsToRecreate = event.getNonPrimaryGwInstanceIdsToRecreate();
+        when(multiAzMigrationRebalanceService.getNonPrimaryGwInstanceIdsToRecreate(event)).thenReturn(nonPrimaryGwInstanceIdsToRecreate);
 
         FlowTriggerEventQueue queue = underTest.createFlowTriggerEventQueue(event);
 
         verify(freeIpaLoadBalancerService).findByStackId(STACK_ID);
-        assertThat(queue.getQueue()).hasSize(getExpectedFlowCount(instanceIds, sourceVariant, hasLoadBalancer));
+        assertThat(queue.getQueue()).hasSize(getExpectedFlowCount(event, hasLoadBalancer));
+        assertReplacedInstances(queue,
+                Stream.concat(
+                        event.shouldRecreatePrimaryGw() ? Stream.of(PRIMARY_GW) : Stream.empty(),
+                        nonPrimaryGwInstanceIdsToRecreate.stream()).toList());
+    }
 
+    @Test
+    void testCreateFlowTriggerEventQueueWhenOnlySomeNonPrimaryGwInstancesNeedToBeRecreated() {
+        when(instanceGroupService.findGroupNamesByStackId(STACK_ID)).thenReturn(Set.of("master"));
+        MultiAzMigrationEvent event = event(AWS_NATIVE_VARIANT.variant(), NON_PGW_1, NON_PGW_2);
+        when(multiAzMigrationRebalanceService.getNonPrimaryGwInstanceIdsToRecreate(event)).thenReturn(Set.of(NON_PGW_1));
+
+        FlowTriggerEventQueue queue = underTest.createFlowTriggerEventQueue(event);
+
+        assertThat(queue.getQueue()).hasSize(6);
+        assertReplacedInstances(queue, List.of(NON_PGW_1));
+    }
+
+    private static void assertReplacedInstances(FlowTriggerEventQueue queue, List<String> expectedReplacedInstanceIds) {
         List<UpscaleEvent> upscaleEvents = queue.getQueue().stream()
                 .filter(UpscaleEvent.class::isInstance)
                 .map(UpscaleEvent.class::cast)
                 .toList();
-        assertThat(upscaleEvents).hasSize(event.shouldRecreatePrimaryGw() ? instanceIds.size() : instanceIds.size() - 1);
+        assertThat(upscaleEvents).hasSize(expectedReplacedInstanceIds.size());
         assertThat(upscaleEvents).extracting(UpscaleEvent::getInstanceIdsBeingReplaced).allMatch(ids -> ids.size() == 1);
         assertThat(upscaleEvents).flatExtracting(UpscaleEvent::getInstanceIdsBeingReplaced)
-                .containsExactlyInAnyOrderElementsOf(INSTANCE_IDS.subList(event.shouldRecreatePrimaryGw() ? 0 : 1, instanceIds.size()));
+                .containsExactlyInAnyOrderElementsOf(expectedReplacedInstanceIds);
 
         List<DownscaleEvent> downscaleEvents = queue.getQueue().stream()
                 .filter(DownscaleEvent.class::isInstance)
                 .map(DownscaleEvent.class::cast)
                 .toList();
-        assertThat(downscaleEvents).hasSize(event.shouldRecreatePrimaryGw() ? instanceIds.size() : instanceIds.size() - 1);
+        assertThat(downscaleEvents).hasSize(expectedReplacedInstanceIds.size());
         assertThat(downscaleEvents).extracting(DownscaleEvent::getInstanceIds).allMatch(ids -> ids.size() == 1);
         assertThat(downscaleEvents).flatExtracting(DownscaleEvent::getInstanceIds)
-                .containsExactlyInAnyOrderElementsOf(INSTANCE_IDS.subList(event.shouldRecreatePrimaryGw() ? 0 : 1, instanceIds.size()));
+                .containsExactlyInAnyOrderElementsOf(expectedReplacedInstanceIds);
     }
 
-    private static int getExpectedFlowCount(Set<String> instanceIds, Variant sourceVariant, boolean hasLoadBalancer) {
-        return switch (sourceVariant.value()) {
-            case "AWS" -> switch (instanceIds.size()) {
+    private static MultiAzMigrationEvent event(Variant sourceVariant, String... nonPrimaryGwInstanceIds) {
+        Variant targetVariant = AWS_VARIANT.variant().equals(sourceVariant) ? AWS_NATIVE_VARIANT.variant() : sourceVariant;
+        return new MultiAzMigrationEvent(
+                FlowChainTriggers.MULTI_AZ_MIGRATION_TRIGGER_EVENT,
+                STACK_ID,
+                OPERATION_ID,
+                sourceVariant,
+                targetVariant,
+                Stream.concat(Stream.of(PRIMARY_GW), Arrays.stream(nonPrimaryGwInstanceIds)).collect(Collectors.toCollection(HashSet::new)),
+                PRIMARY_GW);
+    }
+
+    private static int getExpectedFlowCount(MultiAzMigrationEvent event, boolean hasLoadBalancer) {
+        return switch (event.getSourceVariant().value()) {
+            case "AWS" -> switch (event.getInstanceIds().size()) {
                 case 1 -> 9;
                 case 2 -> 13;
                 case 3 -> 15;
                 default -> 0;
             };
-            case "AWS_NATIVE", "AWS_NATIVE_GOV", "GCP" -> switch (instanceIds.size()) {
-                case 1 -> 4;
-                case 2 -> 6;
-                case 3 -> 8;
-                default -> 0;
-            };
-            default -> switch (instanceIds.size()) {
+            case "AZURE" -> switch (event.getInstanceIds().size()) {
                 case 1 -> hasLoadBalancer ? 9 : 7;
                 case 2 -> hasLoadBalancer ? 11 : 9;
                 case 3 -> hasLoadBalancer ? 13 : 11;
+                default -> 0;
+            };
+            default -> switch (event.getInstanceIds().size()) {
+                case 1 -> 4;
+                case 2 -> 6;
+                case 3 -> 8;
                 default -> 0;
             };
         };

@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.migration;
 
 import static java.util.function.Predicate.not;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -153,7 +154,7 @@ public class MultiAzMigrationValidationService {
             if (environmentZones.isEmpty()) {
                 return ValidationResult.ofError("Could not determine availability zones available for the environment.");
             } else {
-                return environmentZones.get().size() >= 2
+                return environmentZones.get().stream().filter(Objects::nonNull).count() >= 2
                         ? ValidationResult.empty()
                         : ValidationResult.ofError(String.format("The environment has less than 2 distinct availability zones. " +
                         "For multi-AZ migration on %s, there need to be at least 2 availability zones available.", environment.getCloudPlatform()));
