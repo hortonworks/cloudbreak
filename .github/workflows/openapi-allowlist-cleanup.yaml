@@ -29,6 +29,9 @@ jobs:
         with:
           ref: master
           fetch-depth: 0        # need tags to derive the version
+          # Otherwise the job's read-only GITHUB_TOKEN stays in .git/config as an extraheader and
+          # overrides the Vault PAT in the push URL, so the push is rejected with 403.
+          persist-credentials: false
 
       - name: prepare
         id: base
@@ -62,23 +65,43 @@ jobs:
           echo "EOF"           >> "$GITHUB_OUTPUT"
           if [ -n "${removed}" ]; then echo "has_changes=true" >> "$GITHUB_OUTPUT"; fi
 
+      # The cb-ubuntu22 runner image has no gh CLI, so the GitHub REST API is called with curl
+      # (same approach as auto-close-old-prs.yml).
       - name: create pull request
         if: steps.prune.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ steps.base.outputs.GITHUB_TOKEN }}
-          GH_HOST: ${{ github.server_url }}
+          API_URL: ${{ github.api_url }}
+          SERVER_URL: ${{ github.server_url }}
           REPO: ${{ github.repository }}
           BRANCH_NAME: chore/openapi-allowlist-cleanup
           REMOVED: ${{ steps.prune.outputs.removed }}
         run: |
-          set -e
+          set -euo pipefail
+          api() {
+            # usage: api METHOD PATH [extra curl args...]; prints response body
+            # On an HTTP error the response body is written to stderr, because callers pipe stdout into jq.
+            local method="$1" path="$2"; shift 2
+            local response
+            if ! response=$(curl -sSL --fail-with-body \
+              -X "$method" \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "$@" \
+              "$API_URL/$path"); then
+              echo "GitHub API call failed: $method $path: $response" >&2
+              return 1
+            fi
+            printf '%s\n' "$response"
+          }
           # Host of the GitHub instance (github.infra.cloudera.com on our GHES), taken from the
           # Actions context so we never hardcode github.com.
-          server_host="${GH_HOST#https://}"
-          export GH_HOST="${server_host}"
+          server_host="${SERVER_URL#https://}"
           # Attribute the commit to the token's own account so it links correctly on GHES.
-          actor=$(gh api user --jq '.login')
-          actor_id=$(gh api user --jq '.id')
+          user=$(api GET "user")
+          actor=$(printf '%s' "$user" | jq -r '.login')
+          actor_id=$(printf '%s' "$user" | jq -r '.id')
           git config user.name "${actor}"
           git config user.email "${actor_id}+${actor}@users.noreply.${server_host}"
           git checkout -B "$BRANCH_NAME"
@@ -99,10 +122,12 @@ jobs:
           EOF
           )
           # Reuse the existing PR if the branch already has one open, otherwise create it.
-          if [ -z "$(gh pr list --repo "$REPO" --head "$BRANCH_NAME" --state open --json number --jq '.[].number')" ]; then
-            gh pr create --repo "$REPO" --base master --head "$BRANCH_NAME" \
-              --title "Remove stale OpenAPI breaking-change allowlist entries" \
-              --body "$body"
+          open_prs=$(api GET "repos/$REPO/pulls?state=open&head=${REPO%%/*}:${BRANCH_NAME}" | jq 'length')
+          if [ "$open_prs" -eq 0 ]; then
+            jq -n --arg title "Remove stale OpenAPI breaking-change allowlist entries" \
+                --arg head "$BRANCH_NAME" --arg body "$body" \
+                '{title: $title, head: $head, base: "master", body: $body}' \
+              | api POST "repos/$REPO/pulls" -H "Content-Type: application/json" --data-binary @- | jq -r '"Created PR: \(.html_url)"'
           else
             echo "PR for $BRANCH_NAME already open — pushed updated commit."
           fi
