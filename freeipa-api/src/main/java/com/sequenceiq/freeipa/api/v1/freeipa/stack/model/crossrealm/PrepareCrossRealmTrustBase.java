@@ -19,7 +19,7 @@ public class PrepareCrossRealmTrustBase {
 
     public static final String INVALID_REALM_MESSAGE = "Invalid realm format, only letters, digits, '-', '_' and '.' separated labels are allowed";
 
-    public static final String TRUST_SECRET_MATCHER = "[A-Za-z0-9@#$*+,./:;=?_~-]{1,128}";
+    public static final String TRUST_SECRET_MATCHER = "\\s*|[A-Za-z0-9@#$*+,./:;=?_~-]{1,128}";
 
     public static final String INVALID_TRUST_SECRET_MESSAGE = "Invalid trust secret, only letters, digits and @#$*+,./:;=?_~- are allowed (max 128)";
 
