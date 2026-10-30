@@ -196,3 +196,7 @@ generate_cm_freeipa_keytab:
 
 {%- endif %}
 {% endif %}
+
+remove_ipa_client_krb5_dropin:
+  file.absent:
+    - name: /etc/krb5.conf.d/freeipa-realm
