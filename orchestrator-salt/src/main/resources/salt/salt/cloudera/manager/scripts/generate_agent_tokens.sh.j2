@@ -10,18 +10,62 @@ declare -A AGENT_FQDN_TOKENDIR_MAP=( {%- for ip, args in pillar.get('hosts', {})
 TOKEN_DIR="/srv/salt/agent-tls-tokens"
 LOADBALANCER_SAN={{ internal_loadbalancer_san }}
 
+AGENT_HOST_CERT="/var/lib/cloudera-scm-agent/agent-cert/cm-auto-host_cert_chain.pem"
+AGENT_TOKEN="/etc/cloudera-scm-agent/cmagent.token"
+SKIP_ENROLLED=${CM_AGENT_TOKENS_SKIP_ENROLLED:-false}
+TOKEN_MAX_AGE_MINUTES=60
+ENROLLMENT_CHECK_TIMEOUT_SECONDS=30
+
 source /bin/activate_salt_env
+
+token_is_fresh() {
+  find "$1/agent_token_generated" -mmin -$TOKEN_MAX_AGE_MINUTES 2>/dev/null | grep -q .
+}
+
+# Agents that already hold a valid host certificate do not use their token again, so they need neither a new token nor a new copy.
+# Expired certificates are renewed by the rotation states, which do not set CM_AGENT_TOKENS_SKIP_ENROLLED, because there the enrolled agents need a new token.
+# The token file is also required, because cloudera/agent/start.sls fails without it.
+declare -A ENROLLED_AGENTS=()
+if [[ "$SKIP_ENROLLED" == true ]]; then
+  STALE_COPIED_AGENTS=()
+  STALE_COPIED_COUNT=0
+  ENROLLED_COUNT=0
+  for fqdn in "${!AGENT_FQDN_TOKENDIR_MAP[@]}"
+  do
+    tokendir=$TOKEN_DIR/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}
+    if [[ -e ${tokendir}/agent_token_copied_to_client ]] && ! token_is_fresh "$tokendir"; then
+      STALE_COPIED_AGENTS+=("$fqdn")
+      STALE_COPIED_COUNT=$((STALE_COPIED_COUNT + 1))
+    fi
+  done
+  if [[ "$STALE_COPIED_COUNT" -gt 0 ]]; then
+    set +e
+    ENROLLMENT_RESULT=$(IFS=,; salt -L "${STALE_COPIED_AGENTS[*]}" cmd.retcode "test -f $AGENT_TOKEN && openssl x509 -checkend 0 -noout -in $AGENT_HOST_CERT" python_shell=True -t $ENROLLMENT_CHECK_TIMEOUT_SECONDS --out=txt)
+    ENROLLMENT_RET=$?
+    set -e
+    # Only "<minion>: <retcode>" lines are answers, other lines (e.g. "Minion did not return. [Not connected]") leave the host on the regeneration path.
+    ENROLLMENT_LINE_PATTERN='^([^ ]+): ([0-9]+)$'
+    while read -r line; do
+      if [[ "$line" =~ $ENROLLMENT_LINE_PATTERN ]] && [[ "${BASH_REMATCH[2]}" == "0" ]]; then
+        ENROLLED_AGENTS["${BASH_REMATCH[1]}"]=true
+        ENROLLED_COUNT=$((ENROLLED_COUNT + 1))
+      fi
+    done <<< "$ENROLLMENT_RESULT"
+    echo "CM agent enrollment check returned with ${ENROLLMENT_RET}: ${ENROLLED_COUNT} of ${STALE_COPIED_COUNT} hosts with a stale copied token are enrolled."
+  fi
+fi
 
 for fqdn in "${!AGENT_FQDN_TOKENDIR_MAP[@]}"
 do
   tokendir=$TOKEN_DIR/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}
   token_file="${tokendir}/agent_token_generated"
+  if [[ -n "${ENROLLED_AGENTS[${fqdn}]:-}" ]]; then
+    echo "CM agent token generation for ${fqdn} will be skipped as the agent already has a valid host certificate."
+    continue
+  fi
   regenerate=true
-  if [[ -e "$token_file" ]]; then
-    # Check if the file is less than 1 hour old
-    if find "$token_file" -mmin -60 | grep -q .; then
-      regenerate=false
-    fi
+  if token_is_fresh "$tokendir"; then
+    regenerate=false
   fi
   if [[ "$regenerate" == true ]]; then
     HOSTNAME=" --hostname ${fqdn} "
@@ -34,14 +78,16 @@ do
     /opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR gen_cert_request_token --output ${tokendir}/cmagent.token $HOSTNAME --lifetime 3600
     echo $(date +%Y-%m-%d:%H:%M:%S) >> "$token_file"
   else
-    echo "CM agent token generation for ${fqdn} will be skipped as it was already generated in ${tokendir} and is not older than 1 hour."
+    echo "CM agent token generation for ${fqdn} will be skipped as it was already generated in ${tokendir} and is not older than ${TOKEN_MAX_AGE_MINUTES} minutes."
   fi
 done
 
 for fqdn in "${!AGENT_FQDN_TOKENDIR_MAP[@]}"
 do
   tokendir=$TOKEN_DIR/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}
-  if [[ ! -e ${tokendir}/agent_token_copied_to_client ]]; then
+  if [[ -n "${ENROLLED_AGENTS[${fqdn}]:-}" ]]; then
+    echo "CM agent token copy to ${fqdn} will be skipped as the agent already has a valid host certificate."
+  elif [[ ! -e ${tokendir}/agent_token_copied_to_client ]]; then
     set +e
     # This can be fairly slow, for large clusters
     COPY_RESULT=$(salt ${fqdn} cp.get_file salt://agent-tls-tokens/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}/cmagent.token /etc/cloudera-scm-agent/cmagent.token makedirs=True)

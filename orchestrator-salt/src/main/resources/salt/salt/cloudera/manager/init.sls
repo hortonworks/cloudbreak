@@ -287,6 +287,8 @@ setup_support_settings:
 run_generate_agent_tokens:
   cmd.run:
     - name: /opt/salt/scripts/cm_generate_agent_tokens.sh 2>&1 | tee -a /var/log/cm_generate_agent_tokens.log && exit ${PIPESTATUS[0]}
+    - env:
+        - CM_AGENT_TOKENS_SKIP_ENROLLED: "true"
     - require:
         - file: /opt/salt/scripts/cm_generate_agent_tokens.sh
         - cmd: run_autotls_setup
