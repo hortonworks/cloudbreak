@@ -92,7 +92,7 @@ ext {
   protobufVersion = '3.25.5'
   e2eTestProtobufVersion = '4.36.2'
   grpcVersion = '1.82.2'
-  openTelemetryVersion = '1.66.0'
+  openTelemetryVersion = '1.67.0'
 
   // Google
   googleHttpClientVersion = '2.2.0'
