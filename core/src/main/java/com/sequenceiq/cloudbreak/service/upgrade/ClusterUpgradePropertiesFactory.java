@@ -148,9 +148,8 @@ public class ClusterUpgradePropertiesFactory {
     }
 
     private ClusterUpgradeProperties.CurrentImageUpgradeContext createCurrentImageContext(Image currentImage, Stack stack) {
-        Image enrichedImage = StringUtils.isBlank(currentImage.getPackageVersion(ImagePackageVersion.STACK))
-                ? baseImagePackageVersionsEnricher.enrich(currentImage, stack) : currentImage;
-        Long clusterId = stack.getCluster() != null ? stack.getCluster().getId() : null;
+        Long clusterId = stack.getClusterId();
+        Image enrichedImage = baseImagePackageVersionsEnricher.enrich(currentImage, clusterId);
         Set<ClouderaManagerProduct> currentProducts = captureCurrentClusterProducts(clusterId);
         ClouderaManagerRepo currentCmRepo = clusterId != null ? clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId) : null;
         return new ClusterUpgradeProperties.CurrentImageUpgradeContext(

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -62,6 +64,9 @@ public class ClusterUpgradeAvailabilityService {
 
     @Inject
     private CurrentImageRetrieverService currentImageRetrieverService;
+
+    @Inject
+    private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
 
     @Inject
     private UpgradePreconditionService upgradePreconditionService;
@@ -109,12 +114,19 @@ public class ClusterUpgradeAvailabilityService {
         UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         try {
             LOGGER.info("Retrieving images for upgrading stack {}", stack.getName());
-            Image currentImage = currentImageRetrieverService.retrieveCurrentModelImage(stack);
-            ImageFilterParams imageFilterParams =
-                    imageFilterParamsFactory.create(targetImageId, currentImage, lockComponents, replaceVms, stack, internalUpgradeSettings, getAllImages);
-            ImageFilterResult imageFilterResult = getAvailableImagesForUpgrade(stack, currentImage.getImageCatalogName(), imageFilterParams);
-            LOGGER.info("{} possible image found for stack upgrade.", imageFilterResult.getImages().size());
-            upgradeOptions = createResponse(imageFilterResult, imageFilterParams, stack);
+            Image currentImage = getCurrentImageWithInstalledVersions(stack);
+            ImageFilterResult filteredImages;
+            if (StringUtils.isAnyBlank(currentImage.getPackageVersion(ImagePackageVersion.CM), currentImage.getPackageVersion(ImagePackageVersion.STACK))) {
+                LOGGER.info("Installed CM or Runtime version is missing for current image {}", currentImage.getImageId());
+                filteredImages = new ImageFilterResult(List.of(), "Cannot determine the installed Cloudera Manager and Runtime versions of the cluster.");
+            } else {
+                ImageFilterParams params = imageFilterParamsFactory.create(targetImageId, currentImage, lockComponents, replaceVms, stack,
+                        internalUpgradeSettings, getAllImages);
+                filteredImages = clusterUpgradeImageFilter.getAvailableImagesForUpgrade(stack.getWorkspace().getId(),
+                        currentImage.getImageCatalogName(), params);
+            }
+            LOGGER.info("{} possible image found for stack upgrade.", filteredImages.getImages().size());
+            upgradeOptions = upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack, currentImage.getImageCatalogName());
         } catch (CloudbreakImageNotFoundException | NotFoundException e) {
             LOGGER.warn("Failed to get images", e);
             upgradeOptions.setReason(String.format("Failed to retrieve image due to %s", e.getMessage()));
@@ -185,12 +197,10 @@ public class ClusterUpgradeAvailabilityService {
         return lockComponents || replaceVms == null || Boolean.TRUE.equals(replaceVms);
     }
 
-    private ImageFilterResult getAvailableImagesForUpgrade(Stack stack, String imageCatalogName, ImageFilterParams imageFilterParams) {
-        return clusterUpgradeImageFilter.getAvailableImagesForUpgrade(stack.getWorkspace().getId(), imageCatalogName, imageFilterParams);
-    }
-
-    private UpgradeV4Response createResponse(ImageFilterResult filteredImages, ImageFilterParams imageFilterParams, Stack stack) {
-        return upgradeOptionsResponseFactory.createV4Response(imageFilterParams.getCurrentImage(), filteredImages, stack,
-                imageFilterParams.getImageCatalogName());
+    private Image getCurrentImageWithInstalledVersions(Stack stack) throws CloudbreakImageNotFoundException {
+        Image currentImage = currentImageRetrieverService.retrieveCurrentModelImage(stack);
+        Image enrichedImage = baseImagePackageVersionsEnricher.enrich(currentImage, stack.getClusterId());
+        LOGGER.info("Using current package versions for image {}: {}", currentImage.getImageId(), enrichedImage.getPackageVersions());
+        return enrichedImage;
     }
 }

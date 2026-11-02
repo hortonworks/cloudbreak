@@ -49,8 +49,6 @@ public class ClusterUpgradeImageFilterTest {
 
     private static final String INTERNAL_ERROR = "Failed to retrieve eligible images due to an internal error.";
 
-    private static final String BASE_IMAGE_ERROR = "Cannot upgrade a base image cluster.";
-
     private static final String BUILD_NUMBER = "64507825";
 
     private static final String CM_VERSION = "7.3.1";
@@ -76,7 +74,7 @@ public class ClusterUpgradeImageFilterTest {
     private Image otherImage;
 
     @Test
-    void testFilterWithImageCatalogShouldReturnErrorMessageWhenTheBlueprintIsNotEligible() {
+    void testFilterShouldReturnBlueprintErrorWhenCurrentImageIsPrewarmed() {
         when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(false, BLUEPRINT_ERROR));
 
         ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
@@ -89,7 +87,8 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     @Test
-    void testFilterShouldReturnErrorMessageWhenTheBlueprintIsNotEligible() {
+    void testFilterShouldReturnBlueprintErrorWhenCurrentImageIsBaseImage() {
+        ImageFilterParams imageFilterParams = createImageFilterParams(createBaseImageWithInstalledVersions());
         when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(false, BLUEPRINT_ERROR));
 
         ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
@@ -149,15 +148,20 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     @Test
-    void testFilterShouldReturnErrorMessageWhenCurrentImageIsBaseImage() {
-        ImageFilterParams imageFilterParamsWithBaseImage = createImageFilterParams(createCurrentImageWithoutPackageVersions());
+    void testFilterShouldReturnFilteredImagesWhenCurrentImageIsBaseImage() throws CloudbreakImageCatalogException {
+        ImageFilterParams imageFilterParamsWithBaseImage = createImageFilterParams(createBaseImageWithInstalledVersions());
+        ImageFilterResult imageFilterResult = new ImageFilterResult(List.of(image), EMPTY_REASON);
+        ImageFilterResult filteredImages = new ImageFilterResult(List.of(otherImage), EMPTY_REASON);
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParamsWithBaseImage)).thenReturn(new BlueprintValidationResult(true));
+        when(imageCatalogService.getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParamsWithBaseImage.getImageCatalogPlatform(),
+                imageFilterParamsWithBaseImage.isGetAllImages(), CURRENT_IMAGE_ID)).thenReturn(imageFilterResult);
+        when(imageFilterUpgradeService.filterImages(imageFilterResult, imageFilterParamsWithBaseImage)).thenReturn(filteredImages);
+
         ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParamsWithBaseImage);
 
-        assertTrue(actual.getImages().isEmpty());
-        assertEquals(BASE_IMAGE_ERROR, actual.getReason());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
-        verifyNoInteractions(imageCatalogService);
-        verifyNoInteractions(imageFilterUpgradeService);
+        assertEquals(filteredImages, actual);
+        verify(blueprintUpgradeOptionValidator).isValidBlueprint(imageFilterParamsWithBaseImage);
+        verify(imageFilterUpgradeService).filterImages(imageFilterResult, imageFilterParamsWithBaseImage);
     }
 
     private ImageFilterParams createImageFilterParams() {
@@ -171,11 +175,12 @@ public class ClusterUpgradeImageFilterTest {
                 imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false);
     }
 
-    private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImageWithoutPackageVersions() {
+    private com.sequenceiq.cloudbreak.cloud.model.Image createBaseImageWithInstalledVersions() {
         return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withImageId(CURRENT_IMAGE_ID)
                 .withImageCatalogName(IMAGE_CATALOG_NAME)
                 .withImageCatalogUrl(FALLBACK_CATALOG_URL)
+                .withPackageVersions(Map.of(ImagePackageVersion.CM.getKey(), CM_VERSION, ImagePackageVersion.STACK.getKey(), "7.2.17"))
                 .build();
     }
 
@@ -191,6 +196,7 @@ public class ClusterUpgradeImageFilterTest {
     private static Map<String, String> getPackageVersions() {
         Map<String, String> packageVersions = new HashMap<>();
         packageVersions.put(ImagePackageVersion.CM.getKey(), CM_VERSION);
+        packageVersions.put(ImagePackageVersion.STACK.getKey(), "7.2.17");
         packageVersions.put(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), BUILD_NUMBER);
         return packageVersions;
     }

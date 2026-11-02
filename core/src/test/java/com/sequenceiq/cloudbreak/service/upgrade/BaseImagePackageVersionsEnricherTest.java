@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,16 +22,9 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @ExtendWith(MockitoExtension.class)
 class BaseImagePackageVersionsEnricherTest {
-
-    private static final Long STACK_ID = 1L;
 
     private static final Long CLUSTER_ID = 2L;
 
@@ -47,22 +40,15 @@ class BaseImagePackageVersionsEnricherTest {
     private BaseImagePackageVersionsEnricher underTest;
 
     @Mock
-    private InstanceMetaDataService instanceMetaDataService;
-
-    @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    @Test
-    void repairUsesPersistedClusterVersionsInsteadOfOldInstanceVersions() {
-        Image image = createBaseImage();
-        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion(CM_VERSION).withBuildNumber(CM_BUILD_NUMBER);
-        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion(STACK_VERSION + "-" + CDH_BUILD_NUMBER);
-        ClouderaManagerProduct cfm = new ClouderaManagerProduct().withName("CFM").withVersion("2.1.7");
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(repo);
-        when(clusterComponentConfigProvider.getCdhProduct(CLUSTER_ID)).thenReturn(java.util.Optional.of(cdh));
-        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(CLUSTER_ID)).thenReturn(List.of(cdh, cfm));
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void enrichShouldUseClusterComponentsForBaseImage(boolean force) {
+        Image image = createImage(Map.of(ImagePackageVersion.SALT.getKey(), "3006.10"));
+        mockClusterComponents();
 
-        Image actual = underTest.enrichWithClusterComponents(image, CLUSTER_ID);
+        Image actual = force ? underTest.enrichWithClusterComponents(image, CLUSTER_ID) : underTest.enrich(image, CLUSTER_ID);
 
         assertEquals(CM_VERSION, actual.getPackageVersion(ImagePackageVersion.CM));
         assertEquals(CM_BUILD_NUMBER, actual.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER));
@@ -70,7 +56,6 @@ class BaseImagePackageVersionsEnricherTest {
         assertEquals(CDH_BUILD_NUMBER, actual.getPackageVersion(ImagePackageVersion.CDH_BUILD_NUMBER));
         assertEquals("2.1.7", actual.getPackageVersion(ImagePackageVersion.CFM));
         assertEquals(image.getPackageVersion(ImagePackageVersion.SALT), actual.getPackageVersion(ImagePackageVersion.SALT));
-        verifyNoInteractions(instanceMetaDataService);
     }
 
     @Test
@@ -79,60 +64,22 @@ class BaseImagePackageVersionsEnricherTest {
                 ImagePackageVersion.CM.getKey(), CM_VERSION,
                 ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), CDH_BUILD_NUMBER));
 
-        Image actual = underTest.enrich(image, createStack());
+        Image actual = underTest.enrich(image, CLUSTER_ID);
 
         assertSame(image, actual);
+        verifyNoInteractions(clusterComponentConfigProvider);
     }
 
     @Test
-    void enrichShouldUseInstanceMetadataPackageVersionsForBaseImage() {
-        Image image = createBaseImage();
-        Stack stack = createStack();
-        Map<String, String> instancePackageVersions = Map.of(
-                ImagePackageVersion.CM.getKey(), CM_VERSION,
-                ImagePackageVersion.STACK.getKey(), STACK_VERSION);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID))
-                .thenReturn(Set.of(createInstanceMetaData(instancePackageVersions)));
+    void forcedEnrichmentShouldUpdatePrewarmedImageWithCurrentVersions() {
+        Image image = createImage(Map.of(
+                ImagePackageVersion.CM.getKey(), "7.4.1",
+                ImagePackageVersion.CM_BUILD_NUMBER.getKey(), "12345",
+                ImagePackageVersion.STACK.getKey(), "7.2.16",
+                ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), "54321"));
+        mockClusterComponents();
 
-        Image actual = underTest.enrich(image, stack);
-
-        assertEquals(CM_VERSION, actual.getPackageVersion(ImagePackageVersion.CM));
-        assertEquals(STACK_VERSION, actual.getPackageVersion(ImagePackageVersion.STACK));
-    }
-
-    @Test
-    void enrichShouldSkipInstanceMetadataWithNullImageAndUseNextInstance() {
-        Image image = createBaseImage();
-        Stack stack = createStack();
-        InstanceMetaData requestedInstance = createInstanceMetaDataWithoutImage();
-        Map<String, String> instancePackageVersions = Map.of(
-                ImagePackageVersion.CM.getKey(), CM_VERSION,
-                ImagePackageVersion.STACK.getKey(), STACK_VERSION);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID))
-                .thenReturn(Set.of(requestedInstance, createInstanceMetaData(instancePackageVersions)));
-
-        Image actual = underTest.enrich(image, stack);
-
-        assertEquals(CM_VERSION, actual.getPackageVersion(ImagePackageVersion.CM));
-        assertEquals(STACK_VERSION, actual.getPackageVersion(ImagePackageVersion.STACK));
-    }
-
-    @Test
-    void enrichShouldFallbackToClusterComponentsWhenInstanceMetadataHasNullImage() {
-        Image image = createBaseImage();
-        Stack stack = createStack();
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID))
-                .thenReturn(Set.of(createInstanceMetaDataWithoutImage()));
-
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion(CM_VERSION);
-        clouderaManagerRepo.setBuildNumber(CM_BUILD_NUMBER);
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
-        when(clusterComponentConfigProvider.getCdhProduct(CLUSTER_ID)).thenReturn(java.util.Optional.of(
-                new ClouderaManagerProduct().withName("CDH").withVersion(STACK_VERSION + "-" + CDH_BUILD_NUMBER)));
-        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(CLUSTER_ID)).thenReturn(List.of());
-
-        Image actual = underTest.enrich(image, stack);
+        Image actual = underTest.enrichWithClusterComponents(image, CLUSTER_ID);
 
         assertEquals(CM_VERSION, actual.getPackageVersion(ImagePackageVersion.CM));
         assertEquals(CM_BUILD_NUMBER, actual.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER));
@@ -141,43 +88,22 @@ class BaseImagePackageVersionsEnricherTest {
     }
 
     @Test
-    void enrichShouldFallbackToClusterComponentsWhenInstanceMetadataIsEmpty() {
-        Image image = createBaseImage();
-        Stack stack = createStack();
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(Set.of());
+    void enrichShouldPreserveImagePackagesWhenClusterComponentsAreMissing() {
+        Map<String, String> packageVersions = Map.of(ImagePackageVersion.SALT.getKey(), "3006.10");
+        Image image = createImage(packageVersions);
 
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        clouderaManagerRepo.setVersion(CM_VERSION);
-        clouderaManagerRepo.setBuildNumber(CM_BUILD_NUMBER);
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
-        when(clusterComponentConfigProvider.getCdhProduct(CLUSTER_ID)).thenReturn(java.util.Optional.of(
-                new ClouderaManagerProduct().withName("CDH").withVersion(STACK_VERSION + "-" + CDH_BUILD_NUMBER)));
-        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(CLUSTER_ID)).thenReturn(List.of());
+        Image actual = underTest.enrich(image, CLUSTER_ID);
 
-        Image actual = underTest.enrich(image, stack);
-
-        assertEquals(CM_VERSION, actual.getPackageVersion(ImagePackageVersion.CM));
-        assertEquals(CM_BUILD_NUMBER, actual.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER));
-        assertEquals(STACK_VERSION, actual.getPackageVersion(ImagePackageVersion.STACK));
-        assertEquals(CDH_BUILD_NUMBER, actual.getPackageVersion(ImagePackageVersion.CDH_BUILD_NUMBER));
+        assertEquals(packageVersions, actual.getPackageVersions());
     }
 
-    @Test
-    void enrichShouldReturnOriginalImageWhenNoPackageVersionsCanBeResolved() {
-        Image image = createBaseImage();
-        Stack stack = createStack();
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(Set.of());
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
-        when(clusterComponentConfigProvider.getCdhProduct(CLUSTER_ID)).thenReturn(java.util.Optional.empty());
-        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(CLUSTER_ID)).thenReturn(List.of());
-
-        Image actual = underTest.enrich(image, stack);
-
-        assertSame(image, actual);
-    }
-
-    private Image createBaseImage() {
-        return createImage(new HashMap<>());
+    private void mockClusterComponents() {
+        ClouderaManagerRepo repo = new ClouderaManagerRepo().withVersion(CM_VERSION).withBuildNumber(CM_BUILD_NUMBER);
+        ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion(STACK_VERSION + "-" + CDH_BUILD_NUMBER);
+        ClouderaManagerProduct cfm = new ClouderaManagerProduct().withName("CFM").withVersion("2.1.7");
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(repo);
+        when(clusterComponentConfigProvider.getCdhProduct(CLUSTER_ID)).thenReturn(Optional.of(cdh));
+        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(CLUSTER_ID)).thenReturn(List.of(cdh, cfm));
     }
 
     private Image createImage(Map<String, String> packageVersions) {
@@ -186,28 +112,5 @@ class BaseImagePackageVersionsEnricherTest {
                 .withImageCatalogName("catalog")
                 .withPackageVersions(packageVersions)
                 .build();
-    }
-
-    private Stack createStack() {
-        Cluster cluster = new Cluster();
-        cluster.setId(CLUSTER_ID);
-        Stack stack = new Stack();
-        stack.setId(STACK_ID);
-        stack.setCluster(cluster);
-        return stack;
-    }
-
-    private InstanceMetaData createInstanceMetaDataWithoutImage() {
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setInstanceId("requested-instance");
-        assertNull(instanceMetaData.getImage());
-        return instanceMetaData;
-    }
-
-    private InstanceMetaData createInstanceMetaData(Map<String, String> packageVersions) {
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setInstanceId("instance-1");
-        instanceMetaData.setImage(new Json(Image.builder().withPackageVersions(packageVersions).build()));
-        return instanceMetaData;
     }
 }

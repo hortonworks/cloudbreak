@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import java.util.Map;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -94,8 +93,8 @@ public class BaseImageUpgradeService {
         Image currentImage = componentConfigProviderService.getImage(stack.getId());
         Set<ClouderaManagerProduct> currentProducts = clouderaManagerProductsProvider.findCdhProduct(stack.getClusterComponents())
                 .map(Set::of).orElse(Set.of());
-        Map<String, String> currentPackages = baseImagePackageVersionsEnricher.enrich(currentImage, stack).getPackageVersions();
-        upgradePermissionProvider.validateRequestedComponentVersions(currentPackages, currentProducts, components);
+        Image enrichedImage = baseImagePackageVersionsEnricher.enrich(currentImage, stack.getCluster().getId());
+        upgradePermissionProvider.validateRequestedComponentVersions(enrichedImage.getPackageVersions(), currentProducts, components);
         return currentImage;
     }
 

@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
@@ -29,7 +30,7 @@ public class ImageCatalogMock {
     }
 
     public Image getImage(String imageId) {
-        return imageCatalog.getImages().getCdhImages().stream()
+        return Stream.concat(imageCatalog.getImages().getCdhImages().stream(), imageCatalog.getImages().getBaseImages().stream())
                 .filter(image -> image.getUuid().equals(imageId))
                 .findFirst()
                 .orElseThrow(() -> new CloudbreakRuntimeException(String.format("Image not found with id: %s", imageId)));

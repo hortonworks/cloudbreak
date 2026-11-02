@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CDH_BUILD_NUMBER;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,6 +109,7 @@ class ClusterUpgradePropertiesFactoryTest {
 
     @BeforeEach
     void setupPackageVersionMapping() {
+        lenient().when(baseImagePackageVersionsEnricher.enrich(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(baseImagePackageVersionsEnricher.getPackageVersionsFromComponents(
                 any(), anySet())).thenCallRealMethod();
     }
@@ -188,15 +191,17 @@ class ClusterUpgradePropertiesFactoryTest {
         assertEquals("https://build/cdh/CDH-7.3.2-1.cdh7.3.2.p20000.83281140-" + parcelPostfix + ".parcel", result.cdhParcel().getParcelFileUrl());
     }
 
-    @Test
-    void resolvesCurrentRuntimeForAClusterProvisionedWithABaseImage() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void resolvesCurrentRuntimeForAClusterProvisionedWithABaseImage(boolean hasStaleRuntime) throws Exception {
         Stack stack = new Stack();
-        Image current = Image.builder().withOsType("redhat8").withPackageVersions(Map.of("salt", "3006.10")).build();
+        Image current = Image.builder().withOsType("redhat8").withPackageVersions(hasStaleRuntime
+                ? Map.of(STACK.getKey(), "7.2.16", "salt", "3006.10") : Map.of("salt", "3006.10")).build();
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image baseImage = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
                 .withUuid(TARGET_IMAGE_ID).withOsType("redhat8").withPackageVersions(Map.of()).build();
         StatedImage statedImage = StatedImage.statedImage(baseImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
         when(stackImageService.getImageModelFromStatedImage(stack, current, statedImage)).thenReturn(Image.builder().build());
-        when(baseImagePackageVersionsEnricher.enrich(current, stack)).thenReturn(currentImage());
+        when(baseImagePackageVersionsEnricher.enrich(current, stack.getClusterId())).thenReturn(currentImage());
 
         Workspace workspace = new Workspace();
         workspace.setId(WORKSPACE_ID);
@@ -209,7 +214,10 @@ class ClusterUpgradePropertiesFactoryTest {
                         UpgradeComponentsConverter.fromRequest(requestedComponents())), false, false, false);
 
         assertEquals("7.2.17", properties.currentImage().runtimeVersion());
+        assertEquals("12345", properties.getCurrentPackageVersions().get(CDH_BUILD_NUMBER.getKey()));
+        assertEquals("54321", properties.getCurrentPackageVersions().get(CM_BUILD_NUMBER.getKey()));
         assertEquals("7.3.2", properties.targetImage().runtimeVersion());
+        verify(baseImagePackageVersionsEnricher).enrich(current, stack.getClusterId());
     }
 
     @Test
@@ -231,7 +239,7 @@ class ClusterUpgradePropertiesFactoryTest {
         when(clouderaManagerProductTransformer.transform(target, true, true)).thenReturn(Set.of(new ClouderaManagerProduct().withName("CDH")
                 .withVersion("7.2.18-1.cdh7.2.18.p0.12345")));
         when(imageToClouderaManagerRepoConverter.convert(target)).thenReturn(new ClouderaManagerRepo().withVersion("7.11.3"));
-        when(baseImagePackageVersionsEnricher.enrich(current, stack)).thenReturn(currentImage());
+        when(baseImagePackageVersionsEnricher.enrich(current, stack.getClusterId())).thenReturn(currentImage());
 
         ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL),
                 false, false, true);
@@ -543,7 +551,7 @@ class ClusterUpgradePropertiesFactoryTest {
         when(imageToClouderaManagerRepoConverter.convert(targetCatalogImage)).thenReturn(new com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo());
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage))
                 .thenReturn(Image.builder().withImageName("targetImageName").build());
-        when(baseImagePackageVersionsEnricher.enrich(currentImage, stack)).thenReturn(currentImage);
+        when(baseImagePackageVersionsEnricher.enrich(currentImage, stack.getClusterId())).thenReturn(currentImage);
 
         ClusterUpgradeProperties properties = underTest.create(new ImageChangeDto(STACK_ID, TARGET_IMAGE_ID), false, true, false);
 
@@ -678,7 +686,8 @@ class ClusterUpgradePropertiesFactoryTest {
                 .withDate("2024-01-01")
                 .withCreated(1L)
                 .withTags(Map.of("tag", "value"))
-                .withPackageVersions(Map.of(STACK.getKey(), "7.2.17"))
+                .withPackageVersions(Map.of(STACK.getKey(), "7.2.17", CM.getKey(), "7.11.0",
+                        CDH_BUILD_NUMBER.getKey(), "12345", CM_BUILD_NUMBER.getKey(), "54321"))
                 .build();
     }
 

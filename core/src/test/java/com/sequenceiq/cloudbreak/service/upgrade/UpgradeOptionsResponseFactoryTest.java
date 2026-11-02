@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,9 +63,6 @@ public class UpgradeOptionsResponseFactoryTest {
     @Mock
     private ComponentVersionProvider componentVersionProvider;
 
-    @Mock
-    private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
-
     @Test
     public void testCreateV4ResponseShouldReturnTheUpgradeOptionsFromTheGivenParameters() throws CloudbreakImageNotFoundException {
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(CLOUD_PLATFORM);
@@ -76,7 +72,6 @@ public class UpgradeOptionsResponseFactoryTest {
         Stack stack = createStack();
         ImageFilterResult availableImages = createAvailableImages(packageVersions);
 
-        when(baseImagePackageVersionsEnricher.enrich(currentImage, stack)).thenReturn(currentImage);
         when(platformStringTransformer.getPlatformStringForImageCatalogByRegion(anyString(), anyString())).thenReturn(imageCatalogPlatform);
         when(imageService.determineImageName(CLOUD_PLATFORM, imageCatalogPlatform, REGION, availableImages.getImages().get(0)))
                 .thenReturn(IMAGE_NAME);
@@ -99,22 +94,21 @@ public class UpgradeOptionsResponseFactoryTest {
     }
 
     @Test
-    public void testCreateV4ResponseShouldEnrichBaseImageComponentVersionsInCurrentImageOnly() throws CloudbreakImageNotFoundException {
-        Image baseImage = createModelImage(new HashMap<>());
+    public void testCreateV4ResponseReturnsResolvedVersionsAndReasonWhenThereAreNoCandidates() {
         Image enrichedImage = createModelImage(Map.of(
                 ImagePackageVersion.CM.getKey(), V_7_0_3,
                 ImagePackageVersion.STACK.getKey(), V_7_0_2));
         Stack stack = createStack();
-        ImageFilterResult availableImages = new ImageFilterResult(Collections.emptyList(), "Cannot upgrade a base image cluster.");
+        String reason = "No eligible upgrade images found.";
+        ImageFilterResult availableImages = new ImageFilterResult(Collections.emptyList(), reason);
         ImageComponentVersions enrichedComponentVersions = createExpectedPackageVersions();
 
-        when(baseImagePackageVersionsEnricher.enrich(baseImage, stack)).thenReturn(enrichedImage);
         when(componentVersionProvider.getComponentVersions(eq(enrichedImage.getPackageVersions()), any(), any())).thenReturn(enrichedComponentVersions);
 
-        UpgradeV4Response actual = underTest.createV4Response(baseImage, availableImages, stack, IMAGE_CATALOG_NAME);
+        UpgradeV4Response actual = underTest.createV4Response(enrichedImage, availableImages, stack, IMAGE_CATALOG_NAME);
 
         assertEquals(enrichedComponentVersions, actual.getCurrent().getComponentVersions());
-        assertEquals("Cannot upgrade a base image cluster.", actual.getReason());
+        assertEquals(reason, actual.getReason());
     }
 
     private Stack createStack() {
@@ -180,7 +174,7 @@ public class UpgradeOptionsResponseFactoryTest {
         assertEquals(1, response.getUpgradeCandidates().size());
         assertEquals("base-image", response.getUpgradeCandidates().getFirst().getImageId());
         assertEquals(requestedVersions, response.getUpgradeCandidates().getFirst().getComponentVersions());
-        verifyNoInteractions(imageService, baseImagePackageVersionsEnricher);
+        verifyNoInteractions(imageService);
     }
 
 }

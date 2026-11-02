@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageRegionUpgradeImageFilter;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.Architecture;
 
@@ -77,9 +78,13 @@ class BaseImageUpgradeServiceTest {
         when(stackView.getPlatformVariant()).thenReturn("AWS");
         when(stackView.getRegion()).thenReturn("eu-west-1");
         Image current = Image.builder().withImageCatalogName("catalog").withOsType("redhat8").withArchitecture("x86_64")
-                .withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), "7.3.1")).withCreated(2L).build();
+                .withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), "7.3.1", ImagePackageVersion.CM.getKey(), "7.13.1",
+                        ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), "12345")).withCreated(2L).build();
         when(componentConfigProviderService.getImage(1L)).thenReturn(current);
-        when(baseImagePackageVersionsEnricher.enrich(current, stack)).thenReturn(current);
+        ClusterView cluster = mock(ClusterView.class);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(cluster.getId()).thenReturn(3L);
+        when(baseImagePackageVersionsEnricher.enrich(current, 3L)).thenReturn(current);
         when(platformStringTransformer.getPlatformStringForImageCatalog("AWS", "AWS")).thenReturn(imageCatalogPlatform("AWS"));
         Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> regionFilter = image -> true;
         when(imageRegionUpgradeImageFilter.filterByRegion(imageCatalogPlatform("AWS"), "AWS", "eu-west-1")).thenReturn(regionFilter);
@@ -112,7 +117,10 @@ class BaseImageUpgradeServiceTest {
         Image current = Image.builder().withImageCatalogName("catalog").withPackageVersions(Map.of()).build();
         when(componentConfigProviderService.getImage(1L)).thenReturn(current);
         Image enriched = Image.builder().withPackageVersions(Map.of(ImagePackageVersion.CM.getKey(), "7.13.2")).build();
-        when(baseImagePackageVersionsEnricher.enrich(current, stack)).thenReturn(enriched);
+        ClusterView cluster = mock(ClusterView.class);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(cluster.getId()).thenReturn(3L);
+        when(baseImagePackageVersionsEnricher.enrich(current, 3L)).thenReturn(enriched);
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image base = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder().withUuid("original").build();
         when(imageCatalogService.getImageByCatalogName(2L, "original", "catalog")).thenReturn(StatedImage.statedImage(base, "catalog-url", "catalog"));
         UpgradeComponents components = new UpgradeComponents(null, null);
@@ -134,7 +142,10 @@ class BaseImageUpgradeServiceTest {
         when(stack.getId()).thenReturn(1L);
         Image current = Image.builder().withImageId("current").withPackageVersions(Map.of()).build();
         when(componentConfigProviderService.getImage(1L)).thenReturn(current);
-        when(baseImagePackageVersionsEnricher.enrich(current, stack)).thenReturn(current);
+        ClusterView cluster = mock(ClusterView.class);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(cluster.getId()).thenReturn(3L);
+        when(baseImagePackageVersionsEnricher.enrich(current, 3L)).thenReturn(current);
         UpgradeComponents components = new UpgradeComponents(null, null);
         BadRequestException failure = new BadRequestException("Cannot downgrade Cloudera Manager");
         doThrow(failure).when(upgradePermissionProvider).validateRequestedComponentVersions(current.getPackageVersions(), Set.of(), components);

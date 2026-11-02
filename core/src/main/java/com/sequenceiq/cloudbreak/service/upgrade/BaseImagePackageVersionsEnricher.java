@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,9 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
 
 @Component
@@ -33,22 +29,10 @@ public class BaseImagePackageVersionsEnricher {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseImagePackageVersionsEnricher.class);
 
     @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    public Image enrich(Image image, StackDtoDelegate stack) {
-        if (!BaseImageUtils.isBaseImage(image)) {
-            return image;
-        }
-        Map<String, String> resolvedPackageVersions = resolvePackageVersions(stack);
-        if (resolvedPackageVersions.isEmpty()) {
-            LOGGER.debug("Could not resolve package versions for base image cluster {}", stack.getName());
-            return image;
-        }
-        LOGGER.debug("Enriching base image package versions for cluster {} with {}", stack.getName(), resolvedPackageVersions);
-        return withPackageVersions(image, resolvedPackageVersions);
+    public Image enrich(Image image, Long clusterId) {
+        return BaseImageUtils.isBaseImage(image) ? enrichWithClusterComponents(image, clusterId) : image;
     }
 
     public Image enrichWithClusterComponents(Image image, Long clusterId) {
@@ -61,50 +45,6 @@ public class BaseImagePackageVersionsEnricher {
         addCdhPackageVersions(packageVersions, products.stream().filter(product -> CDH_PRODUCT_NAME.equals(product.getName())).findFirst());
         addParcelPackageVersions(packageVersions, products);
         return packageVersions;
-    }
-
-    private Map<String, String> resolvePackageVersions(StackDtoDelegate stack) {
-        Map<String, String> fromInstances = getPackageVersionsFromInstances(stack.getId());
-        if (!fromInstances.isEmpty()) {
-            return fromInstances;
-        }
-        return getPackageVersionsFromClusterComponents(stack);
-    }
-
-    private Map<String, String> getPackageVersionsFromInstances(Long stackId) {
-        return instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(stackId).stream()
-                .map(this::getPackageVersionsFromInstance)
-                .filter(this::hasComponentVersions)
-                .findFirst()
-                .orElseGet(HashMap::new);
-    }
-
-    private Map<String, String> getPackageVersionsFromInstance(InstanceMetaData instanceMetaData) {
-        if (instanceMetaData.getImage() == null || StringUtils.isBlank(instanceMetaData.getImage().getValue())) {
-            return new HashMap<>();
-        }
-        try {
-            Image image = instanceMetaData.getImage().get(Image.class);
-            if (image == null || image.getPackageVersions() == null) {
-                return new HashMap<>();
-            }
-            return new HashMap<>(image.getPackageVersions());
-        } catch (IOException e) {
-            LOGGER.warn("Failed to read package versions from instance {}", instanceMetaData.getInstanceId(), e);
-            return new HashMap<>();
-        }
-    }
-
-    private boolean hasComponentVersions(Map<String, String> packageVersions) {
-        return StringUtils.isNotBlank(packageVersions.get(ImagePackageVersion.CM.getKey()))
-                || StringUtils.isNotBlank(packageVersions.get(ImagePackageVersion.STACK.getKey()));
-    }
-
-    private Map<String, String> getPackageVersionsFromClusterComponents(StackDtoDelegate stack) {
-        if (stack.getCluster() == null) {
-            return Map.of();
-        }
-        return getPackageVersionsFromClusterComponents(stack.getCluster().getId());
     }
 
     private Map<String, String> getPackageVersionsFromClusterComponents(Long clusterId) {

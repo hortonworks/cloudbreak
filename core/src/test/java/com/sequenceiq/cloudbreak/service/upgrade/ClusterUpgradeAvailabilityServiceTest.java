@@ -103,8 +103,6 @@ class ClusterUpgradeAvailabilityServiceTest {
             .withRollingUpgradeEnabled(true)
             .build();
 
-    private static final String BASE_IMAGE_ERROR = "Cannot upgrade cluster with a base image.";
-
     private final Map<String, String> activatedParcels = new HashMap<>();
 
     @InjectMocks
@@ -112,6 +110,9 @@ class ClusterUpgradeAvailabilityServiceTest {
 
     @Mock
     private CurrentImageRetrieverService currentImageRetrieverService;
+
+    @Mock
+    private BaseImagePackageVersionsEnricher baseImagePackageVersionsEnricher;
 
     @Mock
     private ClusterUpgradeImageFilter clusterUpgradeImageFilter;
@@ -150,6 +151,7 @@ class ClusterUpgradeAvailabilityServiceTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(baseImagePackageVersionsEnricher.enrich(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(upgradePreconditionService.notUsingEphemeralVolume(any())).thenReturn(true);
         lenient().when(clusterDBValidationService.isGatewayRepairEnabled(any())).thenReturn(true);
     }
@@ -561,29 +563,6 @@ class ClusterUpgradeAvailabilityServiceTest {
         verifyNoInteractions(cloudbreakEventService);
     }
 
-    @Test
-    public void testCheckForUpgradesByNameAndCurrentImageIsBaseImage() throws CloudbreakImageNotFoundException {
-        Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.DATALAKE);
-        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-        Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImage);
-        UpgradeV4Response response = new UpgradeV4Response();
-        response.setReason(BASE_IMAGE_ERROR);
-
-        when(currentImageRetrieverService.retrieveCurrentModelImage(stack)).thenReturn(currentImage);
-        when(imageFilterParamsFactory.create(null, currentImage, lockComponents, true, stack, INTERNAL_UPGRADE_SETTINGS, false)).thenReturn(imageFilterParams);
-        when(currentImageRetrieverService.retrieveCurrentModelImage(stack)).thenReturn(currentImage);
-        ImageFilterResult filteredImages = new ImageFilterResult(List.of(), BASE_IMAGE_ERROR);
-        when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
-        when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack,
-                currentImage.getImageCatalogName())).thenReturn(response);
-
-
-        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
-
-        assertEquals(response, actual);
-    }
-
     private StackStatus createStackStatus(Status status) {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(status);
@@ -615,6 +594,7 @@ class ClusterUpgradeAvailabilityServiceTest {
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {
         return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withImageId(CURRENT_IMAGE_ID)
+                .withPackageVersions(getPackageVersions())
                 .withImageCatalogName(CATALOG_NAME)
                 .withImageCatalogUrl(FALLBACK_CATALOG_URL)
                 .build();
@@ -623,12 +603,14 @@ class ClusterUpgradeAvailabilityServiceTest {
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImageWithoutImageCatalogUrl() {
         return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withImageId(CURRENT_IMAGE_ID)
+                .withPackageVersions(getPackageVersions())
                 .withImageCatalogName(CATALOG_NAME)
                 .build();
     }
 
     private static Map<String, String> getPackageVersions() {
         Map<String, String> packageVersions = new HashMap<>();
+        packageVersions.put(ImagePackageVersion.STACK.getKey(), V_7_0_2);
         packageVersions.put(ImagePackageVersion.CM.getKey(), V_7_0_3);
         packageVersions.put(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), BUILD_NUMBER);
         return packageVersions;

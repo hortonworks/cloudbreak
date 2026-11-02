@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.upgrade.BaseImageUtils;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageFilterUpgradeService;
 
 @Component
@@ -27,14 +26,9 @@ public class ClusterUpgradeImageFilter {
     private ImageCatalogService imageCatalogService;
 
     public ImageFilterResult getAvailableImagesForUpgrade(Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {
-        if (BaseImageUtils.isBaseImage(imageFilterParams.getCurrentImage())) {
-            LOGGER.info("Base image found, upgrade not supported: {}", imageFilterParams.getCurrentImage());
-            return createEmptyResult("Cannot upgrade a base image cluster.");
-        } else {
-            BlueprintValidationResult blueprintValidationResult = isValidBlueprint(imageFilterParams);
-            return blueprintValidationResult.isValid() ? getImageFilterResult(workspaceId, imageCatalogName, imageFilterParams)
-                    : createEmptyResult(blueprintValidationResult.getReason());
-        }
+        BlueprintValidationResult blueprintValidationResult = isValidBlueprint(imageFilterParams);
+        return blueprintValidationResult.isValid() ? getImageFilterResult(workspaceId, imageCatalogName, imageFilterParams)
+                : createEmptyResult(blueprintValidationResult.getReason());
     }
 
     private ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {
