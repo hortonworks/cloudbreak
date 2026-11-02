@@ -25,7 +25,6 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_RDBMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_S3GUARD_TABLE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_UMS_RESOURCE_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINALIZE_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.HANDLED_FAILED_ENV_DELETE_EVENT;
 
@@ -88,25 +87,6 @@ public class EnvDeleteActions {
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS,
                                 ENVIRONMENT_FREEIPA_DELETION_STARTED, EnvDeleteState.FREEIPA_DELETE_STARTED_STATE);
                 sendEvent(context, DELETE_FREEIPA_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(), payload.getResourceId()));
-            }
-        };
-    }
-
-    @Bean(name = "STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE")
-    public Action<?, ?> storageConsumptionCollectionUnschedulingAction() {
-        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
-            @Override
-            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    sendEvent(context, UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(),
-                            createEnvironmentDeletionDto(environmentDto, payload.isForceDelete(), payload.getResourceId()));
-                }, () -> {
-                    EnvDeleteFailedEvent failureEvent = new EnvDeleteFailedEvent(payload.getResourceId(), payload.getResourceName(), null,
-                            payload.getResourceCrn());
-                    LOGGER.warn("No environment found with id '{}'.", payload.getResourceId());
-                    sendEvent(context, failureEvent);
-                });
             }
         };
     }
