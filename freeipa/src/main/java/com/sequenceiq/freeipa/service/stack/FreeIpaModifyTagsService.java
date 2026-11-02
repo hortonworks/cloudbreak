@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.flow.stack.modify.tags.event.ModifyUserDefi
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -89,14 +90,13 @@ public class FreeIpaModifyTagsService {
     }
 
     private void validateTagKeysToRemove(Stack stack, Set<String> tagKeys) {
-        if (stack.getTags() != null) {
-            StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
-            ValidationResult validationResult = userDefinedTagValidator.validateTagKeysToRemove(
-                    tagKeys, stackTags.getDefaultTags(), stackTags.getApplicationTags(),
-                    tagKeyNormalizerProvider.forPlatform(stack.getCloudPlatform()));
-            if (validationResult.hasError()) {
-                throw new BadRequestException(validationResult.getFormattedErrors());
-            }
+        Optional<StackTags> stackTags = Optional.ofNullable(stack.getTags()).map(tags -> tags.getUnchecked(StackTags.class));
+        ValidationResult validationResult = userDefinedTagValidator.validateTagKeysToRemove(tagKeys,
+                stackTags.map(StackTags::getDefaultTags).orElse(Map.of()),
+                stackTags.map(StackTags::getApplicationTags).orElse(Map.of()),
+                stack.getCloudPlatform(), tagKeyNormalizerProvider.forPlatform(stack.getCloudPlatform()));
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
         }
     }
 

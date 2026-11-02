@@ -439,5 +439,5 @@ public interface DatabaseServerV4Endpoint {
             operationId = "deleteUserDefinedTags",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteUserDefinedTags(@ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
-    @PathParam("crn") String crn, @NotNull @Valid DeleteUserDefinedTagsRequest request);
+    @PathParam("crn") String crn, @NotNull @Valid DeleteUserDefinedTagsRequest request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

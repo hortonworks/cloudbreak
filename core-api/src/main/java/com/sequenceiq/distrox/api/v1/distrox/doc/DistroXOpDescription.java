@@ -41,6 +41,7 @@ public class DistroXOpDescription {
     public static final String VERTICAL_SCALE_BY_CRN = "vertical scales the instances (node type/disks) stack by crn";
     public static final String DELETE_VOLUMES_BY_STACK_NAME = "delete attached volumes on stack instances by stack name";
     public static final String DELETE_VOLUMES_BY_STACK_CRN = "delete attached volumes on stack instances by stack crn";
+    public static final String DELETE_USER_DEFINED_TAGS_BY_CRN = "Deletes user defined tags from the Data Hub and its cloud resources by CRN";
     public static final String ADD_VOLUMES_BY_STACK_NAME = "add block storage to stack instance group by stack name";
     public static final String ADD_VOLUMES_BY_STACK_CRN = "add EBS volumes to stack instance group by stack crn";
     public static final String ROOT_VOLUME_UPDATE_BY_DH_NAME = "Update root volume of stack instance group by Datahub name";

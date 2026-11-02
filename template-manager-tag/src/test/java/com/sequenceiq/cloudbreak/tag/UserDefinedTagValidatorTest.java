@@ -12,6 +12,8 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 class UserDefinedTagValidatorTest {
 
+    private static final String AWS = "AWS";
+
     private final UserDefinedTagValidator underTest = new UserDefinedTagValidator();
 
     @Test
@@ -50,7 +52,7 @@ class UserDefinedTagValidatorTest {
 
     @Test
     void validateTagKeysToRemoveShouldFailWhenEmpty() {
-        ValidationResult result = underTest.validateTagKeysToRemove(Set.of(), Map.of("owner", "john doe"), Map.of(), TagKeyNormalizer.IDENTITY);
+        ValidationResult result = underTest.validateTagKeysToRemove(Set.of(), Map.of("owner", "john doe"), Map.of(), AWS, TagKeyNormalizer.IDENTITY);
 
         assertThat(result.hasError()).isTrue();
         assertThat(result.getFormattedErrors()).contains("must not be empty");
@@ -62,6 +64,7 @@ class UserDefinedTagValidatorTest {
                 Set.of("owner", "custom"),
                 Map.of("owner", "john doe"),
                 Map.of(),
+                AWS,
                 TagKeyNormalizer.IDENTITY);
 
         assertThat(result.hasError()).isTrue();
@@ -75,6 +78,7 @@ class UserDefinedTagValidatorTest {
                 Set.of("application"),
                 Map.of(),
                 Map.of("application", "app"),
+                AWS,
                 TagKeyNormalizer.IDENTITY);
 
         assertThat(result.hasError()).isTrue();
@@ -87,6 +91,7 @@ class UserDefinedTagValidatorTest {
                 Set.of("custom"),
                 Map.of("owner", "john doe"),
                 Map.of("application", "app"),
+                AWS,
                 TagKeyNormalizer.IDENTITY);
 
         assertThat(result.hasError()).isFalse();
@@ -100,10 +105,38 @@ class UserDefinedTagValidatorTest {
                 Set.of("cloudera-resource-name"),
                 Map.of("Cloudera-Resource-Name", "resourceName"),
                 Map.of(),
+                AWS,
                 lowerCaseNormalizer);
 
         assertThat(result.hasError()).isTrue();
         assertThat(result.getFormattedErrors()).contains("default");
         assertThat(result.getFormattedErrors()).contains("cloudera-resource-name");
+    }
+
+    @Test
+    void validateTagKeysToRemoveShouldFailWhenAwsReservedKeyRequestedOnAws() {
+        ValidationResult result = underTest.validateTagKeysToRemove(
+                Set.of("AWS:cloudformation:stack-name", "custom"),
+                Map.of(),
+                Map.of(),
+                AWS,
+                TagKeyNormalizer.IDENTITY);
+
+        assertThat(result.hasError()).isTrue();
+        assertThat(result.getFormattedErrors()).contains("AWS:cloudformation:stack-name");
+        assertThat(result.getFormattedErrors()).contains("reserved by AWS");
+        assertThat(result.getFormattedErrors()).doesNotContain("custom");
+    }
+
+    @Test
+    void validateTagKeysToRemoveShouldPassForAwsPrefixedKeyOnOtherPlatform() {
+        ValidationResult result = underTest.validateTagKeysToRemove(
+                Set.of("aws:custom"),
+                Map.of(),
+                Map.of(),
+                "AZURE",
+                TagKeyNormalizer.IDENTITY);
+
+        assertThat(result.hasError()).isFalse();
     }
 }

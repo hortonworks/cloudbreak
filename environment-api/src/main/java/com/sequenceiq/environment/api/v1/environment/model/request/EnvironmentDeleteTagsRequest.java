@@ -6,6 +6,7 @@ import java.util.Set;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -16,8 +17,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class EnvironmentDeleteTagsRequest implements Serializable {
 
     @NotEmpty
+    @Size(max = 64)
     @Schema(description = "User-defined tag keys to remove from the environment and cascade to child resources.")
-    private Set<@NotBlank String> tagKeys = new HashSet<>();
+    private Set<@NotBlank @Size(max = 512) String> tagKeys = new HashSet<>();
 
     public Set<String> getTagKeys() {
         return tagKeys;

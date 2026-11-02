@@ -457,7 +457,7 @@ public interface FreeIpaV1Endpoint {
             @NotNull Map<String, String> tags);
 
     @POST
-    @Path("/delete_user_defined_tags")
+    @Path("/internal/delete_user_defined_tags")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = DELETE_USER_DEFINED_TAGS_BY_CRN,

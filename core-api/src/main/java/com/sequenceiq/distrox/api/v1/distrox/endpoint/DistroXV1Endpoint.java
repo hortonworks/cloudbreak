@@ -23,6 +23,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DEL
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_MULTIPLE;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_USER_DEFINED_TAGS_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_VOLUMES_BY_STACK_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_VOLUMES_BY_STACK_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS_BY_CRN;
@@ -121,6 +122,7 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
@@ -760,6 +762,16 @@ public interface DistroXV1Endpoint {
     FlowIdentifier deleteVolumesByStackCrn(
             @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @Valid StackDeleteVolumesRequest deleteRequest);
+
+    @POST
+    @Path("crn/{crn}/delete_user_defined_tags")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = DELETE_USER_DEFINED_TAGS_BY_CRN, operationId = "deleteUserDefinedTagsDistroXV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier deleteUserDefinedTagsByCrn(
+            @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
+            @Valid @NotNull DeleteUserDefinedTagsRequest request);
 
     @PUT
     @Path("/name/{name}/disk_update")

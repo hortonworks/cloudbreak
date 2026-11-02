@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -61,8 +62,24 @@ class TagValidatorTest {
                 DynamicTest.dynamicTest("tag value is valid ",
                         () -> testPositive("cod_database_name", "appletree")),
                 DynamicTest.dynamicTest("tag value is valid ",
-                        () -> testPositive("cod_database_crn", "appletree"))
+                        () -> testPositive("cod_database_crn", "appletree")),
+                DynamicTest.dynamicTest("tag key to remove is too long",
+                        () -> testTagKeyLengthNegative("a".repeat(513), "too long")),
+                DynamicTest.dynamicTest("tag key to remove has maximum length",
+                        () -> testTagKeyLengthPositive("a".repeat(512)))
         );
+    }
+
+    private void testTagKeyLengthNegative(String tagKey, String messagePortion) {
+        ValidationResult result = tagValidatorUnderTest.validateTagKeyLengths(CloudConstants.AZURE, Set.of(tagKey));
+        assertTrue(result.hasError(), "tag key length validation should fail");
+        assertEquals(1, result.getErrors().size(), "tag key length validation should have one error only");
+        assertTrue(result.getErrors().get(0).contains(messagePortion));
+    }
+
+    private void testTagKeyLengthPositive(String tagKey) {
+        ValidationResult result = tagValidatorUnderTest.validateTagKeyLengths(CloudConstants.AZURE, Set.of(tagKey));
+        assertFalse(result.hasError(), "tag key length validation should pass");
     }
 
     public void testNegative(String tag, String value, String messagePortion) {

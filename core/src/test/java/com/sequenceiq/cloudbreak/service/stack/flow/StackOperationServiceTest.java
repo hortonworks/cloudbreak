@@ -72,6 +72,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateReques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.TagKeyNormalizer;
+import com.sequenceiq.cloudbreak.cloud.TagValidator;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
@@ -115,10 +122,12 @@ import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.validation.EncryptionProfileValidator;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.tag.UserDefinedTagValidator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -226,6 +235,18 @@ class StackOperationServiceTest {
 
     @Mock
     private NetworkService networkService;
+
+    @Mock
+    private UserDefinedTagValidator userDefinedTagValidator;
+
+    @Mock
+    private CloudPlatformTagKeyNormalizerProvider tagKeyNormalizerProvider;
+
+    @Mock
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Mock
+    private TagValidator tagValidator;
 
     @Captor
     private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
@@ -1277,16 +1298,93 @@ class StackOperationServiceTest {
 
     @Test
     public void testDeleteUserDefinedTags() {
-        StackDto stack = mock(StackDto.class);
+        StackDto stack = stackWithCloudPlatform("AWS");
         String resourceCrn = "resourceCrn";
         Set<String> tagKeys = Set.of("custom");
 
         when(stack.getId()).thenReturn(STACK_ID);
         when(stackDtoService.getByCrnWithMdcContext(resourceCrn)).thenReturn(stack);
+        platformTagValidator(tagValidator);
+        when(tagValidator.validateTagKeyLengths(tagKeys)).thenReturn(ValidationResult.empty());
+        when(tagKeyNormalizerProvider.forPlatform("AWS")).thenReturn(TagKeyNormalizer.IDENTITY);
+        when(userDefinedTagValidator.validateTagKeysToRemove(tagKeys, Map.of(), Map.of(), "AWS", TagKeyNormalizer.IDENTITY))
+                .thenReturn(ValidationResult.builder().build());
 
         underTest.triggerUserDefinedTagsDelete(resourceCrn, tagKeys);
 
         verify(flowManager).triggerUserDefinedTagsDelete(STACK_ID, tagKeys);
+    }
+
+    @Test
+    public void testDeleteUserDefinedTagsWhenPlatformHasNoTagValidator() {
+        StackDto stack = stackWithCloudPlatform("MOCK");
+        String resourceCrn = "resourceCrn";
+        Set<String> tagKeys = Set.of("custom");
+
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackDtoService.getByCrnWithMdcContext(resourceCrn)).thenReturn(stack);
+        platformTagValidator(null);
+        when(tagKeyNormalizerProvider.forPlatform("MOCK")).thenReturn(TagKeyNormalizer.IDENTITY);
+        when(userDefinedTagValidator.validateTagKeysToRemove(tagKeys, Map.of(), Map.of(), "MOCK", TagKeyNormalizer.IDENTITY))
+                .thenReturn(ValidationResult.empty());
+
+        underTest.triggerUserDefinedTagsDelete(resourceCrn, tagKeys);
+
+        verify(flowManager).triggerUserDefinedTagsDelete(STACK_ID, tagKeys);
+    }
+
+    @Test
+    public void testDeleteUserDefinedTagsWhenValidationFails() {
+        StackDto stack = stackWithCloudPlatform("AWS");
+        String resourceCrn = "resourceCrn";
+        Set<String> tagKeys = Set.of("aws:reserved");
+
+        when(stackDtoService.getByCrnWithMdcContext(resourceCrn)).thenReturn(stack);
+        platformTagValidator(tagValidator);
+        when(tagValidator.validateTagKeyLengths(tagKeys)).thenReturn(ValidationResult.empty());
+        when(tagKeyNormalizerProvider.forPlatform("AWS")).thenReturn(TagKeyNormalizer.IDENTITY);
+        when(userDefinedTagValidator.validateTagKeysToRemove(tagKeys, Map.of(), Map.of(), "AWS", TagKeyNormalizer.IDENTITY))
+                .thenReturn(ValidationResult.builder().error("reserved").build());
+
+        assertThatThrownBy(() -> underTest.triggerUserDefinedTagsDelete(resourceCrn, tagKeys))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("reserved");
+        verify(flowManager, never()).triggerUserDefinedTagsDelete(any(), any());
+    }
+
+    @Test
+    public void testDeleteUserDefinedTagsWhenTagKeyIsTooLongForPlatform() {
+        StackDto stack = stackWithCloudPlatform("AWS");
+        String resourceCrn = "resourceCrn";
+        Set<String> tagKeys = Set.of("a".repeat(128));
+
+        when(stackDtoService.getByCrnWithMdcContext(resourceCrn)).thenReturn(stack);
+        platformTagValidator(tagValidator);
+        when(tagValidator.validateTagKeyLengths(tagKeys)).thenReturn(ValidationResult.builder().error("Following tag names are too long").build());
+        when(tagKeyNormalizerProvider.forPlatform("AWS")).thenReturn(TagKeyNormalizer.IDENTITY);
+        when(userDefinedTagValidator.validateTagKeysToRemove(tagKeys, Map.of(), Map.of(), "AWS", TagKeyNormalizer.IDENTITY))
+                .thenReturn(ValidationResult.empty());
+
+        assertThatThrownBy(() -> underTest.triggerUserDefinedTagsDelete(resourceCrn, tagKeys))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("too long");
+        verify(flowManager, never()).triggerUserDefinedTagsDelete(any(), any());
+    }
+
+    private StackDto stackWithCloudPlatform(String cloudPlatform) {
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stackView.getCloudPlatform()).thenReturn(cloudPlatform);
+        when(stack.getStack()).thenReturn(stackView);
+        return stack;
+    }
+
+    private void platformTagValidator(TagValidator platformTagValidator) {
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+        when(cloudConnector.parameters()).thenReturn(platformParameters);
+        when(platformParameters.tagValidator()).thenReturn(platformTagValidator);
     }
 
     @Test

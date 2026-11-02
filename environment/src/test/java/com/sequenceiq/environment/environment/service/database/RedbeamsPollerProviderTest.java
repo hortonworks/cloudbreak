@@ -208,7 +208,7 @@ class RedbeamsPollerProviderTest {
         RedbeamsPollerProvider providerWithRealService = new RedbeamsPollerProvider(
                 realRedbeamsService, new UserDefinedTagsPollerSupport(flowResultPollerEvaluator));
         stubFlowResultPollerEvaluator();
-        when(databaseServerV4Endpoint.deleteUserDefinedTags(eq(DB_CRN_1), any()))
+        when(databaseServerV4Endpoint.deleteUserDefinedTags(eq(DB_CRN_1), any(), any()))
                 .thenThrow(new WebApplicationException(Response.status(Response.Status.CONFLICT).build()));
 
         AttemptResult<List<FlowIdentifier>> result = providerWithRealService.userDefinedTagsDeletePoller(List.of(DB_CRN_1), ENV_ID, TAG_KEYS).process();

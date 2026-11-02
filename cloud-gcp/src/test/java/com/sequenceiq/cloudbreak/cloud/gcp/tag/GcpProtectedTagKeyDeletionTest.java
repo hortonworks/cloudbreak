@@ -26,6 +26,7 @@ class GcpProtectedTagKeyDeletionTest {
                 Set.of("cloudera-resource-name"),
                 Map.of("Cloudera-Resource-Name", "resourceName"),
                 Map.of(),
+                "GCP",
                 tagKeyNormalizerProvider.forPlatform("GCP"));
 
         assertThat(result.hasError()).isTrue();

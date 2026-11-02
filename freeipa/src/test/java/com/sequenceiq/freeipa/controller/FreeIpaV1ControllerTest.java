@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -406,5 +408,14 @@ class FreeIpaV1ControllerTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.modifyNetworkCidrsByCrnInternal(ENVIRONMENT_CRN, request));
 
         verify(freeIpaModifyNetworkCidrsService).modifyNetworkCidrs(eq(ENVIRONMENT_CRN), eq("hortonworks"), eq(networkCidrs));
+    }
+
+    @Test
+    void testDeleteUserDefinedTagsByCrn() {
+        Set<String> tagKeys = Set.of("custom");
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteUserDefinedTagsByCrn(ENVIRONMENT_CRN, new DeleteUserDefinedTagsRequest(tagKeys)));
+
+        verify(freeIpaModifyTagsService).startUserDefinedTagsDeletionOperation(ENVIRONMENT_CRN, "hortonworks", tagKeys);
     }
 }

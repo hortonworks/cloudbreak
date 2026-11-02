@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
@@ -500,4 +501,15 @@ public class DatabaseServerV4ControllerTest {
         assertEquals("1", response.getPollableId());
     }
 
+    @Test
+    void testDeleteUserDefinedTags() {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "1");
+        Set<String> tagKeys = Set.of("custom");
+        when(redbeamsTagUpdaterService.triggerUserDefinedTagsDelete(SERVER_CRN, tagKeys)).thenReturn(flowIdentifier);
+
+        FlowIdentifier response = underTest.deleteUserDefinedTags(SERVER_CRN, new DeleteUserDefinedTagsRequest(tagKeys), USER_CRN);
+
+        verify(redbeamsTagUpdaterService).triggerUserDefinedTagsDelete(SERVER_CRN, tagKeys);
+        assertEquals("1", response.getPollableId());
+    }
 }

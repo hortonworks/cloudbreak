@@ -63,6 +63,8 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -121,6 +123,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.tag.UserDefinedTagValidator;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -254,6 +257,9 @@ public class StackOperationService {
 
     @Inject
     private CloudPlatformTagKeyNormalizerProvider tagKeyNormalizerProvider;
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
     private NetworkService networkService;
@@ -955,14 +961,19 @@ public class StackOperationService {
     }
 
     private void validateTagKeysToRemove(StackDto stack, Set<String> tagKeys) {
-        if (stack.getTags() != null) {
-            StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
-            ValidationResult validationResult = userDefinedTagValidator.validateTagKeysToRemove(
-                    tagKeys, stackTags.getDefaultTags(), stackTags.getApplicationTags(),
-                    tagKeyNormalizerProvider.forPlatform(stack.getStack().getCloudPlatform()));
-            if (validationResult.hasError()) {
-                throw new BadRequestException(validationResult.getFormattedErrors());
-            }
+        Optional<StackTags> stackTags = Optional.ofNullable(stack.getTags()).map(tags -> tags.getUnchecked(StackTags.class));
+        String cloudPlatform = stack.getStack().getCloudPlatform();
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        Optional.ofNullable(cloudPlatformConnectors.get(new CloudPlatformVariant(cloudPlatform, stack.getPlatformVariant())).parameters().tagValidator())
+                .map(tagValidator -> tagValidator.validateTagKeyLengths(tagKeys))
+                .ifPresent(validationResultBuilder::merge);
+        validationResultBuilder.merge(userDefinedTagValidator.validateTagKeysToRemove(tagKeys,
+                stackTags.map(StackTags::getDefaultTags).orElse(Map.of()),
+                stackTags.map(StackTags::getApplicationTags).orElse(Map.of()),
+                cloudPlatform, tagKeyNormalizerProvider.forPlatform(cloudPlatform)));
+        ValidationResult validationResult = validationResultBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
         }
     }
 

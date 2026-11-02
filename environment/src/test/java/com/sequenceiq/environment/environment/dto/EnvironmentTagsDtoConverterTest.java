@@ -301,7 +301,8 @@ class EnvironmentTagsDtoConverterTest {
     void validateUserDefinedTagKeysToRemoveShouldDelegateToUserDefinedTagValidator() {
         EnvironmentTags existingTags = new EnvironmentTags(Map.of(), Map.of("owner", "originalowner"));
         when(tagKeyNormalizerProvider.forPlatform(CLOUD_PLATFORM_AWS)).thenReturn(TagKeyNormalizer.IDENTITY);
-        when(userDefinedTagValidator.validateTagKeysToRemove(List.of("owner"), existingTags.getDefaultTags(), Map.of(), TagKeyNormalizer.IDENTITY))
+        when(userDefinedTagValidator.validateTagKeysToRemove(List.of("owner"), existingTags.getDefaultTags(), Map.of(), CLOUD_PLATFORM_AWS,
+                TagKeyNormalizer.IDENTITY))
                 .thenReturn(ValidationResult.builder().error("protected").build());
 
         ValidationResult result = underTest.validateUserDefinedTagKeysToRemove(List.of("owner"), existingTags, CLOUD_PLATFORM_AWS);
@@ -313,7 +314,7 @@ class EnvironmentTagsDtoConverterTest {
     @Test
     void validateUserDefinedTagKeysToRemoveShouldTreatNullEnvironmentTagsAsEmptyDefaultTags() {
         when(tagKeyNormalizerProvider.forPlatform(CLOUD_PLATFORM_AWS)).thenReturn(TagKeyNormalizer.IDENTITY);
-        when(userDefinedTagValidator.validateTagKeysToRemove(List.of("custom"), Map.of(), Map.of(), TagKeyNormalizer.IDENTITY))
+        when(userDefinedTagValidator.validateTagKeysToRemove(List.of("custom"), Map.of(), Map.of(), CLOUD_PLATFORM_AWS, TagKeyNormalizer.IDENTITY))
                 .thenReturn(ValidationResult.builder().build());
 
         ValidationResult result = underTest.validateUserDefinedTagKeysToRemove(List.of("custom"), null, CLOUD_PLATFORM_AWS);

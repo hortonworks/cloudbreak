@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,12 +22,15 @@ public class TagValidator {
     }
 
     public ValidationResult validateTags(String cloudPlatform, Map<String, String> tags) {
-        Optional<com.sequenceiq.cloudbreak.cloud.TagValidator> tagValidatorConnector = getTagValidatorConnector(cloudPlatform);
-        if (tagValidatorConnector.isEmpty()) {
-            return ValidationResult.empty();
-        }
-        return tagValidatorConnector.get().validateTags(tags);
+        return getTagValidatorConnector(cloudPlatform)
+                .map(tagValidator -> tagValidator.validateTags(tags))
+                .orElseGet(ValidationResult::empty);
+    }
 
+    public ValidationResult validateTagKeyLengths(String cloudPlatform, Collection<String> tagKeys) {
+        return getTagValidatorConnector(cloudPlatform)
+                .map(tagValidator -> tagValidator.validateTagKeyLengths(tagKeys))
+                .orElseGet(ValidationResult::empty);
     }
 
     private Optional<com.sequenceiq.cloudbreak.cloud.TagValidator> getTagValidatorConnector(String cloudPlatform) {

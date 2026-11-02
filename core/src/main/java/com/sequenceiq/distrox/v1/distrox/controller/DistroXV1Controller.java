@@ -102,6 +102,7 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.SeLinux;
@@ -842,6 +843,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier deleteVolumesByStackCrn(@ResourceCrn String crn, StackDeleteVolumesRequest deleteRequest) {
         deleteRequest.setStackId(stackOperations.getResourceIdByResourceCrn(crn));
         return stackOperations.putDeleteVolumes(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), deleteRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_DATAHUB_TAGS)
+    public FlowIdentifier deleteUserDefinedTagsByCrn(@ResourceCrn String crn, DeleteUserDefinedTagsRequest request) {
+        return stackOperationService.triggerUserDefinedTagsDelete(crn, request.tagKeys());
     }
 
     @Override

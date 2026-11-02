@@ -559,7 +559,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    @InternalOnly
     public OperationStatus deleteUserDefinedTagsByCrn(@ResourceCrn String environmentCrn, DeleteUserDefinedTagsRequest request) {
         return freeIpaModifyTagsService.startUserDefinedTagsDeletionOperation(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(),
                 request.tagKeys());

@@ -5,15 +5,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.TagKeyNormalizer;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
 @Service
 public class UserDefinedTagValidator {
+
+    private static final String AWS_RESERVED_TAG_KEY_PREFIX = "aws:";
 
     public ValidationResult validateAgainstDefaultTags(Map<String, String> userDefinedTags, Map<String, String> defaultTags) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
@@ -30,11 +34,16 @@ public class UserDefinedTagValidator {
     }
 
     public ValidationResult validateTagKeysToRemove(Collection<String> tagKeys, Map<String, String> defaultTags, Map<String, String> applicationTags,
-            TagKeyNormalizer tagKeyNormalizer) {
+            String cloudPlatform, TagKeyNormalizer tagKeyNormalizer) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         if (CollectionUtils.isEmpty(tagKeys)) {
             validationResultBuilder.error("Tag keys to remove must not be empty.");
         } else {
+            // Only AWS needs this: its system tags (e.g. aws:cloudformation:*) are present on our resources but cannot be deleted, and a single
+            // rejected key fails the whole DeleteTags call. Azure and GCP deletes are read-modify-write, so absent or reserved keys are a no-op.
+            if (CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform)) {
+                validateAgainstReservedTagKeys(tagKeys, validationResultBuilder);
+            }
             Set<String> defaultTagConflicts = tagKeys.stream()
                     .filter(key -> matchesProtectedTagKey(key, defaultTags, tagKeyNormalizer))
                     .collect(Collectors.toSet());
@@ -49,6 +58,16 @@ public class UserDefinedTagValidator {
             }
         }
         return validationResultBuilder.build();
+    }
+
+    private static void validateAgainstReservedTagKeys(Collection<String> tagKeys, ValidationResultBuilder validationResultBuilder) {
+        Set<String> reservedKeys = tagKeys.stream()
+                .filter(key -> Strings.CI.startsWith(key, AWS_RESERVED_TAG_KEY_PREFIX))
+                .collect(Collectors.toSet());
+        if (!reservedKeys.isEmpty()) {
+            validationResultBuilder.error(String.format("Tag key(s) %s cannot be removed because the '%s' prefix is reserved by AWS.",
+                    reservedKeys, AWS_RESERVED_TAG_KEY_PREFIX));
+        }
     }
 
     private boolean matchesProtectedTagKey(String requestedKey, Map<String, String> protectedTags, TagKeyNormalizer tagKeyNormalizer) {

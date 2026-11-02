@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -47,6 +48,12 @@ class AwsTagValidatorTest {
                 // max.length
                 DynamicTest.dynamicTest("tag key is too long",
                         () -> testNegative(generateLongString(128), "test", "too long")),
+                DynamicTest.dynamicTest("tag key to remove is too long",
+                        () -> testTagKeyLengthNegative(generateLongString(128), "too long")),
+                DynamicTest.dynamicTest("tag key to remove is too short",
+                        () -> testTagKeyLengthNegative("", "too short")),
+                DynamicTest.dynamicTest("tag key to remove has maximum length",
+                        () -> testTagKeyLengthPositive(generateLongString(127))),
                 // key.validator
                 //    prefix
                 DynamicTest.dynamicTest("tag key starts with restricted prefix, regular expression is printed",
@@ -124,6 +131,18 @@ class AwsTagValidatorTest {
         assertTrue(result.hasError(), "tag validation should fail");
         assertTrue(result.getErrors().size() == 1, "tag validation should have one error only");
         assertTrue(result.getErrors().get(0).contains(messagePortion));
+    }
+
+    public void testTagKeyLengthNegative(String tagKey, String messagePortion) {
+        ValidationResult result = tagValidatorUnderTest.validateTagKeyLengths(Set.of(tagKey));
+        assertTrue(result.hasError(), "tag key length validation should fail");
+        assertTrue(result.getErrors().size() == 1, "tag key length validation should have one error only");
+        assertTrue(result.getErrors().get(0).contains(messagePortion));
+    }
+
+    public void testTagKeyLengthPositive(String tagKey) {
+        ValidationResult result = tagValidatorUnderTest.validateTagKeyLengths(Set.of(tagKey));
+        assertFalse(result.hasError(), "tag key length validation should pass");
     }
 
     public void testEmptyTagKey(String tag, String value) {

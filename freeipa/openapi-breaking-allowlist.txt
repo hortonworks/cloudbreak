@@ -1,1 +1,2 @@
 # Deliberate, reviewed breaking changes for the freeipa API — one full oasdiff message per line.
+in API POST /v1/freeipa/delete_user_defined_tags api path removed without deprecation

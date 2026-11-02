@@ -147,7 +147,7 @@ class RedBeamsServiceTest {
         ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
                 redBeamsService.triggerUserDefinedTagsDelete(crn, tagKeys));
 
-        verify(databaseServerV4Endpoint).deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys));
+        verify(databaseServerV4Endpoint).deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys), ACTOR);
     }
 
     @Test
@@ -156,7 +156,7 @@ class RedBeamsServiceTest {
         Set<String> tagKeys = Set.of("custom");
 
         WebApplicationException webApplicationException = new WebApplicationException("Error");
-        when(databaseServerV4Endpoint.deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys))).thenThrow(webApplicationException);
+        when(databaseServerV4Endpoint.deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys), ACTOR)).thenThrow(webApplicationException);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("Extracted error message");
 
         RedbeamsOperationFailedException redbeamsOperationFailedException = assertThrows(

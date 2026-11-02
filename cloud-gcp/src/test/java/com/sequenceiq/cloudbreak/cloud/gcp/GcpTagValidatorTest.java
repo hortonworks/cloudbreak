@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -48,6 +49,8 @@ class GcpTagValidatorTest {
                 // NOTE: anything above 63 is truncated by GcpLabelUtil
                 DynamicTest.dynamicTest("tag key is too long",
                         () -> testPositive(generateLongString(64), "test")),
+                DynamicTest.dynamicTest("tag key to remove is too long, it gets truncated",
+                        () -> testTagKeyLengthPositive(generateLongString(64))),
                 // key.validator
                 //    prefix
                 // NOTE: GcpLabelUtil converts it to lower-case
@@ -144,6 +147,11 @@ class GcpTagValidatorTest {
     public void testPositive(String tag, String value) {
         ValidationResult result = tagValidatorUnderTest.validateTags(Map.of(tag, value));
         assertFalse(result.hasError(), "tag validation should pass");
+    }
+
+    public void testTagKeyLengthPositive(String tagKey) {
+        ValidationResult result = tagValidatorUnderTest.validateTagKeyLengths(Set.of(tagKey));
+        assertFalse(result.hasError(), "tag key length validation should pass");
     }
 
     public void testEmptyTagKey(String tag, String value) {

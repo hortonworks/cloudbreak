@@ -431,7 +431,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @InternalOnly
-    public FlowIdentifier deleteUserDefinedTags(@ResourceCrn String crn, DeleteUserDefinedTagsRequest request) {
+    public FlowIdentifier deleteUserDefinedTags(@ResourceCrn String crn, DeleteUserDefinedTagsRequest request, @InitiatorUserCrn String initiatorUserCrn) {
         return redbeamsTagUpdaterService.triggerUserDefinedTagsDelete(crn, request.tagKeys());
     }
 

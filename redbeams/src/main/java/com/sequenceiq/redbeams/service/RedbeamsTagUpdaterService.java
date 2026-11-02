@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.service;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -55,14 +56,13 @@ public class RedbeamsTagUpdaterService {
     }
 
     private void validateTagKeysToRemove(DBStack dbStack, Set<String> tagKeys) {
-        if (dbStack.getTags() != null) {
-            StackTags stackTags = dbStack.getTags().getUnchecked(StackTags.class);
-            ValidationResult validationResult = userDefinedTagValidator.validateTagKeysToRemove(
-                    tagKeys, stackTags.getDefaultTags(), stackTags.getApplicationTags(),
-                    tagKeyNormalizerProvider.forPlatform(dbStack.getCloudPlatform()));
-            if (validationResult.hasError()) {
-                throw new BadRequestException(validationResult.getFormattedErrors());
-            }
+        Optional<StackTags> stackTags = Optional.ofNullable(dbStack.getTags()).map(tags -> tags.getUnchecked(StackTags.class));
+        ValidationResult validationResult = userDefinedTagValidator.validateTagKeysToRemove(tagKeys,
+                stackTags.map(StackTags::getDefaultTags).orElse(Map.of()),
+                stackTags.map(StackTags::getApplicationTags).orElse(Map.of()),
+                dbStack.getCloudPlatform(), tagKeyNormalizerProvider.forPlatform(dbStack.getCloudPlatform()));
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
         }
     }
 }

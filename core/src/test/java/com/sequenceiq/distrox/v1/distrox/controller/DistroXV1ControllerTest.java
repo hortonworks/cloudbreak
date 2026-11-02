@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificate
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.tag.request.DeleteUserDefinedTagsRequest;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.rotaterdscert.RotateRdsCertificateV1Response;
@@ -412,5 +413,16 @@ class DistroXV1ControllerTest {
         });
         assertEquals(resourceUpdateResponse, result);
         verify(stackOperationService).updateVolumeResourcesByCrn(resourceUpdateRequest, ACCOUNT_ID);
+    }
+
+    @Test
+    void testDeleteUserDefinedTagsByCrn() {
+        Set<String> tagKeys = Set.of("custom");
+        when(stackOperationService.triggerUserDefinedTagsDelete(CRN, tagKeys)).thenReturn(FLOW_IDENTIFIER);
+
+        FlowIdentifier result = doAs(TEST_USER_CRN, () -> distroXV1Controller.deleteUserDefinedTagsByCrn(CRN, new DeleteUserDefinedTagsRequest(tagKeys)));
+
+        assertEquals(FLOW_IDENTIFIER, result);
+        verify(stackOperationService).triggerUserDefinedTagsDelete(CRN, tagKeys);
     }
 }

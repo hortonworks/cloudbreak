@@ -171,7 +171,10 @@ public class EnvironmentValidatorService {
     }
 
     public ValidationResult validateTagKeysToRemove(Collection<String> tagKeys, EnvironmentTags environmentTags, String cloudPlatform) {
-        return environmentTagsDtoConverter.validateUserDefinedTagKeysToRemove(tagKeys, environmentTags, cloudPlatform);
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        validationResultBuilder.merge(tagValidator.validateTagKeyLengths(cloudPlatform, tagKeys));
+        validationResultBuilder.merge(environmentTagsDtoConverter.validateUserDefinedTagKeysToRemove(tagKeys, environmentTags, cloudPlatform));
+        return validationResultBuilder.build();
     }
 
     public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentName) {

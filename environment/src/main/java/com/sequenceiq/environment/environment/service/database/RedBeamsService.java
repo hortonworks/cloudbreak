@@ -80,8 +80,9 @@ public class RedBeamsService {
 
     public FlowIdentifier triggerUserDefinedTagsDelete(String crn, Set<String> tagKeys) {
         LOGGER.debug("Calling deleteUserDefinedTags endpoint for DB {} with tag keys {}", crn, tagKeys);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return triggerUserDefinedTagsAsInternalActor(
-                () -> databaseServerV4Endpoint.deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys)),
+                () -> databaseServerV4Endpoint.deleteUserDefinedTags(crn, new DeleteUserDefinedTagsRequest(tagKeys), initiatorUserCrn),
                 crn,
                 "delete user defined tags");
     }

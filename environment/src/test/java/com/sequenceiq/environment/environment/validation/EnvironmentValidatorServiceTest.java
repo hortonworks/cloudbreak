@@ -686,15 +686,17 @@ class EnvironmentValidatorServiceTest {
     }
 
     @Test
-    void validateTagKeysToRemoveShouldDelegateToEnvironmentTagsDtoConverter() {
+    void validateTagKeysToRemoveShouldMergePlatformKeyLengthAndProtectedKeyValidation() {
         EnvironmentTags environmentTags = new EnvironmentTags(Map.of("project", "atlas"), Map.of("owner", "originalowner"));
+        when(tagValidator.validateTagKeyLengths("AWS", List.of("owner")))
+                .thenReturn(ValidationResult.builder().error("too long").build());
         when(environmentTagsDtoConverter.validateUserDefinedTagKeysToRemove(List.of("owner"), environmentTags, "AWS"))
                 .thenReturn(ValidationResult.builder().error("protected").build());
 
         ValidationResult result = underTest.validateTagKeysToRemove(List.of("owner"), environmentTags, "AWS");
 
         assertThat(result.hasError()).isTrue();
-        assertThat(result.getFormattedErrors()).contains("protected");
+        assertThat(result.getFormattedErrors()).contains("too long", "protected");
     }
 
 }

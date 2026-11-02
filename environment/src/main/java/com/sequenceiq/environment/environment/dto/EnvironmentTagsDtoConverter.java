@@ -101,7 +101,7 @@ public class EnvironmentTagsDtoConverter {
         Map<String, String> defaultTags = Optional.ofNullable(environmentTags)
                 .map(EnvironmentTags::getDefaultTags)
                 .orElse(Map.of());
-        return userDefinedTagValidator.validateTagKeysToRemove(tagKeys, defaultTags, Map.of(),
+        return userDefinedTagValidator.validateTagKeysToRemove(tagKeys, defaultTags, Map.of(), cloudPlatform,
                 tagKeyNormalizerProvider.forPlatform(cloudPlatform));
     }
 

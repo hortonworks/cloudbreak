@@ -33,18 +33,29 @@ public abstract class CommonTagValidator implements Validator, TagValidator {
         return validateTags(getTagSpecification(), tags);
     }
 
+    @Override
+    public ValidationResult validateTagKeyLengths(Collection<String> tagKeys) {
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        validateTagKeyLengths(getTagSpecification(), tagKeys, validationResultBuilder);
+        return validationResultBuilder.build();
+    }
+
     protected ValidationResult validateTags(TagSpecification ts, Map<String, String> tags) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         validateTagsAreNotMoreThanMaximum(ts, tags, validationResultBuilder);
-        validateTagsAreTooShort(tags.keySet(), ts.getMinKeyLength(), "Following tag names are too short: %s", validationResultBuilder);
-        validateTagAreTooLong(tags.keySet(), ts.getMaxKeyLength(), "Following tag names are too long: %s", validationResultBuilder);
+        validateTagKeyLengths(ts, tags.keySet(), validationResultBuilder);
         validateTagsAreWellFormatted(ts.getKeyValidator(), tags.keySet(), getKeyValidator(),
                 "Following tag names are not well formatted: %s. Key of the tag should match for %s regular expression", validationResultBuilder);
         validateTagsAreTooShort(tags.values(), ts.getMinValueLength(), "Following tag values are too short: %s", validationResultBuilder);
-        validateTagAreTooLong(tags.values(), ts.getMaxValueLength(), "Following tag values are too long: %s", validationResultBuilder);
+        validateTagsAreTooLong(tags.values(), ts.getMaxValueLength(), "Following tag values are too long: %s", validationResultBuilder);
         validateTagsAreWellFormatted(ts.getValueValidator(), tags.values(), getValueValidator(),
                 "Following tag values are not well formatted: %s. Value of the tag should match for %s regular expression", validationResultBuilder);
         return validationResultBuilder.build();
+    }
+
+    private void validateTagKeyLengths(TagSpecification ts, Collection<String> tagKeys, ValidationResultBuilder validationResultBuilder) {
+        validateTagsAreTooShort(tagKeys, ts.getMinKeyLength(), "Following tag names are too short: %s", validationResultBuilder);
+        validateTagsAreTooLong(tagKeys, ts.getMaxKeyLength(), "Following tag names are too long: %s", validationResultBuilder);
     }
 
     private void validateTagsAreNotMoreThanMaximum(TagSpecification ts, Map<String, String> tags, ValidationResultBuilder validationResultBuilder) {
@@ -63,7 +74,7 @@ public abstract class CommonTagValidator implements Validator, TagValidator {
         }
     }
 
-    private void validateTagAreTooLong(Collection<String> strings, Integer maxKeyLength, String s, ValidationResultBuilder validationResultBuilder) {
+    private void validateTagsAreTooLong(Collection<String> strings, Integer maxKeyLength, String s, ValidationResultBuilder validationResultBuilder) {
         Set<String> longKeys = strings.stream().filter(k -> transform(k).length() > maxKeyLength).collect(Collectors.toSet());
         if (!longKeys.isEmpty()) {
             validationResultBuilder.error(String.format(s, longKeys));
