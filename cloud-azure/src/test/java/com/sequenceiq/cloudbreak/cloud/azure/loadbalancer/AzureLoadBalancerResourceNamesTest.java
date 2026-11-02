@@ -77,6 +77,11 @@ class AzureLoadBalancerResourceNamesTest {
     }
 
     @Test
+    void testPublicIpName() {
+        assertEquals(LB_NAME + "-publicIp", AzureLoadBalancerResourceNames.publicIpName(LB_NAME));
+    }
+
+    @Test
     void testFrontendName() {
         assertEquals(LB_NAME + "-frontend", AzureLoadBalancerResourceNames.frontendName(LB_NAME, LoadBalancerType.PRIVATE));
         assertEquals(LB_NAME + "-frontend", AzureLoadBalancerResourceNames.frontendName(LB_NAME, LoadBalancerType.PUBLIC));

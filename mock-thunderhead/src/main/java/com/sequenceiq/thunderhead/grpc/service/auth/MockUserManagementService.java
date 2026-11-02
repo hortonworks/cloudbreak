@@ -20,6 +20,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DELETE_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_RESIZE_DISK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_UPSCALE_SKIP_EXISTING_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CM_TEMPLATE_SYNC;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CONFIGURE_ENCRYPTION_PROFILE;
@@ -1039,6 +1040,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         addEntitlement(builder, accountId, true, CDP_CB_AZURE_RESIZE_DISK);
         addEntitlement(builder, accountId, true, CDP_CB_AZURE_DELETE_DISK);
         addEntitlement(builder, accountId, true, CDP_CB_AZURE_ADD_DISK);
+        addEntitlement(builder, accountId, true, CDP_CB_AZURE_UPSCALE_SKIP_EXISTING_LOAD_BALANCER);
         addEntitlement(builder, accountId, true, CDP_EXPRESS_ONBOARDING);
         addEntitlement(builder, accountId, true, CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION);
         addEntitlement(builder, accountId, true, CDP_SECURITY_ENFORCING_SELINUX);

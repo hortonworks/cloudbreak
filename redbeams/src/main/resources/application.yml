@@ -169,6 +169,8 @@ cb:
 
   azure:
     host.name.prefix.length: 255
+    # Redbeams never upscales Azure VMs, the property is only needed by the shared cloud-azure component
+    upscale.skipExistingLoadBalancer: false
     database:
         template.batchSize: 1
         flexible:

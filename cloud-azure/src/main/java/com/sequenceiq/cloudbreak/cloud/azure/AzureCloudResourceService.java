@@ -134,64 +134,16 @@ public class AzureCloudResourceService {
         };
     }
 
-    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private CloudResource convert(TargetResource targetResource, CommonStatus commonStatus, DeploymentType deploymentType) {
-        CloudResource.Builder cloudResourceBuilder = CloudResource.builder();
-        switch (targetResource.resourceType()) {
-            case "Microsoft.Compute/availabilitySets":
-                cloudResourceBuilder.withType(AZURE_AVAILABILITY_SET);
-                break;
-            case "Microsoft.Compute/virtualMachines":
-                cloudResourceBuilder.withType(AZURE_INSTANCE);
-                cloudResourceBuilder.withInstanceId(targetResource.resourceName());
-                break;
-            case "Microsoft.Network/networkSecurityGroups":
-                cloudResourceBuilder.withType(AZURE_SECURITY_GROUP);
-                break;
-            case "Microsoft.Network/publicIPAddresses":
-                cloudResourceBuilder.withType(AZURE_PUBLIC_IP);
-                break;
-            case "Microsoft.Network/networkInterfaces":
-                cloudResourceBuilder.withType(AZURE_NETWORK_INTERFACE);
-                break;
-            case "Microsoft.Network/virtualNetworks":
-                cloudResourceBuilder.withType(AZURE_NETWORK);
-                break;
-            case "Microsoft.Network/privateEndpoints":
-                cloudResourceBuilder.withType(deploymentType == PROVISION ?
-                        AZURE_PRIVATE_ENDPOINT :
-                        AZURE_PRIVATE_ENDPOINT_CANARY);
-                break;
-            case "Microsoft.DBforPostgreSQL/servers":
-            case "Microsoft.DBforPostgreSQL/flexibleServers":
-                cloudResourceBuilder.withType(deploymentType == PROVISION ?
-                        AZURE_DATABASE :
-                        AZURE_DATABASE_CANARY);
-                break;
-            case "Microsoft.DBforPostgreSQL/servers/securityAlertPolicies":
-                cloudResourceBuilder.withType(AZURE_DATABASE_SECURITY_ALERT_POLICY);
-                break;
-            case "Microsoft.Compute/images":
-                cloudResourceBuilder.withType(AZURE_MANAGED_IMAGE);
-                break;
-            case "Microsoft.Compute/disks":
-                cloudResourceBuilder.withType(AZURE_DISK);
-                break;
-            case "Microsoft.Storage/storageAccounts":
-                cloudResourceBuilder.withType(AZURE_STORAGE);
-                break;
-            case "Microsoft.Network/privateDnsZones":
-                cloudResourceBuilder.withType(AZURE_PRIVATE_DNS_ZONE);
-                break;
-            case "Microsoft.Network/privateDnsZones/virtualNetworkLinks":
-                cloudResourceBuilder.withType(AZURE_VIRTUAL_NETWORK_LINK);
-                break;
-            case "Microsoft.Network/loadBalancers":
-                cloudResourceBuilder.withType(AZURE_LOAD_BALANCER);
-                break;
-            default:
-                LOGGER.info("Unknown resource type {}", targetResource.resourceType());
-                return null;
+        Optional<ResourceType> resourceType = ArmResourceType.getByType(targetResource.resourceType())
+                .map(armResourceType -> toResourceType(armResourceType, deploymentType));
+        if (resourceType.isEmpty()) {
+            LOGGER.info("Unknown resource type {}", targetResource.resourceType());
+            return null;
+        }
+        CloudResource.Builder cloudResourceBuilder = CloudResource.builder().withType(resourceType.get());
+        if (AZURE_INSTANCE == resourceType.get()) {
+            cloudResourceBuilder.withInstanceId(targetResource.resourceName());
         }
         CloudResource cloudResource = cloudResourceBuilder
                 .withName(targetResource.resourceName())
@@ -205,6 +157,28 @@ public class AzureCloudResourceService {
                 targetResource.resourceName(),
                 targetResource.resourceType());
         return shouldBeCollected(deploymentType, cloudResource) ? cloudResource : null;
+    }
+
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
+    private ResourceType toResourceType(ArmResourceType armResourceType, DeploymentType deploymentType) {
+        return switch (armResourceType) {
+            case AVAILABILITY_SET -> AZURE_AVAILABILITY_SET;
+            case VIRTUAL_MACHINE -> AZURE_INSTANCE;
+            case NETWORK_SECURITY_GROUP -> AZURE_SECURITY_GROUP;
+            case PUBLIC_IP_ADDRESS -> AZURE_PUBLIC_IP;
+            case NETWORK_INTERFACE -> AZURE_NETWORK_INTERFACE;
+            case VIRTUAL_NETWORK -> AZURE_NETWORK;
+            case PRIVATE_ENDPOINT -> deploymentType == PROVISION ? AZURE_PRIVATE_ENDPOINT : AZURE_PRIVATE_ENDPOINT_CANARY;
+            case POSTGRESQL_SERVER, POSTGRESQL_FLEXIBLE_SERVER -> deploymentType == PROVISION ? AZURE_DATABASE : AZURE_DATABASE_CANARY;
+            case POSTGRESQL_SECURITY_ALERT_POLICY -> AZURE_DATABASE_SECURITY_ALERT_POLICY;
+            case IMAGE -> AZURE_MANAGED_IMAGE;
+            case MANAGED_DISK -> AZURE_DISK;
+            case STORAGE_ACCOUNT -> AZURE_STORAGE;
+            case PRIVATE_DNS_ZONE -> AZURE_PRIVATE_DNS_ZONE;
+            case VIRTUAL_NETWORK_LINK -> AZURE_VIRTUAL_NETWORK_LINK;
+            case LOAD_BALANCER -> AZURE_LOAD_BALANCER;
+            case MANAGED_CLUSTER -> null;
+        };
     }
 
     private boolean shouldBeCollected(DeploymentType deploymentType, CloudResource cloudResource) {

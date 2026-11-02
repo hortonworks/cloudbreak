@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -33,6 +36,7 @@ import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureUpscaleLoadBalancerTemplateFilter;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureInstanceTypeRetryExceptionMatcher;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -59,6 +63,15 @@ class AzureFallbackAwareDeploymentServiceTest {
     private static final String REBUILT_TEMPLATE = "{\"rebuilt\":true}";
 
     private static final String PARAMETERS = "{\"params\":true}";
+
+    private static final String LB_NAME = "LoadBalancerstackPRIVATE";
+
+    private static final String UPSCALE_TEMPLATE = """
+            {"resources": [
+                {"type": "Microsoft.Network/loadBalancers", "name": "%s"},
+                {"type": "Microsoft.Network/networkInterfaces", "name": "%s",
+                "dependsOn": ["[resourceId('Microsoft.Network/loadBalancers', '%s')]"]}
+            ]}""";
 
     @Mock
     private AzureTemplateBuilder azureTemplateBuilder;
@@ -92,6 +105,9 @@ class AzureFallbackAwareDeploymentServiceTest {
 
     @Mock
     private com.sequenceiq.cloudbreak.cloud.notification.InstanceTypeFallbackReporter instanceTypeFallbackReporter;
+
+    @Spy
+    private AzureUpscaleLoadBalancerTemplateFilter azureUpscaleLoadBalancerTemplateFilter;
 
     @InjectMocks
     private AzureFallbackAwareDeploymentService underTest;
@@ -396,9 +412,73 @@ class AzureFallbackAwareDeploymentServiceTest {
         return new ManagementException("Preflight failed", null, top);
     }
 
+    @Test
+    void removesExistingLoadBalancerWhenEntitlementIsDisabled() {
+        when(entitlementService.isFallbackInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(false);
+        when(azureClient.createTemplateDeployment(eq(RG), eq(STACK_NAME), anyString(), eq(PARAMETERS))).thenReturn(deployment);
+
+        Deployment result = underTest.createTemplateDeploymentWithFallback(upscaleRequest(upscaleTemplate("nic-initial")));
+
+        assertSame(deployment, result);
+        assertSubmittedTemplatesHaveNoLoadBalancer(1);
+    }
+
+    @Test
+    void removesExistingLoadBalancerWhenStackHasNoFallbackTypes() {
+        when(entitlementService.isFallbackInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        List<Group> groups = List.of(group("master", null), group("worker", null));
+        when(cloudStack.getGroups()).thenReturn(groups);
+        when(azureClient.createTemplateDeployment(eq(RG), eq(STACK_NAME), anyString(), eq(PARAMETERS))).thenReturn(deployment);
+
+        Deployment result = underTest.createTemplateDeploymentWithFallback(upscaleRequest(upscaleTemplate("nic-initial")));
+
+        assertSame(deployment, result);
+        assertSubmittedTemplatesHaveNoLoadBalancer(1);
+    }
+
+    @Test
+    void removesExistingLoadBalancerFromInitialAndRebuiltTemplateOnFallback() {
+        when(entitlementService.isFallbackInstanceTypeEnabled(ACCOUNT_ID)).thenReturn(true);
+        List<Group> groups = List.of(group("master", List.of("Standard_D8s_v5")));
+        when(cloudStack.getGroups()).thenReturn(groups);
+        ManagementException capacityException = capacityException("SkuNotAvailable");
+        when(azureClient.createTemplateDeployment(eq(RG), eq(STACK_NAME), anyString(), eq(PARAMETERS))).thenThrow(capacityException).thenReturn(deployment);
+        when(retryExceptionMatcher.isInstanceTypeNotSupported(capacityException)).thenReturn(true);
+        when(retryExceptionMatcher.findGroupsWithCapacityFailure(eq(RG), eq(STACK_NAME), eq(STACK_NAME), anyList(), eq(azureClient)))
+                .thenReturn(Set.of("master"));
+        when(azureTemplateBuilder.build(eq(STACK_NAME), any(), eq(credentialView), eq(azureStackView), eq(cloudContext), eq(cloudStack),
+                eq(AzureInstanceTemplateOperation.UPSCALE), eq(marketplaceImage))).thenReturn(upscaleTemplate("nic-rebuilt"));
+
+        Deployment result = underTest.createTemplateDeploymentWithFallback(upscaleRequest(upscaleTemplate("nic-initial")));
+
+        assertSame(deployment, result);
+        List<String> submittedTemplates = assertSubmittedTemplatesHaveNoLoadBalancer(2);
+        assertTrue(submittedTemplates.get(0).contains("nic-initial"));
+        assertTrue(submittedTemplates.get(1).contains("nic-rebuilt"));
+    }
+
+    private List<String> assertSubmittedTemplatesHaveNoLoadBalancer(int expectedSubmissions) {
+        ArgumentCaptor<String> templateCaptor = ArgumentCaptor.forClass(String.class);
+        verify(azureClient, times(expectedSubmissions)).createTemplateDeployment(eq(RG), eq(STACK_NAME), templateCaptor.capture(), eq(PARAMETERS));
+        for (String template : templateCaptor.getAllValues()) {
+            assertFalse(template.contains("Microsoft.Network/loadBalancers"), template);
+            assertTrue(template.contains("Microsoft.Network/networkInterfaces"), template);
+        }
+        return templateCaptor.getAllValues();
+    }
+
+    private String upscaleTemplate(String nicName) {
+        return UPSCALE_TEMPLATE.formatted(LB_NAME, nicName, LB_NAME);
+    }
+
+    private AzureTemplateDeploymentRequest upscaleRequest(String template) {
+        return new AzureTemplateDeploymentRequest(azureClient, RG, STACK_NAME, template, PARAMETERS, azureStackView,
+                cloudContext, cloudStack, credentialView, null, AzureInstanceTemplateOperation.UPSCALE, marketplaceImage, Set.of(LB_NAME));
+    }
+
     private AzureTemplateDeploymentRequest request() {
         return new AzureTemplateDeploymentRequest(azureClient, RG, STACK_NAME, INITIAL_TEMPLATE, PARAMETERS, azureStackView,
-                cloudContext, cloudStack, credentialView, null, AzureInstanceTemplateOperation.PROVISION, marketplaceImage);
+                cloudContext, cloudStack, credentialView, null, AzureInstanceTemplateOperation.PROVISION, marketplaceImage, Set.of());
     }
 
     private Group group(String name, List<String> fallbackTypes) {

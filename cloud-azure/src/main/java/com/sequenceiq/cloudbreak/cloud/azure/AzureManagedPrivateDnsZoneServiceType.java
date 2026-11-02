@@ -22,7 +22,7 @@ Azure private DNS zones that can be registered and used by Cloudbreak are listed
 public enum AzureManagedPrivateDnsZoneServiceType implements AzurePrivateDnsZoneDescriptor {
 
     POSTGRES(AzureResourceFamily.DATABASE,
-            "Microsoft.DBforPostgreSQL/servers",
+            ArmResourceType.POSTGRESQL_SERVER.getType(),
             AzureDatabaseType.SINGLE_SERVER.shortName(),
             "privatelink.postgres.database.azure.com",
             "postgres.database.azure.com",
@@ -30,7 +30,7 @@ public enum AzureManagedPrivateDnsZoneServiceType implements AzurePrivateDnsZone
             List.of(POSTGRES_WITH_EXISTING_DNS_ZONE, POSTGRES_WITH_NEW_DNS_ZONE)),
 
     POSTGRES_FLEXIBLE_FOR_PRIVATE_ENDPOINT(AzureResourceFamily.DATABASE,
-            "Microsoft.DBforPostgreSQL/flexibleServers",
+            ArmResourceType.POSTGRESQL_FLEXIBLE_SERVER.getType(),
             AzureDatabaseType.FLEXIBLE_SERVER.shortName(),
             "privatelink.postgres.database.azure.com",
             "postgres.database.azure.com",
@@ -38,7 +38,7 @@ public enum AzureManagedPrivateDnsZoneServiceType implements AzurePrivateDnsZone
             List.of(FLEXIBLE_POSTGRES_WITH_PE_AND_EXISTING_DNS_ZONE, FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_EXISTING_DNS_ZONE)),
 
     POSTGRES_FLEXIBLE(AzureResourceFamily.DATABASE,
-            "Microsoft.DBforPostgreSQL/flexibleServers",
+            ArmResourceType.POSTGRESQL_FLEXIBLE_SERVER.getType(),
             AzureDatabaseType.FLEXIBLE_SERVER.shortName(),
             "flexible.postgres.database.azure.com",
             "postgres.database.azure.com",
@@ -52,7 +52,7 @@ public enum AzureManagedPrivateDnsZoneServiceType implements AzurePrivateDnsZone
     },
 
     STORAGE(AzureResourceFamily.STORAGE,
-            "Microsoft.Storage/storageAccounts",
+            ArmResourceType.STORAGE_ACCOUNT.getType(),
             "Blob",
             "privatelink.blob.core.windows.net",
             "blob.core.windows.net",

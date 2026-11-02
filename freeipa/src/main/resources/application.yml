@@ -323,6 +323,8 @@ cb:
 
   azure:
     host.name.prefix.length: 255
+    # FreeIPA deploys its load balancer separately (arm-v2-freeipa-lb.ftl), never in the upscale template, so there is nothing to skip
+    upscale.skipExistingLoadBalancer: false
     database.template.batchSize: 1
 
   os:

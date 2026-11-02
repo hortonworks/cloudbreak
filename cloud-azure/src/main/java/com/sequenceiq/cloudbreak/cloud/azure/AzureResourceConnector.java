@@ -172,7 +172,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 Deployment templateDeployment = azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(
                         new AzureTemplateDeploymentRequest(client, resourceGroupName, stackName,
                                 template, parameters, azureStackView, cloudContext, stack, azureCredentialView, customImageId,
-                                AzureInstanceTemplateOperation.PROVISION, marketplaceImageForTemplate));
+                                AzureInstanceTemplateOperation.PROVISION, marketplaceImageForTemplate, Set.of()));
                 LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
                 instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
             } else {

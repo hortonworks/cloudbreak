@@ -20,6 +20,8 @@ public final class AzureLoadBalancerResourceNames {
 
     private static final String POOL_SUFFIX = "-pool";
 
+    private static final String PUBLIC_IP_SUFFIX = "-publicIp";
+
     // The protocol part is empty in rules created before the traffic protocol was added to the name
     private static final String RULE_PROTOCOL_PATTERN = "[A-Z_]*";
 
@@ -54,5 +56,9 @@ public final class AzureLoadBalancerResourceNames {
         return LoadBalancerType.GATEWAY_PRIVATE == type
                 ? loadBalancerName + FRONTEND_SUFFIX + GATEWAY_SUFFIX
                 : loadBalancerName + FRONTEND_SUFFIX;
+    }
+
+    public static String publicIpName(String loadBalancerName) {
+        return loadBalancerName + PUBLIC_IP_SUFFIX;
     }
 }

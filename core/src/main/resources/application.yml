@@ -270,6 +270,8 @@ cb:
 
   azure:
     host.name.prefix.length: 255
+    # Leave load balancers that already exist in Azure out of the upscale ARM template, so entries added outside Cloudbreak are kept
+    upscale.skipExistingLoadBalancer: true
     poller:
       dns:
         checkinterval: 2000
