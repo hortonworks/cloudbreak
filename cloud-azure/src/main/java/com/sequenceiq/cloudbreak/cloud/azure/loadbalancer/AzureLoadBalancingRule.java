@@ -31,7 +31,7 @@ public final class AzureLoadBalancingRule {
         this.frontendPort = portPair.getTrafficPort();
 
         this.protocol = Optional.ofNullable(trafficProtocol).map(NetworkProtocol::name).orElse("");
-        this.name = defaultNameFromPort(portPair.getTrafficPort(), protocol);
+        this.name = AzureLoadBalancerResourceNames.ruleName(portPair.getTrafficPort(), protocol);
         String healthCheckProtocol = Optional.ofNullable(portPair)
                 .map(TargetGroupPortPair::getHealthProbeParameters)
                 .map(HealthProbeParameters::getProtocol).map(NetworkProtocol::name).orElse("");
@@ -44,11 +44,6 @@ public final class AzureLoadBalancingRule {
                 healthProbeParameters.getInterval(),
                 healthProbeParameters.getProbeDownThreshold());
         this.groupName = checkNotNull(group, "Group must be provided.").getName();
-    }
-
-    private String defaultNameFromPort(int port, String trafficProtocol) {
-
-        return "port-" + port + trafficProtocol + "-rule";
     }
 
     public String getName() {

@@ -279,6 +279,32 @@ class AzureMetadataCollectorTest {
     }
 
     @Test
+    void testCollectPublicLoadBalancerPrefersCloudbreakFrontendOverForeignOne() {
+        List<CloudResource> resources = new ArrayList<>();
+        CloudResource cloudResource = createCloudResource();
+
+        when(authenticatedContext.getCloudContext()).thenReturn(mockCloudContext);
+        when(mockCloudContext.getName()).thenReturn(RESOURCE_GROUP_NAME);
+
+        when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
+        when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
+
+        String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, loadBalancerName, LoadBalancerType.PUBLIC))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend("aaa-custom-frontend", SECOND_PUBLIC_IP, LoadBalancerType.PUBLIC),
+                        new AzureLoadBalancerFrontend(loadBalancerName + "-frontend", PUBLIC_IP, LoadBalancerType.PUBLIC)));
+
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
+
+        List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PUBLIC), resources);
+
+        assertEquals(1, result.size());
+        assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
+        assertEquals(PUBLIC_IP, result.get(0).getIp());
+    }
+
+    @Test
     void testCollectPublicAndPrivateLoadBalancer() {
         List<CloudResource> resources = new ArrayList<>();
         CloudResource cloudResource = createCloudResource();
@@ -395,6 +421,61 @@ class AzureMetadataCollectorTest {
         assertEquals(1, result.size());
         assertEquals(LoadBalancerType.PRIVATE, result.get(0).getType());
         assertEquals(PRIVATE_IP, result.get(0).getIp());
+    }
+
+    @Test
+    void testCollectPrivateLoadBalancerPrefersCloudbreakFrontendOverForeignOne() {
+        List<CloudResource> resources = new ArrayList<>();
+        CloudResource cloudResource = createCloudResource();
+
+        when(authenticatedContext.getCloudContext()).thenReturn(mockCloudContext);
+        when(mockCloudContext.getName()).thenReturn(RESOURCE_GROUP_NAME);
+
+        when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
+        when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
+
+        String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend("aaa-custom-frontend", "10.23.12.1", LoadBalancerType.PRIVATE),
+                        new AzureLoadBalancerFrontend(privateLoadBalancerName + "-frontend", PRIVATE_IP, LoadBalancerType.PRIVATE)));
+
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
+
+        List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PRIVATE), resources);
+
+        assertEquals(1, result.size());
+        assertEquals(LoadBalancerType.PRIVATE, result.get(0).getType());
+        assertEquals(PRIVATE_IP, result.get(0).getIp());
+    }
+
+    @Test
+    void testCollectGatewayPrivateLoadBalancerPrefersCloudbreakFrontendOverForeignOne() {
+        List<CloudResource> resources = new ArrayList<>();
+        CloudResource cloudResource = createCloudResource();
+
+        when(authenticatedContext.getCloudContext()).thenReturn(mockCloudContext);
+        when(mockCloudContext.getName()).thenReturn(RESOURCE_GROUP_NAME);
+
+        when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
+        when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
+
+        String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend(privateLoadBalancerName + "-frontend", PRIVATE_IP, LoadBalancerType.PRIVATE)));
+        when(azureClient.getLoadBalancerFrontends(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.GATEWAY_PRIVATE))
+                .thenReturn(List.of(new AzureLoadBalancerFrontend("aaa-custom-gateway", "10.23.12.1", LoadBalancerType.GATEWAY_PRIVATE),
+                        new AzureLoadBalancerFrontend(privateLoadBalancerName + "-frontend-gateway", GATEWAY_PRIVATE_IP, LoadBalancerType.GATEWAY_PRIVATE)));
+
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());
+
+        List<CloudLoadBalancerMetadata> result =
+                underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.GATEWAY_PRIVATE, LoadBalancerType.PRIVATE), resources);
+
+        assertEquals(2, result.size());
+        assertThat(result).anyMatch(lbm -> LoadBalancerType.GATEWAY_PRIVATE == lbm.getType() && GATEWAY_PRIVATE_IP.equals(lbm.getIp()))
+                .anyMatch(lbm -> LoadBalancerType.PRIVATE == lbm.getType() && PRIVATE_IP.equals(lbm.getIp()));
     }
 
     @Test
