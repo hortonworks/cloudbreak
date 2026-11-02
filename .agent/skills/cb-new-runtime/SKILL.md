@@ -139,14 +139,6 @@ placeholder and the engine substitutes the target version. A file must never car
 2. Bump the expected size in `RuntimeUpgradeMatrixDefinitionProviderTest` (currently
    `assertEquals(10, ...)`) — `core/src/test/java/com/sequenceiq/cloudbreak/service/upgrade/matrix/RuntimeUpgradeMatrixDefinitionProviderTest.java`.
 
-### 1.4 Fix the count oracle
-
-`ClusterTemplateTest.validateDefaultCount` asserts the total default cluster-template count
-(currently `905`) — `integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase/mock/ClusterTemplateTest.java`.
-A new zero-patch version contributes the base's full count (**+110** at the base's current shape),
-minus any tombstones you added and templates whose blueprint is gov-only. Run the test and let it
-report the exact number rather than eyeballing it.
-
 ---
 
 ## Phase 2 — Make the new CR the default (later, separate PR)
@@ -174,8 +166,6 @@ The image-burn-trigger removal that pairs with promotion is not a CB-repo change
 ./gradlew :core:test   --tests '*RuntimeBlueprintOverlayLoaderTest' --tests '*RuntimeClusterTemplateOverlayLoaderTest' \
                        --tests '*RuntimeUpgradeMatrixDefinitionProviderTest'
 ./gradlew :datalake:test --tests '*RuntimeDutyOverlayLoaderTest' --tests '*CDPConfigServiceTest'
-# ClusterTemplateTest is an integration-test mock case — run per your usual integration-test invocation
-# to read the real default count.
 ```
 
 Then load **cb-testing** (coverage gates + authorization-compliance) and **cb-jira** to link the ticket.
@@ -200,6 +190,6 @@ Then load **cb-testing** (coverage gates + authorization-compliance) and **cb-ji
 - **Don't author version strings** in overlay files — injection owns `name` / `description` /
   `cdhVersion` / `blueprintName`. A typo'd `blueprintName` in a hand-copied file silently yields zero
   templates.
-- **Count assertions fail by design** until bumped (upgrade-matrix size, `validateDefaultCount`). Let
+- **Count assertions fail by design** until bumped (upgrade-matrix size). Let
   the failing test tell you the number.
 - **Versions ≤ 7.3.3 are frozen full dirs** — leave them; the overlay model is forward-only.

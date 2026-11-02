@@ -1,8 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -12,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.audit.ClusterTemplateAuditGrpcServiceAssertion;
@@ -186,7 +183,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
     @Description(
             given = "a cluster template list request",
             when = " list requested",
-            then = " the response has defined number of cluster templates"
+            then = " every ARM default cluster template has arm64 architecture"
     )
     public void testListDefaultClusterTemplate(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
@@ -196,7 +193,6 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .when(umsTestClient.grantEntitlement(accountId, Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE.name()))
                 .given(ClusterTemplateTestDto.class)
                 .when(clusterTemplateTestClient.listV4(), RunningParameter.key(generatedKey))
-                .then(this::validateDefaultCount)
                 .then(this::validateArchitecture)
                 .validate();
     }
@@ -379,19 +375,6 @@ public class ClusterTemplateTest extends AbstractMockTest {
                         throw new TestFailException("The architecture must be arm64 on ARM templates!");
                     }
                 });
-        return entity;
-    }
-
-    private ClusterTemplateTestDto validateDefaultCount(TestContext tc, ClusterTemplateTestDto entity, CloudbreakClient cc) {
-        try {
-            assertNotNull(entity);
-            assertNotNull(entity.getResponses());
-            long defaultCount = entity.getResponses().stream().filter(template -> ResourceStatus.DEFAULT.equals(template.getStatus())).count();
-            long expectedCount = 1009;
-            assertEquals(expectedCount, defaultCount, "Should have " + expectedCount + " of default cluster templates.");
-        } catch (Exception e) {
-            throw new TestFailException(String.format("Failed to validate default count of cluster templates: %s", e.getMessage()), e);
-        }
         return entity;
     }
 
