@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.converter;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -37,6 +38,8 @@ import com.sequenceiq.common.model.FileSystemType;
 @ExtendWith(MockitoExtension.class)
 class ClusterToClusterDetailsConverterTest {
 
+    private static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:accountId:encryptionProfile:uuid";
+
     @Mock
     private RdsConfigToRdsDetailsConverter rdsConfigToRdsDetailsConverter;
 
@@ -61,8 +64,18 @@ class ClusterToClusterDetailsConverterTest {
                 () -> assertTrue(result.getGatewayEnabled()),
                 () -> assertEquals("CENTRAL", result.getGatewayType()),
                 () -> assertEquals("SSO_PROVIDER", result.getSsoType()),
-                () -> assertEquals("S3", result.getFileSystemType())
+                () -> assertEquals("S3", result.getFileSystemType()),
+                () -> assertEquals(ENCRYPTION_PROFILE_CRN, result.getEncryptionProfileCrn())
         );
+    }
+
+    @Test
+    void convertWithoutEncryptionProfile() {
+        when(rdsConfigWithoutClusterService.findByClusterId(any())).thenReturn(Set.of());
+        Cluster cluster = (Cluster) getClusterView();
+        cluster.setEncryptionProfileCrn(null);
+        ClusterDetails result = underTest.convert(cluster, getStackView(), getGatewayView());
+        assertNull(result.getEncryptionProfileCrn());
     }
 
     @Test
@@ -100,6 +113,7 @@ class ClusterToClusterDetailsConverterTest {
         cluster.setEnvironmentCrn("crn");
         cluster.setProxyConfigCrn("");
         cluster.setVariant("");
+        cluster.setEncryptionProfileCrn(ENCRYPTION_PROFILE_CRN);
         FileSystem fileSystem = new FileSystem();
         fileSystem.setType(FileSystemType.S3);
         cluster.setFileSystem(fileSystem);

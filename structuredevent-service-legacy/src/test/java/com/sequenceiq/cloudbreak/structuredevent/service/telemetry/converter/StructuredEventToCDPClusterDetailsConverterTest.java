@@ -191,6 +191,33 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
 
         assertFalse(result.getSslEnabled());
         assertFalse(result.getUsingExternalDatabase());
+        assertEquals("", result.getEncryptionProfileCrn());
+    }
+
+    @Test
+    void testEncryptionProfileCrnConversion() {
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:accountId:encryptionProfile:uuid";
+        ClusterDetails clusterDetails = new ClusterDetails();
+        clusterDetails.setEncryptionProfileCrn(encryptionProfileCrn);
+
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        structuredFlowEvent.setCluster(clusterDetails);
+        assertEquals(encryptionProfileCrn, underTest.convert(structuredFlowEvent).getEncryptionProfileCrn());
+
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setCluster(clusterDetails);
+        assertEquals(encryptionProfileCrn, underTest.convert(structuredSyncEvent).getEncryptionProfileCrn());
+    }
+
+    @Test
+    void testEncryptionProfileCrnConversionWhenCrnIsNull() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        structuredFlowEvent.setCluster(new ClusterDetails());
+        assertEquals("", underTest.convert(structuredFlowEvent).getEncryptionProfileCrn());
+
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setCluster(new ClusterDetails());
+        assertEquals("", underTest.convert(structuredSyncEvent).getEncryptionProfileCrn());
     }
 
     @Test

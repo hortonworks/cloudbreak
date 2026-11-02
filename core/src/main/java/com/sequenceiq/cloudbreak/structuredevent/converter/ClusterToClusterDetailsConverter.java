@@ -44,6 +44,7 @@ public class ClusterToClusterDetailsConverter {
         clusterDetails.setUpSince(source.getUpSince());
         clusterDetails.setRazEnabled(source.isRangerRazEnabled());
         clusterDetails.setRmsEnabled(source.isRangerRmsEnabled());
+        clusterDetails.setEncryptionProfileCrn(source.getEncryptionProfileCrn());
         convertGatewayProperties(clusterDetails, gatewayView);
         convertFileSystemProperties(clusterDetails, source.getFileSystem());
         addDatabaseInfo(clusterDetails, source);

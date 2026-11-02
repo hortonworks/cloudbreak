@@ -1,8 +1,8 @@
 package com.sequenceiq.environment.environment.flow.encryptionprofile.config;
 
-import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FAILED;
-import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FINISHED;
-import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.SUSPEND_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.ENABLE_ENCRYPTION_PROFILE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.ENABLE_ENCRYPTION_PROFILE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.ENABLE_ENCRYPTION_PROFILE_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FINISHED_STATE;
@@ -98,11 +98,11 @@ public class EnableEncryptionProfileFlowConfig extends AbstractFlowConfiguration
     @Override
     public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
         if (INIT_STATE.equals(flowState)) {
-            return SUSPEND_STARTED;
+            return ENABLE_ENCRYPTION_PROFILE_STARTED;
         } else if (ENABLE_ENCRYPTION_PROFILE_FINISHED_STATE.equals(flowState)) {
-            return SUSPEND_FINISHED;
+            return ENABLE_ENCRYPTION_PROFILE_FINISHED;
         } else if (ENABLE_ENCRYPTION_PROFILE_FAILED_STATE.equals(flowState)) {
-            return SUSPEND_FAILED;
+            return ENABLE_ENCRYPTION_PROFILE_FAILED;
         } else {
             return UNSET;
         }

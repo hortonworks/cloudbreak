@@ -283,6 +283,14 @@ public class UsageReportProcessor implements UsageReporter {
     }
 
     @Override
+    public void cdpEncryptionProfileEvent(UsageProto.CDPEncryptionProfileEvent details) {
+        checkNotNull(details);
+        usageProcessingStrategy.processUsage(eventBuilder()
+                .setCdpEncryptionProfileEvent(details)
+                .build(), null);
+    }
+
+    @Override
     public void cdpRecipeEvent(UsageProto.CDPRecipeEvent details) {
         checkNotNull(details);
         usageProcessingStrategy.processUsage(eventBuilder()

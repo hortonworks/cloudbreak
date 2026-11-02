@@ -121,6 +121,17 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         assertEquals(UsageProto.CDPCredentialType.Value.UNKNOWN, cdpEnvironmentDetails.getCredentialDetails().getCredentialType());
         assertThat(cdpEnvironmentDetails.getSecretEncryptionEnabled()).isFalse();
         assertEquals(UsageProto.CDPEnvironmentDeploymentType.Value.UNSET, cdpEnvironmentDetails.getEnvironmentDeploymentType());
+        assertEquals("", cdpEnvironmentDetails.getEncryptionProfileCrn());
+    }
+
+    @Test
+    void testConversionEncryptionProfileCrn() {
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:cdp_default_fips_140_3";
+        when(environmentDetails.getEncryptionProfileCrn()).thenReturn(encryptionProfileCrn);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        assertEquals(encryptionProfileCrn, cdpEnvironmentDetails.getEncryptionProfileCrn());
     }
 
     @Test

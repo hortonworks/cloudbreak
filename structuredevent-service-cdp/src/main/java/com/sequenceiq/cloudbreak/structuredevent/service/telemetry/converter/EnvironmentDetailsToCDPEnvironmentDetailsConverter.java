@@ -120,6 +120,7 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
             cdpEnvironmentDetails.setEnvironmentDeletionType(
                     EnvironmentDeletionTypeToCDPEnvironmentDeletionType.convert(srcEnvironmentDetails.getEnvironmentDeletionTypeAsString()));
             cdpEnvironmentDetails.setEnvironmentDeploymentType(convertEnvironmentDeploymentType(srcEnvironmentDetails.getEnvironmentType()));
+            cdpEnvironmentDetails.setEncryptionProfileCrn(Objects.requireNonNullElse(srcEnvironmentDetails.getEncryptionProfileCrn(), ""));
         }
 
         CDPEnvironmentDetails ret = cdpEnvironmentDetails.build();

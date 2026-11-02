@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.encryptionprofile.service;
 
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.ACCOUNT_ID;
+import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.CIPHER_SUITES;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.CREATOR;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.DEFAULT_ENCRYPTION_PROFILE_CRN;
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.DEFAULT_ENCRYPTION_PROFILE_NAME;
@@ -14,18 +15,22 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import jakarta.ws.rs.InternalServerErrorException;
@@ -49,6 +54,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.usage.service.EncryptionProfileUsageService;
 import com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants;
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
@@ -79,6 +85,9 @@ public class EncryptionProfileServiceTest {
     @Mock
     private ClusterService clusterService;
 
+    @Mock
+    private EncryptionProfileUsageService encryptionProfileUsageService;
+
     @InjectMocks
     private EncryptionProfileService underTest;
 
@@ -88,6 +97,7 @@ public class EncryptionProfileServiceTest {
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get())
                 .when(transactionService).required(any(Supplier.class));
         lenient().when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), eq(ACCOUNT_ID))).thenReturn(ENCRYPTION_PROFILE_CRN);
+        lenient().when(repository.save(any(EncryptionProfile.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -105,6 +115,7 @@ public class EncryptionProfileServiceTest {
         verify(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(CREATOR, ENCRYPTION_PROFILE_CRN);
         verify(transactionService).required(any(Supplier.class));
         verify(repository).save(ENCRYPTION_PROFILE);
+        verify(encryptionProfileUsageService).sendCreatedUsageReport(eq(ENCRYPTION_PROFILE_CRN), eq(ACCOUNT_ID), tlsVersionNames(), eq(CIPHER_SUITES));
     }
 
     @Test
@@ -119,6 +130,7 @@ public class EncryptionProfileServiceTest {
 
         verify(repository, never()).save(any());
         verify(ownerAssignmentService, never()).assignResourceOwnerRoleIfEntitled(any(), any());
+        verifyNoInteractions(encryptionProfileUsageService);
     }
 
     @Test
@@ -139,6 +151,7 @@ public class EncryptionProfileServiceTest {
                 .hasRootCauseMessage("DB error");
 
         verify(ownerAssignmentService).notifyResourceDeleted(ENCRYPTION_PROFILE_CRN);
+        verifyNoInteractions(encryptionProfileUsageService);
     }
 
     @Test
@@ -274,6 +287,11 @@ public class EncryptionProfileServiceTest {
         verify(repository).findByNameAndAccountId(NAME, ACCOUNT_ID);
         verify(repository, never()).delete(any());
         verify(ownerAssignmentService).notifyResourceDeleted(ENCRYPTION_PROFILE_CRN);
+        verify(encryptionProfileUsageService).sendDeletedUsageReport(eq(ENCRYPTION_PROFILE_CRN), eq(ACCOUNT_ID), tlsVersionNames(), eq(CIPHER_SUITES));
+    }
+
+    private static Collection<String> tlsVersionNames() {
+        return argThat(tlsVersions -> Set.copyOf(tlsVersions).equals(Set.of("TLSv1.2", "TLSv1.3")));
     }
 
     private EncryptionProfile captureSavedProfile() {
@@ -317,6 +335,7 @@ public class EncryptionProfileServiceTest {
         verify(repository).findByResourceCrnAndAccountId(ENCRYPTION_PROFILE_CRN, ACCOUNT_ID);
         verify(repository, never()).delete(any());
         verify(ownerAssignmentService).notifyResourceDeleted(ENCRYPTION_PROFILE_CRN);
+        verify(encryptionProfileUsageService).sendDeletedUsageReport(eq(ENCRYPTION_PROFILE_CRN), eq(ACCOUNT_ID), tlsVersionNames(), eq(CIPHER_SUITES));
     }
 
     @Test
@@ -412,6 +431,7 @@ public class EncryptionProfileServiceTest {
         verify(repository, never()).delete(any());
         verify(repository, never()).save(any());
         verify(ownerAssignmentService, never()).notifyResourceDeleted(any());
+        verifyNoInteractions(encryptionProfileUsageService);
     }
 
     @Test

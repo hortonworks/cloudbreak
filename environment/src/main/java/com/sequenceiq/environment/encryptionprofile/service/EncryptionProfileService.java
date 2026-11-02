@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.cloudbreak.usage.service.EncryptionProfileUsageService;
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
@@ -60,6 +62,8 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
     private final ClusterService clusterService;
 
+    private final EncryptionProfileUsageService encryptionProfileUsageService;
+
     public EncryptionProfileService(
             EncryptionProfileRepository repository,
             RegionAwareCrnGenerator regionAwareCrnGenerator,
@@ -67,7 +71,8 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
             TransactionService transactionService,
             EncryptionProfileProvider encryptionProfileProvider,
             DefaultEncryptionProfileProvider defaultEncryptionProfileProvider,
-            ClusterService clusterService
+            ClusterService clusterService,
+            EncryptionProfileUsageService encryptionProfileUsageService
     ) {
         this.repository = repository;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
@@ -76,6 +81,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         this.encryptionProfileProvider = encryptionProfileProvider;
         this.defaultEncryptionProfileProvider = defaultEncryptionProfileProvider;
         this.clusterService = clusterService;
+        this.encryptionProfileUsageService = encryptionProfileUsageService;
     }
 
     public EncryptionProfile create(EncryptionProfile encryptionProfile, String accountId, String creator) {
@@ -90,12 +96,20 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         encryptionProfile.setAccountId(accountId);
         ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, encryptionProfile.getResourceCrn());
         try {
-            return transactionService.required(() -> repository.save(encryptionProfile));
+            EncryptionProfile savedEncryptionProfile = transactionService.required(() -> repository.save(encryptionProfile));
+            encryptionProfileUsageService.sendCreatedUsageReport(savedEncryptionProfile.getResourceCrn(), savedEncryptionProfile.getAccountId(),
+                    getTlsVersionNames(savedEncryptionProfile), savedEncryptionProfile.getCipherSuites());
+            return savedEncryptionProfile;
         } catch (TransactionService.TransactionExecutionException e) {
             ownerAssignmentService.notifyResourceDeleted(encryptionProfile.getResourceCrn());
             LOGGER.error("Error happened during encryption profile creation: ", e);
             throw new InternalServerErrorException(e);
         }
+    }
+
+    private List<String> getTlsVersionNames(EncryptionProfile encryptionProfile) {
+        return encryptionProfile.getTlsVersions() == null ? List.of()
+                : encryptionProfile.getTlsVersions().stream().map(TlsVersion::getVersion).toList();
     }
 
     public EncryptionProfile getByNameAndAccountId(String encryptionProfileName, String accountId) {
@@ -182,7 +196,13 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         repository.save(encryptionProfile);
         ownerAssignmentService.notifyResourceDeleted(encryptionProfile.getResourceCrn());
         LOGGER.debug("Encryption profile {} has been archived as {}.", originalName, encryptionProfile.getName());
+        sendDeletedUsageReport(encryptionProfile);
         return encryptionProfile;
+    }
+
+    private void sendDeletedUsageReport(EncryptionProfile encryptionProfile) {
+        encryptionProfileUsageService.sendDeletedUsageReport(encryptionProfile.getResourceCrn(), encryptionProfile.getAccountId(),
+                getTlsVersionNames(encryptionProfile), encryptionProfile.getCipherSuites());
     }
 
     public List<ResourceWithId> getEncryptionProfilesAsAuthorizationResources() {

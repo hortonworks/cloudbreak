@@ -1,16 +1,26 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.ENABLE_ENCRYPTION_PROFILE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.ENABLE_ENCRYPTION_PROFILE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.ENABLE_ENCRYPTION_PROFILE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.EnableEncryptionProfileOnClusterState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.EnableEncryptionProfileOnClusterStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.encryptionprofile.event.EnableEncryptionProfileOnClusterEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restartcm.RestartClusterManagerFlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.restartcm.RestartClusterManagerFlowState;
 import com.sequenceiq.cloudbreak.core.flow2.event.EnableEncryptionProfileTriggerEvent;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -71,5 +81,34 @@ class EnableEncryptionProfileFlowEventChainFactoryTest {
         assertThat(result.getQueue())
                 .isNotEmpty()
                 .allSatisfy(selectable -> assertThat(((StackEvent) selectable).accepted()).isSameAs(triggerEvent.accepted()));
+    }
+
+    @ParameterizedTest(name = "Use case for enable encryption profile on cluster flow state: {0}")
+    @EnumSource(EnableEncryptionProfileOnClusterState.class)
+    void testGetUseCaseForEnableEncryptionProfileOnClusterState(EnableEncryptionProfileOnClusterState flowState) {
+        Value expected = switch (flowState) {
+            case INIT_STATE -> ENABLE_ENCRYPTION_PROFILE_STARTED;
+            case ENABLE_ENCRYPTION_PROFILE_ON_CLUSTER_FAILED_STATE -> ENABLE_ENCRYPTION_PROFILE_FAILED;
+            default -> UNSET;
+        };
+        assertThat(underTest.getUseCaseForFlowState(flowState)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "Use case for pillar config update flow state: {0}")
+    @EnumSource(PillarConfigUpdateState.class)
+    void testGetUseCaseForPillarConfigUpdateState(PillarConfigUpdateState flowState) {
+        Value expected = PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_FAILED_STATE == flowState ? ENABLE_ENCRYPTION_PROFILE_FAILED : UNSET;
+        assertThat(underTest.getUseCaseForFlowState(flowState)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "Use case for restart cluster manager flow state: {0}")
+    @EnumSource(RestartClusterManagerFlowState.class)
+    void testGetUseCaseForRestartClusterManagerFlowState(RestartClusterManagerFlowState flowState) {
+        Value expected = switch (flowState) {
+            case RESTART_CLUSTER_MANAGER_FINISED_STATE -> ENABLE_ENCRYPTION_PROFILE_FINISHED;
+            case RESTART_CLUSTER_MANAGER_FAILED_STATE -> ENABLE_ENCRYPTION_PROFILE_FAILED;
+            default -> UNSET;
+        };
+        assertThat(underTest.getUseCaseForFlowState(flowState)).isEqualTo(expected);
     }
 }

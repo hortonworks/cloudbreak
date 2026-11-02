@@ -172,6 +172,13 @@ public interface UsageReporter {
             UsageProto.CDPSaltPasswordRotationEvent details);
 
     /**
+     * Reports an encryption profile lifecycle event (creation/deletion)
+     * @param details the event details
+     */
+    void cdpEncryptionProfileEvent(
+            UsageProto.CDPEncryptionProfileEvent details);
+
+    /**
      * Reports a recipe lifecycle event (creation/attachment/detachment/deletion)
      * @param details the event details
      */

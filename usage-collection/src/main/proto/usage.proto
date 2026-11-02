@@ -407,6 +407,8 @@ message Event {
     CDPCMLServingEndpointStartedStoppedEvent cdpCMLServingEndpointStartedStoppedEvent = 199;
     // The On Premises Connection creation or deletion has been requested.
     CDPOnPremisesConnectionStatusChanged cdpOnPremisesConnectionStatusChanged = 200;
+    // An encryption profile has been created or deleted.
+    CDPEncryptionProfileEvent cdpEncryptionProfileEvent = 201;
   }
 }
 
@@ -2418,6 +2420,19 @@ message CDPEnvironmentStatus {
     NETWORK_CIDRS_MODIFICATION_FINISHED = 38;
     // The status when network CIDRs modification has been failed on the environment.
     NETWORK_CIDRS_MODIFICATION_FAILED = 39;
+
+    // The status when enable encryption profile has been triggered on the environment.
+    ENABLE_ENCRYPTION_PROFILE_STARTED = 40;
+    // The status when enable encryption profile has been finished on the environment.
+    ENABLE_ENCRYPTION_PROFILE_FINISHED = 41;
+    // The status when enable encryption profile has been failed on the environment.
+    ENABLE_ENCRYPTION_PROFILE_FAILED = 42;
+    // The status when disable encryption profile has been triggered on the environment.
+    DISABLE_ENCRYPTION_PROFILE_STARTED = 43;
+    // The status when disable encryption profile has been finished on the environment.
+    DISABLE_ENCRYPTION_PROFILE_FINISHED = 44;
+    // The status when disable encryption profile has been failed on the environment.
+    DISABLE_ENCRYPTION_PROFILE_FAILED = 45;
   }
 }
 
@@ -2770,6 +2785,20 @@ message CDPClusterStatus {
     KRAFT_MIGRATION_ROLLBACK_FINISHED = 92;
     // The status when ZooKeeper to KRaft migration rollback has failed.
     KRAFT_MIGRATION_ROLLBACK_FAILED = 93;
+
+    // The status when enabling an encryption profile on the cluster has started.
+    ENABLE_ENCRYPTION_PROFILE_STARTED = 94;
+    // The status when enabling an encryption profile on the cluster has completed successfully.
+    ENABLE_ENCRYPTION_PROFILE_FINISHED = 95;
+    // The status when enabling an encryption profile on the cluster has failed.
+    ENABLE_ENCRYPTION_PROFILE_FAILED = 96;
+
+    // The status when disabling the encryption profile on the cluster has started.
+    DISABLE_ENCRYPTION_PROFILE_STARTED = 97;
+    // The status when disabling the encryption profile on the cluster has completed successfully.
+    DISABLE_ENCRYPTION_PROFILE_FINISHED = 98;
+    // The status when disabling the encryption profile on the cluster has failed.
+    DISABLE_ENCRYPTION_PROFILE_FAILED = 99;
   }
 }
 
@@ -2867,6 +2896,8 @@ message CDPEnvironmentDetails {
   CDPEnvironmentDeletionType.Value environmentDeletionType = 14;
   // Environment deployment type
   CDPEnvironmentDeploymentType.Value environmentDeploymentType = 15;
+  // CRN of the encryption profile of the environment. Empty if the environment uses the Cloudera default encryption profile.
+  string encryptionProfileCrn = 16;
 }
 
 // CDP FreeIPA details closely related to the CDP Environment
@@ -3202,6 +3233,8 @@ message CDPClusterDetails {
   CDPDatabaseDetails databaseDetails = 12;
   // seLinux status
   string seLinux = 13;
+  // CRN of the encryption profile set directly on the cluster. Empty if the cluster inherits the encryption profile of its environment.
+  string encryptionProfileCrn = 14;
 }
 
 message CDPStatusDetails {
@@ -6456,6 +6489,32 @@ message CDPRecipeEvent {
   string stackCrn = 6;
   // corresponding account id
   string accountId = 7;
+}
+
+// Status of encryption profile event
+message CDPEncryptionProfileStatus {
+  enum Value {
+    // Indicates that status cannot be recognized
+    UNKNOWN = 0;
+    // Indicates that it is an encryption profile creation event
+    CREATED = 1;
+    // Indicates that it is an encryption profile deletion event
+    DELETED = 2;
+  }
+}
+
+// Event about the lifecycle of a user managed encryption profile
+message CDPEncryptionProfileEvent {
+  // Status of encryption profile
+  CDPEncryptionProfileStatus.Value status = 1;
+  // CRN of encryption profile
+  string encryptionProfileCrn = 2;
+  // corresponding account id
+  string accountId = 3;
+  // Comma separated list of the TLS versions of the encryption profile, e.g. TLSv1.2,TLSv1.3
+  string tlsVersions = 4;
+  // Comma separated list of the cipher suites of the encryption profile
+  string cipherSuites = 5;
 }
 
 // Recipe related event about cluster creation

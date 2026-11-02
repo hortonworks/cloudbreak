@@ -82,8 +82,9 @@ public class RestartClusterManagerActions {
         return new AbstractStackFailureAction<RestartClusterManagerFlowState, RestartClusterManagerFlowEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.warn("Restarting Cluster Manager failed: {}", payload.getException().getMessage());
-                stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.CLUSTER_MANAGER_RESTART_FAILED);
+                LOGGER.warn("Restarting Cluster Manager failed.", payload.getException());
+                String statusReason = payload.getException() != null ? payload.getException().getMessage() : "";
+                stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.CLUSTER_MANAGER_RESTART_FAILED, statusReason);
                 flowMessageService.fireEventAndLog(payload.getResourceId(), AVAILABLE.name(), CLUSTER_MANAGER_SERVER_RESTART_FAILED);
                 sendEvent(context, RESTART_CLUSTER_MANAGER_FAIL_HANDLED_EVENT.event(), payload);
             }

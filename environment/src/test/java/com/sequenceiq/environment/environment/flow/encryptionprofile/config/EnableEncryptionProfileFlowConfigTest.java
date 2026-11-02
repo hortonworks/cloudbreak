@@ -18,11 +18,11 @@ class EnableEncryptionProfileFlowConfigTest {
         UsageProto.CDPEnvironmentStatus.Value actual = underTest.getUseCaseForFlowState(flowState);
 
         if (EnabledEncryptionProfileState.INIT_STATE.equals(flowState)) {
-            assertEquals(UsageProto.CDPEnvironmentStatus.Value.SUSPEND_STARTED, actual);
+            assertEquals(UsageProto.CDPEnvironmentStatus.Value.ENABLE_ENCRYPTION_PROFILE_STARTED, actual);
         } else if (EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FINISHED_STATE.equals(flowState)) {
-            assertEquals(UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FINISHED, actual);
+            assertEquals(UsageProto.CDPEnvironmentStatus.Value.ENABLE_ENCRYPTION_PROFILE_FINISHED, actual);
         } else if (EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE.equals(flowState)) {
-            assertEquals(UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FAILED, actual);
+            assertEquals(UsageProto.CDPEnvironmentStatus.Value.ENABLE_ENCRYPTION_PROFILE_FAILED, actual);
         } else {
             assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET, actual);
         }

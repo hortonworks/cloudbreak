@@ -32,6 +32,22 @@ public class UsageReportProcessorTest {
     }
 
     @Test
+    public void cdpEncryptionProfileEvent() {
+        UsageProto.CDPEncryptionProfileEvent proto = UsageProto.CDPEncryptionProfileEvent.newBuilder()
+                .setStatus(UsageProto.CDPEncryptionProfileStatus.Value.CREATED)
+                .setEncryptionProfileCrn(DUMMY)
+                .setAccountId(DUMMY)
+                .build();
+        usageReporter.cdpEncryptionProfileEvent(proto);
+
+        ArgumentCaptor<UsageProto.Event> captor = ArgumentCaptor.forClass(UsageProto.Event.class);
+        verify(compositeUsageProcessingStrategy).processUsage(captor.capture(), any());
+
+        assertEquals(DUMMY, captor.getValue().getCdpEncryptionProfileEvent().getEncryptionProfileCrn());
+        assertEquals(UsageProto.CDPEncryptionProfileStatus.Value.CREATED, captor.getValue().getCdpEncryptionProfileEvent().getStatus());
+    }
+
+    @Test
     public void cdpDatahubClusterRequested() {
         long timestamp = System.currentTimeMillis();
         UsageProto.CDPDatahubClusterRequested proto = UsageProto.CDPDatahubClusterRequested.newBuilder()

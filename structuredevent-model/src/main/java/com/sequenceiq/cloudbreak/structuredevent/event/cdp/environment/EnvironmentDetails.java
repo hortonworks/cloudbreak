@@ -61,4 +61,6 @@ public interface EnvironmentDetails {
     String getEnvironmentDeletionTypeAsString();
 
     EnvironmentType getEnvironmentType();
+
+    String getEncryptionProfileCrn();
 }

@@ -55,7 +55,7 @@ public class StructuredEventToCDPClusterDetailsConverter {
             if (structuredFlowEvent.getCluster() != null) {
                 cdpClusterDetails.setSslEnabled(Optional.ofNullable(structuredFlowEvent.getCluster().isDbSslEnabled()).orElse(false));
                 cdpClusterDetails.setUsingExternalDatabase(Optional.ofNullable(structuredFlowEvent.getCluster().getExternalDatabase()).orElse(false));
-
+                cdpClusterDetails.setEncryptionProfileCrn(Objects.requireNonNullElse(structuredFlowEvent.getCluster().getEncryptionProfileCrn(), ""));
             }
         }
 
@@ -84,6 +84,7 @@ public class StructuredEventToCDPClusterDetailsConverter {
             if (structuredSyncEvent.getCluster() != null) {
                 cdpClusterDetails.setSslEnabled(Optional.ofNullable(structuredSyncEvent.getCluster().isDbSslEnabled()).orElse(false));
                 cdpClusterDetails.setUsingExternalDatabase(Optional.ofNullable(structuredSyncEvent.getCluster().getExternalDatabase()).orElse(false));
+                cdpClusterDetails.setEncryptionProfileCrn(Objects.requireNonNullElse(structuredSyncEvent.getCluster().getEncryptionProfileCrn(), ""));
             }
         }
 

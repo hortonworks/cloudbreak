@@ -64,6 +64,8 @@ public class ClusterDetails implements Serializable {
 
     private Boolean dbSslEnabled;
 
+    private String encryptionProfileCrn;
+
     public Boolean isDbSslEnabled() {
         return dbSslEnabled;
     }
@@ -230,5 +232,13 @@ public class ClusterDetails implements Serializable {
 
     public void setRmsEnabled(boolean rmsEnabled) {
         this.rmsEnabled = rmsEnabled;
+    }
+
+    public String getEncryptionProfileCrn() {
+        return encryptionProfileCrn;
+    }
+
+    public void setEncryptionProfileCrn(String encryptionProfileCrn) {
+        this.encryptionProfileCrn = encryptionProfileCrn;
     }
 }
