@@ -2,10 +2,13 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.generator.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,8 +20,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeReachabilityValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -73,5 +80,58 @@ class UpscaleFlowEventChainFactoryTest {
 
         assertEquals(4, flowTriggerEventQueue.getQueue().size());
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue, "WITHOUT_SKU_MIGRATION");
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueWhenDatahubUpscaleThenDatalakeReachabilityIsValidatedBeforeSkuMigration() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getType()).thenReturn(StackType.WORKLOAD);
+        when(stackService.getStackProxyById(any())).thenReturn(stackDto);
+        when(skuMigrationService.isUpscaleSkuMigrationEnabled()).thenReturn(Boolean.TRUE);
+        when(skuMigrationService.isMigrationNecessary(any())).thenReturn(Boolean.TRUE);
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(createTriggerEvent());
+
+        assertEquals(List.of("STACK_SYNC_TRIGGER_EVENT", "DATALAKE_REACHABILITY_VALIDATION_EVENT", "SKU_MIGRATION_EVENT", "STACK_UPSCALE_TRIGGER_EVENT",
+                        "CLUSTER_DOWNSCALE_TRIGGER_EVENT", "STACK_DOWNSCALE_TRIGGER_EVENT"),
+                flowTriggerEventQueue.getQueue().stream().map(Selectable::selector).toList());
+        DatalakeReachabilityValidationTriggerEvent datalakeValidation = (DatalakeReachabilityValidationTriggerEvent) flowTriggerEventQueue.getQueue().stream()
+                .filter(DatalakeReachabilityValidationTriggerEvent.class::isInstance)
+                .findFirst()
+                .orElseThrow();
+        assertEquals(DetailedStackStatus.UPSCALE_FAILED, datalakeValidation.getFailureStatus());
+        FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue, "DATAHUB_WITH_DATALAKE_VALIDATION");
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueWhenDatalakeUpscaleThenDatalakeReachabilityIsNotValidated() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getType()).thenReturn(StackType.DATALAKE);
+        when(stackService.getStackProxyById(any())).thenReturn(stackDto);
+        when(skuMigrationService.isUpscaleSkuMigrationEnabled()).thenReturn(Boolean.FALSE);
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(createTriggerEvent());
+
+        assertFalse(flowTriggerEventQueue.getQueue().stream().anyMatch(DatalakeReachabilityValidationTriggerEvent.class::isInstance));
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueWhenRepairThenDatalakeReachabilityIsNotValidatedAgain() {
+        StackDto stackDto = mock(StackDto.class);
+        lenient().when(stackDto.getType()).thenReturn(StackType.WORKLOAD);
+        when(stackService.getStackProxyById(any())).thenReturn(stackDto);
+        when(skuMigrationService.isUpscaleSkuMigrationEnabled()).thenReturn(Boolean.FALSE);
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(createTriggerEvent().setRepair());
+
+        assertFalse(flowTriggerEventQueue.getQueue().stream().anyMatch(DatalakeReachabilityValidationTriggerEvent.class::isInstance));
+    }
+
+    private StackAndClusterUpscaleTriggerEvent createTriggerEvent() {
+        Map<String, Set<String>> hostGroupWithHostNames = Map.of("master", Set.of("master1", "master2"));
+        return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT,
+                0L, Map.of(), Map.of(), hostGroupWithHostNames, ScalingType.UPSCALE_TOGETHER, true, true,
+                null, false, true, null, null, "",
+                false);
     }
 }

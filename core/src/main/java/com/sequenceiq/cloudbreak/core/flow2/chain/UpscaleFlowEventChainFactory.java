@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.validate.datalake.config.DatalakeReachabilityValidationEvent.DATALAKE_REACHABILITY_VALIDATION_EVENT;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,6 +27,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
@@ -34,6 +37,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeReachabilityValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
@@ -69,6 +73,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         StackDto stackDto = stackService.getStackProxyById(event.getResourceId());
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         addStackSyncTriggerEvent(event, flowEventChain);
+        addDatalakeReachabilityValidationIfNecessary(event, stackDto, flowEventChain);
         addSkuMigrationIfNecessary(stackDto, flowEventChain);
         addStackScaleTriggerEvent(event, flowEventChain);
         addClusterScaleTriggerEventIfNeeded(event, stackDto, flowEventChain);
@@ -89,6 +94,14 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
             return UPSCALE_FAILED;
         } else {
             return UNSET;
+        }
+    }
+
+    private void addDatalakeReachabilityValidationIfNecessary(StackAndClusterUpscaleTriggerEvent event, StackDto stackDto, Queue<Selectable> flowTriggers) {
+        // repair validates up-front in its own chain, a late failure here would leave the stack in the wrong status after the nodes were removed
+        if (!event.isRepair() && StackType.WORKLOAD.equals(stackDto.getType())) {
+            flowTriggers.add(new DatalakeReachabilityValidationTriggerEvent(DATALAKE_REACHABILITY_VALIDATION_EVENT.event(), stackDto.getId(),
+                    DetailedStackStatus.UPSCALE_FAILED));
         }
     }
 

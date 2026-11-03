@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,11 +25,10 @@ import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
-import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
-import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -62,7 +60,7 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     private FlowMessageService flowMessageService;
 
     @Inject
-    private PlatformAwareSdxConnector platformAwareSdxConnector;
+    private DataLakeStatusCheckerService dataLakeStatusCheckerService;
 
     @Inject
     private CdhPatchUpgradeService cdhPatchUpgradeService;
@@ -106,15 +104,10 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     private Optional<String> getRemoteDataContext(StackView stack) {
         Optional<String> remoteDataContext = Optional.empty();
         if (!stack.isDatalake()) {
-            String datalakeCrn;
-            if (StringUtils.isNotEmpty(stack.getDatalakeCrn())) {
-                datalakeCrn = stack.getDatalakeCrn();
-            } else {
-                datalakeCrn = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn()).map(SdxBasicView::crn).orElse(null);
-            }
-            if (StringUtils.isNotEmpty(datalakeCrn)) {
+            Optional<String> datalakeCrn = dataLakeStatusCheckerService.getDatalakeCrn(stack);
+            if (datalakeCrn.isPresent()) {
                 LOGGER.info("Fetch the Remote Data Context from {} to update the Data Hub", stack.getName());
-                remoteDataContext = clusterBuilderService.getSdxContextOptional(datalakeCrn);
+                remoteDataContext = clusterBuilderService.getSdxContextOptional(datalakeCrn.get());
             }
         }
         return remoteDataContext;

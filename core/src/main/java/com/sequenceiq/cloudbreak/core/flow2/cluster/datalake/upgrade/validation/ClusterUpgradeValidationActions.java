@@ -34,8 +34,11 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeDiskSpaceValidationEventToClusterUpgradeImageValidationFinishedEventConverter;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeFreeIpaStatusValidationFinishedToClusterUpgradeDatalakeReachabilityValidationFinishedEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeUpdateCheckFailedToClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeValidationEventToClusterUpgradeImageValidationFinishedEventConverter;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDatalakeReachabilityValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDatalakeReachabilityValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationEvent;
@@ -292,12 +295,33 @@ public class ClusterUpgradeValidationActions {
         };
     }
 
-    @Bean(name = "CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE")
-    public Action<?, ?> clusterUpgradeServiceValidation() {
+    @Bean(name = "CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_STATE")
+    public Action<?, ?> clusterUpgradeDatalakeReachabilityValidation() {
         return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeFreeIpaStatusValidationFinishedEvent.class) {
 
             @Override
             protected void doExecute(StackContext context, ClusterUpgradeFreeIpaStatusValidationFinishedEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Starting the validation if the Data Lake is reachable...");
+                ClusterUpgradeProperties clusterUpgradeProperties = resolveUpgradeProperties(payload);
+                ClusterUpgradeDatalakeReachabilityValidationEvent event = new ClusterUpgradeDatalakeReachabilityValidationEvent(payload.getResourceId(),
+                        clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
+                sendEvent(context, event.selector(), event);
+            }
+
+            @Override
+            protected Object getFailurePayload(ClusterUpgradeFreeIpaStatusValidationFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE")
+    public Action<?, ?> clusterUpgradeServiceValidation() {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeDatalakeReachabilityValidationFinishedEvent.class) {
+
+            @Override
+            protected void doExecute(StackContext context, ClusterUpgradeDatalakeReachabilityValidationFinishedEvent payload,
+                    Map<Object, Object> variables) {
                 LOGGER.info("Starting to validate services.");
                 ClusterUpgradeProperties clusterUpgradeProperties = resolveUpgradeProperties(payload);
                 ClusterUpgradeServiceValidationEvent event = new ClusterUpgradeServiceValidationEvent(payload.getResourceId(),
@@ -306,8 +330,14 @@ public class ClusterUpgradeValidationActions {
             }
 
             @Override
-            protected Object getFailurePayload(ClusterUpgradeFreeIpaStatusValidationFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ClusterUpgradeDatalakeReachabilityValidationFinishedEvent payload, Optional<StackContext> flowContext,
+                    Exception ex) {
                 return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<ClusterUpgradeDatalakeReachabilityValidationFinishedEvent>> payloadConverters) {
+                payloadConverters.add(new ClusterUpgradeFreeIpaStatusValidationFinishedToClusterUpgradeDatalakeReachabilityValidationFinishedEventConverter());
             }
         };
     }

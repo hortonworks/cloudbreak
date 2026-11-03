@@ -35,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEven
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeReachabilityValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DiskValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ImageValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.SecurityGroupValidationTriggerEvent;
@@ -334,12 +336,37 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "IMAGE_VALIDATION_EVENT",
                 "DISK_VALIDATION_EVENT",
+                "DATALAKE_REACHABILITY_VALIDATION_EVENT",
                 "STOPSTART_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+        DatalakeReachabilityValidationTriggerEvent datalakeValidation = eventQueues.getQueue().stream()
+                .filter(DatalakeReachabilityValidationTriggerEvent.class::isInstance)
+                .map(DatalakeReachabilityValidationTriggerEvent.class::cast)
+                .findFirst()
+                .orElseThrow();
+        assertEquals(DetailedStackStatus.REPAIR_FAILED, datalakeValidation.getFailureStatus());
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, eventQueues, "CoreNodesWithStoppedNodes");
+    }
+
+    @Test
+    void testRepairDatalakeShouldNotValidateDatalakeReachability() {
+        Stack stack = getStack();
+        setupHostGroup(InstanceGroupType.CORE);
+        when(stackDto.getStack().getType()).thenReturn(StackType.DATALAKE);
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
+
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "IMAGE_VALIDATION_EVENT",
+                "DISK_VALIDATION_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test

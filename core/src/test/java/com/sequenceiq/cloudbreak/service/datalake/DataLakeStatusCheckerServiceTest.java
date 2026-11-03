@@ -2,10 +2,15 @@ package com.sequenceiq.cloudbreak.service.datalake;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
 import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -26,6 +32,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 class DataLakeStatusCheckerServiceTest {
 
     private static final String ENVIRONMENT_CRN = "evn-crn";
+
+    private static final String DATALAKE_CRN = "datalake-crn";
 
     @InjectMocks
     private DataLakeStatusCheckerService underTest;
@@ -176,6 +184,62 @@ class DataLakeStatusCheckerServiceTest {
 
         BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.validateStartOperationBasedOnDatalake(stack));
         assertEquals("Data Hub start is not allowed due to Data Lake being unavailable. Reason: ''.", e.getMessage());
+    }
+
+    @Test
+    void testValidateDatalakeReachableShouldSkipWhenStackIsDatalake() {
+        Stack stack = createStack();
+        stack.setType(StackType.DATALAKE);
+
+        underTest.validateDatalakeReachable(stack);
+
+        verifyNoInteractions(platformAwareSdxConnector);
+    }
+
+    @Test
+    void testValidateDatalakeReachableShouldSkipWhenNoDatalakeFound() {
+        Stack stack = createStack();
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+
+        underTest.validateDatalakeReachable(stack);
+
+        verify(platformAwareSdxConnector, never()).getRdcView(anyString());
+    }
+
+    @Test
+    void testValidateDatalakeReachableShouldUseDatalakeCrnOfStack() {
+        Stack stack = createStack();
+        stack.setDatalakeCrn(DATALAKE_CRN);
+
+        underTest.validateDatalakeReachable(stack);
+
+        verify(platformAwareSdxConnector).getRdcView(DATALAKE_CRN);
+        verify(platformAwareSdxConnector, never()).getSdxBasicViewByEnvironmentCrn(anyString());
+    }
+
+    @Test
+    void testValidateDatalakeReachableShouldFallBackToDatalakeOfEnvironment() {
+        Stack stack = createStack();
+        SdxBasicView sdxBasicView = SdxBasicView.builder().withCrn(DATALAKE_CRN).build();
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(sdxBasicView));
+
+        underTest.validateDatalakeReachable(stack);
+
+        verify(platformAwareSdxConnector).getRdcView(DATALAKE_CRN);
+    }
+
+    @Test
+    void testValidateDatalakeReachableShouldThrowWhenRemoteDataContextCannotBeFetched() {
+        Stack stack = createStack();
+        stack.setDatalakeCrn(DATALAKE_CRN);
+        RuntimeException cause = new RuntimeException("Connection refused");
+        when(platformAwareSdxConnector.getRdcView(DATALAKE_CRN)).thenThrow(cause);
+
+        DatalakeNotReachableException e = assertThrows(DatalakeNotReachableException.class, () -> underTest.validateDatalakeReachable(stack));
+
+        assertEquals("The Data Lake's Cloudera Manager is not reachable and no previously fetched data is available, "
+                + "but it is required for this operation. Please check the Data Lake state and try again. Cause: Connection refused", e.getMessage());
+        assertEquals(cause, e.getCause());
     }
 
     private Stack createStack() {

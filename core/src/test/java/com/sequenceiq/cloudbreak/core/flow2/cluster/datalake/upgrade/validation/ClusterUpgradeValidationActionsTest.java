@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDatalakeReachabilityValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDatalakeReachabilityValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -143,5 +149,87 @@ class ClusterUpgradeValidationActionsTest {
         assertThat(emittedPayload.getValue().getTargetImage()).isNull();
         assertThat(emittedPayload.getValue().getClusterUpgradeProperties()).isSameAs(properties);
         assertThat(emittedPayload.getValue().getCloudStack().getImage().getImageId()).isEqualTo(properties.getTargetImageId());
+    }
+
+    @Test
+    void datalakeReachabilityValidationActionPassesPropertiesToTheReachabilityCheck() throws Exception {
+        AbstractClusterUpgradeValidationAction<ClusterUpgradeFreeIpaStatusValidationFinishedEvent> action =
+                (AbstractClusterUpgradeValidationAction<ClusterUpgradeFreeIpaStatusValidationFinishedEvent>)
+                        underTest.clusterUpgradeDatalakeReachabilityValidation();
+        initActionPrivateFields(action);
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                TARGET_RUNTIME_VERSION, "base-image", OsType.RHEL8, "x86_64", null, Set.of(), null);
+        ClusterUpgradeFreeIpaStatusValidationFinishedEvent payload =
+                new ClusterUpgradeFreeIpaStatusValidationFinishedEvent(STACK_ID, properties.getTargetImageId(), properties);
+        when(clusterUpgradePropertiesResolver.resolve(payload)).thenReturn(properties);
+        ArgumentCaptor<ClusterUpgradeDatalakeReachabilityValidationEvent> emittedPayload =
+                ArgumentCaptor.forClass(ClusterUpgradeDatalakeReachabilityValidationEvent.class);
+        when(reactorEventFactory.createEvent(anyMap(), emittedPayload.capture())).thenReturn(mock(Event.class));
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, new HashMap<>());
+
+        assertThat(emittedPayload.getValue().getResourceId()).isEqualTo(STACK_ID);
+        assertThat(emittedPayload.getValue().getClusterUpgradeProperties()).isSameAs(properties);
+    }
+
+    @Test
+    void serviceValidationActionContinuesAfterTheDatalakeReachabilityValidation() throws Exception {
+        AbstractClusterUpgradeValidationAction<ClusterUpgradeDatalakeReachabilityValidationFinishedEvent> action =
+                (AbstractClusterUpgradeValidationAction<ClusterUpgradeDatalakeReachabilityValidationFinishedEvent>)
+                        underTest.clusterUpgradeServiceValidation();
+        initActionPrivateFields(action);
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                TARGET_RUNTIME_VERSION, "base-image", OsType.RHEL8, "x86_64", null, Set.of(), null);
+        ClusterUpgradeDatalakeReachabilityValidationFinishedEvent payload =
+                new ClusterUpgradeDatalakeReachabilityValidationFinishedEvent(STACK_ID, properties.getTargetImageId(), properties);
+        when(clusterUpgradePropertiesResolver.resolve(payload)).thenReturn(properties);
+        ArgumentCaptor<ClusterUpgradeServiceValidationEvent> emittedPayload = ArgumentCaptor.forClass(ClusterUpgradeServiceValidationEvent.class);
+        when(reactorEventFactory.createEvent(anyMap(), emittedPayload.capture())).thenReturn(mock(Event.class));
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, new HashMap<>());
+
+        assertThat(emittedPayload.getValue().getResourceId()).isEqualTo(STACK_ID);
+        assertThat(emittedPayload.getValue().getClusterUpgradeProperties()).isSameAs(properties);
+    }
+
+    @Test
+    void serviceValidationActionConvertsThePayloadOfAFlowStartedBeforeTheReachabilityValidation() {
+        AbstractClusterUpgradeValidationAction<ClusterUpgradeDatalakeReachabilityValidationFinishedEvent> action =
+                (AbstractClusterUpgradeValidationAction<ClusterUpgradeDatalakeReachabilityValidationFinishedEvent>)
+                        underTest.clusterUpgradeServiceValidation();
+        action.init();
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                TARGET_RUNTIME_VERSION, "base-image", OsType.RHEL8, "x86_64", null, Set.of(), null);
+        ClusterUpgradeFreeIpaStatusValidationFinishedEvent legacyPayload =
+                new ClusterUpgradeFreeIpaStatusValidationFinishedEvent(STACK_ID, properties.getTargetImageId(), properties);
+
+        Object converted = ReflectionTestUtils.invokeMethod(action, "convertPayload", legacyPayload);
+
+        assertThat(converted).isInstanceOfSatisfying(ClusterUpgradeDatalakeReachabilityValidationFinishedEvent.class, result -> {
+            assertThat(result.getResourceId()).isEqualTo(STACK_ID);
+            assertThat(result.getClusterUpgradeProperties()).isSameAs(properties);
+        });
+    }
+
+    @Test
+    void reachabilityAndServiceValidationActionsFailWithTheValidationFailureEvent() {
+        AbstractClusterUpgradeValidationAction<ClusterUpgradeFreeIpaStatusValidationFinishedEvent> reachabilityAction =
+                (AbstractClusterUpgradeValidationAction<ClusterUpgradeFreeIpaStatusValidationFinishedEvent>)
+                        underTest.clusterUpgradeDatalakeReachabilityValidation();
+        AbstractClusterUpgradeValidationAction<ClusterUpgradeDatalakeReachabilityValidationFinishedEvent> serviceAction =
+                (AbstractClusterUpgradeValidationAction<ClusterUpgradeDatalakeReachabilityValidationFinishedEvent>)
+                        underTest.clusterUpgradeServiceValidation();
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                TARGET_RUNTIME_VERSION, "base-image", OsType.RHEL8, "x86_64", null, Set.of(), null);
+        RuntimeException exception = new RuntimeException("failure");
+
+        Object reachabilityFailure = new AbstractActionTestSupport<>(reachabilityAction).getFailurePayload(
+                new ClusterUpgradeFreeIpaStatusValidationFinishedEvent(STACK_ID, properties.getTargetImageId(), properties), Optional.empty(), exception);
+        Object serviceFailure = new AbstractActionTestSupport<>(serviceAction).getFailurePayload(
+                new ClusterUpgradeDatalakeReachabilityValidationFinishedEvent(STACK_ID, properties.getTargetImageId(), properties),
+                Optional.empty(), exception);
+
+        assertThat(reachabilityFailure).isInstanceOf(ClusterUpgradeValidationFailureEvent.class);
+        assertThat(serviceFailure).isInstanceOf(ClusterUpgradeValidationFailureEvent.class);
     }
 }

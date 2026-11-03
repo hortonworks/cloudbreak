@@ -34,6 +34,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimaps;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscale
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeReachabilityValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DiskValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ImageValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.SecurityGroupValidationTriggerEvent;
@@ -58,6 +60,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerE
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
+import com.sequenceiq.cloudbreak.core.flow2.validate.datalake.config.DatalakeReachabilityValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.disk.config.DiskValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.image.config.ImageValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.securitygroup.config.SecurityGroupValidationEvent;
@@ -221,6 +224,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         flowTriggers.add(new ImageValidationTriggerEvent(ImageValidationEvent.IMAGE_VALIDATION_EVENT.event(), event.getResourceId()));
         flowTriggers.add(new DiskValidationTriggerEvent(DiskValidationEvent.DISK_VALIDATION_EVENT.event(), event.getResourceId(),
                 repairableGroupsWithHostNames));
+        addUpfrontDatalakeReachabilityValidationFlow(event, stackView, flowTriggers);
         addUpfrontSecurityGroupValidationFlows(event, stackDto, repairableGroupsWithHostNames, flowTriggers);
         if (!stoppedInstances.isEmpty() && stackView.getType().equals(StackType.WORKLOAD)) {
             addClusterScaleTriggerEventIfNeeded(stackView, flowTriggers, stoppedInstances, hostGroup);
@@ -426,6 +430,14 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             flowTriggers.add(fullUpscaleEvent(event, repairableGroupsWithHostNames, singlePrimaryGW,
                     restartServices, isKerberosSecured(stackDto.getStack()), event.isRollingRestartEnabled()));
             LOGGER.info("Upscale event added for: {}", repairableGroupsWithHostNames);
+        }
+    }
+
+    private void addUpfrontDatalakeReachabilityValidationFlow(ClusterRepairTriggerEvent event, StackView stackView, Queue<Selectable> flowTriggers) {
+        if (StackType.WORKLOAD.equals(stackView.getType())) {
+            LOGGER.debug("Up-front Data Lake reachability validation flow added to cluster repair");
+            flowTriggers.add(new DatalakeReachabilityValidationTriggerEvent(DatalakeReachabilityValidationEvent.DATALAKE_REACHABILITY_VALIDATION_EVENT.event(),
+                    event.getResourceId(), DetailedStackStatus.REPAIR_FAILED));
         }
     }
 

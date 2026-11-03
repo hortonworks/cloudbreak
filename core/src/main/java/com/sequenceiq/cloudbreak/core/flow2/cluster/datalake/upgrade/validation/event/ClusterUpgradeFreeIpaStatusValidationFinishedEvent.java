@@ -11,7 +11,7 @@ public class ClusterUpgradeFreeIpaStatusValidationFinishedEvent extends ClusterU
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("imageId") String imageId,
             @JsonProperty("clusterUpgradeProperties") ClusterUpgradeProperties clusterUpgradeProperties) {
-        super(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT.name(), resourceId, imageId,
+        super(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_EVENT.name(), resourceId, imageId,
                 clusterUpgradeProperties);
     }
 }

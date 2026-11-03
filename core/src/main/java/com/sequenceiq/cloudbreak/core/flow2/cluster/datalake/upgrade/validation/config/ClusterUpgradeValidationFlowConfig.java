@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_CLOUDPROVIDER_CHECK_UPDATE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_STATE;
@@ -19,6 +20,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_CLOUDPROVIDER_CHECK_UPDATE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT;
@@ -81,6 +83,16 @@ public class ClusterUpgradeValidationFlowConfig
                     .event(START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT)
                     .defaultFailureEvent()
 
+                    .from(CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_STATE).to(CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_STATE)
+                    .event(START_CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_STATE).to(CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE)
+                    .event(START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT)
+                    .defaultFailureEvent()
+
+                    // Kept for flows persisted before the Data Lake reachability validation existed: their restart replays this event from the
+                    // FreeIPA status validation state, and the service validation action converts the FreeIPA status validation payload.
                     .from(CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_STATE).to(CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE)
                     .event(START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT)
                     .defaultFailureEvent()

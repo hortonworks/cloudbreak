@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgrad
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -68,6 +69,9 @@ class ClusterUpgradeHandlerTest {
 
     @Mock
     private FlowMessageService flowMessageService;
+
+    @Mock
+    private DataLakeStatusCheckerService dataLakeStatusCheckerService;
 
     @Mock
     private StackDto stackDto;
@@ -109,8 +113,10 @@ class ClusterUpgradeHandlerTest {
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
-        when(stackDto.getStack()).thenReturn(createStack(StackType.WORKLOAD));
-        when(clusterBuilderService.getSdxContextOptional(stackDto.getStack().getDatalakeCrn())).thenReturn(Optional.of(REMOTE_DATA_CONTEXT));
+        StackView stack = createStack(StackType.WORKLOAD);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(dataLakeStatusCheckerService.getDatalakeCrn(stack)).thenReturn(Optional.of(stack.getDatalakeCrn()));
+        when(clusterBuilderService.getSdxContextOptional(stack.getDatalakeCrn())).thenReturn(Optional.of(REMOTE_DATA_CONTEXT));
         when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(createParcelOperationStatus(true));
         when(cdhPatchUpgradeService.isCdhPatchUpgrade(upgradeCandidateProducts, connector, stackDto)).thenReturn(true);
 
@@ -131,8 +137,10 @@ class ClusterUpgradeHandlerTest {
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
-        when(stackDto.getStack()).thenReturn(createStack(StackType.WORKLOAD));
-        when(clusterBuilderService.getSdxContextOptional(stackDto.getStack().getDatalakeCrn())).thenReturn(Optional.of(REMOTE_DATA_CONTEXT));
+        StackView stack = createStack(StackType.WORKLOAD);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(dataLakeStatusCheckerService.getDatalakeCrn(stack)).thenReturn(Optional.of(stack.getDatalakeCrn()));
+        when(clusterBuilderService.getSdxContextOptional(stack.getDatalakeCrn())).thenReturn(Optional.of(REMOTE_DATA_CONTEXT));
         when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(createParcelOperationStatus(true));
         when(cdhPatchUpgradeService.isCdhPatchUpgrade(upgradeCandidateProducts, connector, stackDto)).thenReturn(false);
 
