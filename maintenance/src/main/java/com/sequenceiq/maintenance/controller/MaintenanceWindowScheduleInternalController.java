@@ -5,8 +5,10 @@ import static com.sequenceiq.maintenance.domain.MaintenanceEnumValues.toScopeTyp
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.maintenance.api.internal.schedule.endpoint.MaintenanceWindowScheduleInternalEndpoint;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRestoreRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 import com.sequenceiq.maintenance.service.MaintenanceWindowScheduleService;
 
@@ -26,5 +28,20 @@ public class MaintenanceWindowScheduleInternalController implements MaintenanceW
             String scopeType,
             String scopeId) {
         return scheduleService.get(accountId, toScopeType(scopeType), scopeId);
+    }
+
+    @Override
+    @InternalOnly
+    public MaintenanceWindowScheduleResponse restore(
+            @AccountId String accountId,
+            String scopeType,
+            String scopeId,
+            MaintenanceWindowScheduleRestoreRequest request) {
+        return scheduleService.restore(
+                accountId,
+                toScopeType(scopeType),
+                scopeId,
+                request,
+                ThreadBasedUserCrnProvider.getUserCrn());
     }
 }

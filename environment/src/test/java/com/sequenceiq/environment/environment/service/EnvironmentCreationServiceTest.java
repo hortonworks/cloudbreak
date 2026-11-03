@@ -13,7 +13,11 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,6 +26,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
@@ -36,9 +41,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -49,6 +56,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentMaintenanceWindowScheduleRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
@@ -56,6 +64,7 @@ import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
@@ -64,6 +73,7 @@ import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.environment.service.validation.SeLinuxValidationService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.maintenancewindow.EnvironmentMaintenanceWindowScheduleService;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
@@ -77,6 +87,7 @@ import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersD
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.service.ParametersService;
+import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentCreationServiceTest {
@@ -131,6 +142,9 @@ class EnvironmentCreationServiceTest {
     @Mock
     private SeLinuxValidationService seLinuxValidationService;
 
+    @Mock
+    private ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService;
+
     @InjectMocks
     private EnvironmentCreationService environmentCreationServiceUnderTest;
 
@@ -164,6 +178,7 @@ class EnvironmentCreationServiceTest {
         lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(any(), any());
         lenient().when(validatorService.validatePublicKey(any())).thenReturn(ValidationResult.empty());
         lenient().when(validatorService.validateTags(any(EnvironmentCreationDto.class))).thenReturn(ValidationResult.empty());
+        lenient().when(validatorService.validateMaintenanceWindowScheduleCreation(any())).thenReturn(ValidationResult.empty());
     }
 
     @Test
@@ -968,6 +983,140 @@ class EnvironmentCreationServiceTest {
 
         verify(entitlementService, never()).isConfigureEncryptionProfileEnabled(any());
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+    }
+
+    @Test
+    void createAppliesMaintenanceWindowScheduleBeforeSave() {
+        EnvironmentMaintenanceWindowScheduleService scheduleService = mock(EnvironmentMaintenanceWindowScheduleService.class);
+        stubMaintenanceScheduleServiceAvailable(scheduleService);
+
+        EnvironmentMaintenanceWindowScheduleRequest scheduleRequest = maintenanceWindowScheduleCreateRequest();
+        EnvironmentCreationDto environmentCreationDto = environmentCreationDtoWithSchedule(scheduleRequest);
+        Environment environment = environmentForMaintenanceScheduleCreate(environmentCreationDto);
+        lenientHappyCreatePath(environmentCreationDto, environment);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(EnvironmentDto.builder().build());
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        InOrder order = inOrder(scheduleService, environmentService);
+        order.verify(scheduleService).createEnvironmentScheduleIfPresent("crn", scheduleRequest);
+        order.verify(environmentService, times(2)).save(any(Environment.class));
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), eq("crn"));
+        verify(scheduleService, never()).clearEnvironmentScheduleIfPresent(anyString());
+    }
+
+    @Test
+    void createSkipsMaintenanceWhenScheduleNotRequested() {
+        EnvironmentCreationDto environmentCreationDto = environmentCreationDtoWithSchedule(null);
+        Environment environment = environmentForMaintenanceScheduleCreate(environmentCreationDto);
+        lenientHappyCreatePath(environmentCreationDto, environment);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(EnvironmentDto.builder().build());
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        verify(maintenanceWindowScheduleService, never()).ifAvailable(any());
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), eq("crn"));
+    }
+
+    @Test
+    void createDoesNotPersistEnvironmentWhenMaintenanceScheduleCreateFails() {
+        EnvironmentMaintenanceWindowScheduleService scheduleService = mock(EnvironmentMaintenanceWindowScheduleService.class);
+        stubMaintenanceScheduleServiceAvailable(scheduleService);
+        doThrow(new BadRequestException("invalid schedule")).when(scheduleService)
+                .createEnvironmentScheduleIfPresent(anyString(), any());
+
+        EnvironmentMaintenanceWindowScheduleRequest scheduleRequest = maintenanceWindowScheduleCreateRequest();
+        EnvironmentCreationDto environmentCreationDto = environmentCreationDtoWithSchedule(scheduleRequest);
+        Environment environment = environmentForMaintenanceScheduleCreate(environmentCreationDto);
+        lenientHappyCreatePath(environmentCreationDto, environment);
+
+        assertThatThrownBy(() -> environmentCreationServiceUnderTest.create(environmentCreationDto))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("invalid schedule");
+
+        verify(scheduleService).createEnvironmentScheduleIfPresent("crn", scheduleRequest);
+        verify(environmentService, never()).save(any());
+        verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), anyString(), anyString(), anyString());
+        verify(scheduleService, never()).clearEnvironmentScheduleIfPresent(anyString());
+    }
+
+    @Test
+    void createRollsBackMaintenanceScheduleWhenSaveFailsAfterScheduleCreate() {
+        EnvironmentMaintenanceWindowScheduleService scheduleService = mock(EnvironmentMaintenanceWindowScheduleService.class);
+        stubMaintenanceScheduleServiceAvailable(scheduleService);
+
+        EnvironmentMaintenanceWindowScheduleRequest scheduleRequest = maintenanceWindowScheduleCreateRequest();
+        EnvironmentCreationDto environmentCreationDto = environmentCreationDtoWithSchedule(scheduleRequest);
+        Environment environment = environmentForMaintenanceScheduleCreate(environmentCreationDto);
+        lenientHappyCreatePath(environmentCreationDto, environment);
+        when(environmentService.save(any(Environment.class))).thenThrow(new RuntimeException("save failed"));
+
+        assertThatThrownBy(() -> environmentCreationServiceUnderTest.create(environmentCreationDto))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("save failed");
+
+        verify(scheduleService).createEnvironmentScheduleIfPresent("crn", scheduleRequest);
+        verify(scheduleService).clearEnvironmentScheduleIfPresent("crn");
+        verify(environmentService, times(1)).save(any());
+        verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void createRollsBackMaintenanceScheduleWhenCreationFlowFails() {
+        EnvironmentMaintenanceWindowScheduleService scheduleService = mock(EnvironmentMaintenanceWindowScheduleService.class);
+        stubMaintenanceScheduleServiceAvailable(scheduleService);
+
+        EnvironmentMaintenanceWindowScheduleRequest scheduleRequest = maintenanceWindowScheduleCreateRequest();
+        EnvironmentCreationDto environmentCreationDto = environmentCreationDtoWithSchedule(scheduleRequest);
+        Environment environment = environmentForMaintenanceScheduleCreate(environmentCreationDto);
+        lenientHappyCreatePath(environmentCreationDto, environment);
+        when(reactorFlowManager.triggerCreationFlow(anyLong(), anyString(), anyString(), anyString()))
+                .thenThrow(new RuntimeException("flow failed"));
+
+        assertThatThrownBy(() -> environmentCreationServiceUnderTest.create(environmentCreationDto))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("flow failed");
+
+        verify(scheduleService).createEnvironmentScheduleIfPresent("crn", scheduleRequest);
+        verify(scheduleService).clearEnvironmentScheduleIfPresent("crn");
+        verify(environmentService, times(3)).save(any());
+    }
+
+    private void stubMaintenanceScheduleServiceAvailable(EnvironmentMaintenanceWindowScheduleService scheduleService) {
+        doAnswer(invocation -> {
+            invocation.<Consumer<EnvironmentMaintenanceWindowScheduleService>>getArgument(0).accept(scheduleService);
+            return null;
+        }).when(maintenanceWindowScheduleService).ifAvailable(any());
+    }
+
+    private static EnvironmentMaintenanceWindowScheduleRequest maintenanceWindowScheduleCreateRequest() {
+        EnvironmentMaintenanceWindowScheduleRequest scheduleRequest = new EnvironmentMaintenanceWindowScheduleRequest();
+        scheduleRequest.setRecurrenceKind(MaintenanceRecurrenceKind.WEEKLY.name());
+        scheduleRequest.setDurationMinutes(120);
+        scheduleRequest.setStartLocalTime("02:00");
+        scheduleRequest.setDayOfWeek("SUNDAY");
+        scheduleRequest.setTimezone("UTC");
+        return scheduleRequest;
+    }
+
+    private static EnvironmentCreationDto environmentCreationDtoWithSchedule(EnvironmentMaintenanceWindowScheduleRequest scheduleRequest) {
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
+        return EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withCrn("crn")
+                .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(parametersDto)
+                .withMaintenanceWindowSchedule(scheduleRequest)
+                .withLocation(LocationDto.builder().withName("test").withDisplayName("test").withLatitude(0.1).withLongitude(0.1).build())
+                .build();
+    }
+
+    private Environment environmentForMaintenanceScheduleCreate(EnvironmentCreationDto environmentCreationDto) {
+        Environment environment = azureEnvironment();
+        environment.setResourceCrn(environmentCreationDto.getCrn());
+        return environment;
     }
 
     private EnvironmentCreationDto creationDtoWithEncryptionProfile(String encryptionProfileCrn) {

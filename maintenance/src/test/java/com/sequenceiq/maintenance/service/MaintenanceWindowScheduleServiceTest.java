@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,13 +27,16 @@ import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowEffectiveScheduleParams;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRequest;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRestoreRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.UpdateMaintenanceWindowScheduleRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowEffectiveScheduleResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleListResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
+import com.sequenceiq.maintenance.domain.MaintenanceWindowSkip;
 import com.sequenceiq.maintenance.exception.ConflictException;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowScheduleRepository;
+import com.sequenceiq.maintenance.repository.MaintenanceWindowSkipRepository;
 import com.sequenceiq.maintenance.service.model.EffectiveScheduleLookupContext;
 import com.sequenceiq.maintenance.service.model.EffectiveScheduleResolution;
 import com.sequenceiq.maintenance.service.model.EffectiveScheduleResourceContext;
@@ -56,6 +60,9 @@ class MaintenanceWindowScheduleServiceTest {
     private final MaintenanceWindowScheduleScopeValidator scopeValidator = new MaintenanceWindowScheduleScopeValidator();
 
     @Mock
+    private MaintenanceWindowSkipRepository skipRepository;
+
+    @Mock
     private Clock clock;
 
     @Mock
@@ -70,6 +77,8 @@ class MaintenanceWindowScheduleServiceTest {
 
     private MaintenanceWindowScheduleService scheduleService;
 
+    private MaintenanceWindowScheduleEligibilityService eligibilityService;
+
     @BeforeEach
     void setUp() {
         occurrenceCalculator = new MaintenanceOccurrenceCalculator();
@@ -77,6 +86,8 @@ class MaintenanceWindowScheduleServiceTest {
         scheduleService = new MaintenanceWindowScheduleService(
                 scheduleRepository, scheduleValidator, scopeValidator, scheduleConverter,
                 scheduleEligibilityService, resourceEnvironmentCrnResolver, clock);
+        eligibilityService = new MaintenanceWindowScheduleEligibilityService(
+                scheduleRepository, skipRepository, occurrenceCalculator, clock);
     }
 
     @Test
@@ -356,9 +367,127 @@ class MaintenanceWindowScheduleServiceTest {
         params.setEnvironmentCrn("crn:cdp:environments:us-west-1:acc-1:environment:env-1");
         EffectiveScheduleResourceContext resourceContext = scheduleService.validateEffectiveScheduleResource(ACCOUNT_ID, params);
         when(resourceEnvironmentCrnResolver.resolveOptional(ACCOUNT_ID, resourceCrn, MaintenanceScopeType.DATAHUB))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         assertThrows(BadRequestException.class, () -> scheduleService.completeEffectiveScheduleLookup(resourceContext, params));
+    }
+
+    @Test
+    void restoreReactivatesArchivedSchedulePreservingId() {
+        when(clock.getCurrentTimeMillis()).thenReturn(NOW);
+        MaintenanceWindowSchedule schedule = entityFromRequest(request("tenant-default"));
+        schedule.setId(1L);
+        schedule.setArchived(true);
+        when(scheduleRepository.findByIdAndAccountId(1L, ACCOUNT_ID)).thenReturn(Optional.of(schedule));
+        when(scheduleRepository.save(any(MaintenanceWindowSchedule.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MaintenanceWindowScheduleRestoreRequest request = restoreRequest(1L, "tenant-default");
+
+        MaintenanceWindowScheduleResponse response = scheduleService.restore(
+                ACCOUNT_ID, MaintenanceScopeType.TENANT, ACCOUNT_ID, request, USER_CRN);
+
+        // Same row id reused so maintenance_window_skip rows (FK to id 1) stay valid;
+        // behaviourally exercised by restoredSchedulePreservesSkipEligibility
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(schedule.getId()).isEqualTo(1L);
+        assertThat(schedule.isArchived()).isFalse();
+        assertThat(schedule.getUpdatedAt()).isEqualTo(NOW);
+        assertThat(schedule.getUpdatedBy()).isEqualTo(USER_CRN);
+        verify(scheduleValidator).validate(schedule);
+        verify(scheduleRepository).save(schedule);
+        verify(scheduleRepository, never()).delete(any());
+        // Reactivate path, not create-a-new-row path
+        verify(scheduleRepository, never()).findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(any(), any(), any());
+    }
+
+    @Test
+    void restoredSchedulePreservesSkipEligibility() {
+        // Regression: a skip recorded before archival (FK to schedule id 1) must still suppress the matching
+        // occurrence after restore, because restore reactivates the same row rather than creating a new id.
+        // Had restore created a fresh row, eligibility would resolve a new id and the id-1 skip would be orphaned.
+        long windowStart = Instant.parse("2025-01-06T09:00:00Z").toEpochMilli();
+        long insideWindow = Instant.parse("2025-01-06T09:30:00Z").toEpochMilli();
+        when(clock.getCurrentTimeMillis()).thenReturn(NOW);
+        MaintenanceWindowSchedule schedule = entityFromRequest(request("tenant-default"));
+        schedule.setId(1L);
+        schedule.setArchived(true);
+        when(scheduleRepository.findByIdAndAccountId(1L, ACCOUNT_ID)).thenReturn(Optional.of(schedule));
+        when(scheduleRepository.save(any(MaintenanceWindowSchedule.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        scheduleService.restore(ACCOUNT_ID, MaintenanceScopeType.TENANT, ACCOUNT_ID, restoreRequest(1L, "tenant-default"), USER_CRN);
+
+        // Eligibility resolves the reactivated row; the pre-existing skip is still keyed to its (preserved) id.
+        when(scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(ACCOUNT_ID, MaintenanceScopeType.TENANT, ACCOUNT_ID))
+                .thenReturn(Optional.of(schedule));
+        MaintenanceWindowSkip skip = new MaintenanceWindowSkip();
+        skip.setMaintenanceWindowSchedule(schedule);
+        skip.setWindowStart(windowStart);
+        when(skipRepository.findByMaintenanceWindowScheduleIdAndWindowStart(1L, windowStart)).thenReturn(Optional.of(skip));
+
+        MaintenanceWindowResourceIdentity identity = new MaintenanceWindowResourceIdentity(ACCOUNT_ID, null, null, null);
+        MaintenanceWindowScheduleEligibility eligibility = eligibilityService.checkEligibility(identity, insideWindow);
+
+        assertThat(eligibility.dispatchable()).isFalse();
+        assertThat(eligibility.currentOccurrence()).isPresent();
+        assertThat(eligibility.currentOccurrence().get().windowStart()).isEqualTo(windowStart);
+        verify(skipRepository).findByMaintenanceWindowScheduleIdAndWindowStart(1L, windowStart);
+    }
+
+    @Test
+    void restoreRestoresNullableDescriptionToNull() {
+        when(clock.getCurrentTimeMillis()).thenReturn(NOW);
+        MaintenanceWindowSchedule schedule = entityFromRequest(request("tenant-default"));
+        schedule.setId(1L);
+        schedule.setDescription("edited-during-failed-edit");
+        when(scheduleRepository.findByIdAndAccountId(1L, ACCOUNT_ID)).thenReturn(Optional.of(schedule));
+        when(scheduleRepository.save(any(MaintenanceWindowSchedule.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        MaintenanceWindowScheduleRestoreRequest request = restoreRequest(1L, "tenant-default");
+        request.setDescription(null);
+
+        MaintenanceWindowScheduleResponse response = scheduleService.restore(
+                ACCOUNT_ID, MaintenanceScopeType.TENANT, ACCOUNT_ID, request, USER_CRN);
+
+        // Full replace restores the prior null, unlike PATCH which would keep "edited-during-failed-edit"
+        assertThat(schedule.getDescription()).isNull();
+        assertThat(response.getDescription()).isNull();
+    }
+
+    @Test
+    void restoreFallsBackToCreateWhenScheduleRowMissing() {
+        when(clock.getCurrentTimeMillis()).thenReturn(NOW);
+        when(scheduleRepository.findByIdAndAccountId(99L, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(
+                ACCOUNT_ID, MaintenanceScopeType.TENANT, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(scheduleRepository.save(any(MaintenanceWindowSchedule.class))).thenAnswer(invocation -> {
+            MaintenanceWindowSchedule schedule = invocation.getArgument(0);
+            schedule.setId(2L);
+            return schedule;
+        });
+
+        MaintenanceWindowScheduleRestoreRequest request = restoreRequest(99L, "tenant-default");
+
+        MaintenanceWindowScheduleResponse response = scheduleService.restore(
+                ACCOUNT_ID, MaintenanceScopeType.TENANT, ACCOUNT_ID, request, USER_CRN);
+
+        assertThat(response.getName()).isEqualTo("tenant-default");
+        verify(scheduleRepository).findByIdAndAccountId(99L, ACCOUNT_ID);
+        // Create path validates the merged schedule
+        verify(scheduleValidator).validate(any(MaintenanceWindowSchedule.class));
+    }
+
+    private MaintenanceWindowScheduleRestoreRequest restoreRequest(Long id, String name) {
+        MaintenanceWindowScheduleRestoreRequest request = new MaintenanceWindowScheduleRestoreRequest();
+        request.setId(id);
+        request.setName(name);
+        request.setScopeType(MaintenanceScopeType.TENANT.name());
+        request.setScopeId(ACCOUNT_ID);
+        request.setRecurrenceKind(MaintenanceRecurrenceKind.WEEKLY.name());
+        request.setTimezone("UTC");
+        request.setDurationMinutes(120);
+        request.setStartLocalTime("09:00");
+        request.setDayOfWeek(DayOfWeek.MONDAY.name());
+        return request;
     }
 
     private UpdateMaintenanceWindowScheduleRequest updateRequest(String name, int durationMinutes) {

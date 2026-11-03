@@ -16,6 +16,7 @@ import jakarta.ws.rs.client.Client;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -31,8 +32,10 @@ import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.environment.environment.dto.credential.CloudPlatformAwareCredentialDetailsConverter;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
+import com.sequenceiq.environment.maintenancewindow.MaintenanceServiceConditions;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
+import com.sequenceiq.maintenance.client.internal.MaintenanceApiClientParams;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -83,6 +86,10 @@ public class AppConfig {
     @Inject
     @Named("redbeamsServerUrl")
     private String redbeamsServerUrl;
+
+    @Inject
+    @Named("maintenanceServerUrl")
+    private String maintenanceServerUrl;
 
     @Value("${environment.redbeams.supportedPlatforms:}")
     private String supportedRedbeamsPlatforms;
@@ -144,6 +151,12 @@ public class AppConfig {
     @Bean
     public RedbeamsApiClientParams redbeamsApiClientParams() {
         return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
+    }
+
+    @Bean
+    @ConditionalOnExpression(MaintenanceServiceConditions.URL_CONFIGURED)
+    public MaintenanceApiClientParams maintenanceApiClientParams() {
+        return new MaintenanceApiClientParams(restDebug, certificateValidation, ignorePreValidation, maintenanceServerUrl);
     }
 
     @Bean

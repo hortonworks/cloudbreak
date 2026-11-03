@@ -5,6 +5,7 @@ import java.util.Map;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentMaintenanceWindowScheduleEditRequest;
 import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -61,6 +62,10 @@ public class EnvironmentEditDto {
 
     private final boolean updateTagsOnExistingResources;
 
+    private final EnvironmentMaintenanceWindowScheduleEditRequest maintenanceWindowSchedule;
+
+    private final boolean clearMaintenanceWindowSchedule;
+
     public EnvironmentEditDto(Builder builder) {
         this.description = builder.description;
         this.accountId = builder.accountId;
@@ -86,6 +91,8 @@ public class EnvironmentEditDto {
         this.environmentHybridDto = builder.environmentHybridDto;
         this.refreshNetwork = builder.refreshNetwork;
         this.updateTagsOnExistingResources = builder.updateTagsOnExistingResources;
+        this.maintenanceWindowSchedule = builder.maintenanceWindowSchedule;
+        this.clearMaintenanceWindowSchedule = builder.clearMaintenanceWindowSchedule;
     }
 
     public String getDescription() {
@@ -184,6 +191,14 @@ public class EnvironmentEditDto {
         return updateTagsOnExistingResources;
     }
 
+    public EnvironmentMaintenanceWindowScheduleEditRequest getMaintenanceWindowSchedule() {
+        return maintenanceWindowSchedule;
+    }
+
+    public boolean isClearMaintenanceWindowSchedule() {
+        return clearMaintenanceWindowSchedule;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -266,6 +281,10 @@ public class EnvironmentEditDto {
         private boolean refreshNetwork;
 
         private boolean updateTagsOnExistingResources;
+
+        private EnvironmentMaintenanceWindowScheduleEditRequest maintenanceWindowSchedule;
+
+        private boolean clearMaintenanceWindowSchedule;
 
         private Builder() {
         }
@@ -387,6 +406,16 @@ public class EnvironmentEditDto {
 
         public Builder withUpdateTagsOnExistingResources(boolean updateTagsOnExistingResources) {
             this.updateTagsOnExistingResources = updateTagsOnExistingResources;
+            return this;
+        }
+
+        public Builder withMaintenanceWindowSchedule(EnvironmentMaintenanceWindowScheduleEditRequest maintenanceWindowSchedule) {
+            this.maintenanceWindowSchedule = maintenanceWindowSchedule;
+            return this;
+        }
+
+        public Builder withClearMaintenanceWindowSchedule(boolean clearMaintenanceWindowSchedule) {
+            this.clearMaintenanceWindowSchedule = clearMaintenanceWindowSchedule;
             return this;
         }
 

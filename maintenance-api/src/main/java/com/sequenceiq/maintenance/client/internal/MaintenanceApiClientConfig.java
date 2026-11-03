@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.maintenance.api.MaintenanceApi;
 import com.sequenceiq.maintenance.api.internal.schedule.endpoint.MaintenanceWindowScheduleInternalEndpoint;
+import com.sequenceiq.maintenance.api.v1.schedule.endpoint.MaintenanceWindowScheduleEndpoint;
 import com.sequenceiq.maintenance.api.v1.task.endpoint.MaintenanceWindowTaskEndpoint;
 
 @Configuration
@@ -44,5 +45,11 @@ public class MaintenanceApiClientConfig {
     @ConditionalOnBean(name = "maintenanceApiClientWebTarget")
     MaintenanceWindowScheduleInternalEndpoint maintenanceWindowScheduleInternalEndpoint(WebTarget maintenanceApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(maintenanceApiClientWebTarget, MaintenanceWindowScheduleInternalEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "maintenanceApiClientWebTarget")
+    MaintenanceWindowScheduleEndpoint maintenanceWindowScheduleEndpoint(WebTarget maintenanceApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(maintenanceApiClientWebTarget, MaintenanceWindowScheduleEndpoint.class);
     }
 }

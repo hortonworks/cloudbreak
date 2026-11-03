@@ -24,8 +24,9 @@ public class ToStringTest {
                     && requestOrResponse(clazz) && !clazz.contains(".Valid")
                     && !Class.forName(clazz).isInterface()) {
                 try {
-                    Method toString = ReflectionUtils.findMethod(Class.forName(clazz), "toString");
-                    if (!clazz.equals(toString.getDeclaringClass().getName())) {
+                    Class<?> type = Class.forName(clazz);
+                    Method toString = ReflectionUtils.findMethod(type, "toString");
+                    if (toString == null || Object.class.equals(toString.getDeclaringClass())) {
                         missingToStrings.add(clazz);
                     }
                 } catch (Exception e) {
@@ -34,7 +35,8 @@ public class ToStringTest {
             }
         }
         assertEquals(0, missingToStrings.size(),
-                String.format("These classes do not have toString(): %s. Please add that", String.join(",\n", missingToStrings)));
+                String.format("These classes inherit only Object.toString(): %s. Implement or inherit a custom toString().",
+                        String.join(",\n", missingToStrings)));
     }
 
     private boolean requestOrResponse(String clazz) {

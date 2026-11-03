@@ -44,6 +44,15 @@ FREEIPA-scoped schedules store a **FreeIPA resource CRN** in `scopeId`. UMS righ
 
 Unscoped **list** returns only schedules the caller may read. Resource scopes are resolved with one batched UMS `hasRights` call per distinct right rather than one call per schedule.
 
+## Internal schedule APIs (`/internal/maintenance-schedules`)
+
+Service-to-service schedule lookups and compensation: **`@InternalOnly`** with `@AccountId`. Not callable by interactive users.
+
+| Operation | Purpose |
+|-----------|---------|
+| `get` | Describe-time schedule lookup under an internal actor (no public UMS check) |
+| `restore` (`PUT .../restore`) | Full-state restore by id to compensate a failed cross-service edit; reactivates the existing row (preserving its id and attached skips) and overwrites every field, including nulls |
+
 ## Internal task APIs (`/internal/maintenance-tasks`)
 
 Register, list, update, delete tasks and report run outcomes: **`@InternalOnly`** with `@AccountId` (or `@RequestObject` with `@ResourceCrn` on peer services). Not callable by interactive users. Task APIs are not gated by `CDP_MAINTENANCE_WINDOW` (platform automation continues to register work when the entitlement is off).

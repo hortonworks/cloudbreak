@@ -34,6 +34,9 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_CLUSTER)
     private ExternalizedComputeClusterResponse externalizedComputeCluster;
 
+    @Schema(description = EnvironmentModelDescription.MAINTENANCE_WINDOW_SCHEDULE)
+    private EnvironmentMaintenanceWindowScheduleResponse maintenanceWindowSchedule;
+
     public static Builder builder() {
         return new Builder();
     }
@@ -60,6 +63,14 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     public void setExternalizedComputeCluster(ExternalizedComputeClusterResponse externalizedComputeCluster) {
         this.externalizedComputeCluster = externalizedComputeCluster;
+    }
+
+    public EnvironmentMaintenanceWindowScheduleResponse getMaintenanceWindowSchedule() {
+        return maintenanceWindowSchedule;
+    }
+
+    public void setMaintenanceWindowSchedule(EnvironmentMaintenanceWindowScheduleResponse maintenanceWindowSchedule) {
+        this.maintenanceWindowSchedule = maintenanceWindowSchedule;
     }
 
     @Override
@@ -168,6 +179,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private String encryptionProfileCrn;
 
         private NotificationParameters notificationParameters;
+
+        private EnvironmentMaintenanceWindowScheduleResponse maintenanceWindowSchedule;
 
         protected Builder() {
         }
@@ -407,6 +420,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return (B) this;
         }
 
+        public B withMaintenanceWindowSchedule(EnvironmentMaintenanceWindowScheduleResponse maintenanceWindowSchedule) {
+            this.maintenanceWindowSchedule = maintenanceWindowSchedule;
+            return (B) this;
+        }
+
         public T build() {
             return build((T) new DetailedEnvironmentResponse());
         }
@@ -458,6 +476,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setJumpgateEnvironmentCrn(jumpgateEnvironmentCrn);
             detailedEnvironmentResponse.setEncryptionProfileCrn(encryptionProfileCrn);
             detailedEnvironmentResponse.setNotificationParameters(notificationParameters);
+            detailedEnvironmentResponse.setMaintenanceWindowSchedule(maintenanceWindowSchedule);
             return detailedEnvironmentResponse;
         }
     }

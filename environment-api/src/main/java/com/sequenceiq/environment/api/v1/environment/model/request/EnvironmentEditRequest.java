@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -92,6 +94,19 @@ public class EnvironmentEditRequest implements Serializable {
 
     @Schema(description = EnvironmentModelDescription.UPDATE_TAGS_ON_EXISTING_RESOURCES)
     private boolean updateTagsOnExistingResources;
+
+    @Valid
+    @Schema(description = EnvironmentModelDescription.MAINTENANCE_WINDOW_SCHEDULE)
+    private EnvironmentMaintenanceWindowScheduleEditRequest maintenanceWindowSchedule;
+
+    @Schema(description = EnvironmentModelDescription.CLEAR_MAINTENANCE_WINDOW_SCHEDULE)
+    private boolean clearMaintenanceWindowSchedule;
+
+    @JsonIgnore
+    @AssertTrue(message = "clearMaintenanceWindowSchedule cannot be combined with maintenanceWindowSchedule")
+    public boolean isMaintenanceWindowScheduleEditConsistent() {
+        return !clearMaintenanceWindowSchedule || maintenanceWindowSchedule == null;
+    }
 
     public String getDescription() {
         return description;
@@ -259,6 +274,22 @@ public class EnvironmentEditRequest implements Serializable {
 
     public void setUpdateTagsOnExistingResources(boolean updateTagsOnExistingResources) {
         this.updateTagsOnExistingResources = updateTagsOnExistingResources;
+    }
+
+    public EnvironmentMaintenanceWindowScheduleEditRequest getMaintenanceWindowSchedule() {
+        return maintenanceWindowSchedule;
+    }
+
+    public void setMaintenanceWindowSchedule(EnvironmentMaintenanceWindowScheduleEditRequest maintenanceWindowSchedule) {
+        this.maintenanceWindowSchedule = maintenanceWindowSchedule;
+    }
+
+    public boolean isClearMaintenanceWindowSchedule() {
+        return clearMaintenanceWindowSchedule;
+    }
+
+    public void setClearMaintenanceWindowSchedule(boolean clearMaintenanceWindowSchedule) {
+        this.clearMaintenanceWindowSchedule = clearMaintenanceWindowSchedule;
     }
 
     @Override

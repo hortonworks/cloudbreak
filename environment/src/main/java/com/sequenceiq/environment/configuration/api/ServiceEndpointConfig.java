@@ -2,12 +2,14 @@ package com.sequenceiq.environment.configuration.api;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
+import com.sequenceiq.environment.maintenancewindow.MaintenanceServiceConditions;
 
 @Configuration
 public class ServiceEndpointConfig {
@@ -57,6 +59,15 @@ public class ServiceEndpointConfig {
     @Value("${environment.externalizedCompute.contextPath}")
     private String externalizedComputeRootContextPath;
 
+    @Value("${" + MaintenanceServiceConditions.URL_PROPERTY + ":}")
+    private String maintenanceServiceUrl;
+
+    @Value("${environment.maintenance.contextPath:/maintenance}")
+    private String maintenanceContextPath;
+
+    @Value("${environment.maintenance.serviceid:}")
+    private String maintenanceServiceId;
+
     @Inject
     private ServiceAddressResolver serviceAddressResolver;
 
@@ -83,5 +94,13 @@ public class ServiceEndpointConfig {
     @Bean
     public String externalizedComputeServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(externalizedComputeServiceUrl + externalizedComputeRootContextPath, "http", externalizedComputeServiceId);
+    }
+
+    @Bean
+    public String maintenanceServerUrl() throws ServiceAddressResolvingException {
+        if (StringUtils.isBlank(maintenanceServiceUrl)) {
+            return "";
+        }
+        return serviceAddressResolver.resolveUrl(maintenanceServiceUrl + maintenanceContextPath, "http", maintenanceServiceId);
     }
 }

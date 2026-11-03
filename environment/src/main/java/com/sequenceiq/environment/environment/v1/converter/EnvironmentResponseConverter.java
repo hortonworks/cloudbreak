@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.util.NullUtil;
@@ -46,6 +47,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.maintenancewindow.EnvironmentMaintenanceWindowScheduleMapper;
+import com.sequenceiq.environment.maintenancewindow.EnvironmentMaintenanceWindowScheduleService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
@@ -83,13 +86,16 @@ public class EnvironmentResponseConverter {
 
     private final EncryptionProfileToEncryptionProfileResponseConverter encryptionProfileResponseConverter;
 
+    private final ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService;
+
     public EnvironmentResponseConverter(CredentialToCredentialV1ResponseConverter credentialConverter,
             RegionConverter regionConverter, CredentialViewConverter credentialViewConverter,
             ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter,
             FreeIpaConverter freeIpaConverter, TelemetryApiConverter telemetryApiConverter,
             BackupConverter backupConverter, NetworkDtoToResponseConverter networkDtoToResponseConverter,
             DataServicesConverter dataServicesConverter,
-            EncryptionProfileToEncryptionProfileResponseConverter encryptionProfileResponseConverter) {
+            EncryptionProfileToEncryptionProfileResponseConverter encryptionProfileResponseConverter,
+            ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService) {
         this.credentialConverter = credentialConverter;
         this.regionConverter = regionConverter;
         this.credentialViewConverter = credentialViewConverter;
@@ -100,6 +106,7 @@ public class EnvironmentResponseConverter {
         this.networkDtoToResponseConverter = networkDtoToResponseConverter;
         this.dataServicesConverter = dataServicesConverter;
         this.encryptionProfileResponseConverter = encryptionProfileResponseConverter;
+        this.maintenanceWindowScheduleService = maintenanceWindowScheduleService;
     }
 
     public CreateEnvironmentResponse dtoToCreateResponse(CreateEnvironmentDto environmentDto) {
@@ -165,6 +172,10 @@ public class EnvironmentResponseConverter {
         NullUtil.doIfNotNull(environmentDto.getExternalizedComputeCluster(),
                 externalizedComputeCluster -> builder.withExternalizedComputeCluster(externalizedComputeClusterDtoToResponse(externalizedComputeCluster,
                         environmentDto.getNetwork())));
+        maintenanceWindowScheduleService.ifAvailable(service -> service.getEnvironmentScheduleForDescribe(
+                        environmentDto.getAccountId(), environmentDto.getResourceCrn())
+                .map(EnvironmentMaintenanceWindowScheduleMapper::toEnvironmentResponse)
+                .ifPresent(builder::withMaintenanceWindowSchedule));
         return builder;
     }
 

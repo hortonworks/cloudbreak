@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -70,6 +71,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
+import com.sequenceiq.environment.maintenancewindow.EnvironmentMaintenanceWindowScheduleService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
@@ -124,6 +126,9 @@ class EnvironmentResponseConverterTest {
 
     @Mock
     private EncryptionProfileToEncryptionProfileResponseConverter encryptionProfileResponseConverter;
+
+    @Mock
+    private ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService;
 
     @ParameterizedTest
     @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})

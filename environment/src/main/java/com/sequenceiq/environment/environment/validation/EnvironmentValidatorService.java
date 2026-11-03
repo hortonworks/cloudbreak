@@ -19,6 +19,7 @@ import jakarta.ws.rs.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -57,6 +58,8 @@ import com.sequenceiq.environment.environment.validation.validators.ManagedIdent
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
+import com.sequenceiq.environment.maintenancewindow.EnvironmentMaintenanceWindowScheduleService;
+import com.sequenceiq.environment.maintenancewindow.MaintenanceServiceConditions;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -108,6 +111,8 @@ public class EnvironmentValidatorService {
 
     private final EnvironmentTagsDtoConverter environmentTagsDtoConverter;
 
+    private final ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService;
+
     public EnvironmentValidatorService(NetworkValidator networkValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
@@ -125,7 +130,8 @@ public class EnvironmentValidatorService {
             @Value("${environment.freeipa.groupInstanceCount.minimum}") Integer ipaMinimumInstanceCountByGroup,
             SeLinuxValidationService seLinuxValidationService,
             EnvironmentComputeClusterEntitlementValidator computeClusterEntitlementValidator,
-            EnvironmentTagsDtoConverter environmentTagsDtoConverter) {
+            EnvironmentTagsDtoConverter environmentTagsDtoConverter,
+            ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService) {
         this.networkValidator = networkValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
@@ -144,6 +150,7 @@ public class EnvironmentValidatorService {
         this.seLinuxValidationService = seLinuxValidationService;
         this.computeClusterEntitlementValidator = computeClusterEntitlementValidator;
         this.environmentTagsDtoConverter = environmentTagsDtoConverter;
+        this.maintenanceWindowScheduleService = maintenanceWindowScheduleService;
     }
 
     public void validateFreeipaRecipesExistsByName(Set<String> resourceNames) {
@@ -170,6 +177,31 @@ public class EnvironmentValidatorService {
         validationResultBuilder.merge(validateTags(editDto));
         validationResultBuilder.merge(environmentTagsDtoConverter.validateUserDefinedTagsAgainstDefaultTags(editDto, environmentTags));
         return validationResultBuilder.build();
+    }
+
+    public ValidationResult validateMaintenanceWindowScheduleCreation(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        if (creationDto.getMaintenanceWindowSchedule() != null) {
+            validateMaintenanceServiceAvailable(validationResultBuilder);
+        }
+        return validationResultBuilder.build();
+    }
+
+    public ValidationResult validateMaintenanceWindowScheduleEdit(EnvironmentEditDto editDto) {
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        if (editDto.isClearMaintenanceWindowSchedule() && editDto.getMaintenanceWindowSchedule() != null) {
+            validationResultBuilder.error("clearMaintenanceWindowSchedule cannot be combined with maintenanceWindowSchedule");
+        }
+        if (editDto.isClearMaintenanceWindowSchedule() || editDto.getMaintenanceWindowSchedule() != null) {
+            validateMaintenanceServiceAvailable(validationResultBuilder);
+        }
+        return validationResultBuilder.build();
+    }
+
+    private void validateMaintenanceServiceAvailable(ValidationResultBuilder validationResultBuilder) {
+        if (maintenanceWindowScheduleService.getIfAvailable() == null) {
+            validationResultBuilder.error(MaintenanceServiceConditions.NOT_CONFIGURED_VALIDATION_ERROR);
+        }
     }
 
     public ValidationResult validateTagKeysToRemove(Collection<String> tagKeys, EnvironmentTags environmentTags, String cloudPlatform) {

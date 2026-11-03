@@ -234,6 +234,32 @@ public class EnvironmentModelDescription {
             "availabilityZones, provider-specific parameters, and serviceEndpointCreation; the refresh writes the cloud-discovered fields above. " +
             "Defaults to false.";
 
+    public static final String MAINTENANCE_WINDOW_SCHEDULE =
+            "Optional environment-level maintenance window schedule override (stored by the Maintenance Window service).";
+
+    public static final String CLEAR_MAINTENANCE_WINDOW_SCHEDULE =
+            "When true on edit, removes the environment-level maintenance window schedule override. Ignored when false.";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_NAME = "Schedule display name";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_RECURRENCE_KIND = "Recurrence pattern kind";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_TIMEZONE = "IANA timezone for local-time recurrence";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_DESCRIPTION = "Schedule description";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_DURATION_MINUTES = "Window duration in minutes (minimum 60)";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_START_LOCAL_TIME = "Local start time (HH:mm)";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_DAY_OF_WEEK = "Day of week for weekly recurrence";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_WEEK_ORDINAL = "Week ordinal for monthly nth-weekday recurrence";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_DAY_OF_MONTH = "Day of month for monthly recurrence";
+
+    public static final String MAINTENANCE_WINDOW_SCHEDULE_CRON_EXPRESSION = "Quartz cron expression for CRON recurrence";
+
     private EnvironmentModelDescription() {
     }
 }

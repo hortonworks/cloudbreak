@@ -143,6 +143,10 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Schema(description = EnvironmentModelDescription.JUMPGATE_ENVIRONMENT_CRN)
     private String jumpgateEnvironmentCrn;
 
+    @Valid
+    @Schema(description = EnvironmentModelDescription.MAINTENANCE_WINDOW_SCHEDULE)
+    private EnvironmentMaintenanceWindowScheduleRequest maintenanceWindowSchedule;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -388,6 +392,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
         this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
+    }
+
+    public EnvironmentMaintenanceWindowScheduleRequest getMaintenanceWindowSchedule() {
+        return maintenanceWindowSchedule;
+    }
+
+    public void setMaintenanceWindowSchedule(EnvironmentMaintenanceWindowScheduleRequest maintenanceWindowSchedule) {
+        this.maintenanceWindowSchedule = maintenanceWindowSchedule;
     }
 
     @Override

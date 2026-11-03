@@ -14,6 +14,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -56,6 +57,7 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentTagUpdatePermissionService;
 import com.sequenceiq.environment.events.EventSenderService;
+import com.sequenceiq.environment.maintenancewindow.EnvironmentMaintenanceWindowScheduleService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -76,6 +78,7 @@ import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 
 @Service
 public class EnvironmentModificationService {
@@ -120,6 +123,8 @@ public class EnvironmentModificationService {
 
     private final EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService;
 
+    private final ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService;
+
     public EnvironmentModificationService(
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentService environmentService,
@@ -139,7 +144,8 @@ public class EnvironmentModificationService {
             EnvironmentValidatorService environmentValidatorService,
             EventSenderService eventSenderService,
             FreeIpaService freeIpaService,
-            EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService) {
+            EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService,
+            ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -159,6 +165,7 @@ public class EnvironmentModificationService {
         this.environmentValidatorService = environmentValidatorService;
         this.eventSenderService = eventSenderService;
         this.environmentTagUpdatePermissionService = environmentTagUpdatePermissionService;
+        this.maintenanceWindowScheduleService = maintenanceWindowScheduleService;
     }
 
     public EnvironmentDto edit(Environment environment, EnvironmentEditDto editDto) {
@@ -180,6 +187,7 @@ public class EnvironmentModificationService {
         editFreeIpaEnableMultiAz(editDto, environment);
         editFreeIpaPlatformVariant(editDto, environment);
         validationBuilder.merge(environmentValidatorService.validateTags(editDto, environment.getEnvironmentTags()));
+        validationBuilder.merge(environmentValidatorService.validateMaintenanceWindowScheduleEdit(editDto));
         editTags(editDto, environment);
 
         ValidationResult validationResult = validationBuilder.build();
@@ -187,10 +195,55 @@ public class EnvironmentModificationService {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
 
-        Environment saved = environmentService.save(environment);
-        triggerEditProxyIfChanged(editDto, saved);
+        String environmentCrn = environment.getResourceCrn();
+        boolean maintenanceScheduleEditRequested = isMaintenanceScheduleEditRequested(editDto);
+        Optional<MaintenanceWindowScheduleResponse> scheduleBeforeEdit = maintenanceScheduleEditRequested
+                ? captureEnvironmentScheduleBeforeEdit(environmentCrn)
+                : Optional.empty();
+        if (maintenanceScheduleEditRequested) {
+            applyMaintenanceWindowScheduleEdit(environmentCrn, editDto);
+        }
+        boolean environmentSaved = false;
+        try {
+            Environment saved = environmentService.save(environment);
+            environmentSaved = true;
+            triggerEditProxyIfChanged(editDto, saved);
+            return environmentDtoConverter.environmentToDto(saved);
+        } catch (RuntimeException e) {
+            if (maintenanceScheduleEditRequested && !environmentSaved) {
+                try {
+                    maintenanceWindowScheduleService.ifAvailable(
+                            service -> service.restoreEnvironmentSchedule(environmentCrn, scheduleBeforeEdit));
+                } catch (RuntimeException restoreFailure) {
+                    LOGGER.warn("Failed to roll back maintenance window schedule after environment edit failure", restoreFailure);
+                }
+            }
+            throw e;
+        }
+    }
 
-        return environmentDtoConverter.environmentToDto(saved);
+    private static boolean isMaintenanceScheduleEditRequested(EnvironmentEditDto editDto) {
+        return editDto.isClearMaintenanceWindowSchedule() || editDto.getMaintenanceWindowSchedule() != null;
+    }
+
+    private Optional<MaintenanceWindowScheduleResponse> captureEnvironmentScheduleBeforeEdit(String environmentCrn) {
+        EnvironmentMaintenanceWindowScheduleService service = maintenanceWindowScheduleService.getIfAvailable();
+        return service != null ? service.getEnvironmentSchedule(environmentCrn) : Optional.empty();
+    }
+
+    private void applyMaintenanceWindowScheduleEdit(String environmentCrn, EnvironmentEditDto editDto) {
+        try {
+            maintenanceWindowScheduleService.ifAvailable(service -> {
+                if (editDto.isClearMaintenanceWindowSchedule()) {
+                    service.clearEnvironmentScheduleIfPresent(environmentCrn);
+                    return;
+                }
+                service.applyEnvironmentScheduleOnEdit(environmentCrn, editDto.getMaintenanceWindowSchedule());
+            });
+        } catch (RuntimeException e) {
+            LOGGER.warn("Environment edit failed while applying maintenance window schedule", e);
+            throw e;
+        }
     }
 
     public EnvironmentDto changeCredentialByEnvironmentName(String accountId, String environmentName, EnvironmentChangeCredentialDto dto) {

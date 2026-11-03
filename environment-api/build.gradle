@@ -16,6 +16,7 @@ dependencies {
     implementation     project(":common-model")
     implementation     project(":freeipa-api")
     implementation     project(":structuredevent-api-cdp")
+    implementation     project(':maintenance-api')
 
     implementation     group: "org.apache.commons",            name: "commons-lang3",                  version: "$apacheCommonsLangVersion"
     implementation     group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2-jakarta',         version: "$swaggerCoreVersion"

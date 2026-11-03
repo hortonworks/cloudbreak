@@ -11,6 +11,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -24,17 +26,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -46,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentMaintenanceWindowScheduleEditRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -73,6 +80,7 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentTagUpdatePermissionService;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.EnvironmentTagUpdatePermissionMissingException;
+import com.sequenceiq.environment.maintenancewindow.EnvironmentMaintenanceWindowScheduleService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -96,6 +104,8 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 
 @ExtendWith(SpringExtension.class)
 class EnvironmentModificationServiceTest {
@@ -172,11 +182,27 @@ class EnvironmentModificationServiceTest {
     @MockBean
     private EnvironmentTagUpdatePermissionService environmentTagUpdatePermissionService;
 
+    @MockBean
+    private ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService;
+
+    @MockBean
+    private EnvironmentMaintenanceWindowScheduleService environmentMaintenanceWindowScheduleService;
+
     @Mock
     private ValidationResult.ValidationResultBuilder validationResultBuilder;
 
     @Mock
     private ValidationResult validationResult;
+
+    @BeforeEach
+    void stubEnvironmentSave() {
+        when(environmentService.save(any(Environment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().doAnswer(invocation -> {
+            invocation.<Consumer<EnvironmentMaintenanceWindowScheduleService>>getArgument(0)
+                    .accept(environmentMaintenanceWindowScheduleService);
+            return null;
+        }).when(maintenanceWindowScheduleService).ifAvailable(any());
+    }
 
     @Test
     void editByName() {
@@ -1274,6 +1300,255 @@ class EnvironmentModificationServiceTest {
         } else {
             assertEquals("AWS", environment.getFreeIpaPlatformVariant());
         }
+    }
+
+    @Test
+    void editAppliesMaintenanceWindowScheduleBeforeSave() {
+        EnvironmentMaintenanceWindowScheduleEditRequest scheduleRequest = maintenanceWindowScheduleEditRequest();
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withMaintenanceWindowSchedule(scheduleRequest)
+                .build();
+        stubMaintenanceScheduleEditValidation(editDto);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(EnvironmentDto.builder().build());
+
+        environmentModificationServiceUnderTest.edit(environment, editDto);
+
+        InOrder order = inOrder(environmentMaintenanceWindowScheduleService, environmentService);
+        order.verify(environmentMaintenanceWindowScheduleService)
+                .applyEnvironmentScheduleOnEdit(environment.getResourceCrn(), scheduleRequest);
+        order.verify(environmentService).save(environment);
+        verify(environmentMaintenanceWindowScheduleService, never()).clearEnvironmentScheduleIfPresent(anyString());
+    }
+
+    @Test
+    void editClearsMaintenanceWindowScheduleBeforeSave() {
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withClearMaintenanceWindowSchedule(true)
+                .build();
+        stubMaintenanceScheduleEditValidation(editDto);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(EnvironmentDto.builder().build());
+
+        environmentModificationServiceUnderTest.edit(environment, editDto);
+
+        InOrder order = inOrder(environmentMaintenanceWindowScheduleService, environmentService);
+        order.verify(environmentMaintenanceWindowScheduleService).clearEnvironmentScheduleIfPresent(environment.getResourceCrn());
+        order.verify(environmentService).save(environment);
+        verify(environmentMaintenanceWindowScheduleService, never()).applyEnvironmentScheduleOnEdit(anyString(), any());
+    }
+
+    @Test
+    void editDoesNotSaveWhenMaintenanceWindowScheduleApplyFails() {
+        doThrow(new BadRequestException("invalid schedule")).when(environmentMaintenanceWindowScheduleService)
+                .applyEnvironmentScheduleOnEdit(anyString(), any());
+
+        EnvironmentMaintenanceWindowScheduleEditRequest scheduleRequest = maintenanceWindowScheduleEditRequest();
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withMaintenanceWindowSchedule(scheduleRequest)
+                .build();
+        stubMaintenanceScheduleEditValidation(editDto);
+
+        assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.edit(environment, editDto));
+
+        verify(environmentMaintenanceWindowScheduleService).applyEnvironmentScheduleOnEdit(environment.getResourceCrn(), scheduleRequest);
+        verify(environmentService, never()).save(any());
+    }
+
+    @Test
+    void editDoesNotSaveWhenMaintenanceWindowScheduleClearFails() {
+        doThrow(new RuntimeException("maintenance unavailable")).when(environmentMaintenanceWindowScheduleService)
+                .clearEnvironmentScheduleIfPresent(anyString());
+
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withClearMaintenanceWindowSchedule(true)
+                .build();
+        stubMaintenanceScheduleEditValidation(editDto);
+
+        assertThrows(RuntimeException.class, () -> environmentModificationServiceUnderTest.edit(environment, editDto));
+
+        verify(environmentMaintenanceWindowScheduleService).clearEnvironmentScheduleIfPresent(environment.getResourceCrn());
+        verify(environmentService, never()).save(any());
+    }
+
+    @Test
+    void editRestoresMaintenanceWindowScheduleWhenSaveFails() {
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        String environmentCrn = environment.getResourceCrn();
+        MaintenanceWindowScheduleResponse priorSchedule = priorMaintenanceWindowSchedule();
+        EnvironmentMaintenanceWindowScheduleEditRequest scheduleRequest = maintenanceWindowScheduleEditRequest();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withMaintenanceWindowSchedule(scheduleRequest)
+                .build();
+        stubMaintenanceScheduleEditValidation(editDto);
+        when(environmentMaintenanceWindowScheduleService.getEnvironmentSchedule(environmentCrn))
+                .thenReturn(Optional.of(priorSchedule));
+        when(environmentService.save(environment)).thenThrow(new RuntimeException("db unavailable"));
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> environmentModificationServiceUnderTest.edit(environment, editDto));
+
+        assertEquals("db unavailable", thrown.getMessage());
+        InOrder order = inOrder(environmentMaintenanceWindowScheduleService, environmentService);
+        order.verify(environmentMaintenanceWindowScheduleService).getEnvironmentSchedule(environmentCrn);
+        order.verify(environmentMaintenanceWindowScheduleService)
+                .applyEnvironmentScheduleOnEdit(environmentCrn, scheduleRequest);
+        order.verify(environmentService).save(environment);
+        order.verify(environmentMaintenanceWindowScheduleService)
+                .restoreEnvironmentSchedule(environmentCrn, Optional.of(priorSchedule));
+    }
+
+    @Test
+    void editRestoresMaintenanceWindowScheduleWhenSaveFailsAfterClear() {
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        String environmentCrn = environment.getResourceCrn();
+        MaintenanceWindowScheduleResponse priorSchedule = priorMaintenanceWindowSchedule();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withClearMaintenanceWindowSchedule(true)
+                .build();
+        stubMaintenanceScheduleEditValidation(editDto);
+        when(environmentMaintenanceWindowScheduleService.getEnvironmentSchedule(environmentCrn))
+                .thenReturn(Optional.of(priorSchedule));
+        when(environmentService.save(environment)).thenThrow(new RuntimeException("db unavailable"));
+
+        assertThrows(RuntimeException.class, () -> environmentModificationServiceUnderTest.edit(environment, editDto));
+
+        InOrder order = inOrder(environmentMaintenanceWindowScheduleService, environmentService);
+        order.verify(environmentMaintenanceWindowScheduleService).getEnvironmentSchedule(environmentCrn);
+        order.verify(environmentMaintenanceWindowScheduleService).clearEnvironmentScheduleIfPresent(environmentCrn);
+        order.verify(environmentService).save(environment);
+        order.verify(environmentMaintenanceWindowScheduleService)
+                .restoreEnvironmentSchedule(environmentCrn, Optional.of(priorSchedule));
+    }
+
+    @Test
+    void editPreservesOriginalSaveExceptionWhenMaintenanceRestoreAlsoFails() {
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        String environmentCrn = environment.getResourceCrn();
+        MaintenanceWindowScheduleResponse priorSchedule = priorMaintenanceWindowSchedule();
+        EnvironmentMaintenanceWindowScheduleEditRequest scheduleRequest = maintenanceWindowScheduleEditRequest();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withMaintenanceWindowSchedule(scheduleRequest)
+                .build();
+        stubMaintenanceScheduleEditValidation(editDto);
+        when(environmentMaintenanceWindowScheduleService.getEnvironmentSchedule(environmentCrn))
+                .thenReturn(Optional.of(priorSchedule));
+        when(environmentService.save(environment)).thenThrow(new RuntimeException("db unavailable"));
+        doThrow(new RuntimeException("restore failed")).when(environmentMaintenanceWindowScheduleService)
+                .restoreEnvironmentSchedule(environmentCrn, Optional.of(priorSchedule));
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> environmentModificationServiceUnderTest.edit(environment, editDto));
+
+        // Compensation failure must not mask the original save exception
+        assertEquals("db unavailable", thrown.getMessage());
+        verify(environmentMaintenanceWindowScheduleService)
+                .restoreEnvironmentSchedule(environmentCrn, Optional.of(priorSchedule));
+    }
+
+    @Test
+    void editClearsMaintenanceWindowScheduleWhenSaveFailsAfterCreateOnEdit() {
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        String environmentCrn = environment.getResourceCrn();
+        EnvironmentMaintenanceWindowScheduleEditRequest scheduleRequest = maintenanceWindowScheduleEditRequest();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withMaintenanceWindowSchedule(scheduleRequest)
+                .build();
+        stubMaintenanceScheduleEditValidation(editDto);
+        when(environmentService.save(environment)).thenThrow(new RuntimeException("db unavailable"));
+
+        assertThrows(RuntimeException.class, () -> environmentModificationServiceUnderTest.edit(environment, editDto));
+
+        InOrder order = inOrder(environmentMaintenanceWindowScheduleService, environmentService);
+        order.verify(environmentMaintenanceWindowScheduleService).getEnvironmentSchedule(environmentCrn);
+        order.verify(environmentMaintenanceWindowScheduleService)
+                .applyEnvironmentScheduleOnEdit(environmentCrn, scheduleRequest);
+        order.verify(environmentService).save(environment);
+        order.verify(environmentMaintenanceWindowScheduleService)
+                .restoreEnvironmentSchedule(environmentCrn, Optional.empty());
+    }
+
+    @Test
+    void editDoesNotRestoreMaintenanceWindowScheduleWhenPostSaveFails() {
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        EnvironmentMaintenanceWindowScheduleEditRequest scheduleRequest = maintenanceWindowScheduleEditRequest();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withMaintenanceWindowSchedule(scheduleRequest)
+                .build();
+        stubMaintenanceScheduleEditValidation(editDto);
+        when(environmentDtoConverter.environmentToDto(environment))
+                .thenThrow(new RuntimeException("dto conversion failed"));
+
+        assertThrows(RuntimeException.class, () -> environmentModificationServiceUnderTest.edit(environment, editDto));
+
+        verify(environmentService).save(environment);
+        verify(environmentMaintenanceWindowScheduleService).applyEnvironmentScheduleOnEdit(
+                environment.getResourceCrn(), scheduleRequest);
+        verify(environmentMaintenanceWindowScheduleService, never())
+                .restoreEnvironmentSchedule(anyString(), any());
+    }
+
+    @Test
+    void editDoesNotRestoreMaintenanceWindowScheduleWhenSaveFailsWithoutScheduleEdit() {
+        Environment environment = environmentForMaintenanceScheduleEdit();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .build();
+        when(validatorService.validateTags(eq(editDto), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateMaintenanceWindowScheduleEdit(editDto)).thenReturn(ValidationResult.builder().build());
+        when(environmentService.save(environment)).thenThrow(new RuntimeException("db unavailable"));
+
+        assertThrows(RuntimeException.class, () -> environmentModificationServiceUnderTest.edit(environment, editDto));
+
+        verify(environmentMaintenanceWindowScheduleService, never()).getEnvironmentSchedule(anyString());
+        verify(environmentMaintenanceWindowScheduleService, never()).restoreEnvironmentSchedule(anyString(), any());
+        verify(environmentMaintenanceWindowScheduleService, never()).applyEnvironmentScheduleOnEdit(anyString(), any());
+        verify(environmentMaintenanceWindowScheduleService, never()).clearEnvironmentScheduleIfPresent(anyString());
+    }
+
+    private void stubMaintenanceScheduleEditValidation(EnvironmentEditDto editDto) {
+        when(validatorService.validateTags(eq(editDto), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateMaintenanceWindowScheduleEdit(editDto)).thenReturn(ValidationResult.builder().build());
+        when(environmentMaintenanceWindowScheduleService.getEnvironmentSchedule(anyString())).thenReturn(Optional.empty());
+    }
+
+    private static MaintenanceWindowScheduleResponse priorMaintenanceWindowSchedule() {
+        MaintenanceWindowScheduleResponse response = new MaintenanceWindowScheduleResponse();
+        response.setName("prior");
+        response.setRecurrenceKind(MaintenanceRecurrenceKind.WEEKLY.name());
+        response.setDurationMinutes(60);
+        response.setStartLocalTime("01:00");
+        response.setDayOfWeek("SATURDAY");
+        response.setTimezone("UTC");
+        return response;
+    }
+
+    private static Environment environmentForMaintenanceScheduleEdit() {
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        environment.setResourceCrn("crn:cdp:environments:us-west-1:123:environment:abc");
+        return environment;
+    }
+
+    private static EnvironmentMaintenanceWindowScheduleEditRequest maintenanceWindowScheduleEditRequest() {
+        EnvironmentMaintenanceWindowScheduleEditRequest request = new EnvironmentMaintenanceWindowScheduleEditRequest();
+        request.setRecurrenceKind(MaintenanceRecurrenceKind.WEEKLY.name());
+        request.setDurationMinutes(120);
+        request.setStartLocalTime("02:00");
+        request.setDayOfWeek("SUNDAY");
+        request.setTimezone("UTC");
+        return request;
     }
 
     private Environment environmentMock() {

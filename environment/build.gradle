@@ -85,6 +85,7 @@ dependencies {
     implementation     project(":idbmms-connector")
     implementation     project(":redbeams-api")
     implementation     project(":freeipa-api")
+    implementation     project(':maintenance-api')
     implementation     project(":externalized-compute-api")
     implementation     project(":structuredevent-service-cdp")
     implementation     project(':stack-patcher')

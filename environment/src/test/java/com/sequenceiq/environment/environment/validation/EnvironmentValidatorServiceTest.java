@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -36,6 +37,8 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.RsaPublicKeyTestUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentMaintenanceWindowScheduleEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentMaintenanceWindowScheduleRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -44,6 +47,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentTagsDtoConverter;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
@@ -62,7 +66,10 @@ import com.sequenceiq.environment.environment.validation.validators.ManagedIdent
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
+import com.sequenceiq.environment.maintenancewindow.EnvironmentMaintenanceWindowScheduleService;
+import com.sequenceiq.environment.maintenancewindow.MaintenanceServiceConditions;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
+import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentValidatorServiceTest {
@@ -118,6 +125,9 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private EnvironmentTagsDtoConverter environmentTagsDtoConverter;
 
+    @Mock
+    private ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService;
+
     private EnvironmentValidatorService underTest;
 
     private static Stream<Arguments> freeIpaCreationArguments() {
@@ -172,7 +182,8 @@ class EnvironmentValidatorServiceTest {
                 1,
                 seLinuxValidationService,
                 computeClusterEntitlementValidator,
-                environmentTagsDtoConverter);
+                environmentTagsDtoConverter,
+                maintenanceWindowScheduleService);
         lenient().when(computeClusterEntitlementValidator.validate(anyString()))
                 .thenReturn(ValidationResult.builder().build());
     }
@@ -779,6 +790,65 @@ class EnvironmentValidatorServiceTest {
 
         assertThat(result.hasError()).isTrue();
         assertThat(result.getFormattedErrors()).contains("too long", "protected");
+    }
+
+    @Test
+    void validateMaintenanceWindowScheduleEditRejectsClearWithSchedulePatch() {
+        when(maintenanceWindowScheduleService.getIfAvailable()).thenReturn(mock(EnvironmentMaintenanceWindowScheduleService.class));
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withClearMaintenanceWindowSchedule(true)
+                .withMaintenanceWindowSchedule(new EnvironmentMaintenanceWindowScheduleEditRequest())
+                .build();
+
+        ValidationResult result = underTest.validateMaintenanceWindowScheduleEdit(editDto);
+
+        assertThat(result.getFormattedErrors())
+                .contains("clearMaintenanceWindowSchedule cannot be combined with maintenanceWindowSchedule");
+    }
+
+    @Test
+    void validateMaintenanceWindowScheduleEditAllowsClearWithoutSchedulePatch() {
+        when(maintenanceWindowScheduleService.getIfAvailable()).thenReturn(mock(EnvironmentMaintenanceWindowScheduleService.class));
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withClearMaintenanceWindowSchedule(true)
+                .build();
+
+        assertFalse(underTest.validateMaintenanceWindowScheduleEdit(editDto).hasError());
+    }
+
+    @Test
+    void validateMaintenanceWindowScheduleEditRejectsScheduleOpsWhenServiceUnavailable() {
+        when(maintenanceWindowScheduleService.getIfAvailable()).thenReturn(null);
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withClearMaintenanceWindowSchedule(true)
+                .build();
+
+        ValidationResult result = underTest.validateMaintenanceWindowScheduleEdit(editDto);
+
+        assertThat(result.getFormattedErrors()).contains(MaintenanceServiceConditions.NOT_CONFIGURED_VALIDATION_ERROR);
+    }
+
+    @Test
+    void validateMaintenanceWindowScheduleCreationRejectsScheduleWhenServiceUnavailable() {
+        when(maintenanceWindowScheduleService.getIfAvailable()).thenReturn(null);
+        EnvironmentMaintenanceWindowScheduleRequest scheduleRequest = new EnvironmentMaintenanceWindowScheduleRequest();
+        scheduleRequest.setRecurrenceKind(MaintenanceRecurrenceKind.WEEKLY.name());
+        scheduleRequest.setDurationMinutes(120);
+        scheduleRequest.setStartLocalTime("02:00");
+        scheduleRequest.setDayOfWeek("SUNDAY");
+        scheduleRequest.setTimezone("UTC");
+        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
+                .withMaintenanceWindowSchedule(scheduleRequest)
+                .build();
+
+        ValidationResult result = underTest.validateMaintenanceWindowScheduleCreation(creationDto);
+
+        assertThat(result.getFormattedErrors()).contains(MaintenanceServiceConditions.NOT_CONFIGURED_VALIDATION_ERROR);
+    }
+
+    @Test
+    void validateMaintenanceWindowScheduleCreationAllowsMissingScheduleWhenServiceUnavailable() {
+        assertFalse(underTest.validateMaintenanceWindowScheduleCreation(EnvironmentCreationDto.builder().build()).hasError());
     }
 
 }

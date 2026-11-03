@@ -6,12 +6,14 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,7 @@ import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.environment.service.validation.SeLinuxValidationService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.maintenancewindow.EnvironmentMaintenanceWindowScheduleService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
@@ -79,6 +82,8 @@ public class EnvironmentCreationService {
 
     private final SeLinuxValidationService seLinuxValidationService;
 
+    private final ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService;
+
     @Value("${info.app.version}")
     private String environmentServiceVersion;
 
@@ -94,7 +99,8 @@ public class EnvironmentCreationService {
             EnvironmentRecipeService recipeService,
             OwnerAssignmentService ownerAssignmentService,
             EntitlementService entitlementService,
-            SeLinuxValidationService seLinuxValidationService) {
+            SeLinuxValidationService seLinuxValidationService,
+            ObjectProvider<EnvironmentMaintenanceWindowScheduleService> maintenanceWindowScheduleService) {
         this.environmentService = environmentService;
         validatorService = environmentValidatorService;
         this.environmentResourceService = environmentResourceService;
@@ -107,6 +113,7 @@ public class EnvironmentCreationService {
         this.ownerAssignmentService = ownerAssignmentService;
         this.entitlementService = entitlementService;
         this.seLinuxValidationService = seLinuxValidationService;
+        this.maintenanceWindowScheduleService = maintenanceWindowScheduleService;
     }
 
     public CreateEnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -136,8 +143,18 @@ public class EnvironmentCreationService {
         validateRecipes(creationDto);
         validateSecurity(creationDto);
         FlowIdentifier flowIdentifier;
+        final String scheduleEnvironmentCrn = creationDto.getCrn();
+        AtomicBoolean maintenanceScheduleCreated = new AtomicBoolean(false);
+        boolean environmentPersisted = false;
         try {
+            if (creationDto.getMaintenanceWindowSchedule() != null) {
+                maintenanceWindowScheduleService.ifAvailable(service -> {
+                    service.createEnvironmentScheduleIfPresent(scheduleEnvironmentCrn, creationDto.getMaintenanceWindowSchedule());
+                    maintenanceScheduleCreated.set(true);
+                });
+            }
             environment = environmentService.save(environment);
+            environmentPersisted = true;
             saveFreeIpaRecipes(creationDto, environment);
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(),
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getSubnetMetas),
@@ -145,11 +162,21 @@ public class EnvironmentCreationService {
             createAndSetParameters(environment, creationDto.getParameters());
             environmentService.save(environment);
             flowIdentifier = reactorFlowManager.triggerCreationFlow(
-                    environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
+                    environment.getId(), environment.getName(), creationDto.getCreator(), scheduleEnvironmentCrn);
         } catch (Exception e) {
-            environment.setStatus(EnvironmentStatus.CREATE_FAILED);
-            environment.setStatusReason(e.getMessage());
-            environmentService.save(environment);
+            if (maintenanceScheduleCreated.get()) {
+                try {
+                    maintenanceWindowScheduleService.ifAvailable(
+                            service -> service.clearEnvironmentScheduleIfPresent(scheduleEnvironmentCrn));
+                } catch (RuntimeException rollbackEx) {
+                    LOGGER.warn("Failed to roll back maintenance window schedule after environment creation failure", rollbackEx);
+                }
+            }
+            if (environmentPersisted) {
+                environment.setStatus(EnvironmentStatus.CREATE_FAILED);
+                environment.setStatusReason(e.getMessage());
+                environmentService.save(environment);
+            }
             throw e;
         }
         return CreateEnvironmentDto.builder()
@@ -248,6 +275,7 @@ public class EnvironmentCreationService {
                     creationDto.getAccountId(), environmentSubnets));
         }
         validationBuilder.merge(validateEncryptionProfile(creationDto));
+        validationBuilder.merge(validatorService.validateMaintenanceWindowScheduleCreation(creationDto));
 
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {

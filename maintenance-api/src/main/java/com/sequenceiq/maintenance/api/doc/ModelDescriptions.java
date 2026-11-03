@@ -59,6 +59,18 @@ public final class ModelDescriptions {
         }
     }
 
+    public static final class ScheduleRestoreRequest {
+
+        public static final String REQUEST = "Internal full-state restore of a maintenance window schedule by id. "
+                + "Reactivates the existing row (preserving its id and attached skips) and replaces every mutable field "
+                + "with the supplied values, including nulls. Used to compensate a failed cross-service edit.";
+
+        public static final String ID = "Id of the schedule row to restore (reactivate and overwrite)";
+
+        private ScheduleRestoreRequest() {
+        }
+    }
+
     public static final class ScheduleListParams {
 
         public static final String PARAMS = "Optional scope filter query parameters for listing schedules";

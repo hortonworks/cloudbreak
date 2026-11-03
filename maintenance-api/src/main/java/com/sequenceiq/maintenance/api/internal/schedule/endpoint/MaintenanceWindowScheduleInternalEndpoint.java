@@ -1,8 +1,10 @@
 package com.sequenceiq.maintenance.api.internal.schedule.endpoint;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -12,6 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.util.OneOfEnum;
 import com.sequenceiq.maintenance.api.doc.MaintenanceWindowScheduleInternalOpDescription;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRestoreRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,4 +45,22 @@ public interface MaintenanceWindowScheduleInternalEndpoint {
             @PathParam("scopeType") String scopeType,
             @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.SCOPE_ID, required = true)
             @PathParam("scopeId") String scopeId);
+
+    @PUT
+    @Path("scope/{scopeType}/scopeId/{scopeId}/restore")
+    @Operation(summary = MaintenanceWindowScheduleInternalOpDescription.RESTORE,
+            description = MaintenanceWindowScheduleInternalOpDescription.RESTORE_NOTES,
+            operationId = "restoreMaintenanceWindowScheduleInternal")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Schedule restored", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid request")
+    })
+    MaintenanceWindowScheduleResponse restore(
+            @QueryParam("accountId") @NotEmpty String accountId,
+            @OneOfEnum(enumClass = MaintenanceScopeType.class, message = "Value must be one of the followings %s", fieldName = "scopeType")
+            @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.SCOPE_TYPE, required = true)
+            @PathParam("scopeType") String scopeType,
+            @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.SCOPE_ID, required = true)
+            @PathParam("scopeId") String scopeId,
+            @Valid MaintenanceWindowScheduleRestoreRequest request);
 }

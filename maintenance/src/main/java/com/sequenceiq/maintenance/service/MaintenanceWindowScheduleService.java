@@ -23,6 +23,7 @@ import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeTypes;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowEffectiveScheduleParams;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRequest;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRestoreRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.UpdateMaintenanceWindowScheduleRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowEffectiveScheduleResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleListResponse;
@@ -162,6 +163,33 @@ public class MaintenanceWindowScheduleService {
         schedule.setUpdatedAt(clock.getCurrentTimeMillis());
         schedule.setUpdatedBy(userCrn);
         return scheduleConverter.toResponse(scheduleRepository.save(schedule));
+    }
+
+    /**
+     * Full-state restore used to compensate a failed cross-service edit. Reactivates the existing schedule row by id
+     * (preserving its id and attached {@code maintenance_window_skip} rows) and replaces every mutable field with the
+     * supplied values, including nulls. Falls back to a fresh create only when the row is genuinely gone, which is not
+     * expected under soft delete.
+     */
+    @Transactional(TxType.REQUIRED)
+    public MaintenanceWindowScheduleResponse restore(
+            String accountId, MaintenanceScopeType scopeType, String scopeId,
+            MaintenanceWindowScheduleRestoreRequest request, String userCrn) {
+        validateScope(scopeType, scopeId, accountId);
+        MaintenanceWindowSchedule existing = request.getId() == null
+                ? null
+                : scheduleRepository.findByIdAndAccountId(request.getId(), accountId)
+                        .filter(schedule -> schedule.getScopeType() == scopeType && scopeId.equals(schedule.getScopeId()))
+                        .orElse(null);
+        if (existing == null) {
+            return create(request, accountId, userCrn);
+        }
+        scheduleConverter.applyRequest(existing, request);
+        existing.setArchived(false);
+        scheduleValidator.validate(existing);
+        existing.setUpdatedAt(clock.getCurrentTimeMillis());
+        existing.setUpdatedBy(userCrn);
+        return scheduleConverter.toResponse(scheduleRepository.save(existing));
     }
 
     public MaintenanceWindowScheduleResponse get(String accountId, MaintenanceScopeType scopeType, String scopeId) {

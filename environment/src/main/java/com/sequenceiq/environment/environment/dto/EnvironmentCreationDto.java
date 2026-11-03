@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentMaintenanceWindowScheduleRequest;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -87,6 +88,8 @@ public class EnvironmentCreationDto {
 
     private final String jumpgateEnvironmentCrn;
 
+    private final EnvironmentMaintenanceWindowScheduleRequest maintenanceWindowSchedule;
+
     private EnvironmentCreationDto(Builder builder) {
         name = builder.name;
         description = builder.description;
@@ -123,6 +126,11 @@ public class EnvironmentCreationDto {
         secretEncryptionEnabled = builder.secretEncryptionEnabled;
         remoteEnvironmentCrn = builder.remoteEnvironmentCrn;
         jumpgateEnvironmentCrn = builder.jumpgateEnvironmentCrn;
+        maintenanceWindowSchedule = builder.maintenanceWindowSchedule;
+    }
+
+    public EnvironmentMaintenanceWindowScheduleRequest getMaintenanceWindowSchedule() {
+        return maintenanceWindowSchedule;
     }
 
     public static Builder builder() {
@@ -340,6 +348,8 @@ public class EnvironmentCreationDto {
 
         private String jumpgateEnvironmentCrn;
 
+        private EnvironmentMaintenanceWindowScheduleRequest maintenanceWindowSchedule;
+
         private Builder() {
         }
 
@@ -500,6 +510,11 @@ public class EnvironmentCreationDto {
 
         public Builder withJumpgateEnvironmentCrn(String jumpgateEnvironmentCrn) {
             this.jumpgateEnvironmentCrn = jumpgateEnvironmentCrn;
+            return this;
+        }
+
+        public Builder withMaintenanceWindowSchedule(EnvironmentMaintenanceWindowScheduleRequest maintenanceWindowSchedule) {
+            this.maintenanceWindowSchedule = maintenanceWindowSchedule;
             return this;
         }
 

@@ -110,6 +110,10 @@ environment:
     enabled: false
     url: http://localhost:8091
     contextPath: /externalizedcompute
+  maintenance:
+    url:
+    contextPath: /maintenance
+    serviceid:
   db:
     host: localhost
     port: 5432

@@ -18,4 +18,6 @@ public interface MaintenanceWindowScheduleRepository extends JpaRepository<Maint
 
     Optional<MaintenanceWindowSchedule> findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(
             String accountId, MaintenanceScopeType scopeType, String scopeId);
+
+    Optional<MaintenanceWindowSchedule> findByIdAndAccountId(Long id, String accountId);
 }
