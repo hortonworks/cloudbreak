@@ -532,7 +532,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (internalStackV4Request != null) {
             if (internalStackV4Request.getNotificationState() == null) {
                 internalStackV4Request.setNotificationState(notificationState);
-            } else if (!notificationState.equals(internalStackV4Request.getArchitecture())) {
+            } else if (!notificationState.equals(internalStackV4Request.getNotificationState())) {
                 throw new BadRequestException(
                         String.format("The request contains %s notificationState but the internal stack request contains %s notificationState.",
                                 notificationState, internalStackV4Request.getNotificationState()));

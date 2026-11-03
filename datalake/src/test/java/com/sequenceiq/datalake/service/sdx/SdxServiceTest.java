@@ -90,6 +90,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -746,6 +747,71 @@ class SdxServiceTest {
 
         StackV4Request savedStackV4Request = JsonUtil.readValue(sdxClusterArgumentCaptor.getValue().getStackRequest(), StackV4Request.class);
         assertEquals(8, savedStackV4Request.getJavaVersion());
+    }
+
+    @Test
+    void testNotificationStateShouldBeSetOnInternalStackRequestWhenItIsMissing() throws IOException, TransactionExecutionException {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.1", CUSTOM);
+        sdxClusterRequest.setNotificationState(NotificationState.ENABLED);
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setCluster(new ClusterV4Request());
+
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        when(sdxClusterRepository.save(sdxClusterArgumentCaptor.capture())).thenReturn(mock(SdxCluster.class));
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
+        mockEnvironmentCall(sdxClusterRequest, AWS, null);
+        mockTransactionServiceRequired();
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
+
+        SdxCluster savedSdxCluster = sdxClusterArgumentCaptor.getValue();
+        assertEquals(NotificationState.ENABLED, savedSdxCluster.getNotificationState());
+        StackV4Request savedStackV4Request = JsonUtil.readValue(savedSdxCluster.getStackRequest(), StackV4Request.class);
+        assertEquals(NotificationState.ENABLED, savedStackV4Request.getNotificationState());
+    }
+
+    @Test
+    void testNotificationStateShouldBeAcceptedWhenItMatchesTheInternalStackRequest() throws IOException, TransactionExecutionException {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.1", CUSTOM);
+        sdxClusterRequest.setNotificationState(NotificationState.DISABLED);
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setCluster(new ClusterV4Request());
+        stackV4Request.setNotificationState(NotificationState.DISABLED);
+
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        when(sdxClusterRepository.save(sdxClusterArgumentCaptor.capture())).thenReturn(mock(SdxCluster.class));
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
+        mockEnvironmentCall(sdxClusterRequest, AWS, null);
+        mockTransactionServiceRequired();
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
+
+        SdxCluster savedSdxCluster = sdxClusterArgumentCaptor.getValue();
+        assertEquals(NotificationState.DISABLED, savedSdxCluster.getNotificationState());
+        StackV4Request savedStackV4Request = JsonUtil.readValue(savedSdxCluster.getStackRequest(), StackV4Request.class);
+        assertEquals(NotificationState.DISABLED, savedStackV4Request.getNotificationState());
+    }
+
+    @Test
+    void testNotificationStateShouldThrowBadRequestWhenItDiffersFromTheInternalStackRequest() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.1", CUSTOM);
+        sdxClusterRequest.setNotificationState(NotificationState.ENABLED);
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setCluster(new ClusterV4Request());
+        stackV4Request.setNotificationState(NotificationState.DISABLED);
+
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
+        mockEnvironmentCall(sdxClusterRequest, AWS, null);
+
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("The request contains ENABLED notificationState but the internal stack request contains DISABLED notificationState.");
+        verify(sdxClusterRepository, times(0)).save(any());
     }
 
     @Test
