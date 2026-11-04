@@ -12,7 +12,12 @@
 {%- else %}
   {%- set cm_services = common_cm_services %}
 {%- endif %}
-{%- set freeipa_services = '|cdp-freeipa-healthagent|kadmin|krb5kdc|named-pkcs11|ipa|ipa-dnskeysyncd|ipa-custodia|sshd|sssd' %}
+{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int > 8 %}
+  {%- set dns_service = 'named' %}
+{%- else %}
+  {%- set dns_service = 'named-pkcs11' %}
+{%- endif %}
+{%- set freeipa_services = '|cdp-freeipa-healthagent|kadmin|krb5kdc|' + dns_service + '|ipa|ipa-dnskeysyncd|ipa-custodia|sshd|sssd' %}
 {%- if monitoring.type == "freeipa" %}
   {%- set systemd_units_include = common_services + salt_services + freeipa_services %}
 {%- else %}
