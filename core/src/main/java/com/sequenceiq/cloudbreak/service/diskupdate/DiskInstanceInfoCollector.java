@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -89,15 +90,8 @@ public class DiskInstanceInfoCollector {
         List<InstanceResourceDto.VolumeDto> volumesFromLsblk = filter(lsblkLines);
 
         Map<String, InstanceResourceDto.VolumeDto> diskMap = volumesFromLsblk.stream()
-                .collect(toMap(d -> {
-                    if (cloudPlatform.equals(CloudPlatform.AZURE.toString()) && d.hctl() != null) {
-                        return LUN_DEVICE_PATH_PREFIX + d.hctl().split(":")[LUN_INDEX];
-                    }
-                    if (cloudPlatform.equals(CloudPlatform.AWS.toString()) && d.serial() != null) {
-                        return d.serial().replaceFirst("^vol", "vol-");
-                    }
-                    return d.deviceName();
-                }, d -> d));
+                .flatMap(volume -> resolveDiskKey(volume, cloudPlatform, instanceId).map(key -> Map.entry(key, volume)).stream())
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (first, second) -> first));
 
         instanceResourceDto.setInstanceId(instanceId);
 
@@ -114,6 +108,27 @@ public class DiskInstanceInfoCollector {
         }
         instanceResourceDto.setVolumes(updatedVolumes);
         return instanceResourceDto;
+    }
+
+    private Optional<String> resolveDiskKey(InstanceResourceDto.VolumeDto volume, String cloudPlatform, String instanceId) {
+        if (cloudPlatform.equals(CloudPlatform.AZURE.toString())) {
+            String hctl = volume.hctl();
+            String[] hctlParts = hctl == null ? null : hctl.split(":");
+            if (!hasScsiLun(hctlParts)) {
+                LOGGER.debug("Skipping disk on instance {}: no SCSI HCTL (likely local ephemeral disk) (hctl='{}', device='{}')",
+                        instanceId, hctl, volume.deviceName());
+                return Optional.empty();
+            }
+            return Optional.of(LUN_DEVICE_PATH_PREFIX + hctlParts[LUN_INDEX]);
+        }
+        if (cloudPlatform.equals(CloudPlatform.AWS.toString()) && volume.serial() != null) {
+            return Optional.of(volume.serial().replaceFirst("^vol", "vol-"));
+        }
+        return Optional.ofNullable(volume.deviceName());
+    }
+
+    private boolean hasScsiLun(String[] hctlParts) {
+        return hctlParts != null && hctlParts.length > LUN_INDEX;
     }
 
     private List<InstanceResourceDto.VolumeDto> filter(Collection<InstanceResourceDto.VolumeDto> lsblkLines) {
