@@ -69,17 +69,48 @@ class DiskInstanceInfoCollectorTest {
 
     @Test
     void testGetInstanceResourceDtoAzure() {
-        VolumeRecord vol = new VolumeRecord("vol1", "sdc", 100, "type1");
+        VolumeRecord vol = new VolumeRecord("volA", "/dev/disk/azure/scsi[1-9]/lun3", 100, "type1");
         Map<String, List<VolumeRecord>> cloudMetadata = Map.of("inst1", List.of(vol));
 
         MultiValuedMap<String, InstanceResourceDto.VolumeDto> lsblkLines = new ArrayListValuedHashMap<>();
-        lsblkLines.put("host", new InstanceResourceDto.VolumeDto(null, "sdc", "/hadoopfs/", 100, "disk", "uuid", "sdc", null, null));
+        lsblkLines.put("host", new InstanceResourceDto.VolumeDto(null, "sdc", "/hadoopfs/", 100, "disk", "uuid", "serialX", "1:0:0:3", null));
 
         InstanceResourceDto result = underTest.getInstanceResourceDto(lsblkLines.get("host"), cloudMetadata, "inst1", "AZURE");
 
         assertNotNull(result);
         assertEquals(1, result.getVolumes().size());
-        assertEquals("sdc", result.getVolumes().get(0).deviceName());
+        assertEquals("volA", result.getVolumes().get(0).volumeId());
+    }
+
+    @Test
+    void testGetInstanceResourceDtoAzureBlankHctlSkipped() {
+        VolumeRecord vol = new VolumeRecord("volA", "/dev/disk/azure/scsi[1-9]/lun3", 100, "type1");
+        Map<String, List<VolumeRecord>> cloudMetadata = Map.of("inst1", List.of(vol));
+
+        MultiValuedMap<String, InstanceResourceDto.VolumeDto> lsblkLines = new ArrayListValuedHashMap<>();
+        lsblkLines.put("host", new InstanceResourceDto.VolumeDto(null, "nvme0n2", "/hadoopfs/ephfs1", 100, "disk", "uuid", "serialX", "", null));
+        lsblkLines.put("host", new InstanceResourceDto.VolumeDto(null, "nvme0n3", "/hadoopfs/ephfs2", 100, "disk", "uuid", "serialY", "1:0:0", null));
+
+        InstanceResourceDto result = underTest.getInstanceResourceDto(lsblkLines.get("host"), cloudMetadata, "inst1", "AZURE");
+
+        assertNotNull(result);
+        assertTrue(result.getVolumes().isEmpty());
+    }
+
+    @Test
+    void testGetInstanceResourceDtoAzureMixedSkipsOnlyBadDisk() {
+        VolumeRecord vol = new VolumeRecord("volA", "/dev/disk/azure/scsi[1-9]/lun3", 100, "type1");
+        Map<String, List<VolumeRecord>> cloudMetadata = Map.of("inst1", List.of(vol));
+
+        MultiValuedMap<String, InstanceResourceDto.VolumeDto> lsblkLines = new ArrayListValuedHashMap<>();
+        lsblkLines.put("host", new InstanceResourceDto.VolumeDto(null, "sdc", "/hadoopfs/", 100, "disk", "uuid", "serialX", "1:0:0:3", null));
+        lsblkLines.put("host", new InstanceResourceDto.VolumeDto(null, "nvme0n2", "/hadoopfs/ephfs1", 100, "disk", "uuid", "serialY", "", null));
+
+        InstanceResourceDto result = underTest.getInstanceResourceDto(lsblkLines.get("host"), cloudMetadata, "inst1", "AZURE");
+
+        assertNotNull(result);
+        assertEquals(1, result.getVolumes().size());
+        assertEquals("volA", result.getVolumes().get(0).volumeId());
     }
 
     @Test

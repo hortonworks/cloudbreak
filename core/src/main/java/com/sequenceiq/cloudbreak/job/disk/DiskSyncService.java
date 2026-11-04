@@ -67,7 +67,7 @@ public class DiskSyncService {
         }
         Stack stack = stackService.getByIdWithLists(stackDto.getId());
         try {
-            if (!stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)) {
+            if (DiskSyncMode.DRY_RUN != diskSyncMode && !stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)) {
                 LOGGER.warn("Disk sync will be skipped for {} stack, because its status is not valid or not all nodes are reachable, status: {}",
                         stack.getName(), stack.getStatus());
                 throw new CloudbreakServiceException("The stack is either not in a valid state or not all nodes or reachable for disk sync to run!");
