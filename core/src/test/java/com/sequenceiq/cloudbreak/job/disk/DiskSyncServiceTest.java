@@ -66,7 +66,7 @@ class DiskSyncServiceTest {
         when(stackService.getByIdWithLists(1L)).thenReturn(stack);
         when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(false);
 
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN));
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stackDto, DiskSyncMode.PERSIST));
 
         verify(eventService).fireCloudbreakEvent(eq(1L), eq("UPDATE_FAILED"), eq(DISK_SYNC_FAILED), anyList());
         assertEquals("Exception while trying to sync disks - The stack is either not in a valid state or not all nodes or reachable for disk sync to run!",
@@ -80,7 +80,6 @@ class DiskSyncServiceTest {
         StackView stackView = mock(StackView.class);
         when(stackDto.getId()).thenReturn(1L);
         when(stackService.getByIdWithLists(1L)).thenReturn(stack);
-        when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(true);
         when(stackDto.getCloudPlatform()).thenReturn("AWS");
         when(stackDto.getStack()).thenReturn(stackView);
         when(stackView.getProviderSyncStates()).thenReturn(Set.of());
@@ -111,9 +110,25 @@ class DiskSyncServiceTest {
         when(stackService.getByIdWithLists(1L)).thenReturn(stack);
         when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenThrow(new RuntimeException("error"));
 
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN));
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stackDto, DiskSyncMode.PERSIST));
 
         verify(eventService).fireCloudbreakEvent(eq(1L), eq("UPDATE_FAILED"), eq(DISK_SYNC_FAILED), anyList());
         assertEquals("Exception while trying to sync disks - error", exception.getMessage());
+    }
+
+    @Test
+    void testSyncResourcesWithPreValidatedStackSkipsReloadAndReachabilityCheck() {
+        StackDto stackDto = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stackDto.getId()).thenReturn(1L);
+        when(stackDto.getCloudPlatform()).thenReturn("AWS");
+        when(stackDto.getStack()).thenReturn(stackView);
+        when(stackView.getProviderSyncStates()).thenReturn(Set.of());
+        when(stackDto.getInstanceGroupDtos()).thenReturn(List.of());
+        when(resourceService.findAllByStackIdAndResourceTypeIn(any(), any())).thenReturn(Collections.emptyList());
+
+        underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN);
+
+        verifyNoInteractions(stackStatusAndReachabilityValidatorUtil);
     }
 }
