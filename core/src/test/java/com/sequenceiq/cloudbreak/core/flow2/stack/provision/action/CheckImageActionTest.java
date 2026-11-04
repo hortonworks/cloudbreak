@@ -25,13 +25,13 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @ExtendWith(MockitoExtension.class)
 public class CheckImageActionTest {

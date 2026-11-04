@@ -35,6 +35,7 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.state.State;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -52,7 +53,6 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)

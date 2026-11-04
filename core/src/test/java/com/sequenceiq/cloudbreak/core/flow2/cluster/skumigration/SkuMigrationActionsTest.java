@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.handler.SkuMigr
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.handler.check.CheckSkuRequest;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -44,7 +45,6 @@ import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @ExtendWith(MockitoExtension.class)
 class SkuMigrationActionsTest {

@@ -33,6 +33,7 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -47,7 +48,6 @@ import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @ExtendWith(MockitoExtension.class)
 class DatalakeEnableSeLinuxActionsTest {

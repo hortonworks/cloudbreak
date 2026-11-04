@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
@@ -400,6 +401,7 @@ class UpdateTrustedRealmFlowIntegrationTest extends AbstractFlowIntegrationTest 
             UpdateTrustedRealmFailedAction.class,
             UpdateTrustedRealmStatusService.class,
             UpdateTrustedRealmHandler.class,
+            ErrorHandlerAwareReactorEventFactory.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",

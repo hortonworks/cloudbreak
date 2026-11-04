@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.core.flow2.CloudbreakFlowInformation;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.cloudbreak.core.flow2.service.CbEventParameterFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -47,7 +48,8 @@ import com.sequenceiq.notification.WebSocketNotificationService;
         CloudbreakMetricService.class,
         Clock.class,
         CbEventParameterFactory.class,
-        ReactorNotifier.class})
+        ReactorNotifier.class,
+        ErrorHandlerAwareReactorEventFactory.class})
 public class FlowIntegrationTestConfig {
 
     @MockBean

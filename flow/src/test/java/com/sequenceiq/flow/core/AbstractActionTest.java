@@ -36,10 +36,10 @@ import org.springframework.statemachine.config.model.DefaultStateMachineModel;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.FlowEdgeConfig;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 class AbstractActionTest {

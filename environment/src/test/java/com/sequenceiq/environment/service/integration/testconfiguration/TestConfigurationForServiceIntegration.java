@@ -6,11 +6,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.environment.service.LoadBalancerPollerConfig;
 import com.sequenceiq.environment.service.integration.DummySecretService;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.notification.config.CDPConsoleUrlProvider;
 import com.sequenceiq.notification.repository.NotificationDataAccessService;

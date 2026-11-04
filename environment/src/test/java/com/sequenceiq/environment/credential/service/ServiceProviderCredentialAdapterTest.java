@@ -34,13 +34,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationRespons
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.environment.environment.verification.CDPServicePolicyVerification;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 class ServiceProviderCredentialAdapterTest {
 

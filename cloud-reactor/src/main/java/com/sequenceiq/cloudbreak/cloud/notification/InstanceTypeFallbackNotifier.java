@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.notification.model.InstanceTypeFallbackEvent;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @Component
 public class InstanceTypeFallbackNotifier implements InstanceTypeFallbackReporter {

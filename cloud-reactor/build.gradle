@@ -16,7 +16,6 @@ jar {
 dependencies {
     api project(':cloud-reactor-api')
     implementation project(':common-model')
-    implementation project(':flow')
     implementation project(':auth-connector')
 
     implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: "$slf4jApiVersion"
@@ -25,6 +24,7 @@ dependencies {
     implementation group: 'org.freemarker',                name: 'freemarker',                     version: "$freemarkerVersion"
     implementation group: 'com.dyngr',                     name: 'polling',                        version: "$dyngrPollingVersion"
 
+    testImplementation project(':flow')
     testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: "$mockitoVersion"
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: "$springBootVersion"
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: "$springBootVersion"

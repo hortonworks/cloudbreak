@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
@@ -261,7 +262,8 @@ class RotateRdsCertificateFlowIntegrationTest extends AbstractFlowIntegrationTes
             SecurityConfigService.class,
             SecurityConfigRepository.class,
             RotateRdsCertificateService.class,
-            ClusterManagerRestartService.class
+            ClusterManagerRestartService.class,
+            ErrorHandlerAwareReactorEventFactory.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",

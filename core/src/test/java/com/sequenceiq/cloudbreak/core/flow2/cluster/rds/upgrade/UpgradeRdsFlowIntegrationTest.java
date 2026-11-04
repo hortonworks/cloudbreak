@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
@@ -224,7 +225,8 @@ class UpgradeRdsFlowIntegrationTest extends AbstractFlowIntegrationTest {
             StartServicesHandler.class,
             InstallPostgresPackagesHandler.class,
             MigrateAttachedDatahubsDBSettingsHandler.class,
-            UpdatePostgresVersionHandler.class
+            UpdatePostgresVersionHandler.class,
+            ErrorHandlerAwareReactorEventFactory.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",

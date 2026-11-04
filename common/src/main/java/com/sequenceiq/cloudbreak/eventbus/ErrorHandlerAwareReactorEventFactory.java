@@ -1,4 +1,4 @@
-package com.sequenceiq.flow.reactor;
+package com.sequenceiq.cloudbreak.eventbus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 /**

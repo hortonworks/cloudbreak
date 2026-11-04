@@ -8,12 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventSenderService;
 import com.sequenceiq.cloudbreak.structuredevent.conf.StructuredEventEnablementConfig;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @Component
 public class LegacyAsyncAuditStructuredEventSender implements StructuredEventSenderService {

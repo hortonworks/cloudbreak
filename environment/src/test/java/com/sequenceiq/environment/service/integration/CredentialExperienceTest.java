@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
@@ -346,6 +347,7 @@ public class CredentialExperienceTest {
             TransactionMetricsService.class,
             Clock.class,
             HttpWebSocketNotificationSenderService.class,
+            ErrorHandlerAwareReactorEventFactory.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",

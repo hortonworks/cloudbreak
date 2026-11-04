@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -55,7 +56,8 @@ import com.sequenceiq.notification.WebSocketNotificationService;
         FreeIpaMetricService.class,
         Clock.class,
         FreeIpaEventParameterFactory.class,
-        FreeIpaFlowManager.class})
+        FreeIpaFlowManager.class,
+        ErrorHandlerAwareReactorEventFactory.class})
 public class FlowIntegrationTestConfig {
 
     @MockBean

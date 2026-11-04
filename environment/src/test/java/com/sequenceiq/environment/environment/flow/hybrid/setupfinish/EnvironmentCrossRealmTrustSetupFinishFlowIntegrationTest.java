@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
+import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
@@ -360,7 +361,8 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
             Clock.class,
             EventSender.class,
             EntitlementService.class,
-            SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter.class
+            SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter.class,
+            ErrorHandlerAwareReactorEventFactory.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",
