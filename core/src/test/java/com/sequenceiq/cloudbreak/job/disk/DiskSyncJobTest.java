@@ -17,8 +17,11 @@ import org.quartz.JobExecutionException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskSyncMode;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackStatusAndReachabilityValidatorUtil;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,7 +30,13 @@ public class DiskSyncJobTest {
     private static final Long STACK_ID = 1L;
 
     @Mock
-    private StackDtoService stackService;
+    private StackDtoService stackDtoService;
+
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private StackStatusAndReachabilityValidatorUtil stackStatusAndReachabilityValidatorUtil;
 
     @Mock
     private DiskSyncConfig config;
@@ -63,7 +72,7 @@ public class DiskSyncJobTest {
         when(config.isDiskSyncEnabled()).thenReturn(true);
         when(flowLogService.isOtherFlowRunning(STACK_ID)).thenReturn(true);
         StackDto stack = mock(StackDto.class);
-        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
 
         underTest.executeJob(mock(JobExecutionContext.class));
 
@@ -76,11 +85,30 @@ public class DiskSyncJobTest {
         when(flowLogService.isOtherFlowRunning(STACK_ID)).thenReturn(false);
         StackDto stack = mock(StackDto.class);
         when(stack.getStatus()).thenReturn(Status.AVAILABLE);
-        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        Stack stackWithLists = mock(Stack.class);
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stackWithLists);
+        when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stackWithLists)).thenReturn(true);
 
         underTest.executeJob(mock(JobExecutionContext.class));
 
         verify(diskSyncService, times(1)).syncResources(stack, DiskSyncMode.DRY_RUN);
+    }
+
+    @Test
+    public void testExecuteJobWhenNodesAreNotReachable() throws JobExecutionException {
+        when(config.isDiskSyncEnabled()).thenReturn(true);
+        when(flowLogService.isOtherFlowRunning(STACK_ID)).thenReturn(false);
+        StackDto stack = mock(StackDto.class);
+        when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        Stack stackWithLists = mock(Stack.class);
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stackWithLists);
+        when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stackWithLists)).thenReturn(false);
+
+        underTest.executeJob(mock(JobExecutionContext.class));
+
+        verify(diskSyncService, times(0)).syncResources(stack, DiskSyncMode.DRY_RUN);
     }
 
     @Test
@@ -89,7 +117,7 @@ public class DiskSyncJobTest {
         when(flowLogService.isOtherFlowRunning(STACK_ID)).thenReturn(false);
         StackDto stack = mock(StackDto.class);
         when(stack.getStatus()).thenReturn(Status.CREATE_IN_PROGRESS);
-        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
 
         underTest.executeJob(mock(JobExecutionContext.class));
 

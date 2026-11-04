@@ -13,10 +13,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskSyncMode;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackStatusAndReachabilityValidatorUtil;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @DisallowConcurrentExecution
@@ -26,7 +29,13 @@ public class DiskSyncJob extends StatusCheckerJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(DiskSyncJob.class);
 
     @Inject
-    private StackDtoService stackService;
+    private StackDtoService stackDtoService;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private StackStatusAndReachabilityValidatorUtil stackStatusAndReachabilityValidatorUtil;
 
     @Inject
     private DiskSyncConfig config;
@@ -47,7 +56,7 @@ public class DiskSyncJob extends StatusCheckerJob {
             LOGGER.info("DiskSyncJob cannot run, because feature is disabled.");
             return;
         }
-        StackDto stack = stackService.getById(getLocalIdAsLong());
+        StackDto stack = stackDtoService.getById(getLocalIdAsLong());
         Status status = stack.getStatus();
         if (flowLogService.isOtherFlowRunning(stackId)) {
             LOGGER.info("DiskSyncJob cannot run, because flow is running.");
@@ -55,6 +64,11 @@ public class DiskSyncJob extends StatusCheckerJob {
             LOGGER.info("DiskSyncJob job will be unscheduled, stack state is {}", status);
             jobService.deregister(context.getJobDetail().getKey());
         } else if (status.isAvailable()) {
+            Stack stackWithLists = stackService.getByIdWithLists(getLocalIdAsLong());
+            if (!stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stackWithLists)) {
+                LOGGER.info("DiskSyncJob will not run for stack {}, because its status is not valid or not all nodes are reachable.", stackId);
+                return;
+            }
             LOGGER.info("DiskSyncJob will run...");
             diskSyncService.syncResources(stack, DiskSyncMode.DRY_RUN);
         } else {
@@ -64,7 +78,7 @@ public class DiskSyncJob extends StatusCheckerJob {
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
-        return Optional.ofNullable(stackService.getStackViewById(getLocalIdAsLong()));
+        return Optional.ofNullable(stackDtoService.getStackViewById(getLocalIdAsLong()));
     }
 
     private Long getStackId() {
