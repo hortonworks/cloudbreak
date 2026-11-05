@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Component
 public class EmbeddedDbUpgradeFlowTriggersFactory {
@@ -65,14 +66,18 @@ public class EmbeddedDbUpgradeFlowTriggersFactory {
                 ? stackDto.getExternalDatabaseEngineVersion() : DEFAULT_DB_VERSION;
         boolean versionsAreDifferent = !targetVersion.equals(currentDbVersion);
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.fromVersion(targetVersion);
-        if (upgradeRequested && embeddedDBOnAttachedDisk && versionsAreDifferent && targetMajorVersion != null) {
-            LOGGER.debug("Embedded db upgrade is possible and needed.");
+        TargetMajorVersion currentVersion = TargetMajorVersion.fromVersion(currentDbVersion);
+        VersionComparator versionComparator = new VersionComparator();
+        if (upgradeRequested && embeddedDBOnAttachedDisk && versionsAreDifferent && targetMajorVersion != null
+                && (currentVersion == null
+                || versionComparator.compare(targetMajorVersion.convertToMajorVersion(), currentVersion.convertToMajorVersion()) > 0)) {
+            LOGGER.debug("Embedded db upgrade is possible and needed. Current version: [{}] Target version: [{}]", currentDbVersion, targetVersion);
             return targetMajorVersion;
         } else {
             LOGGER.debug("Check of embedded db upgrade necessity has evaluated to False. At least one of the following conditions is false:"
-                    + ", os upgrade requested: {}, embedded database is on attached disk: {}, target db version is different: {}"
-                    + ", targetMajorVersion is valid: {}",
-                    upgradeRequested, embeddedDBOnAttachedDisk, versionsAreDifferent, targetMajorVersion != null);
+                            + ", os upgrade requested: {}, embedded database is on attached disk: {}, target db version is different: {}"
+                            + ", targetMajorVersion : {}, currentVersion : {}",
+                    upgradeRequested, embeddedDBOnAttachedDisk, versionsAreDifferent, targetMajorVersion, currentVersion);
             return null;
         }
     }
