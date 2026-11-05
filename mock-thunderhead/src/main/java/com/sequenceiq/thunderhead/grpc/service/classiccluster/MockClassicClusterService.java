@@ -3,7 +3,7 @@ package com.sequenceiq.thunderhead.grpc.service.classiccluster;
 import static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.UNRECOGNIZED;
 import static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.UNSET;
 import static com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider.API_V_51;
-import static com.sequenceiq.thunderhead.service.ClassicClusterService.CLUSTER_PROXY_CONFIG_SERVICE_NAME;
+import static com.sequenceiq.thunderhead.service.ClassicClusterService.CM_SERVICE_NAME;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -151,7 +151,7 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
 
     private HttpClientConfig getHttpClientConfig(ClassicCluster classicCluster) {
         return new HttpClientConfig(classicCluster.getUrl())
-                .withClusterProxy(clusterProxyConfiguration.getClusterProxyUrl(), classicCluster.getCrn(), CLUSTER_PROXY_CONFIG_SERVICE_NAME);
+                .withClusterProxy(clusterProxyConfiguration.getClusterProxyUrl(), classicCluster.getCrn(), CM_SERVICE_NAME);
     }
 
     private String getPvcCrn(ClassicCluster classicCluster) {

@@ -29,7 +29,9 @@ import com.sequenceiq.thunderhead.util.MockResponseLoader;
 @Service
 public class ClassicClusterService implements LoadResourcesForAccountIdService {
 
-    public static final String CLUSTER_PROXY_CONFIG_SERVICE_NAME = "cloudera-manager";
+    public static final String CM_SERVICE_NAME = "cloudera-manager";
+
+    public static final String SMART_ROUTER_SERVICE_NAME = "smart-router";
 
     @Value("${mock.classicCluster.jsonPath:}")
     private String classicClustersJsonPath;
@@ -99,16 +101,26 @@ public class ClassicClusterService implements LoadResourcesForAccountIdService {
     }
 
     private List<ClusterServiceConfig> getClusterServiceConfigs(ClassicCluster classicCluster) {
-        ClusterServiceConfig clusterServiceConfig = new ClusterServiceConfig(
-                CLUSTER_PROXY_CONFIG_SERVICE_NAME,
+        List<ClusterServiceConfig> clusterServiceConfigs = new ArrayList<>();
+        clusterServiceConfigs.add(new ClusterServiceConfig(
+                CM_SERVICE_NAME,
                 List.of(classicCluster.getUrl()),
                 null,
                 false,
                 getCredentials(classicCluster),
                 null,
                 null
-        );
-        return List.of(clusterServiceConfig);
+        ));
+        clusterServiceConfigs.add(new ClusterServiceConfig(
+                SMART_ROUTER_SERVICE_NAME,
+                List.of(classicCluster.getUrl().replaceAll(":\\d+", ":18443")),
+                null,
+                false,
+                getCredentials(classicCluster),
+                null,
+                null
+        ));
+        return clusterServiceConfigs;
     }
 
     private List<ClusterServiceCredential> getCredentials(ClassicCluster classicCluster) {
