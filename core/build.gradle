@@ -246,7 +246,6 @@ dependencies {
   implementation project(':usage-collection')
   implementation project(':cluster-dns-connector')
   implementation project(':cluster-proxy')
-  implementation project(':status-checker')
   implementation project(':metrics-client')
   implementation project(':telemetry-common')
   implementation project(":notification-sender")

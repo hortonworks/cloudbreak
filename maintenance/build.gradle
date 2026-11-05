@@ -112,7 +112,6 @@ dependencies {
   implementation project(':auth-connector')
   implementation project(':common')
   implementation project(':service-common')
-  implementation project(':status-checker')
   implementation project(':structuredevent-service-cdp')
   implementation project(':usage-collection')
 

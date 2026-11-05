@@ -75,7 +75,6 @@ dependencies {
   implementation project(':datalake-api')
   implementation project(':environment-api')
   implementation project(':redbeams-api')
-  implementation project(':status-checker')
 
   implementation     project(":freeipa-api")
   implementation     project(':client-cm')

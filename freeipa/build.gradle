@@ -150,7 +150,6 @@ dependencies {
   implementation project(':core-common')
   implementation project(':datalake-api')
   implementation project(':cluster-proxy')
-  implementation project(':status-checker')
   implementation project(':template-manager-tag')
   implementation project(':cloud-aws-cloudformation')
   implementation project(':cloud-aws-native')

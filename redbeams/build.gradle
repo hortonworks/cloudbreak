@@ -120,7 +120,6 @@ dependencies {
   implementation project(':cloud-reactor-api')
   implementation project(':environment-api')
   implementation project(':datalake-api')
-  implementation project(':status-checker')
   implementation project(':cloud-common')
   implementation project(':cloud-azure')
   implementation project(':cloud-template')

@@ -87,7 +87,6 @@ dependencies {
     implementation     project(":freeipa-api")
     implementation     project(":externalized-compute-api")
     implementation     project(":structuredevent-service-cdp")
-    implementation     project(":status-checker")
     implementation     project(':stack-patcher')
     implementation     project(":template-manager-tag")
     implementation     project(':cluster-dns-connector')
