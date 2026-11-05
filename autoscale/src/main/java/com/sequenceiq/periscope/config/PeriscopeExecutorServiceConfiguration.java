@@ -15,7 +15,7 @@ import com.sequenceiq.periscope.utils.MetricUtils;
 @Configuration
 public class PeriscopeExecutorServiceConfiguration {
 
-    @Value("${periscope.executorservice.pool.size:60}")
+    @Value("${periscope.executorservice.pool.size:70}")
     private int executorServicePoolSize;
 
     @Value("${periscope.executorservice.monitor.time.pool.size:20}")
