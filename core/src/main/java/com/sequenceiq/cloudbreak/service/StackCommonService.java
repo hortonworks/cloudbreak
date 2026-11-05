@@ -356,7 +356,6 @@ public class StackCommonService {
         MDCBuilder.buildMdcContext(stack);
         stackVerticalScaleV4Request.setStackId(stack.getId());
         validateVerticalScalingRequest(stack, stackVerticalScaleV4Request);
-        verticalScalingValidatorService.validateIfEphemeralVolumesPresent(stack, stackVerticalScaleV4Request.getGroup());
         return clusterCommonService.putVerticalScaling(stack.getResourceCrn(), stackVerticalScaleV4Request);
     }
 
