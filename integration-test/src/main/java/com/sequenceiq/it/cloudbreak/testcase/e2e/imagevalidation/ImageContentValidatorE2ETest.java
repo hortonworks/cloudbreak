@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -10,14 +9,12 @@ import java.util.regex.Pattern;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.common.model.Architecture;
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -133,51 +130,31 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
     }
 
     private void testPythonVersionsAreCorrectOnSdx(TestContext testContext) {
-
-        testContext.given(SdxTestDto.class)
-            .then((tc, testDto, client) -> {
-                SshCommandOutcomes results = executeCommandOnInstanceGroup(testContext.get(SdxTestDto.class), "python3 --version");
-
-                LOGGER.info("Python Versions reported by hosts:");
-                results.forEach(result -> {
-                    LOGGER.info("Host {} has {}", result.instanceIp(), result.commandOutput());
-                    assertEquals(getDefaultPythonForOS(), extractSemanticVersion(result.commandOutput()));
-                });
-
-                return testDto;
-            }).validate();
+        testVersionsAreCorrectOnSdx(testContext, "python", "python3 --version");
     }
 
     private void testJavaVersionsAreCorrectOnSdx(TestContext testContext) {
-
-        testContext.given(SdxTestDto.class)
-                .then((tc, testDto, client) -> {
-                    SshCommandOutcomes results = executeCommandOnInstanceGroup(testContext.get(SdxTestDto.class), "java -version");
-
-                    LOGGER.info("Java Versions reported by hosts:");
-                    results.forEach(result -> {
-                        LOGGER.info("Host {} has {}", result.instanceIp(), result.commandOutput());
-                        String javaVersion = extractSemanticVersion(result.commandOutput());
-                        assertNotNull(javaVersion);
-                        assertThat(javaVersion).startsWith(getDefaultJavaForImage());
-                    });
-
-                    return testDto;
-                }).validate();
+        testVersionsAreCorrectOnSdx(testContext, "java", "java -version");
     }
 
     private void testOsVersionsAreCorrectOnSdx(TestContext testContext) {
+        testVersionsAreCorrectOnSdx(testContext, "os-version", "cat /etc/redhat-release");
+    }
 
+    private void testVersionsAreCorrectOnSdx(TestContext testContext, String packageName, String cmd) {
         testContext.given(SdxTestDto.class)
                 .then((tc, testDto, client) -> {
-                    SshCommandOutcomes results = executeCommandOnInstanceGroup(testContext.get(SdxTestDto.class), "cat /etc/redhat-release");
+                    SshCommandOutcomes results = executeCommandOnInstanceGroup(testContext.get(SdxTestDto.class), cmd);
 
-                    LOGGER.info("OS versions reported by hosts:");
+                    String expectedVersion = extractSemanticVersion(getVersionFromMetadata(packageName));
+                    LOGGER.info("Expected {} version: {}", packageName, expectedVersion);
+                    LOGGER.info("{} Versions reported by hosts:", Character.toUpperCase(packageName.charAt(0)) + packageName.substring(1));
                     results.forEach(result -> {
                         LOGGER.info("Host {} has {}", result.instanceIp(), result.commandOutput());
-                        String osVersion = extractSemanticVersion(result.commandOutput());
-                        assertNotNull(osVersion);
-                        assertThat(osVersion).startsWith(getExpectedOsVersionForImage());
+                        String actualVersion = extractSemanticVersion(result.commandOutput());
+                        assertNotNull(actualVersion, "Actual version can't be null.");
+                        assertNotNull(expectedVersion, "Expected version from metadata can't be null.");
+                        assertEquals(expectedVersion, actualVersion);
                     });
 
                     return testDto;
@@ -185,45 +162,18 @@ public class ImageContentValidatorE2ETest extends AbstractE2EWithReusableResourc
     }
 
     private String extractSemanticVersion(String versionString) {
-        Pattern p = Pattern.compile("(\\d+(?:\\.\\d+)+)");
+        Pattern p = Pattern.compile("(\\d+(?:\\.\\d+)+(?:[._]\\d+)?)");
         Matcher m = p.matcher(versionString);
         return m.find() ? m.group(1) : null;
     }
 
-    private String getDefaultPythonForOS() {
-        return switch (OsType.getByOs(imageUnderValidation.getOs())) {
-            case OsType.RHEL8 -> "3.6.8";
-            case OsType.RHEL9 -> "3.9.21";
-            default -> throw new TestFailException(String.format("OS of image %s is not supported by image validation.",
-                    imageUnderValidation.getUuid()));
-        };
-    }
-
-    private String getDefaultJavaForImage() {
-        String javaVersion = switch (OsType.getByOs(imageUnderValidation.getOs())) {
-            case OsType.RHEL8 -> "1.8.";
-            case OsType.RHEL9 -> "17.";
-            default -> throw new TestFailException(String.format("OS of image %s is not supported by image validation.",
-                    imageUnderValidation.getUuid()));
-        };
-        // Base or FreeIPA image
-        if (StringUtils.isEmpty(imageUnderValidation.getVersion())) {
-            return javaVersion;
+    private String getVersionFromMetadata(String packageName) {
+        String version = imageUnderValidation.getPackageVersions().getOrDefault(packageName, "");
+        String packageNameWithMajorVersion = packageName + version.replace(".", "");
+        if (imageUnderValidation.getPackageVersions().containsKey(packageNameWithMajorVersion)) {
+            version = imageUnderValidation.getPackageVersions().get(packageNameWithMajorVersion);
         }
-        // Runtime image
-        if ("7.3.1".equals(imageUnderValidation.getVersion())) {
-            javaVersion = "17.";
-        }
-        return javaVersion;
-    }
-
-    private String getExpectedOsVersionForImage() {
-        return switch (OsType.getByOs(imageUnderValidation.getOs())) {
-            case OsType.RHEL8 -> "8.10";
-            case OsType.RHEL9 -> "9.6";
-            default -> throw new TestFailException(String.format("OS of image %s is not supported by image validation.",
-                    imageUnderValidation.getUuid()));
-        };
+        return version;
     }
 
     // Note: sshjClientActions has a lot of utility methods to check stuff - new functions should be probably
