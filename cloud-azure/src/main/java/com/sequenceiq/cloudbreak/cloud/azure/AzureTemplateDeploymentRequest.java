@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -19,5 +21,10 @@ public record AzureTemplateDeploymentRequest(
         AzureCredentialView credentialView,
         String customImageId,
         AzureInstanceTemplateOperation operation,
-        AzureMarketplaceImage azureMarketplaceImage) {
+        AzureMarketplaceImage azureMarketplaceImage,
+        Set<String> skippableLoadBalancers) {
+
+    public AzureTemplateDeploymentRequest {
+        skippableLoadBalancers = skippableLoadBalancers == null ? Set.of() : Set.copyOf(skippableLoadBalancers);
+    }
 }
