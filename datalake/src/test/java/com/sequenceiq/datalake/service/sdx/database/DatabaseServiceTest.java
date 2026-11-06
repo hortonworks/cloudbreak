@@ -793,7 +793,7 @@ public class DatabaseServiceTest {
         databaseServerV4Response.setStatus(Status.AVAILABLE);
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
 
-        DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(defaultSdxCluster, env));
+        DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createAndWaitUntilAvailable(defaultSdxCluster, env));
 
         assertThat(response.getResourceCrn()).isEqualTo(DATABASE_CRN);
         verify(databaseServerV4Endpoint, never()).createInternal(any(), any());
