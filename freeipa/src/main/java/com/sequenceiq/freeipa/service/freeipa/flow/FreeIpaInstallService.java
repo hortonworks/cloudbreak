@@ -45,16 +45,17 @@ public class FreeIpaInstallService {
     @Inject
     private FreeIpaRecipeService freeIpaRecipeService;
 
-    public void installFreeIpa(Long stackId) throws CloudbreakOrchestratorException {
+    public void installFreeIpa(Long stackId, boolean skipPreServiceDeploymentRecipes) throws CloudbreakOrchestratorException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDatas);
         Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDatas);
 
-        installFreeIpa(stackId, stack, gatewayConfigs, allNodes);
+        installFreeIpa(stackId, stack, gatewayConfigs, allNodes, skipPreServiceDeploymentRecipes);
     }
 
-    private void installFreeIpa(Long stackId, Stack stack, List<GatewayConfig> gatewayConfigs, Set<Node> allNodes) throws CloudbreakOrchestratorException {
+    private void installFreeIpa(Long stackId, Stack stack, List<GatewayConfig> gatewayConfigs, Set<Node> allNodes,
+            boolean skipPreServiceDeploymentRecipes) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfigForSalt(stack);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(stackId);
         if (!recipes.isEmpty()) {
@@ -62,7 +63,9 @@ public class FreeIpaInstallService {
             Map<String, List<RecipeModel>> recipeMap = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName)
                     .collect(Collectors.toMap(instanceGroup -> instanceGroup, instanceGroup -> recipes));
             hostOrchestrator.uploadRecipes(gatewayConfigs, recipeMap, new StackBasedExitCriteriaModel(stackId));
-            if (freeIpaRecipeService.hasRecipeType(recipes, RecipeType.PRE_SERVICE_DEPLOYMENT, RecipeType.PRE_CLOUDERA_MANAGER_START)) {
+            if (skipPreServiceDeploymentRecipes) {
+                LOGGER.info("Skipping pre-service-deployment recipes, the FreeIPA services are already deployed");
+            } else if (freeIpaRecipeService.hasRecipeType(recipes, RecipeType.PRE_SERVICE_DEPLOYMENT, RecipeType.PRE_CLOUDERA_MANAGER_START)) {
                 hostOrchestrator.preServiceDeploymentRecipes(primaryGatewayConfig, allNodes, new StackBasedExitCriteriaModel(stackId));
             } else {
                 LOGGER.info("We have no pre-start recipes for this stack");

@@ -74,11 +74,35 @@ class FreeIpaInstallServiceTest {
                 new RecipeModel("recipe1", RecipeType.PRE_TERMINATION, "bash"));
         when(freeIpaRecipeService.getRecipes(1L)).thenReturn(recipeModelList);
         when(freeIpaRecipeService.hasRecipeType(recipeModelList, RecipeType.PRE_SERVICE_DEPLOYMENT, RecipeType.PRE_CLOUDERA_MANAGER_START)).thenReturn(true);
-        freeIpaInstallService.installFreeIpa(1L);
+        freeIpaInstallService.installFreeIpa(1L, false);
         verify(hostOrchestrator).uploadRecipes(eq(allGatewayConfigs), eq(Map.of("master", recipeModelList)), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator).preServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator).installFreeIpa(eq(gatewayConfig), eq(allGatewayConfigs), eq(nodes), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator, never()).postClusterManagerStartRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
+    }
+
+    @Test
+    public void testInstallSkipsPreServiceDeploymentRecipesButUploadsThem() throws CloudbreakOrchestratorException {
+        Stack stack = mock(Stack.class);
+        InstanceGroup masterInstanceGroup = new InstanceGroup();
+        masterInstanceGroup.setGroupName("master");
+        when(stack.getInstanceGroups()).thenReturn(Set.of(masterInstanceGroup));
+        Set<InstanceMetaData> instanceMetaDataSet = Set.of(new InstanceMetaData());
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig);
+        when(gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet)).thenReturn(allGatewayConfigs);
+        when(gatewayConfigService.getPrimaryGatewayConfigForSalt(stack)).thenReturn(gatewayConfig);
+        Node node = mock(Node.class);
+        Set<Node> nodes = Set.of(node);
+        when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        List<RecipeModel> recipeModelList = List.of(new RecipeModel("recipe1", RecipeType.PRE_SERVICE_DEPLOYMENT, "bash"));
+        when(freeIpaRecipeService.getRecipes(1L)).thenReturn(recipeModelList);
+        freeIpaInstallService.installFreeIpa(1L, true);
+        verify(hostOrchestrator).uploadRecipes(eq(allGatewayConfigs), eq(Map.of("master", recipeModelList)), any(StackBasedExitCriteriaModel.class));
+        verify(hostOrchestrator, never()).preServiceDeploymentRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
+        verify(hostOrchestrator).installFreeIpa(eq(gatewayConfig), eq(allGatewayConfigs), eq(nodes), any(StackBasedExitCriteriaModel.class));
     }
 
     @Test
@@ -98,7 +122,7 @@ class FreeIpaInstallServiceTest {
                 new RecipeModel("recipe1", RecipeType.PRE_TERMINATION, "bash"));
         when(freeIpaRecipeService.getRecipes(1L)).thenReturn(recipeModelList);
         when(freeIpaRecipeService.hasRecipeType(recipeModelList, RecipeType.PRE_SERVICE_DEPLOYMENT, RecipeType.PRE_CLOUDERA_MANAGER_START)).thenReturn(false);
-        freeIpaInstallService.installFreeIpa(1L);
+        freeIpaInstallService.installFreeIpa(1L, false);
         verify(hostOrchestrator, times(1)).uploadRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator, times(0)).preServiceDeploymentRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator).installFreeIpa(eq(gatewayConfig), eq(allGatewayConfigs), eq(nodes), any(StackBasedExitCriteriaModel.class));
@@ -119,7 +143,7 @@ class FreeIpaInstallServiceTest {
         when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(freeIpaRecipeService.getRecipes(1L)).thenReturn(Collections.emptyList());
-        freeIpaInstallService.installFreeIpa(1L);
+        freeIpaInstallService.installFreeIpa(1L, false);
         verify(hostOrchestrator, times(0)).uploadRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator, times(0)).preServiceDeploymentRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator).installFreeIpa(eq(gatewayConfig), eq(allGatewayConfigs), eq(nodes), any(StackBasedExitCriteriaModel.class));

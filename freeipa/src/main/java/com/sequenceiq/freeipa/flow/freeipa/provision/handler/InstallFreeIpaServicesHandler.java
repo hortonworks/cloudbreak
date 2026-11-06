@@ -16,7 +16,6 @@ import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaInstallService;
 
 @Component
@@ -36,10 +35,10 @@ public class InstallFreeIpaServicesHandler implements EventHandler<InstallFreeIp
 
     @Override
     public void accept(Event<InstallFreeIpaServicesRequest> event) {
-        StackEvent request = event.getData();
+        InstallFreeIpaServicesRequest request = event.getData();
         Selectable response;
         try {
-            freeIpaInstallService.installFreeIpa(request.getResourceId());
+            freeIpaInstallService.installFreeIpa(request.getResourceId(), request.isSkipPreServiceDeploymentRecipes());
             response = new InstallFreeIpaServicesSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("FreeIPA service install failed", e);

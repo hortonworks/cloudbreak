@@ -512,7 +512,7 @@ class RebuildFlowIntegrationTest {
         verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
         assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
-        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID, false);
         verify(instanceConnector).reboot(ac, List.of(), List.of(cloudInstance));
         verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
         verify(stackStatusCheckerJob).syncAStack(stack, true);
@@ -605,7 +605,7 @@ class RebuildFlowIntegrationTest {
         verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
         assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
-        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID, false);
         verify(instanceConnector).reboot(ac, List.of(), List.of(cloudInstance));
         verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
         verify(stackStatusCheckerJob).syncAStack(stack, true);
@@ -695,7 +695,7 @@ class RebuildFlowIntegrationTest {
         verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
         assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
-        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID, false);
         verify(instanceConnector).reboot(ac, List.of(), List.of(cloudInstance));
         verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
         verify(stackStatusCheckerJob).syncAStack(stack, true);
@@ -782,7 +782,7 @@ class RebuildFlowIntegrationTest {
         verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
         assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
-        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID, false);
         verify(instanceConnector).reboot(ac, List.of(), List.of(cloudInstance));
         verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
         verify(stackStatusCheckerJob).syncAStack(stack, true);
@@ -865,7 +865,7 @@ class RebuildFlowIntegrationTest {
         verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
         assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
-        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID, false);
         verifyNoInteractions(freeIpaPostInstallService, kerberosConfigUpdateService, environmentEndpoint, cleanupService, instanceConnector,
                 freeIpaServiceStartService, stackStatusCheckerJob);
         verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID,

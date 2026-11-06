@@ -49,7 +49,7 @@ public class SaltUpdateActions {
                 if (SaltUpdateSkipHighstateFlagUtil.getFromVariables(variables)) {
                     sendEvent(context, new InstallFreeIpaServicesSuccess(context.getStack().getId()));
                 } else {
-                    sendEvent(context, new InstallFreeIpaServicesRequest(context.getStack().getId()));
+                    sendEvent(context, new InstallFreeIpaServicesRequest(context.getStack().getId(), true));
                 }
             }
         };
