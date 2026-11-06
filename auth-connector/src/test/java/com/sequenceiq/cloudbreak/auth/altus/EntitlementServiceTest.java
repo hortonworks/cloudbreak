@@ -219,7 +219,12 @@ class EntitlementServiceTest {
                 {"CDP_GCP_RAZ_WITH_CAB", (EntitlementCheckFunction) EntitlementService::isGcpRazWithCabEnabled, true},
 
                 {"CDP_CB_EXTENDED_REPAIR_BATCH_SIZE", (EntitlementCheckFunction) EntitlementService::isExtendedRepairBatchSizeEnabled, false},
-                {"CDP_CB_EXTENDED_REPAIR_BATCH_SIZE", (EntitlementCheckFunction) EntitlementService::isExtendedRepairBatchSizeEnabled, true}
+                {"CDP_CB_EXTENDED_REPAIR_BATCH_SIZE", (EntitlementCheckFunction) EntitlementService::isExtendedRepairBatchSizeEnabled, true},
+
+                {"CDP_CB_AZURE_UPSCALE_SKIP_EXISTING_LOAD_BALANCER",
+                        (EntitlementCheckFunction) EntitlementService::isAzureUpscaleSkipExistingLoadBalancerEnabled, false},
+                {"CDP_CB_AZURE_UPSCALE_SKIP_EXISTING_LOAD_BALANCER",
+                        (EntitlementCheckFunction) EntitlementService::isAzureUpscaleSkipExistingLoadBalancerEnabled, true}
         };
     }
 

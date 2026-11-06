@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -57,6 +58,8 @@ import com.sequenceiq.cloudbreak.service.retry.RetryService;
 @ExtendWith(MockitoExtension.class)
 class AzureTemplateDeploymentServiceTest {
 
+    private static final String ACCOUNT_ID = "accountId";
+
     @Mock
     private AzureStorage azureStorage;
 
@@ -83,6 +86,9 @@ class AzureTemplateDeploymentServiceTest {
 
     @Mock
     private AzureFallbackAwareDeploymentService azureFallbackAwareDeploymentService;
+
+    @Mock
+    private AzureUpscaleLoadBalancerTemplateFilter azureUpscaleLoadBalancerTemplateFilter;
 
     @InjectMocks
     private AzureTemplateDeploymentService underTest;
@@ -144,7 +150,7 @@ class AzureTemplateDeploymentServiceTest {
     void getTemplateDeploymentWithFallbackRoutesThroughFallbackService() {
         CloudStack stack = mock(CloudStack.class);
         Image image = mock(Image.class);
-        CloudContext cloudContext = CloudContext.Builder.builder().withId(1L).build();
+        CloudContext cloudContext = CloudContext.Builder.builder().withId(1L).withAccountId(ACCOUNT_ID).build();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, new CloudCredential());
         AzureStackView stackView = mock(AzureStackView.class);
         Deployment deployment = mock(Deployment.class);
@@ -162,6 +168,7 @@ class AzureTemplateDeploymentServiceTest {
         ArgumentCaptor<AzureTemplateDeploymentRequest> requestCaptor = ArgumentCaptor.forClass(AzureTemplateDeploymentRequest.class);
         when(azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(requestCaptor.capture())).thenReturn(deployment);
         AzureClient client = mock(AzureClient.class);
+        when(azureUpscaleLoadBalancerTemplateFilter.decide("template", client, "rg1", ACCOUNT_ID)).thenReturn(Set.of("lb1"));
 
         Deployment result = underTest.getTemplateDeploymentWithFallback(client, stack, ac, stackView, AzureInstanceTemplateOperation.UPSCALE);
 
@@ -174,6 +181,74 @@ class AzureTemplateDeploymentServiceTest {
         assertEquals(AzureInstanceTemplateOperation.UPSCALE, request.operation());
         assertEquals(client, request.client());
         assertEquals(stackView, request.azureStackView());
+        assertEquals(Set.of("lb1"), request.skippableLoadBalancers());
+    }
+
+    @Test
+    void getTemplateDeploymentWithFallbackChecksLoadBalancersOnceWhenDeploymentIsRetried() {
+        CloudStack stack = mock(CloudStack.class);
+        Image image = mock(Image.class);
+        CloudContext cloudContext = CloudContext.Builder.builder().withId(1L).withAccountId(ACCOUNT_ID).build();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, new CloudCredential());
+        AzureStackView stackView = mock(AzureStackView.class);
+        Deployment deployment = mock(Deployment.class);
+
+        when(stack.getImage()).thenReturn(image);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("rg1");
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(false);
+        lenient().when(azureImageFormatValidator.hasSourceImagePlan(any(Image.class))).thenReturn(false);
+        lenient().when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(new AzureImage("1", "image1", true));
+        when(azureTemplateBuilder.build(eq("stack1"), any(), any(), any(), any(), any(), eq(AzureInstanceTemplateOperation.UPSCALE), any()))
+                .thenReturn("template");
+        when(azureUtils.getStackName(any())).thenReturn("stack1");
+        ManagementError top = AzureTestUtils.managementError("DeploymentFailed", "wrap");
+        AzureTestUtils.setDetails(top, List.of(AzureTestUtils.managementError(null, "Please check the power state later")));
+        when(azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(any(AzureTemplateDeploymentRequest.class)))
+                .thenThrow(new ManagementException("boom", null, top))
+                .thenReturn(deployment);
+        when(retry.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> {
+            Supplier<?> action = invocation.getArgument(0, Supplier.class);
+            try {
+                return action.get();
+            } catch (Retry.ActionFailedException e) {
+                return action.get();
+            }
+        });
+        AzureClient client = mock(AzureClient.class);
+        when(azureUpscaleLoadBalancerTemplateFilter.decide("template", client, "rg1", ACCOUNT_ID)).thenReturn(Set.of("lb1"));
+
+        Deployment result = underTest.getTemplateDeploymentWithFallback(client, stack, ac, stackView, AzureInstanceTemplateOperation.UPSCALE);
+
+        assertEquals(deployment, result);
+        verify(azureFallbackAwareDeploymentService, times(2)).createTemplateDeploymentWithFallback(any(AzureTemplateDeploymentRequest.class));
+        verify(azureUpscaleLoadBalancerTemplateFilter, times(1)).decide(any(), any(), any(), any());
+    }
+
+    @Test
+    void getTemplateDeploymentWithFallbackDoesNotCheckLoadBalancersForProvision() {
+        CloudStack stack = mock(CloudStack.class);
+        Image image = mock(Image.class);
+        CloudContext cloudContext = CloudContext.Builder.builder().withId(1L).build();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, new CloudCredential());
+        AzureStackView stackView = mock(AzureStackView.class);
+        Deployment deployment = mock(Deployment.class);
+
+        when(stack.getImage()).thenReturn(image);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(CloudContext.class), any(CloudStack.class))).thenReturn("rg1");
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(false);
+        lenient().when(azureImageFormatValidator.hasSourceImagePlan(any(Image.class))).thenReturn(false);
+        lenient().when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(new AzureImage("1", "image1", true));
+        when(azureTemplateBuilder.build(eq("stack1"), any(), any(), any(), any(), any(), eq(AzureInstanceTemplateOperation.PROVISION), any()))
+                .thenReturn("template");
+        when(retry.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        when(azureUtils.getStackName(any())).thenReturn("stack1");
+        ArgumentCaptor<AzureTemplateDeploymentRequest> requestCaptor = ArgumentCaptor.forClass(AzureTemplateDeploymentRequest.class);
+        when(azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(requestCaptor.capture())).thenReturn(deployment);
+
+        underTest.getTemplateDeploymentWithFallback(mock(AzureClient.class), stack, ac, stackView, AzureInstanceTemplateOperation.PROVISION);
+
+        assertEquals(Set.of(), requestCaptor.getValue().skippableLoadBalancers());
+        verify(azureUpscaleLoadBalancerTemplateFilter, never()).decide(any(), any(), any(), any());
     }
 
     @Test

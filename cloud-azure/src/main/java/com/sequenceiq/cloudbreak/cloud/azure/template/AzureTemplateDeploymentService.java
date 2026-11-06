@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.template;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,9 @@ public class AzureTemplateDeploymentService {
     @Inject
     private AzureFallbackAwareDeploymentService azureFallbackAwareDeploymentService;
 
+    @Inject
+    private AzureUpscaleLoadBalancerTemplateFilter azureUpscaleLoadBalancerTemplateFilter;
+
     public Deployment getTemplateDeployment(AzureClient client, CloudStack stack, AuthenticatedContext ac, AzureStackView azureStackView,
             AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
         CloudContext cloudContext = ac.getCloudContext();
@@ -81,9 +85,14 @@ public class AzureTemplateDeploymentService {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         RenderedTemplate rendered = getRenderedTemplate(stack, azureStackView, ac, stackName, client, azureInstanceTemplateOperation);
         String parameters = azureTemplateBuilder.buildParameters();
+        // decided once, so neither the retries below nor the instance type fallback query the load balancers again
+        Set<String> skippableLoadBalancers = AzureInstanceTemplateOperation.UPSCALE == azureInstanceTemplateOperation
+                ? azureUpscaleLoadBalancerTemplateFilter.decide(rendered.template(), client, resourceGroupName, cloudContext.getAccountId())
+                : Set.of();
         AzureTemplateDeploymentRequest request = new AzureTemplateDeploymentRequest(
                 client, resourceGroupName, stackName, rendered.template(), parameters, azureStackView,
-                cloudContext, stack, rendered.credentialView(), rendered.customImageId(), azureInstanceTemplateOperation, rendered.marketplaceImage());
+                cloudContext, stack, rendered.credentialView(), rendered.customImageId(), azureInstanceTemplateOperation, rendered.marketplaceImage(),
+                skippableLoadBalancers);
 
         return retry.testWith1SecDelayMax5Times(() -> submit(() ->
                 azureFallbackAwareDeploymentService.createTemplateDeploymentWithFallback(request)));
