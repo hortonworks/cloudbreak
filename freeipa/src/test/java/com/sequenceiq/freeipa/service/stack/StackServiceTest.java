@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -271,5 +272,24 @@ class StackServiceTest {
         Stack stack = new Stack();
         stack.setTelemetry(telemetry);
         return stack;
+    }
+
+    @Test
+    void getEnvironmentCrnByResourceCrnReturnsEnvironmentWhenStackExists() {
+        String freeIpaCrn = "crn:cdp:freeipa:us-west-1:acc-1:freeipa:fi-1";
+        String environmentCrn = "crn:cdp:environments:us-west-1:acc-1:environment:env-1";
+        ResourceBasicView view = mock(ResourceBasicView.class);
+        when(view.getEnvironmentCrn()).thenReturn(environmentCrn);
+        when(stackRepository.findResourceBasicViewByResourceCrn(freeIpaCrn)).thenReturn(Optional.of(view));
+
+        assertEquals(environmentCrn, underTest.getEnvironmentCrnByResourceCrn(freeIpaCrn));
+    }
+
+    @Test
+    void getEnvironmentCrnByResourceCrnThrowsWhenStackMissing() {
+        String freeIpaCrn = "crn:cdp:freeipa:us-west-1:acc-1:freeipa:fi-1";
+        when(stackRepository.findResourceBasicViewByResourceCrn(freeIpaCrn)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> underTest.getEnvironmentCrnByResourceCrn(freeIpaCrn));
     }
 }

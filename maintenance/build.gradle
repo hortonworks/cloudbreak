@@ -108,6 +108,7 @@ dependencies {
   }
 
   implementation project(':maintenance-api')
+  implementation project(':freeipa-api')
   implementation project(':authorization-common')
   implementation project(':auth-connector')
   implementation project(':common')

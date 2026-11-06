@@ -11,9 +11,11 @@ import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaInternalV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaEnvironmentCrnResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.UpdateInstanceTypeRequest;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeDefaultOutboundService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Controller
 @AccountEntityType(Stack.class)
@@ -22,11 +24,20 @@ public class FreeIpaInternalV1Controller implements FreeIpaInternalV1Endpoint {
     @Inject
     private FreeIpaUpgradeDefaultOutboundService upgradeDefaultOutboundService;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     @InternalOnly
     public OutboundType getOutboundType(@ResourceCrn String environmentCrn) {
         String accountId = Crn.safeFromString(environmentCrn).getAccountId();
         return upgradeDefaultOutboundService.getCurrentDefaultOutbound(environmentCrn, accountId);
+    }
+
+    @Override
+    @InternalOnly
+    public FreeIpaEnvironmentCrnResponse getEnvironmentCrnByResourceCrn(@ResourceCrn String resourceCrn) {
+        return new FreeIpaEnvironmentCrnResponse(stackService.getEnvironmentCrnByResourceCrn(resourceCrn));
     }
 
     @Override

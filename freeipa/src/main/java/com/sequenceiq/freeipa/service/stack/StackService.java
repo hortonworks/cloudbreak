@@ -219,6 +219,10 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
             String.format("FreeIPA stack with resource crn [%s] not found or terminated", resourceCrn))));
     }
 
+    public String getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        return getResourceBasicViewByCrn(resourceCrn).getEnvironmentCrn();
+    }
+
     @Override
     public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();

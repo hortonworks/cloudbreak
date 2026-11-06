@@ -79,6 +79,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MAINTENANCE_WINDOW;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MITIGATE_RELEASE_FAILURE_7218P1100;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
@@ -616,6 +617,10 @@ public class EntitlementService {
 
     public boolean isLakehouseOptimizerEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_LAKEHOUSE_OPTIMIZER_ENABLED);
+    }
+
+    public boolean isMaintenanceWindowEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_MAINTENANCE_WINDOW);
     }
 
     public boolean isXfsForEphemeralDisksSupported(String accountId) {

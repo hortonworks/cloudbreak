@@ -9,17 +9,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
+import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientConfig;
+import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
 import com.sequenceiq.maintenance.api.model.MaintenanceSubmitterService;
 
 /**
- * Resolves submitter service base URLs for outbound dispatch HTTP. Bean methods throw
- * {@link ServiceAddressResolvingException} at startup when a configured endpoint cannot be resolved,
- * matching {@code ServiceEndpointConfig} in other Cloudbreak services.
+ * Resolves peer service URLs for maintenance outbound calls: submitter dispatch HTTP and typed API clients
+ * (FreeIPA internal API for schedule authorization). Bean methods throw {@link ServiceAddressResolvingException}
+ * at startup when a configured endpoint cannot be resolved, matching {@code ServiceEndpointConfig} in other
+ * Cloudbreak services.
  */
 @Configuration
+@Import(FreeIpaApiClientConfig.class)
 public class MaintenanceServiceEndpointConfig {
 
     public static final String SUBMITTER_BASE_URLS = "maintenanceSubmitterBaseUrls";
@@ -53,6 +58,15 @@ public class MaintenanceServiceEndpointConfig {
     @Value("${maintenance.freeipa.server.contextPath:/freeipa}")
     private String freeipaContextPath;
 
+    @Value("${rest.debug:false}")
+    private boolean restDebug;
+
+    @Value("${cert.validation:true}")
+    private boolean certificateValidation;
+
+    @Value("${cert.ignorePreValidation:true}")
+    private boolean ignorePreValidation;
+
     @Inject
     public MaintenanceServiceEndpointConfig(ServiceAddressResolver serviceAddressResolver) {
         this.serviceAddressResolver = serviceAddressResolver;
@@ -67,15 +81,24 @@ public class MaintenanceServiceEndpointConfig {
         return Map.copyOf(urls);
     }
 
+    @Bean
+    public FreeIpaApiClientParams freeIpaApiClientParams() throws ServiceAddressResolvingException {
+        return new FreeIpaApiClientParams(
+                restDebug, certificateValidation, ignorePreValidation, resolveFreeIpaBaseUrl());
+    }
+
     private String resolveSubmitterBaseUrl(MaintenanceSubmitterService submitterService) throws ServiceAddressResolvingException {
         return switch (submitterService) {
             case CLOUDBREAK -> serviceAddressResolver.resolveUrl(
                     cloudbreakUrl + cloudbreakContextPath, "http", cloudbreakServiceId);
             case DATALAKE -> serviceAddressResolver.resolveUrl(
                     datalakeUrl + datalakeContextPath, "http", datalakeServiceId);
-            case FREEIPA -> serviceAddressResolver.resolveUrl(
-                    freeipaUrl + freeipaContextPath, "http", freeipaServiceId);
+            case FREEIPA -> resolveFreeIpaBaseUrl();
         };
+    }
+
+    private String resolveFreeIpaBaseUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(freeipaUrl + freeipaContextPath, "http", freeipaServiceId);
     }
 
     private static void registerSubmitter(

@@ -181,6 +181,9 @@ class EntitlementServiceTest {
                 {"CDP_LAKEHOUSE_OPTIMIZER_ENABLED", (EntitlementCheckFunction) EntitlementService::isLakehouseOptimizerEnabled, false},
                 {"CDP_LAKEHOUSE_OPTIMIZER_ENABLED", (EntitlementCheckFunction) EntitlementService::isLakehouseOptimizerEnabled, true},
 
+                {"CDP_MAINTENANCE_WINDOW", (EntitlementCheckFunction) EntitlementService::isMaintenanceWindowEnabled, false},
+                {"CDP_MAINTENANCE_WINDOW", (EntitlementCheckFunction) EntitlementService::isMaintenanceWindowEnabled, true},
+
                 {"CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isConfigureEncryptionProfileEnabled, false},
                 {"CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isConfigureEncryptionProfileEnabled, true},
 

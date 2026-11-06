@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -52,6 +53,9 @@ class MaintenanceWindowScheduleAuthorizationServiceTest {
 
     @Mock
     private UmsRightProvider umsRightProvider;
+
+    @Mock
+    private FreeIpaEnvironmentCrnLookup freeIpaEnvironmentCrnLookup;
 
     @InjectMocks
     private MaintenanceWindowScheduleAuthorizationService underTest;
@@ -146,25 +150,37 @@ class MaintenanceWindowScheduleAuthorizationServiceTest {
 
     @Test
     void freeipaReadFallsThroughToLaterActionsWhenFirstMissing() {
-        resourceRight(AuthorizationResourceAction.REPAIR_FREEIPA, "environments/repairFreeIPA", FREEIPA_CRN, false);
-        resourceRight(AuthorizationResourceAction.ADMIN_FREEIPA, "environments/adminFreeIPA", FREEIPA_CRN, false);
-        resourceRight(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, "environments/describeEnvironment", FREEIPA_CRN, true);
+        when(freeIpaEnvironmentCrnLookup.lookupEnvironmentCrn(FREEIPA_CRN, "acc-1")).thenReturn(Optional.of(ENV_CRN));
+        resourceRight(AuthorizationResourceAction.REPAIR_FREEIPA, "environments/repairFreeIPA", ENV_CRN, false);
+        resourceRight(AuthorizationResourceAction.ADMIN_FREEIPA, "environments/adminFreeIPA", ENV_CRN, false);
+        resourceRight(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, "environments/describeEnvironment", ENV_CRN, true);
 
         assertThat(asUser(() -> underTest.canAccess(MaintenanceScopeType.FREEIPA, FREEIPA_CRN, READ))).isTrue();
+        verify(grpcUmsClient, never()).checkResourceRight(USER_CRN, "environments/describeEnvironment", FREEIPA_CRN);
     }
 
     @Test
     void freeipaReadDeniedWhenNoActionGranted() {
-        resourceRight(AuthorizationResourceAction.REPAIR_FREEIPA, "environments/repairFreeIPA", FREEIPA_CRN, false);
-        resourceRight(AuthorizationResourceAction.ADMIN_FREEIPA, "environments/adminFreeIPA", FREEIPA_CRN, false);
-        resourceRight(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, "environments/describeEnvironment", FREEIPA_CRN, false);
+        when(freeIpaEnvironmentCrnLookup.lookupEnvironmentCrn(FREEIPA_CRN, "acc-1")).thenReturn(Optional.of(ENV_CRN));
+        resourceRight(AuthorizationResourceAction.REPAIR_FREEIPA, "environments/repairFreeIPA", ENV_CRN, false);
+        resourceRight(AuthorizationResourceAction.ADMIN_FREEIPA, "environments/adminFreeIPA", ENV_CRN, false);
+        resourceRight(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, "environments/describeEnvironment", ENV_CRN, false);
 
         assertThat(asUser(() -> underTest.canAccess(MaintenanceScopeType.FREEIPA, FREEIPA_CRN, READ))).isFalse();
     }
 
     @Test
+    void freeipaReadDeniedWhenEnvironmentCrnNotResolved() {
+        when(freeIpaEnvironmentCrnLookup.lookupEnvironmentCrn(FREEIPA_CRN, "acc-1")).thenReturn(Optional.empty());
+
+        assertThat(asUser(() -> underTest.canAccess(MaintenanceScopeType.FREEIPA, FREEIPA_CRN, READ))).isFalse();
+        verify(grpcUmsClient, never()).checkResourceRight(anyString(), anyString(), anyString());
+    }
+
+    @Test
     void freeipaWriteShortCircuitsOnFirstGrantedAction() {
-        resourceRight(AuthorizationResourceAction.ADMIN_FREEIPA, "environments/adminFreeIPA", FREEIPA_CRN, true);
+        when(freeIpaEnvironmentCrnLookup.lookupEnvironmentCrn(FREEIPA_CRN, "acc-1")).thenReturn(Optional.of(ENV_CRN));
+        resourceRight(AuthorizationResourceAction.ADMIN_FREEIPA, "environments/adminFreeIPA", ENV_CRN, true);
         lenient().when(umsRightProvider.getRight(AuthorizationResourceAction.EDIT_ENVIRONMENT))
                 .thenReturn("environments/editEnvironment");
 

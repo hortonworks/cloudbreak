@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -29,7 +30,8 @@ import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
  *   <li>TENANT write: power user (account-level right)</li>
  *   <li>ENVIRONMENT / DATAHUB / DATALAKE: one resource right on {@code scopeId}, chosen by access mode — describe for
  *       read, the corresponding write action for write</li>
- *   <li>FREEIPA: <em>any one of</em> several resource rights on {@code scopeId}, per mode</li>
+ *   <li>FREEIPA: same rights as the FreeIPA service, evaluated on the stack's <em>parent environment</em> CRN
+ *       (resolved from the FreeIPA resource CRN stored in {@code scopeId})</li>
  * </ul>
  * Callers must validate scope with {@link com.sequenceiq.maintenance.service.MaintenanceWindowScheduleService#validateScope}
  * (or {@link com.sequenceiq.maintenance.service.MaintenanceWindowScheduleScopeValidator}) before calling this class; this class assumes a
@@ -55,10 +57,16 @@ public class MaintenanceWindowScheduleAuthorizationService {
 
     private final UmsRightProvider umsRightProvider;
 
+    private final FreeIpaEnvironmentCrnLookup freeIpaEnvironmentCrnLookup;
+
     @Inject
-    public MaintenanceWindowScheduleAuthorizationService(GrpcUmsClient grpcUmsClient, UmsRightProvider umsRightProvider) {
+    public MaintenanceWindowScheduleAuthorizationService(
+            GrpcUmsClient grpcUmsClient,
+            UmsRightProvider umsRightProvider,
+            FreeIpaEnvironmentCrnLookup freeIpaEnvironmentCrnLookup) {
         this.grpcUmsClient = grpcUmsClient;
         this.umsRightProvider = umsRightProvider;
+        this.freeIpaEnvironmentCrnLookup = freeIpaEnvironmentCrnLookup;
     }
 
     public void authorize(MaintenanceScopeType scopeType, String scopeId, MaintenanceWindowScheduleAccessMode mode) {
@@ -74,7 +82,11 @@ public class MaintenanceWindowScheduleAuthorizationService {
         if (scopeType == MaintenanceScopeType.TENANT) {
             return canAccessTenant(userCrn, mode);
         }
-        return hasAnyResourceRight(userCrn, scopeId, resourceActions(scopeType, mode));
+        Optional<String> resourceCrnForUms = resourceCrnForUms(scopeType, scopeId);
+        if (resourceCrnForUms.isEmpty()) {
+            return false;
+        }
+        return hasAnyResourceRight(userCrn, resourceCrnForUms.get(), resourceActions(scopeType, mode));
     }
 
     /**
@@ -89,27 +101,85 @@ public class MaintenanceWindowScheduleAuthorizationService {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Set<MaintenanceScopeKey> readable = new LinkedHashSet<>();
         Map<AuthorizationResourceAction, List<String>> scopeIdsByAction = new HashMap<>();
+        Map<MaintenanceScopeKey, String> freeIpaEnvironmentCrnByScope = new HashMap<>();
+        collectScopesForBatchRead(userCrn, scopes, readable, scopeIdsByAction, freeIpaEnvironmentCrnByScope);
+        Map<AuthorizationResourceAction, Map<String, Boolean>> resultsByAction = batchReadResults(userCrn, scopeIdsByAction);
+        addReadableResourceScopes(scopes, readable, freeIpaEnvironmentCrnByScope, resultsByAction);
+        return readable;
+    }
+
+    private void collectScopesForBatchRead(
+            String userCrn,
+            Collection<MaintenanceScopeKey> scopes,
+            Set<MaintenanceScopeKey> readable,
+            Map<AuthorizationResourceAction, List<String>> scopeIdsByAction,
+            Map<MaintenanceScopeKey, String> freeIpaEnvironmentCrnByScope) {
         for (MaintenanceScopeKey scope : scopes) {
             if (scope.scopeType() == MaintenanceScopeType.TENANT) {
                 if (canAccessTenant(userCrn, MaintenanceWindowScheduleAccessMode.READ)) {
                     readable.add(scope);
                 }
-            } else {
-                for (AuthorizationResourceAction action : readActions(scope)) {
-                    scopeIdsByAction.computeIfAbsent(action, ignored -> new ArrayList<>()).add(scope.scopeId());
-                }
+                continue;
+            }
+            Optional<String> resourceCrnForUms = resourceCrnForUms(scope.scopeType(), scope.scopeId());
+            if (resourceCrnForUms.isEmpty()) {
+                continue;
+            }
+            if (scope.scopeType() == MaintenanceScopeType.FREEIPA) {
+                freeIpaEnvironmentCrnByScope.put(scope, resourceCrnForUms.get());
+            }
+            for (AuthorizationResourceAction action : readActions(scope)) {
+                scopeIdsByAction.computeIfAbsent(action, ignored -> new ArrayList<>()).add(resourceCrnForUms.get());
             }
         }
+    }
+
+    private Map<AuthorizationResourceAction, Map<String, Boolean>> batchReadResults(
+            String userCrn, Map<AuthorizationResourceAction, List<String>> scopeIdsByAction) {
         Map<AuthorizationResourceAction, Map<String, Boolean>> resultsByAction = new HashMap<>();
         scopeIdsByAction.forEach((action, scopeIds) -> resultsByAction.put(action, hasRights(userCrn, scopeIds, action)));
+        return resultsByAction;
+    }
+
+    private void addReadableResourceScopes(
+            Collection<MaintenanceScopeKey> scopes,
+            Set<MaintenanceScopeKey> readable,
+            Map<MaintenanceScopeKey, String> freeIpaEnvironmentCrnByScope,
+            Map<AuthorizationResourceAction, Map<String, Boolean>> resultsByAction) {
         for (MaintenanceScopeKey scope : scopes) {
-            if (scope.scopeType() != MaintenanceScopeType.TENANT && readActions(scope).stream()
-                    .anyMatch(action -> resultsByAction.getOrDefault(action, Map.of())
-                            .getOrDefault(scope.scopeId(), Boolean.FALSE))) {
-                readable.add(scope);
+            if (scope.scopeType() == MaintenanceScopeType.TENANT) {
+                continue;
             }
+            Optional<String> resourceCrnForUms = resolvedResourceCrnForBatchRead(scope, freeIpaEnvironmentCrnByScope);
+            if (resourceCrnForUms.isEmpty() || !hasAnyReadRight(scope, resourceCrnForUms.get(), resultsByAction)) {
+                continue;
+            }
+            readable.add(scope);
         }
-        return readable;
+    }
+
+    private Optional<String> resolvedResourceCrnForBatchRead(
+            MaintenanceScopeKey scope, Map<MaintenanceScopeKey, String> freeIpaEnvironmentCrnByScope) {
+        if (scope.scopeType() == MaintenanceScopeType.FREEIPA) {
+            return Optional.ofNullable(freeIpaEnvironmentCrnByScope.get(scope));
+        }
+        return resourceCrnForUms(scope.scopeType(), scope.scopeId());
+    }
+
+    private boolean hasAnyReadRight(
+            MaintenanceScopeKey scope,
+            String resourceCrnForUms,
+            Map<AuthorizationResourceAction, Map<String, Boolean>> resultsByAction) {
+        return readActions(scope).stream()
+                .anyMatch(action -> resultsByAction.getOrDefault(action, Map.of())
+                        .getOrDefault(resourceCrnForUms, Boolean.FALSE));
+    }
+
+    private Optional<String> resourceCrnForUms(MaintenanceScopeType scopeType, String scopeId) {
+        if (scopeType != MaintenanceScopeType.FREEIPA) {
+            return Optional.of(scopeId);
+        }
+        return freeIpaEnvironmentCrnLookup.lookupEnvironmentCrn(scopeId, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     private static List<AuthorizationResourceAction> readActions(MaintenanceScopeKey scope) {

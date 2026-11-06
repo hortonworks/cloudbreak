@@ -27,6 +27,7 @@ import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWind
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowSkipResponse;
 import com.sequenceiq.maintenance.authorization.MaintenanceScopeKey;
 import com.sequenceiq.maintenance.authorization.MaintenanceWindowScheduleAuthorizationService;
+import com.sequenceiq.maintenance.authorization.MaintenanceWindowScheduleEntitlementService;
 import com.sequenceiq.maintenance.service.MaintenanceWindowScheduleService;
 import com.sequenceiq.maintenance.service.MaintenanceWindowSkipService;
 
@@ -39,22 +40,27 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
 
     private final MaintenanceWindowScheduleAuthorizationService scheduleAuthorization;
 
+    private final MaintenanceWindowScheduleEntitlementService scheduleEntitlementService;
+
     @Context
     private UriInfo uriInfo;
 
     public MaintenanceWindowScheduleController(
             MaintenanceWindowScheduleService scheduleService,
             MaintenanceWindowSkipService skipService,
-            MaintenanceWindowScheduleAuthorizationService scheduleAuthorization) {
+            MaintenanceWindowScheduleAuthorizationService scheduleAuthorization,
+            MaintenanceWindowScheduleEntitlementService scheduleEntitlementService) {
         this.scheduleService = scheduleService;
         this.skipService = skipService;
         this.scheduleAuthorization = scheduleAuthorization;
+        this.scheduleEntitlementService = scheduleEntitlementService;
     }
 
     @Override
     @CustomPermissionCheck
     public MaintenanceWindowScheduleListResponse list(MaintenanceWindowScheduleListParams params) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        scheduleEntitlementService.verifyEntitled(accountId);
         MaintenanceScopeType scopeType = toScopeType(params.getScopeType());
         if (scopeType != null) {
             scheduleService.validateScope(scopeType, params.getScopeId(), accountId);
@@ -77,6 +83,7 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
     @CustomPermissionCheck
     public MaintenanceWindowScheduleResponse get(String scopeType, String scopeId) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        scheduleEntitlementService.verifyEntitled(accountId);
         MaintenanceScopeType scope = toScopeType(scopeType);
         scheduleService.validateScope(scope, scopeId, accountId);
         scheduleAuthorization.authorize(scope, scopeId, READ);
@@ -87,6 +94,7 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
     @CustomPermissionCheck
     public Response create(MaintenanceWindowScheduleRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        scheduleEntitlementService.verifyEntitled(accountId);
         MaintenanceScopeType scope = toScopeType(request.getScopeType());
         scheduleService.validateScope(scope, request.getScopeId(), accountId);
         scheduleAuthorization.authorize(scope, request.getScopeId(), WRITE);
@@ -110,6 +118,7 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
     public MaintenanceWindowScheduleResponse update(
             String scopeType, String scopeId, UpdateMaintenanceWindowScheduleRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        scheduleEntitlementService.verifyEntitled(accountId);
         MaintenanceScopeType scope = toScopeType(scopeType);
         scheduleService.validateScope(scope, scopeId, accountId);
         scheduleAuthorization.authorize(scope, scopeId, WRITE);
@@ -125,6 +134,7 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
     @CustomPermissionCheck
     public void delete(String scopeType, String scopeId) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        scheduleEntitlementService.verifyEntitled(accountId);
         MaintenanceScopeType scope = toScopeType(scopeType);
         scheduleService.validateScope(scope, scopeId, accountId);
         scheduleAuthorization.authorize(scope, scopeId, WRITE);
@@ -140,6 +150,7 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
     public MaintenanceWindowSkipResponse skipNextWindow(
             String scopeType, String scopeId, MaintenanceWindowSkipRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        scheduleEntitlementService.verifyEntitled(accountId);
         MaintenanceScopeType scope = toScopeType(scopeType);
         scheduleService.validateScope(scope, scopeId, accountId);
         scheduleAuthorization.authorize(scope, scopeId, WRITE);
@@ -155,6 +166,7 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
     @CustomPermissionCheck
     public MaintenanceWindowSkipResponse cancelSkipNextWindow(String scopeType, String scopeId) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        scheduleEntitlementService.verifyEntitled(accountId);
         MaintenanceScopeType scope = toScopeType(scopeType);
         scheduleService.validateScope(scope, scopeId, accountId);
         scheduleAuthorization.authorize(scope, scopeId, WRITE);

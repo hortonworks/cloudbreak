@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.type.OutboundType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaEnvironmentCrnResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.UpdateInstanceTypeRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +37,15 @@ public interface FreeIpaInternalV1Endpoint {
             description = FreeIpaNotes.FREEIPA_NOTES, operationId = "internalGetDefaultOutboundByEnvironmentV2",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     OutboundType getOutboundType(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn);
+
+    @GET
+    @Path("/environment_crn")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Resolve parent environment CRN for a FreeIPA resource CRN",
+            operationId = "internalGetEnvironmentCrnByFreeIpaResourceCrnV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FreeIpaEnvironmentCrnResponse getEnvironmentCrnByResourceCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.FREEIPA) @QueryParam("resourceCrn") @NotEmpty String resourceCrn);
 
     @PUT
     @Path("/update_instance_type")
