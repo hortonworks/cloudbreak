@@ -122,6 +122,8 @@ cb:
         access.scope.id: 41094075-9dad-400e-a0bd-54e686782033
   azure:
     host.name.prefix.length: 255
+    # The environment service never upscales Azure VMs, the property is only needed by the shared cloud-azure component
+    upscale.skipExistingLoadBalancer: false
     database.template.batchSize: 1
 
 spring:

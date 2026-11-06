@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  */
 public enum AzureRegisteredPrivateDnsZoneServiceType implements AzurePrivateDnsZoneDescriptor {
 
-    AKS("Microsoft.ContainerService/managedClusters", "managedClusters",
+    AKS(ArmResourceType.MANAGED_CLUSTER.getType(), "managedClusters",
             "privatelink.{region}.azmk8s.io or {subzone}.privatelink.{region}.azmk8s.io",
             List.of(AzureRegisteredPrivateDnsZoneServiceType.AKS_DNS_ZONE_NAME_PATTERN_REGION,
                     AzureRegisteredPrivateDnsZoneServiceType.AKS_DNS_ZONE_NAME_PATTERN_SUBZONE_AND_REGION));
