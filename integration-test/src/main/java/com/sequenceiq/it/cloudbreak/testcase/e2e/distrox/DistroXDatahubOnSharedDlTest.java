@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -20,25 +21,64 @@ import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.assertion.distrox.DistroxStopStartScaleDurationAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.RestartTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
+import com.sequenceiq.it.cloudbreak.config.DistroXStopStartScaleTestProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.restart.RestartInstancesTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2EWithReusableResourcesTest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class DistroXScaleTest extends AbstractE2ETest {
+/**
+ * Consolidated DistroX Data-Hub-only scenarios that share ONE environment + FreeIPA + LIGHT_DUTY Data Lake
+ * (built once in {@link #setupClass(TestContext)}). Each {@code @Test} creates only its own Data Hub against the
+ * shared Data Lake and deletes it at the end, so peak footprint stays at one Data Hub and no Data Hub is leaked
+ * between methods. Env/FreeIPA/Data Lake are read-only throughout.
+ */
+public class DistroXDatahubOnSharedDlTest extends AbstractE2EWithReusableResourcesTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXScaleTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXDatahubOnSharedDlTest.class);
+
+    private static final Map<String, String> DX_TAGS = Map.of("distroxTagKey", "distroxTagValue");
+
+    private static final String RESTART_INSTANCE_GROUP = "executor";
 
     private final List<String> defaultVolumeIds = new ArrayList<>();
 
     private final List<String> scaledVolumeIds = new ArrayList<>();
 
     private int defaultInstanceVolumeRatio = 1;
+
+    @Inject
+    private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private SdxTestClient sdxTestClient;
+
+    @Inject
+    private RestartTestClient restartTestClient;
+
+    @Inject
+    private DistroxUtil distroxUtil;
+
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
+
+    @Inject
+    private DistroXStopStartScaleTestProperties distroXStopStartScaleTestProperties;
 
     private enum DistroXInstanceActions {
         STOP("stop"),
@@ -55,33 +95,28 @@ public class DistroXScaleTest extends AbstractE2ETest {
         }
     }
 
-    @Inject
-    private DistroXTestClient distroXTestClient;
-
-    @Inject
-    private DistroxUtil distroxUtil;
-
     @Override
-    protected void setupTest(TestContext testContext) {
+    protected void setupClass(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createResourceGroup(testContext);
-        createEnvironmentWithFreeIpa(testContext);
-        createDatalakeWithoutDatabase(testContext);
-        createDefaultDatahubForExistingDatalake(testContext);
+        createDefaultEnvironment(testContext);
+        testContext
+                .given(SdxTestDto.class)
+                .withClusterShape(SdxClusterShape.LIGHT_DUTY)
+                .withCloudStorage()
+                .when(sdxTestClient.create())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT, description = "Resilient Scaling: " +
-            "UseCase1: " +
-            "- Start upscale on running cluster " +
-            "- Delete a non CM server host from provider other hostgroup during upscale " +
-            "- Upscale should complete ")
+    @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running default Distrox cluster",
+            given = "there is a running default Distrox cluster on the shared Data Lake",
             when = "deleted a Compute instance while cluster was upscaling (by Worker nodes)",
             then = "cluster can be resiliently scaled up then down with higher node count")
-    public void testCreateAndScaleDistroX(TestContext testContext, ITestContext iTestContext) {
+    public void testScale(TestContext testContext, ITestContext iTestContext) {
         DistroXScaleTestParameters params = new DistroXScaleTestParameters(iTestContext.getCurrentXmlTest().getAllParameters());
 
         if (params.getTimes() < 1) {
@@ -90,6 +125,9 @@ public class DistroXScaleTest extends AbstractE2ETest {
 
         StringBuilder instanceToStopId = new StringBuilder();
         testContext.given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     Optional<String> anInstanceToStop = getDistroxInstanceIds(tc, testDto, client, params.getHostGroup()).stream().findFirst();
                     doDistroxInstanceAction(tc, testDto, List.of(anInstanceToStop.orElseThrow(() ->
@@ -131,6 +169,101 @@ public class DistroXScaleTest extends AbstractE2ETest {
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
                 .awaitForFlow()
                 .validate());
+        deleteDatahub(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running default Distrox cluster on the shared Data Lake",
+            when = "cluster has been scaled successfully by compute nodes",
+            then = "cluster compute nodes can be scaled down then up via stop then start instances at provider")
+    public void testStopStartScale(TestContext testContext, ITestContext iTestContext) {
+        AtomicReference<List<String>> instancesToStop = new AtomicReference<>();
+
+        int expectedNumber = distroXStopStartScaleTestProperties.getScalingTimeByProvider(testContext.commonCloudProperties().getCloudProvider());
+
+        if (distroXStopStartScaleTestProperties.getTestingTimes() < 1) {
+            throw new TestFailException("Test should execute at least 1 round of scaling");
+        }
+
+        testContext.given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .when(distroXTestClient.scale(distroXStopStartScaleTestProperties.getHostGroup(), distroXStopStartScaleTestProperties.getScaleUpTarget()))
+                .awaitForFlow()
+                .then((tc, testDto, client) -> {
+                    instancesToStop.set(distroxUtil.getInstanceIds(testDto, client, distroXStopStartScaleTestProperties.getHostGroup()).stream()
+                            .limit(distroXStopStartScaleTestProperties.getScaleDownTarget()).collect(Collectors.toList()));
+                    testDto.setInstanceIdsForActions(instancesToStop.get());
+                    return testDto;
+                })
+                .when(distroXTestClient.scaleStopInstances())
+                .awaitForFlow()
+                .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, false))
+                .when(distroXTestClient.scaleStartInstances(distroXStopStartScaleTestProperties.getHostGroup(),
+                        distroXStopStartScaleTestProperties.getScaleUpTarget()))
+                .awaitForFlow()
+                .when(distroXTestClient.get())
+                .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, true));
+        IntStream.range(1, distroXStopStartScaleTestProperties.getTestingTimes())
+                .forEach(i -> testContext
+                        .given(DistroXTestDto.class)
+                        .when(distroXTestClient.scaleStopInstances())
+                        .awaitForFlow()
+                        .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, false))
+                        .when(distroXTestClient.scaleStartInstances(distroXStopStartScaleTestProperties.getHostGroup(),
+                                distroXStopStartScaleTestProperties.getScaleUpTarget()))
+                        .awaitForFlow()
+                        .when(distroXTestClient.get())
+                        .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, true)));
+        deleteDatahub(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
+    @Description(
+            given = "there is an available environment with a running datahub on the shared Data Lake",
+            when = "restart Instances is called",
+            then = "Instances are restarted and datahub is running"
+    )
+    public void testRestartInstances(TestContext testContext) {
+        AtomicReference<String> datahubName = new AtomicReference<>();
+        AtomicReference<String> datahubCrn = new AtomicReference<>();
+        List<String> dataHubInstancesToRestart = new ArrayList<>();
+
+        testContext
+                .given("dx", DistroXTestDto.class)
+                .withTemplate(commonClusterManagerProperties.getDataMartDistroXBlueprintNameForCurrentRuntime())
+                .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.dataMartHostGroups(testContext, testContext.getCloudPlatform()))
+                .addTags(DX_TAGS)
+                .when(distroXTestClient.create(), RunningParameter.key("dx"))
+                .await(STACK_AVAILABLE, RunningParameter.key("dx"))
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    datahubName.set(testDto.getName());
+                    datahubCrn.set(testDto.getCrn());
+                    dataHubInstancesToRestart.addAll(distroxUtil.getInstanceIds(testDto, client, RESTART_INSTANCE_GROUP));
+                    return testDto;
+                })
+                .given("restartDistrox", RestartInstancesTestDto.class)
+                .withName(datahubName.get())
+                .withCrn(datahubCrn.get())
+                .when(restartTestClient.restartInstances(dataHubInstancesToRestart))
+                .awaitForFlow()
+                .given("dx", DistroXTestDto.class)
+                .when(distroXTestClient.get(), RunningParameter.key("dx"))
+                .await(STACK_AVAILABLE, RunningParameter.key("dx"))
+                .awaitForHealthyInstances()
+                .when(distroXTestClient.delete(), RunningParameter.key("dx"))
+                .await(STACK_DELETED, RunningParameter.key("dx"))
+                .validate();
+    }
+
+    private void deleteDatahub(TestContext testContext) {
+        testContext.given(DistroXTestDto.class)
+                .when(distroXTestClient.delete())
+                .await(STACK_DELETED)
+                .validate();
     }
 
     private List<String> mergeInstanceIdList(List<String> instanceIdsForAction, String instance) {
@@ -177,7 +310,6 @@ public class DistroXScaleTest extends AbstractE2ETest {
     }
 
     private List<String> getDistroxInstanceIds(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient, String hostGroupName) {
-        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         return distroxUtil.getInstanceIds(testDto, cloudbreakClient, hostGroupName);
     }
 
