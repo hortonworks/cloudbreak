@@ -19,12 +19,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
@@ -65,8 +65,47 @@ class AllowedInstanceTypeTest {
     @Inject
     private DefaultClusterTemplateCache templateCache;
 
-    @Inject
+    @MockBean
+    private ClusterTemplateService clusterTemplateService;
+
+    @MockBean
     private DefaultClusterTemplateV4RequestToClusterTemplateConverter converter;
+
+    @MockBean
+    private StackToTemplatePreparationObjectConverter mockPreparationObject;
+
+    @MockBean
+    private WorkspaceService workspaceService;
+
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private PreferencesService preferencesService;
+
+    @MockBean
+    private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
+
+    @MockBean
+    private BlueprintService blueprintService;
+
+    @MockBean
+    private EntitlementService entitlementService;
+
+    @MockBean
+    private ProviderPreferencesService providerPreferencesService;
+
+    @MockBean
+    private CommonGovService commonGovService;
+
+    @MockBean
+    private InternalClusterTemplateValidator internalClusterTemplateValidator;
+
+    @MockBean
+    private DefaultBlueprintCache defaultBlueprintCache;
+
+    @MockBean
+    private CrnGeneratorService crnGeneratorService;
 
     @Test
     void validateAwsClusterTemplatesByInstanceType() {
@@ -124,50 +163,14 @@ class AllowedInstanceTypeTest {
     @PropertySource("classpath:application.yml")
     static class TestAppContext {
 
-        @MockBean
-        private ClusterTemplateService clusterTemplateService;
-
-        @MockBean
-        private DefaultClusterTemplateV4RequestToClusterTemplateConverter converter;
-
-        @MockBean
-        private StackToTemplatePreparationObjectConverter mockPreparationObject;
-
-        @MockBean
-        private WorkspaceService workspaceService;
-
-        @MockBean
-        private UserService userService;
-
-        @MockBean
-        private PreferencesService preferencesService;
-
-        @MockBean
-        private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
-
-        @MockBean
-        private BlueprintService blueprintService;
-
-        @MockBean
-        private EntitlementService entitlementService;
-
-        @MockBean
-        private ProviderPreferencesService providerPreferencesService;
-
-        @MockBean
-        private CommonGovService commonGovService;
-
-        @MockBean
-        private InternalClusterTemplateValidator internalClusterTemplateValidator;
-
-        @MockBean
-        private DefaultBlueprintCache defaultBlueprintCache;
-
-        @MockBean
-        private CrnGeneratorService crnGeneratorService;
-
-        @PostConstruct
-        public void setUp() {
+        // Stubbing must be in place before DefaultClusterTemplateCache's own @PostConstruct consumes
+        // these beans. An @Autowired method is invoked during this configuration's initialisation with
+        // its parameters already resolved, unlike @Inject fields read from @PostConstruct, which can
+        // still be null depending on initialisation order (CB-35471).
+        @Autowired
+        void stubDefaults(DefaultClusterTemplateV4RequestToClusterTemplateConverter converter,
+                CrnGeneratorService crnGeneratorService,
+                DefaultBlueprintCache defaultBlueprintCache) {
             when(converter.convert(any())).thenReturn(mock(ClusterTemplate.class));
             doAnswer(invocation -> UUID.randomUUID().toString())
                     .when(crnGeneratorService).createGlobalDefaultClusterDefinitionCrn(anyString());

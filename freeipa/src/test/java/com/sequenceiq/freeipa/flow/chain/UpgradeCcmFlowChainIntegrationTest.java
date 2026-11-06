@@ -189,6 +189,9 @@ class UpgradeCcmFlowChainIntegrationTest {
     @MockBean
     private StackUpdater stackUpdater;
 
+    @MockBean
+    private CcmParametersConfigService ccmParametersConfigService;
+
     @BeforeEach
     public void setup() {
         Stack stack = new Stack();
@@ -330,8 +333,6 @@ class UpgradeCcmFlowChainIntegrationTest {
             FlowIntegrationTestConfig.class
     })
     static class Config {
-        @MockBean
-        private CcmParametersConfigService ccmParametersConfigService;
 
         @Bean
         public CommonExecutorServiceFactory commonExecutorServiceFactory() {

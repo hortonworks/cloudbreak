@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.flow.hybrid.repair;
 
-
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_REPAIR_TRUST_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_REPAIR_TRUST_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_REPAIR_TRUST_STARTED;
@@ -38,7 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -124,7 +122,7 @@ class EnvironmentCrossRealmTrustRepairFlowIntegrationTest {
     @Inject
     private FlowRegister flowRegister;
 
-    @Inject
+    @MockBean
     private FlowLogRepository flowLogRepository;
 
     @Inject
@@ -175,8 +173,68 @@ class EnvironmentCrossRealmTrustRepairFlowIntegrationTest {
     @MockBean
     private Environment environment;
 
-    @Autowired
+    @MockBean
     private EnvironmentService environmentService;
+
+    @MockBean
+    private ApplicationFlowInformation applicationFlowInformation;
+
+    @MockBean
+    private FlowChainLogRepository flowChainLogRepository;
+
+    @MockBean
+    private EnvironmentMetricService environmentMetricService;
+
+    @MockBean
+    private OwnerAssignmentService ownerAssignmentService;
+
+    @MockBean
+    private WebSocketNotificationService webSocketNotificationService;
+
+    @MockBean
+    private Client client;
+
+    @MockBean
+    private SecretService secretService;
+
+    @MockBean
+    private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
+    @MockBean
+    private TransactionalScheduler scheduler;
+
+    @MockBean
+    private FlowOperationStatisticsService flowOperationStatisticsService;
+
+    @MockBean
+    private CcmResourceTerminationListener ccmResourceTerminationListener;
+
+    @MockBean
+    private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
+
+    @MockBean
+    private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
+
+    @MockBean
+    private PlatformParameterService platformParameterService;
+
+    @MockBean
+    private EnvironmentDtoConverter environmentDtoConverter;
+
+    @MockBean
+    private GrpcUmsClient grpcUmsClient;
+
+    @MockBean
+    private RoleCrnGenerator roleCrnGenerator;
+
+    @MockBean
+    private ExperienceConnectorService experienceConnectorService;
+
+    @MockBean
+    private ManagedChannelWrapper channelWrapper;
+
+    @MockBean
+    private UmsClientConfig umsClientConfig;
 
     @BeforeEach
     public void repair() throws QuotaExceededException {
@@ -329,72 +387,6 @@ class EnvironmentCrossRealmTrustRepairFlowIntegrationTest {
             "com.sequenceiq.flow",
     })
     static class Config {
-
-        @MockBean
-        EnvironmentService environmentService;
-
-        @MockBean
-        PlatformParameterService platformParameterService;
-
-        @MockBean
-        EnvironmentDtoConverter environmentDtoConverter;
-
-        @MockBean
-        GrpcUmsClient grpcUmsClient;
-
-        @MockBean
-        RoleCrnGenerator roleCrnGenerator;
-
-        @MockBean
-        ExperienceConnectorService experienceConnectorService;
-
-        @MockBean
-        ManagedChannelWrapper channelWrapper;
-
-        @MockBean
-        UmsClientConfig umsClientConfig;
-
-        @MockBean
-        private FlowLogRepository flowLogRepository;
-
-        @MockBean
-        private ApplicationFlowInformation applicationFlowInformation;
-
-        @MockBean
-        private FlowChainLogRepository flowChainLogRepository;
-
-        @MockBean
-        private EnvironmentMetricService environmentMetricService;
-
-        @MockBean
-        private OwnerAssignmentService ownerAssignmentService;
-
-        @MockBean
-        private WebSocketNotificationService webSocketNotificationService;
-
-        @MockBean
-        private Client client;
-
-        @MockBean
-        private SecretService secretService;
-
-        @MockBean
-        private FreeIpaV1Endpoint freeIpaV1Endpoint;
-
-        @MockBean
-        private TransactionalScheduler scheduler;
-
-        @MockBean
-        private FlowOperationStatisticsService flowOperationStatisticsService;
-
-        @MockBean
-        private CcmResourceTerminationListener ccmResourceTerminationListener;
-
-        @MockBean
-        private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
-
-        @MockBean
-        private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
         @Bean
         public EventBus reactor(ExecutorService threadPoolExecutor) {
