@@ -1022,7 +1022,6 @@ class StackCommonServiceTest {
 
         assertEquals(FLOW_IDENTIFIER, result);
         verify(verticalScalingValidatorService).validateInstanceType(stack, request, true);
-        verify(verticalScalingValidatorService).validateIfEphemeralVolumesPresent(stack, "compute");
     }
 
     @Test

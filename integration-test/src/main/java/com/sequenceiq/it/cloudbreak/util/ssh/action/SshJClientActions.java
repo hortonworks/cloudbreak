@@ -546,9 +546,12 @@ public class SshJClientActions {
     private <T extends CloudbreakTestDto> T checkLoggingAgentStatus(T testDto, List<String> instanceIps, boolean freeIpaInstances) {
         // CB-34702: cdp-doctor validates the hardcoded production DataBus endpoints instead of the ones configured on the node, so read the configured
         // endpoints from the telemetry pillar and pass them explicitly.
+        // CB-35500: Salt 3006.25 prints IPC tracebacks on stderr when salt-call exits, which would be reported as statuses.
         String loggingAgentNokStatusCommand = """
-                DBUS=$(sudo sh -c '. activate_salt_env; salt-call pillar.get "telemetry:databusEndpoint" --output json' | jq -r '.local // empty'); \
-                DBUS_S3=$(sudo sh -c '. activate_salt_env; salt-call pillar.get "telemetry:databusS3Endpoint" --output json' | jq -r '.local // empty'); \
+                DBUS=$(sudo sh -c '. activate_salt_env; salt-call pillar.get "telemetry:databusEndpoint" --output json 2>/dev/null' \
+                    | jq -r '.local // empty'); \
+                DBUS_S3=$(sudo sh -c '. activate_salt_env; salt-call pillar.get "telemetry:databusS3Endpoint" --output json 2>/dev/null' \
+                    | jq -r '.local // empty'); \
                 if [ -z "$DBUS" ] || [ -z "$DBUS_S3" ]; then \
                     echo "The configured DataBus endpoints cannot be read from the telemetry pillar!"; \
                     exit 1; \

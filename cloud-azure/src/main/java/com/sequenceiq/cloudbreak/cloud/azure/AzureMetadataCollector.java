@@ -26,6 +26,7 @@ import com.azure.resourcemanager.network.models.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureLoadBalancerResourceNames;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -253,7 +254,7 @@ public class AzureMetadataCollector implements MetadataCollector {
             LOGGER.warn("Unable to find private ip address for load balancer {}", loadBalancerName);
             return Optional.empty();
         } else {
-            AzureLoadBalancerFrontend frontend = privateIpFrontends.get(0);
+            AzureLoadBalancerFrontend frontend = selectFrontend(privateIpFrontends, loadBalancerName, type);
             if (privateIpFrontends.size() > 1) {
                 LOGGER.warn("Found multiple private IPs ({}) for {} load balancer {}. Only one, {}, will be used.",
                         privateIpFrontends.stream().map(AzureLoadBalancerFrontend::getIp).collect(Collectors.joining(", ")),
@@ -271,7 +272,7 @@ public class AzureMetadataCollector implements MetadataCollector {
             LOGGER.warn("Unable to find public ip address for load balancer {}", loadBalancerName);
             return Optional.empty();
         } else {
-            AzureLoadBalancerFrontend frontend = publicIpFrontends.get(0);
+            AzureLoadBalancerFrontend frontend = selectFrontend(publicIpFrontends, loadBalancerName, LoadBalancerType.PUBLIC);
             if (publicIpFrontends.size() > 1) {
                 LOGGER.warn("Found multiple public IPs ({}) for load balancer {}. Only one, {}, will be used.",
                         publicIpFrontends.stream().map(AzureLoadBalancerFrontend::getIp).collect(Collectors.joining(", ")),
@@ -280,6 +281,20 @@ public class AzureMetadataCollector implements MetadataCollector {
             }
             return Optional.ofNullable(frontend.getIp());
         }
+    }
+
+    // frontends added outside Cloudbreak survive upscale, so prefer the one Cloudbreak created over the first one by name
+    private AzureLoadBalancerFrontend selectFrontend(List<AzureLoadBalancerFrontend> frontends, String loadBalancerName, LoadBalancerType type) {
+        String cloudbreakFrontendName = AzureLoadBalancerResourceNames.frontendName(loadBalancerName, type);
+        return frontends.stream()
+                .filter(fe -> cloudbreakFrontendName.equals(fe.getName()))
+                .findFirst()
+                .orElseGet(() -> {
+                    AzureLoadBalancerFrontend firstFrontend = frontends.get(0);
+                    LOGGER.info("No frontend named {} found for {} load balancer {}, using frontend {}",
+                            cloudbreakFrontendName, type, loadBalancerName, firstFrontend.getName());
+                    return firstFrontend;
+                });
     }
 
     @Override

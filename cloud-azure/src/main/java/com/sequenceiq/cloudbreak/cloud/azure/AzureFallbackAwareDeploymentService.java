@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureUpscaleLoadBalancerTemplateFilter;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureInstanceTypeRetryExceptionMatcher;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.InsufficientCapacityException;
@@ -39,19 +40,21 @@ public class AzureFallbackAwareDeploymentService {
     @Inject
     private InstanceTypeFallbackReporter instanceTypeFallbackReporter;
 
+    @Inject
+    private AzureUpscaleLoadBalancerTemplateFilter azureUpscaleLoadBalancerTemplateFilter;
+
     public Deployment createTemplateDeploymentWithFallback(AzureTemplateDeploymentRequest request) {
         String accountId = request.cloudContext().getAccountId();
         String resourceGroupName = request.resourceGroupName();
         String stackName = request.stackName();
-        String parameters = request.parameters();
         if (!entitlementService.isFallbackInstanceTypeEnabled(accountId)) {
             LOGGER.debug("Instance type fallback is disabled for account {}, submitting template deployment as-is.", accountId);
-            return request.client().createTemplateDeployment(resourceGroupName, stackName, request.initialTemplate(), parameters);
+            return createDeployment(request, request.initialTemplate());
         }
         Map<String, List<String>> fallbackChains = collectFallbackChains(request.cloudStack());
         if (fallbackChains.isEmpty()) {
             LOGGER.debug("No fallback instance types configured on stack {}, submitting template deployment as-is.", stackName);
-            return request.client().createTemplateDeployment(resourceGroupName, stackName, request.initialTemplate(), parameters);
+            return createDeployment(request, request.initialTemplate());
         }
         Map<String, String> originalFlavors = collectOriginalFlavors(request.cloudStack());
         Map<String, Integer> nextFallbackIndex = new HashMap<>();
@@ -60,7 +63,7 @@ public class AzureFallbackAwareDeploymentService {
         Map<String, String> vmToSkuFamily = getVmToSkuFamilies(request);
         for (int attempt = 0; attempt < getMaxAttemptFromFallbackQueueLength(fallbackChains); attempt++) {
             try {
-                Deployment deployment = request.client().createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+                Deployment deployment = createDeployment(request, template);
                 if (attempt > 0) {
                     LOGGER.info("Template deployment {}/{} succeeded on fallback attempt {}.", resourceGroupName, stackName, attempt);
                 }
@@ -86,6 +89,12 @@ public class AzureFallbackAwareDeploymentService {
             throw lastException;
         }
         throw new IllegalStateException("Azure fallback deployment loop terminated without a result");
+    }
+
+    // Every submission goes through here, because the fallback rebuilds the template and the existing load balancers must be removed again
+    private Deployment createDeployment(AzureTemplateDeploymentRequest request, String template) {
+        String filteredTemplate = azureUpscaleLoadBalancerTemplateFilter.apply(template, request.skippableLoadBalancers());
+        return request.client().createTemplateDeployment(request.resourceGroupName(), request.stackName(), filteredTemplate, request.parameters());
     }
 
     private String handleDeploymentFailureAndRebuildTemplate(ManagementException underlying, RuntimeException toRethrow,

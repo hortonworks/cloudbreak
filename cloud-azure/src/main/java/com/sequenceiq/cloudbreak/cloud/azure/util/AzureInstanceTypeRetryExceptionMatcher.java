@@ -25,6 +25,7 @@ import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.resources.models.DeploymentOperation;
 import com.azure.resourcemanager.resources.models.TargetResource;
+import com.sequenceiq.cloudbreak.cloud.azure.ArmResourceType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDeploymentCapacityError;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -34,8 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 public class AzureInstanceTypeRetryExceptionMatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureInstanceTypeRetryExceptionMatcher.class);
-
-    private static final String VIRTUAL_MACHINES_RESOURCE_TYPE = "Microsoft.Compute/virtualMachines";
 
     private static final Set<String> CAPACITY_ERROR_CODES = Arrays.stream(AzureDeploymentCapacityError.values())
             .map(AzureDeploymentCapacityError::getCode)
@@ -203,7 +202,7 @@ public class AzureInstanceTypeRetryExceptionMatcher {
     }
 
     private boolean isVirtualMachineResource(TargetResource targetResource) {
-        return targetResource != null && VIRTUAL_MACHINES_RESOURCE_TYPE.equalsIgnoreCase(targetResource.resourceType());
+        return targetResource != null && ArmResourceType.VIRTUAL_MACHINE.getType().equalsIgnoreCase(targetResource.resourceType());
     }
 
     private boolean operationStatusMessageIsCapacityError(DeploymentOperation deploymentOperation) {
