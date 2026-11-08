@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
@@ -188,12 +189,12 @@ public class EnvironmentModificationService {
         editFreeIpaPlatformVariant(editDto, environment);
         validationBuilder.merge(environmentValidatorService.validateTags(editDto, environment.getEnvironmentTags()));
         validationBuilder.merge(environmentValidatorService.validateMaintenanceWindowScheduleEdit(editDto));
-        editTags(editDto, environment);
 
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+        Optional<Json> tagsToPropagate = editTags(editDto, environment);
 
         String environmentCrn = environment.getResourceCrn();
         boolean maintenanceScheduleEditRequested = isMaintenanceScheduleEditRequested(editDto);
@@ -207,6 +208,7 @@ public class EnvironmentModificationService {
         try {
             Environment saved = environmentService.save(environment);
             environmentSaved = true;
+            tagsToPropagate.ifPresent(tags -> modifyTags(saved, tags, editDto.getUserDefinedTags(), Set.of()));
             triggerEditProxyIfChanged(editDto, saved);
             return environmentDtoConverter.environmentToDto(saved);
         } catch (RuntimeException e) {
@@ -357,20 +359,23 @@ public class EnvironmentModificationService {
         }
     }
 
-    private void editTags(EnvironmentEditDto editDto, Environment environment) {
+    /**
+     * Returns the edited tags if they have to be propagated to the existing resources. Those are written by
+     * {@link #modifyTags} only after the tag modification flow is accepted, so they are left out of the entity here.
+     */
+    private Optional<Json> editTags(EnvironmentEditDto editDto, Environment environment) {
+        Optional<Json> tagsToPropagate = Optional.empty();
         if (MapUtils.isNotEmpty(editDto.getUserDefinedTags())) {
             if (editDto.isUpdateTagsOnExistingResources()) {
                 environmentTagUpdatePermissionService.validate(environment);
-            }
-            EnvironmentTags environmentTags = environment.getEnvironmentTags();
-            environment.setTags(environmentTagsDtoConverter.getTags(editDto, environmentTags));
-            if (editDto.isUpdateTagsOnExistingResources()) {
-                environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, editDto.getUserDefinedTags(), Set.of());
+                tagsToPropagate = Optional.of(environmentTagsDtoConverter.getTags(editDto, environment.getEnvironmentTags()));
             } else {
                 LOGGER.info("Skipping environment tag modification flow for environment '{}' due to updateTagsOnExistingResources is false",
                         environment.getName());
+                environment.setTags(environmentTagsDtoConverter.getTags(editDto, environment.getEnvironmentTags()));
             }
         }
+        return tagsToPropagate;
     }
 
     private EnvironmentDto deleteUserDefinedTags(Environment environment, Set<String> tagKeys) {
@@ -380,10 +385,18 @@ public class EnvironmentModificationService {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
-        environment.setTags(environmentTagsDtoConverter.getTagsAfterRemovingUserDefinedKeys(environmentTags, tagKeys));
-        Environment saved = environmentService.save(environment);
-        environmentReactorFlowManager.triggerEnvironmentTagsModification(saved, Map.of(), tagKeys);
-        return environmentDtoConverter.environmentToDto(saved);
+        environmentTagUpdatePermissionService.validate(environment);
+        Json tags = environmentTagsDtoConverter.getTagsAfterRemovingUserDefinedKeys(environmentTags, tagKeys);
+        return environmentDtoConverter.environmentToDto(modifyTags(environment, tags, Map.of(), tagKeys));
+    }
+
+    /**
+     * Triggers the flow before writing the tags, so a rejected flow (for example when another one is already running) leaves them untouched.
+     * Only the tags are written: a full save of the entity after the flow is accepted would overwrite the status the flow sets meanwhile.
+     */
+    private Environment modifyTags(Environment environment, Json tags, Map<String, String> tagsToAdd, Set<String> tagsToRemove) {
+        environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, tagsToAdd, tagsToRemove);
+        return environmentService.updateTags(environment, tags);
     }
 
     private EnvironmentDto changeCredential(String accountId, String environmentName, EnvironmentChangeCredentialDto dto, Environment environment) {

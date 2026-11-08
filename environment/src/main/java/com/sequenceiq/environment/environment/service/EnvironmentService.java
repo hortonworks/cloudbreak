@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
@@ -142,6 +143,20 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         } else {
             environment.setStatus(status);
             environment.setStatusReason(statusReason);
+        }
+        return environment;
+    }
+
+    /**
+     * Writes only the tags column, so a status set meanwhile by a running flow is not overwritten with the stale one of this entity.
+     */
+    public Environment updateTags(Environment environment, Json tags) {
+        LOGGER.debug("Updating tags of environment with ID '{}'.", environment.getId());
+        int updatedRows = environmentRepository.updateTags(environment.getId(), tags);
+        if (updatedRows == 0) {
+            LOGGER.warn("Environment with ID '{}' was not found and its tags were not updated.", environment.getId());
+        } else {
+            environment.setTags(tags);
         }
         return environment;
     }

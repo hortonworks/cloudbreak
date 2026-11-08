@@ -259,7 +259,7 @@ public class AwsCredentialVerifierTest {
     }
 
     @Test
-    public void tagUpdatePolicyCloudWatchActionsAreSimulatedWithResourceTagContext() throws IOException, AwsPermissionMissingException {
+    public void tagUpdatePolicyResourceScopedActionsAreSimulatedWithResourceTagContext() throws IOException, AwsPermissionMissingException {
         URL url = Resources.getResource("definitions/cdp/aws-cdp-tag-update-policy.json");
         String tagUpdatePolicy = Resources.toString(url, Charsets.UTF_8);
         String encodedTagUpdatePolicy = Base64Util.encode(tagUpdatePolicy);
@@ -282,23 +282,26 @@ public class AwsCredentialVerifierTest {
 
         awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), encodedTagUpdatePolicy);
 
-        List<SimulatePrincipalPolicyRequest> cloudWatchTagRequests = requestArgumentCaptor.getAllValues().stream()
+        List<SimulatePrincipalPolicyRequest> resourceTagScopedRequests = requestArgumentCaptor.getAllValues().stream()
                 .filter(request -> request.actionNames().contains("cloudwatch:TagResource"))
                 .toList();
-        assertEquals(1, cloudWatchTagRequests.size(), "cloudwatch:TagResource must be simulated in exactly one request");
-        SimulatePrincipalPolicyRequest cloudWatchTagRequest = cloudWatchTagRequests.get(0);
-        assertThat(cloudWatchTagRequest.actionNames(), CoreMatchers.hasItem("cloudwatch:ListTagsForResource"));
+        assertEquals(1, resourceTagScopedRequests.size(), "cloudwatch:TagResource must be simulated in exactly one request");
+        SimulatePrincipalPolicyRequest resourceTagScopedRequest = resourceTagScopedRequests.get(0);
+        assertThat(resourceTagScopedRequest.actionNames(), CoreMatchers.hasItem("cloudwatch:ListTagsForResource"));
+        assertThat(resourceTagScopedRequest.actionNames(), CoreMatchers.hasItem("cloudwatch:UntagResource"));
+        assertThat("EC2 tag mutation is only granted on Cloudera-owned resources, so it must be simulated with the resource tag context",
+                resourceTagScopedRequest.actionNames(), CoreMatchers.hasItems("ec2:CreateTags", "ec2:DeleteTags"));
 
-        assertEquals(1, cloudWatchTagRequest.contextEntries().size(),
-                "the CloudWatch statement's condition must be translated into exactly one simulation context entry");
-        ContextEntry contextEntry = cloudWatchTagRequest.contextEntries().get(0);
+        assertEquals(1, resourceTagScopedRequest.contextEntries().size(),
+                "the resource-tag-scoped statement's condition must be translated into exactly one simulation context entry");
+        ContextEntry contextEntry = resourceTagScopedRequest.contextEntries().get(0);
         assertEquals("aws:ResourceTag/Cloudera-Resource-Name", contextEntry.contextKeyName());
         assertEquals(ContextKeyTypeEnum.STRING, contextEntry.contextKeyType());
         assertEquals(List.of("crn:cdp:*"), contextEntry.contextKeyValues());
 
         requestArgumentCaptor.getAllValues().stream()
                 .filter(request -> !request.actionNames().contains("cloudwatch:TagResource"))
-                .forEach(request -> assertThat("only the CloudWatch statement is conditioned",
+                .forEach(request -> assertThat("only the resource-tag-scoped statement is conditioned",
                         request.contextEntries(), CoreMatchers.is(List.of())));
     }
 

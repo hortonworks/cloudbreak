@@ -26,6 +26,7 @@ permissionGroups:
       "Microsoft.DBforPostgreSQL/flexibleServers/start/action": "Cloudera platform starts stopped PostgreSQL flexible servers during Azure environment recovery."
       "Microsoft.DBforPostgreSQL/flexibleServers/stop/action": "Cloudera platform stops PostgreSQL flexible servers during Azure environment maintenance."
       "Microsoft.DBforPostgreSQL/flexibleServers/write": "Cloudera platform creates and updates PostgreSQL flexible servers for Azure environment database workloads."
+      "Microsoft.DBforPostgreSQL/servers/read": "Cloudera platform reads single-server PostgreSQL metadata, including current tags before updating them when environment tags change."
       "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules/write": "Cloudera platform links PostgreSQL servers to environment virtual networks using VNet rules."
       "Microsoft.DBforPostgreSQL/servers/write": "Cloudera platform creates and updates single-server PostgreSQL instances for legacy Azure environment stacks."
   storage:

@@ -28,6 +28,7 @@ permissionGroups:
     permissions:
       "cloudwatch:DeleteAlarms": "Cloudera platform removes alarms it created when deleting environment or cluster stacks."
       "cloudwatch:DescribeAlarms": "Cloudera platform lists alarms while reconciling stack resources during provision and delete flows."
+      "cloudwatch:DescribeAlarmsForMetric": "Cloudera platform resolves the alarms of cluster instances when propagating tag changes to them."
       "cloudwatch:GetMetricStatistics": "Cloudera platform reads the FreeStorageSpace metric of external databases to warn before they run low on storage."
       "cloudwatch:ListTagsForResource": "Cloudera platform reads tags on CloudWatch alarms when reconciling user-defined tag updates."
       "cloudwatch:PutMetricAlarm": "Cloudera platform publishes CloudWatch alarms defined in its CloudFormation templates for stack health monitoring."
@@ -98,7 +99,8 @@ permissionGroups:
       "kms:ListResourceTags": "Cloudera platform reads existing KMS key tags when propagating environment tag updates."
       "kms:PutKeyPolicy": "Cloudera platform updates key policies so cluster roles can use encryption keys."
       "kms:ScheduleKeyDeletion": "Cloudera platform schedules key deletion when removing environment encryption assets."
-      "kms:TagResource": "Cloudera platform tags KMS keys created for environment encryption."
+      "kms:TagResource": "Cloudera platform tags KMS keys created for environment encryption, and applies user-defined tags to them."
+      "kms:UntagResource": "Cloudera platform removes user-defined tags from the KMS keys of the environment."
   logs:
     description: Required to collect and inspect logs from Cloudera infrastructure for monitoring and troubleshooting.
     permissions:
@@ -152,7 +154,8 @@ permissionGroups:
       "secretsmanager:DescribeSecret": "Cloudera platform reads secret metadata for stack-managed credentials."
       "secretsmanager:GetSecretValue": "Cloudera platform retrieves secret values needed during provisioning or rotation."
       "secretsmanager:PutResourcePolicy": "Cloudera platform sets secret resource policies for cross-service access from stacks."
-      "secretsmanager:TagResource": "Cloudera platform tags secrets with Cloudera-Resource-Name using AwsTaggingService."
+      "secretsmanager:TagResource": "Cloudera platform tags secrets with Cloudera-Resource-Name using AwsTaggingService, and applies user-defined tags to them."
+      "secretsmanager:UntagResource": "Cloudera platform removes user-defined tags from environment secrets."
       "secretsmanager:UpdateSecret": "Cloudera platform updates secret payloads during credential or encryption rotation."
   servicequotas:
     description: Required to check account quotas when determining whether Cloudera infrastructure can be provisioned.

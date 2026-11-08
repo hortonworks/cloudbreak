@@ -16,6 +16,7 @@
     "Microsoft.DBforPostgreSQL/flexibleServers/stop/action",
     "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write",
     "Microsoft.DBforPostgreSQL/flexibleServers/configurations/write",
+    "Microsoft.DBforPostgreSQL/servers/read",
     "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules/write",
     "Microsoft.DBforPostgreSQL/servers/write",
     "Microsoft.DataLakeStore/*/read",

@@ -34,6 +34,7 @@ permissionGroups:
       "compute.addresses.createInternal": "Cloudera platform allocates internal IPs for private environment endpoints."
       "compute.addresses.delete": "Cloudera platform releases IP addresses when decommissioning environment networking."
       "compute.addresses.get": "Cloudera platform reads reserved address metadata for environment networking."
+      "compute.addresses.setLabels": "Cloudera platform updates labels on reserved addresses when environment tags are added or removed."
       "compute.addresses.use": "Cloudera platform attaches reserved external IPs to environment compute instances."
       "compute.firewalls.create": "Cloudera platform creates firewall rules for environment cluster connectivity."
       "compute.firewalls.delete": "Cloudera platform deletes firewall rules during environment teardown."
@@ -49,6 +50,7 @@ permissionGroups:
     permissions:
       "compute.disks.create": "Cloudera platform creates persistent disks for GCP environment host storage."
       "compute.disks.delete": "Cloudera platform deletes disks when removing GCP environment nodes."
+      "compute.disks.get": "Cloudera platform reads current disk labels before updating them when environment tags change."
       "compute.disks.setLabels": "Cloudera platform labels disks for Cloudera resource tracking with GCP labeling."
       "compute.disks.use": "Cloudera platform attaches persistent disks to environment VM instances."
       "compute.images.create": "Cloudera platform creates custom images when baking environment host images."
@@ -71,6 +73,7 @@ permissionGroups:
     permissions:
       "compute.forwardingRules.create": "Cloudera platform creates forwarding rules for environment load balancer ingress."
       "compute.forwardingRules.delete": "Cloudera platform deletes forwarding rules when removing environment load balancers."
+      "compute.forwardingRules.get": "Cloudera platform reads current forwarding rule labels before updating them when environment tags change."
       "compute.forwardingRules.list": "Cloudera platform lists forwarding rules attached to environment services."
       "compute.forwardingRules.setLabels": "Cloudera platform labels forwarding rules for environment resource inventory."
       "compute.forwardingRules.use": "Cloudera platform associates forwarding rules with environment backend services."

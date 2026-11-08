@@ -8,8 +8,6 @@
         "ec2:StartInstances",
         "ec2:StopInstances",
         "ec2:AttachVolume",
-        "ec2:ReleaseAddress",
-        "ec2:DescribeAddresses",
         "ec2:TerminateInstances",
         "ec2:DeleteSecurityGroup",
         "ec2:ModifyVolume",
@@ -32,6 +30,8 @@
     {
       "Effect": "Allow",
       "Action": [
+        "ec2:CreateTags",
+        "ec2:DeleteTags",
         "cloudformation:DeleteStack",
         "cloudwatch:DeleteAlarms",
         "cloudwatch:TagResource",
@@ -46,7 +46,11 @@
         "rds:DeleteDBSubnetGroup",
         "rds:StopDBInstance",
         "rds:StartDBInstance",
-        "rds:RebootDBInstance"
+        "rds:RebootDBInstance",
+        "kms:DescribeKey",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:PutResourcePolicy",
+        "secretsmanager:UpdateSecret"
       ],
       "Resource": "*",
       "Condition": {
@@ -61,7 +65,6 @@
       "Effect": "Allow",
       "Action": [
         "cloudformation:CreateStack",
-        "cloudformation:GetTemplate",
         "ec2:CreateTags"
       ],
       "Resource": [
@@ -94,7 +97,7 @@
         "ec2:DescribeVpcs",
         "ec2:DescribeInternetGateways",
         "ec2:DescribeVpcEndpoints",
-        "ec2:describeAddresses",
+        "ec2:DescribeAddresses",
         "ec2:DescribeNatGateways",
         "ec2:DescribeVpcEndpointServices",
         "ec2:ModifySubnetAttribute",
@@ -126,23 +129,40 @@
         "ec2:DescribeAccountAttributes",
         "ec2:DisassociateAddress",
         "ec2:DescribeNetworkInterfaces",
+        "ec2:DescribeTags",
         "sts:DecodeAuthorizationMessage",
         "cloudformation:DescribeStacks",
         "iam:ListInstanceProfiles",
         "iam:ListRoles",
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:CreateOrUpdateTags",
+        "autoscaling:DeleteTags",
         "cloudwatch:PutMetricAlarm",
         "cloudwatch:DescribeAlarms",
+        "cloudwatch:DescribeAlarmsForMetric",
         "elasticloadbalancing:CreateLoadBalancer",
         "elasticloadbalancing:CreateTargetGroup",
         "elasticloadbalancing:DescribeLoadBalancers",
         "elasticloadbalancing:DescribeTargetGroups",
         "elasticloadbalancing:AddTags",
+        "elasticloadbalancing:RemoveTags",
+        "elasticloadbalancing:DescribeTags",
         "elasticloadbalancing:RegisterTargets",
         "elasticloadbalancing:DescribeTargetHealth",
         "elasticloadbalancing:DescribeListeners",
         "elasticloadbalancing:CreateListener",
         "elasticloadbalancing:DeregisterTargets",
         "elasticloadbalancing:ModifyLoadBalancerAttributes",
+        "elasticloadbalancing:ModifyTargetGroup",
+        "elasticloadbalancing:ModifyListener",
+        "elasticfilesystem:TagResource",
+        "elasticfilesystem:UntagResource",
+        "elasticfilesystem:ListTagsForResource",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:CreateSecret",
+        "secretsmanager:DeleteSecret",
+        "secretsmanager:TagResource",
+        "secretsmanager:UntagResource",
         "s3:GetBucketLocation",
         "cloudformation:DescribeStackEvents",
         "cloudformation:DescribeStackResources",
@@ -153,6 +173,7 @@
         "iam:GetInstanceProfile",
         "iam:SimulatePrincipalPolicy",
         "iam:GetRole",
+        "iam:PassRole",
         "rds:AddTagsToResource",
         "rds:CreateDBInstance",
         "rds:CreateDBSubnetGroup",
@@ -170,8 +191,11 @@
         "rds:ModifyDBInstance",
         "rds:DescribeCertificates",
         "kms:ListKeys",
+        "kms:CreateKey",
         "kms:ListAliases",
         "kms:ListResourceTags",
+        "kms:TagResource",
+        "kms:UntagResource",
         "ec2:ModifyInstanceAttribute",
         "ec2:CreateLaunchTemplateVersion",
         "ec2:ModifyLaunchTemplate",
@@ -179,13 +203,6 @@
         "ec2:DescribeVolumeAttribute",
         "ec2:DescribeVolumesModifications",
         "ec2:DescribeVolumeStatus"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iam:PassRole"
       ],
       "Resource": "*"
     },
@@ -198,99 +215,6 @@
       "Resource": [
         "arn:aws-us-gov:iam::*:role/aws-service-role/*"
       ]
-    },
-    {
-      "Sid": "KeyManagementServiceForSecretEncryption",
-      "Effect": "Allow",
-      "Action": [
-        "kms:CreateKey",
-        "kms:ListKeys"
-      ],
-      "Resource": [
-        "*"
-      ]
-    },
-    {
-      "Sid": "KeyManagementServiceForSecretEncryptionLimitedWithResourceTag",
-      "Effect": "Allow",
-      "Action": [
-        "kms:DescribeKey"
-      ],
-      "Resource": [
-        "*"
-      ],
-      "Condition": {
-        "StringLike": {
-          "aws:ResourceTag/Cloudera-Resource-Name": [
-            "crn:cdp-us-gov:*"
-          ]
-        }
-      }
-    },
-    {
-      "Sid": "KeyManagementServiceForSecretEncryptionLimitedWithRequestTag",
-      "Effect": "Allow",
-      "Action": [
-        "kms:TagResource"
-      ],
-      "Resource": [
-        "*"
-      ],
-      "Condition": {
-        "StringLike": {
-          "aws:RequestTag/Cloudera-Resource-Name": [
-            "crn:cdp-us-gov:*"
-          ]
-        }
-      }
-    },
-    {
-      "Sid": "SecretsManagerForSecretEncryption",
-      "Effect": "Allow",
-      "Action": [
-        "secretsmanager:CreateSecret",
-        "secretsmanager:DeleteSecret",
-        "secretsmanager:DescribeSecret"
-      ],
-      "Resource": [
-        "*"
-      ]
-    },
-    {
-      "Sid": "SecretsManagerForSecretEncryptionLimitedWithResourceTag",
-      "Effect": "Allow",
-      "Action": [
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:PutResourcePolicy",
-        "secretsmanager:UpdateSecret"
-      ],
-      "Resource": [
-        "*"
-      ],
-      "Condition": {
-        "StringLike": {
-          "aws:ResourceTag/Cloudera-Resource-Name": [
-            "crn:cdp-us-gov:*"
-          ]
-        }
-      }
-    },
-    {
-      "Sid": "SecretsManagerForSecretEncryptionLimitedWithRequestTag",
-      "Effect": "Allow",
-      "Action": [
-        "secretsmanager:TagResource"
-      ],
-      "Resource": [
-        "*"
-      ],
-      "Condition": {
-        "StringLike": {
-          "aws:RequestTag/Cloudera-Resource-Name": [
-            "crn:cdp-us-gov:*"
-          ]
-        }
-      }
     }
   ]
 }

@@ -1138,17 +1138,63 @@ class EnvironmentModificationServiceTest {
                 .build();
         Environment environment = new Environment();
         environment.setAccountId(ACCOUNT_ID);
+        Json originalTags = new Json(Map.of("userDefinedTags", Map.of("owner", "jane doe")));
+        environment.setTags(originalTags);
 
         when(environmentTagsDtoConverter.getTags(eq(environmentEditDto), any(EnvironmentTags.class))).thenReturn(tags);
+        when(environmentService.updateTags(environment, tags)).thenReturn(environment);
 
         environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
 
-        verify(environmentTagUpdatePermissionService).validate(environment);
-        verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, userDefinedTags, Set.of());
-        ArgumentCaptor<Environment> savedCaptor = ArgumentCaptor.forClass(Environment.class);
-        verify(environmentService).save(savedCaptor.capture());
-        Environment saved = savedCaptor.getValue();
-        assertThat(saved.getTags()).isEqualTo(tags);
+        InOrder inOrder = inOrder(environmentTagUpdatePermissionService, environmentReactorFlowManager, environmentService);
+        inOrder.verify(environmentTagUpdatePermissionService).validate(environment);
+        inOrder.verify(environmentService).save(environment);
+        inOrder.verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, userDefinedTags, Set.of());
+        inOrder.verify(environmentService).updateTags(environment, tags);
+        assertThat(environment.getTags()).isEqualTo(originalTags);
+    }
+
+    @Test
+    void editTagsWithTagUpdatePropagationDoesNotWriteTagsWhenFlowIsRejected() {
+        Map<String, String> userDefinedTags = new HashMap<>(Map.of("owner", "john doe"));
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withUserDefinedTags(userDefinedTags)
+                .withUpdateTagsOnExistingResources(true)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        Json originalTags = new Json(Map.of("userDefinedTags", Map.of("owner", "jane doe")));
+        environment.setTags(originalTags);
+
+        when(environmentTagsDtoConverter.getTags(eq(environmentEditDto), any(EnvironmentTags.class)))
+                .thenReturn(new Json(Map.of("userDefinedTags", userDefinedTags)));
+        when(environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, userDefinedTags, Set.of()))
+                .thenThrow(new BadRequestException("Another flow is running"));
+
+        assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.edit(environment, environmentEditDto));
+
+        verify(environmentService, never()).updateTags(any(), any());
+        assertThat(environment.getTags()).isEqualTo(originalTags);
+    }
+
+    @Test
+    void editTagsWithInvalidTagsDoesNotTriggerFlow() {
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withUserDefinedTags(new HashMap<>(Map.of("owner", "john doe")))
+                .withUpdateTagsOnExistingResources(true)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+
+        when(validatorService.validateTags(eq(environmentEditDto), any())).thenReturn(ValidationResult.builder().error("invalid tag").build());
+
+        assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.edit(environment, environmentEditDto));
+
+        verify(environmentTagUpdatePermissionService, never()).validate(any());
+        verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any(), any());
+        verify(environmentService, never()).save(any());
     }
 
     @Test
@@ -1224,7 +1270,6 @@ class EnvironmentModificationServiceTest {
                 new HashMap<>(Map.of("creation-timestamp", "1773042126")))));
         EnvironmentDto environmentDto = EnvironmentDto.builder().build();
         when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(ENVIRONMENT_NAME, ACCOUNT_ID)).thenReturn(Optional.of(environment));
-        when(environmentService.save(environment)).thenReturn(environment);
         when(environmentDtoConverter.environmentToDto(environment)).thenReturn(environmentDto);
         when(validatorService.validateTagKeysToRemove(eq(Set.of("owner")), any(EnvironmentTags.class), eq("AWS")))
                 .thenReturn(ValidationResult.builder().build());
@@ -1232,15 +1277,62 @@ class EnvironmentModificationServiceTest {
                 new HashMap<>(Map.of("creation-timestamp", "1773042126"))));
         when(environmentTagsDtoConverter.getTagsAfterRemovingUserDefinedKeys(any(EnvironmentTags.class), eq(Set.of("owner"))))
                 .thenReturn(updatedTags);
+        when(environmentService.updateTags(environment, updatedTags)).thenReturn(environment);
         when(environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, Map.of(), Set.of("owner")))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "flowId"));
 
         EnvironmentDto result = environmentModificationServiceUnderTest.deleteUserDefinedTagsByEnvironmentName(ACCOUNT_ID, ENVIRONMENT_NAME, Set.of("owner"));
 
         assertThat(result).isSameAs(environmentDto);
-        assertThat(environment.getEnvironmentTags().getUserDefinedTags()).containsExactly(Map.entry("project", "atlas"));
-        verify(environmentTagsDtoConverter).getTagsAfterRemovingUserDefinedKeys(any(EnvironmentTags.class), eq(Set.of("owner")));
-        verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, Map.of(), Set.of("owner"));
+        InOrder inOrder = inOrder(environmentTagUpdatePermissionService, environmentReactorFlowManager, environmentService);
+        inOrder.verify(environmentTagUpdatePermissionService).validate(environment);
+        inOrder.verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, Map.of(), Set.of("owner"));
+        inOrder.verify(environmentService).updateTags(environment, updatedTags);
+        verify(environmentService, never()).save(any());
+    }
+
+    @Test
+    void deleteTagsByEnvironmentNameFailsWhenPermissionCheckFails() {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        environment.setTags(new Json(new EnvironmentTags(new HashMap<>(Map.of("owner", "john doe")),
+                new HashMap<>(Map.of("creation-timestamp", "1773042126")))));
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(ENVIRONMENT_NAME, ACCOUNT_ID)).thenReturn(Optional.of(environment));
+        when(validatorService.validateTagKeysToRemove(eq(Set.of("owner")), any(EnvironmentTags.class), eq("AWS")))
+                .thenReturn(ValidationResult.builder().build());
+        EnvironmentTagUpdatePermissionMissingException permissionException = new EnvironmentTagUpdatePermissionMissingException(
+                "missing action:ec2:DeleteTags", List.of("ec2:DeleteTags : *"), null);
+        doThrow(permissionException).when(environmentTagUpdatePermissionService).validate(environment);
+
+        EnvironmentTagUpdatePermissionMissingException thrown = assertThrows(EnvironmentTagUpdatePermissionMissingException.class,
+                () -> environmentModificationServiceUnderTest.deleteUserDefinedTagsByEnvironmentName(ACCOUNT_ID, ENVIRONMENT_NAME, Set.of("owner")));
+
+        assertEquals("missing action:ec2:DeleteTags", thrown.getMessage());
+        assertEquals(List.of("ec2:DeleteTags : *"), thrown.getFailedActions());
+        verify(environmentTagsDtoConverter, never()).getTagsAfterRemovingUserDefinedKeys(any(), any());
+        verify(environmentReactorFlowManager, never()).triggerEnvironmentTagsModification(any(), any(), any());
+        verify(environmentService, never()).updateTags(any(), any());
+    }
+
+    @Test
+    void deleteTagsByEnvironmentNameDoesNotWriteTagsWhenFlowIsRejected() {
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        environment.setTags(new Json(new EnvironmentTags(new HashMap<>(Map.of("owner", "john doe", "project", "atlas")),
+                new HashMap<>(Map.of("creation-timestamp", "1773042126")))));
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(ENVIRONMENT_NAME, ACCOUNT_ID)).thenReturn(Optional.of(environment));
+        when(validatorService.validateTagKeysToRemove(eq(Set.of("owner")), any(EnvironmentTags.class), eq("AWS")))
+                .thenReturn(ValidationResult.builder().build());
+        when(environmentTagsDtoConverter.getTagsAfterRemovingUserDefinedKeys(any(EnvironmentTags.class), eq(Set.of("owner"))))
+                .thenReturn(new Json(new EnvironmentTags(new HashMap<>(Map.of("project", "atlas")),
+                        new HashMap<>(Map.of("creation-timestamp", "1773042126")))));
+        when(environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, Map.of(), Set.of("owner")))
+                .thenThrow(new BadRequestException("Another flow is running"));
+
+        assertThrows(BadRequestException.class,
+                () -> environmentModificationServiceUnderTest.deleteUserDefinedTagsByEnvironmentName(ACCOUNT_ID, ENVIRONMENT_NAME, Set.of("owner")));
+
+        verify(environmentService, never()).updateTags(any(), any());
     }
 
     @Test

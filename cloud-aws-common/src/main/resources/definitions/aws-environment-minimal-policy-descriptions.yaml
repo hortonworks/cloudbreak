@@ -8,7 +8,9 @@ permissionGroups:
     description: Required to manage groups of cluster VMs and adjust their capacity as hosts are added or removed.
     permissions:
       "autoscaling:CreateAutoScalingGroup": "Cloudera platform creates ASGs for environment host groups."
+      "autoscaling:CreateOrUpdateTags": "Cloudera platform applies user-defined tags to environment ASGs when tags are added."
       "autoscaling:DeleteAutoScalingGroup": "Cloudera platform deletes ASGs created for environment host groups (crn:cdp:* tag)."
+      "autoscaling:DeleteTags": "Cloudera platform removes user-defined tags from environment ASGs when tags are deleted."
       "autoscaling:DescribeAutoScalingGroups": "Cloudera platform reads ASG state for environment host groups."
       "autoscaling:DescribeScalingActivities": "Cloudera platform reads scaling history for environment troubleshooting."
       "autoscaling:DetachInstances": "Cloudera platform detaches instances from environment ASGs (crn:cdp:* tag)."
@@ -33,6 +35,7 @@ permissionGroups:
     permissions:
       "cloudwatch:DeleteAlarms": "Cloudera platform deletes alarms created for environment stacks (crn:cdp:* tag)."
       "cloudwatch:DescribeAlarms": "Cloudera platform lists alarms for environment stacks."
+      "cloudwatch:DescribeAlarmsForMetric": "Cloudera platform resolves the alarms of environment instances when propagating tag changes to them."
       "cloudwatch:GetMetricStatistics": "Cloudera platform reads the FreeStorageSpace metric of external databases to warn before they run low on storage."
       "cloudwatch:ListTagsForResource": "Cloudera platform reads tags on CloudWatch alarms during environment tag sync."
       "cloudwatch:PutMetricAlarm": "Cloudera platform creates alarms for environment infrastructure health."
@@ -52,12 +55,13 @@ permissionGroups:
       "ec2:CreatePlacementGroup": "Cloudera platform creates placement groups for environment host spread."
       "ec2:CreateRoute": "Cloudera platform adds routes for environment VPC traffic."
       "ec2:CreateSecurityGroup": "Cloudera platform creates security groups for environment cluster connectivity."
-      "ec2:CreateTags": "Cloudera platform applies the Cloudera-Resource-Name crn:cdp:* tag using AwsTaggingService when creating environment resources."
+      "ec2:CreateTags": "Cloudera platform applies the Cloudera-Resource-Name crn:cdp:* tag using AwsTaggingService when creating environment resources, and user-defined tags on existing ones (crn:cdp:* tag)."
       "ec2:CreateVolume": "Cloudera platform creates EBS volumes for environment nodes during provisioning."
       "ec2:DeleteKeyPair": "Cloudera platform deletes SSH key pairs provisioned for environment access (crn:cdp:* tag)."
       "ec2:DeleteLaunchTemplate": "Cloudera platform deletes launch templates created for environment host groups (crn:cdp:* tag)."
       "ec2:DeletePlacementGroup": "Cloudera platform deletes placement groups used by environment stacks (crn:cdp:* tag)."
       "ec2:DeleteSecurityGroup": "Cloudera platform removes security groups for torn-down environments (crn:cdp:* tag)."
+      "ec2:DeleteTags": "Cloudera platform removes user-defined tags from environment instances, volumes and launch templates (crn:cdp:* tag)."
       "ec2:DeleteVolume": "Cloudera platform deletes EBS volumes created for environment nodes (crn:cdp:* tag)."
       "ec2:DescribeAccountAttributes": "Cloudera platform reads account limits before accepting environment create requests."
       "ec2:DescribeAddresses": "Cloudera platform lists Elastic IPs allocated for environment ingress."
@@ -78,6 +82,7 @@ permissionGroups:
       "ec2:DescribeRouteTables": "Cloudera platform inspects route tables when attaching environment networking."
       "ec2:DescribeSecurityGroups": "Cloudera platform reads security groups for environment network validation."
       "ec2:DescribeSubnets": "Cloudera platform lists subnets supplied or created for environment deployment."
+      "ec2:DescribeTags": "Cloudera platform reads the current tags of environment EC2 resources before adding or removing user-defined tags."
       "ec2:DescribeVolumeAttribute": "Cloudera platform reads volume attributes on environment nodes."
       "ec2:DescribeVolumeStatus": "Cloudera platform checks EBS health for environment instances."
       "ec2:DescribeVolumes": "Cloudera platform lists volumes attached to environment nodes during status checks."
@@ -102,7 +107,12 @@ permissionGroups:
       "ec2:StartInstances": "Cloudera platform starts stopped environment nodes during recovery (crn:cdp:* tag)."
       "ec2:StopInstances": "Cloudera platform stops environment nodes for maintenance (crn:cdp:* tag)."
       "ec2:TerminateInstances": "Cloudera platform terminates environment instances on delete when they carry the crn:cdp:* tag."
-      "ec2:describeAddresses": "Cloudera platform lists Elastic IPs (legacy API name) for environment networking sync."
+  elasticfilesystem:
+    description: Required to manage the EFS file systems backing Cloudera cluster storage.
+    permissions:
+      "elasticfilesystem:ListTagsForResource": "Cloudera platform reads the current tags of environment EFS file systems before changing them."
+      "elasticfilesystem:TagResource": "Cloudera platform applies user-defined tags to environment EFS file systems."
+      "elasticfilesystem:UntagResource": "Cloudera platform removes user-defined tags from environment EFS file systems."
   elasticloadbalancing:
     description: Required to distribute traffic across cluster hosts and expose Cloudera service endpoints.
     permissions:
@@ -116,10 +126,14 @@ permissionGroups:
       "elasticloadbalancing:DeregisterTargets": "Cloudera platform removes instances from environment target groups on delete."
       "elasticloadbalancing:DescribeListeners": "Cloudera platform lists listeners on environment load balancers."
       "elasticloadbalancing:DescribeLoadBalancers": "Cloudera platform lists ELBs provisioned for environments."
+      "elasticloadbalancing:DescribeTags": "Cloudera platform reads the current tags of environment ELB resources before changing them."
       "elasticloadbalancing:DescribeTargetGroups": "Cloudera platform lists target groups for environment load balancers."
       "elasticloadbalancing:DescribeTargetHealth": "Cloudera platform checks target health for environment endpoints."
+      "elasticloadbalancing:ModifyListener": "Cloudera platform updates listeners of environment load balancers."
       "elasticloadbalancing:ModifyLoadBalancerAttributes": "Cloudera platform tunes ELB attributes for environment ingress."
+      "elasticloadbalancing:ModifyTargetGroup": "Cloudera platform updates target groups of environment load balancers."
       "elasticloadbalancing:RegisterTargets": "Cloudera platform registers environment instances as ELB targets."
+      "elasticloadbalancing:RemoveTags": "Cloudera platform removes user-defined tags from environment ELB resources."
   iam:
     description: Required to inspect and configure the roles and instance profiles that give Cloudera resources access to customer services.
     permissions:
@@ -136,6 +150,8 @@ permissionGroups:
       "kms:ListAliases": "Cloudera platform resolves KMS aliases for environment encryption settings."
       "kms:ListKeys": "Cloudera platform lists KMS keys when configuring encryption for environment resources."
       "kms:ListResourceTags": "Cloudera platform reads existing KMS key tags when propagating environment tag updates."
+      "kms:TagResource": "Cloudera platform applies user-defined tags to the KMS keys of the environment."
+      "kms:UntagResource": "Cloudera platform removes user-defined tags from the KMS keys of the environment."
   rds:
     description: Required to provision, configure, start, stop, and remove external databases used by Cloudera clusters.
     permissions:
@@ -165,6 +181,12 @@ permissionGroups:
     description: Required to access storage buckets and objects used for Cloudera data, logs, and deployment artifacts.
     permissions:
       "s3:GetBucketLocation": "Cloudera platform resolves S3 bucket region for environment log or storage locations."
+  secretsmanager:
+    description: Required to manage the secrets Cloudera stores for cluster and database credentials.
+    permissions:
+      "secretsmanager:DescribeSecret": "Cloudera platform reads the metadata and current tags of environment secrets before changing their tags."
+      "secretsmanager:TagResource": "Cloudera platform applies user-defined tags to environment secrets."
+      "secretsmanager:UntagResource": "Cloudera platform removes user-defined tags from environment secrets."
   sts:
     description: Required to verify the credential identity and assume customer roles used to provision Cloudera resources.
     permissions:

@@ -16,6 +16,7 @@
         "cloudwatch:PutMetricAlarm",
         "cloudwatch:DeleteAlarms",
         "cloudwatch:DescribeAlarms",
+        "cloudwatch:DescribeAlarmsForMetric",
         "cloudwatch:TagResource",
         "cloudwatch:ListTagsForResource",
         "cloudwatch:UntagResource",
@@ -229,6 +230,7 @@
         "kms:ListAliases",
         "kms:Encrypt",
         "kms:TagResource",
+        "kms:UntagResource",
         "kms:DeleteAlias",
         "kms:PutKeyPolicy",
         "kms:ScheduleKeyDeletion",
@@ -308,6 +310,7 @@
         "secretsmanager:GetSecretValue",
         "secretsmanager:PutResourcePolicy",
         "secretsmanager:TagResource",
+        "secretsmanager:UntagResource",
         "secretsmanager:UpdateSecret"
       ],
       "Resource": [

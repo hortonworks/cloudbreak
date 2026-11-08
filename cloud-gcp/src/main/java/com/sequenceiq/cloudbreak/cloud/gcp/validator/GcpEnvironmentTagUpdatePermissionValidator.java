@@ -34,9 +34,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 @Component
 public class GcpEnvironmentTagUpdatePermissionValidator implements EnvironmentTagUpdatePermissionValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GcpEnvironmentTagUpdatePermissionValidator.class);
-
-    private static final List<String> REQUIRED_PERMISSIONS = List.of(
+    static final List<String> REQUIRED_PERMISSIONS = List.of(
             "compute.instances.get",
             "compute.instances.setLabels",
             "compute.disks.get",
@@ -47,6 +45,8 @@ public class GcpEnvironmentTagUpdatePermissionValidator implements EnvironmentTa
             "compute.forwardingRules.setLabels",
             "cloudsql.instances.get",
             "cloudsql.instances.update");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpEnvironmentTagUpdatePermissionValidator.class);
 
     @Inject
     private GcpCloudResourceManagerFactory cloudResourceManagerFactory;

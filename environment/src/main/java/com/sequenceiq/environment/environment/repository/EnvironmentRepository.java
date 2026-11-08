@@ -19,6 +19,7 @@ import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameV
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -202,6 +203,10 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     @Modifying
     @Query("UPDATE Environment e SET e.status = :status, e.statusReason = :statusReason WHERE e.id = :id AND e.archived = false")
     int updateEnvironmentStatusAndStatusReason(Long id, EnvironmentStatus status, String statusReason);
+
+    @Modifying
+    @Query("UPDATE Environment e SET e.tags = :tags WHERE e.id = :id AND e.archived = false")
+    int updateTags(@Param("id") Long id, @Param("tags") Json tags);
 
     @Modifying
     @Query("UPDATE Environment e SET e.remoteEnvironmentCrn = :remoteEnvironmentCrn " +

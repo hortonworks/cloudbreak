@@ -15,12 +15,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -45,6 +47,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -293,6 +296,32 @@ class EnvironmentServiceTest {
         verify(environmentRepository, times(1)).updateEnvironmentStatusAndStatusReason(id, deleteFailedStatus, reason);
         verify(environment).setStatus(deleteFailedStatus);
         verify(environment).setStatusReason(reason);
+    }
+
+    @Test
+    void updateTagsWritesOnlyTheTags() {
+        Environment environment = new Environment();
+        environment.setId(1L);
+        Json tags = new Json(Map.of("userDefinedTags", Map.of("owner", "john doe")));
+        when(environmentRepository.updateTags(1L, tags)).thenReturn(1);
+
+        Environment result = environmentServiceUnderTest.updateTags(environment, tags);
+
+        assertThat(result.getTags()).isEqualTo(tags);
+        verify(environmentRepository, never()).save(any());
+    }
+
+    @Test
+    void updateTagsLeavesTheEntityWhenEnvironmentIsNotFound() {
+        Environment environment = new Environment();
+        environment.setId(1L);
+        Json originalTags = environment.getTags();
+        Json tags = new Json(Map.of("userDefinedTags", Map.of("owner", "john doe")));
+        when(environmentRepository.updateTags(1L, tags)).thenReturn(0);
+
+        Environment result = environmentServiceUnderTest.updateTags(environment, tags);
+
+        assertThat(result.getTags()).isEqualTo(originalTags);
     }
 
     @Test
