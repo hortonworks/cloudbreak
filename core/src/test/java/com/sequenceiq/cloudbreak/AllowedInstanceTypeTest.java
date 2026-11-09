@@ -65,6 +65,10 @@ class AllowedInstanceTypeTest {
     @Inject
     private DefaultClusterTemplateCache templateCache;
 
+    // These overrides have to be declared on the test class: Spring only honours a bean override on
+    // the test class hierarchy, not on an imported @Configuration. Three of them are also taken as
+    // parameters by TestAppContext#stubDefaults below, which is where they get stubbed - see the note
+    // there for why the stubbing cannot live in a @BeforeEach.
     @MockBean
     private ClusterTemplateService clusterTemplateService;
 
@@ -163,10 +167,13 @@ class AllowedInstanceTypeTest {
     @PropertySource("classpath:application.yml")
     static class TestAppContext {
 
-        // Stubbing must be in place before DefaultClusterTemplateCache's own @PostConstruct consumes
-        // these beans. An @Autowired method is invoked during this configuration's initialisation with
-        // its parameters already resolved, unlike @Inject fields read from @PostConstruct, which can
-        // still be null depending on initialisation order (CB-35471).
+        // The mocks are declared on the test class because a bean override is only honoured there, but
+        // they must be stubbed before DefaultClusterTemplateCache's @PostConstruct consumes them, which
+        // happens while the context is still building - so a @BeforeEach is too late. An @Autowired
+        // method runs during this configuration's initialisation with its parameters already resolved;
+        // @Inject fields read from a @PostConstruct can still be null at that point. Declaring these as
+        // @Bean mocks here instead does not work: @Bean adds a definition rather than replacing the
+        // component-scanned one, and the context then fails on BlueprintEntities (CB-35471).
         @Autowired
         void stubDefaults(DefaultClusterTemplateV4RequestToClusterTemplateConverter converter,
                 CrnGeneratorService crnGeneratorService,
