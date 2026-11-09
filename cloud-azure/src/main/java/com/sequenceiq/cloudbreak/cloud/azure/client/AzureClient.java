@@ -1084,7 +1084,7 @@ public class AzureClient {
 
     public Set<String> getDatabaseVersions(String region) {
         return azureListResultFactory.create(
-                postgreSqlFlexibleManager.locationBasedCapabilities().execute(region))
+                postgreSqlFlexibleManager.capabilitiesByLocations().list(region))
                         .getStream()
                 .map(capability ->
                         capability.supportedServerVersions()

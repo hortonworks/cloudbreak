@@ -68,9 +68,9 @@ import com.azure.core.http.HttpResponse;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.postgresql.models.StorageProfile;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.PostgresMajorVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Storage;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.Subscription;
@@ -271,7 +271,7 @@ class AzureDatabaseResourceServiceTest {
         when(storage.storageSizeGB()).thenReturn(storageSizeGB);
         when(server.storage()).thenReturn(storage);
         when(server.sku()).thenReturn(new com.azure.resourcemanager.postgresqlflexibleserver.models.Sku().withName("Standard_E4ds_v4"));
-        when(server.version()).thenReturn(com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion.fromString("16"));
+        when(server.version()).thenReturn(com.azure.resourcemanager.postgresqlflexibleserver.models.PostgresMajorVersion.fromString("16"));
         when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(Optional.of(server));
         ExternalDatabaseParameters actual = underTest.getExternalDatabaseParameters(ac, databaseStack);
         assertEquals(externalDatabaseStatus, actual.externalDatabaseStatus());
@@ -785,7 +785,7 @@ class AzureDatabaseResourceServiceTest {
         AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
         when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
         Server serverMock = mock(Server.class);
-        when(serverMock.version()).thenReturn(ServerVersion.fromString("14"));
+        when(serverMock.version()).thenReturn(PostgresMajorVersion.fromString("14"));
         when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, "name")).thenReturn(Optional.of(serverMock));
         when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(inv -> inv.getArgument(0, Supplier.class).get());
 
@@ -808,7 +808,7 @@ class AzureDatabaseResourceServiceTest {
         AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
         when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
         Server serverMock = mock(Server.class);
-        when(serverMock.version()).thenReturn(ServerVersion.fromString("13"));
+        when(serverMock.version()).thenReturn(PostgresMajorVersion.fromString("13"));
         when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, "name")).thenReturn(Optional.of(serverMock));
         when(retryService.testWith1SecDelayMax5Times(any(Supplier.class))).thenAnswer(inv -> inv.getArgument(0, Supplier.class).get());
 
@@ -855,9 +855,9 @@ class AzureDatabaseResourceServiceTest {
         AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
         when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
         Server serverWithOldVersion = mock(Server.class);
-        when(serverWithOldVersion.version()).thenReturn(ServerVersion.fromString("13"));
+        when(serverWithOldVersion.version()).thenReturn(PostgresMajorVersion.fromString("13"));
         Server serverWithNewVersion = mock(Server.class);
-        when(serverWithNewVersion.version()).thenReturn(ServerVersion.fromString("14"));
+        when(serverWithNewVersion.version()).thenReturn(PostgresMajorVersion.fromString("14"));
         when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, "name"))
                 .thenReturn(Optional.of(serverWithOldVersion))
                 .thenReturn(Optional.of(serverWithNewVersion));

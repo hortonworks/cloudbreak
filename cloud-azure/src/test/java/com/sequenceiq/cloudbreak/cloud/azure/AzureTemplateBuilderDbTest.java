@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -235,6 +236,43 @@ public class AzureTemplateBuilderDbTest {
             checkParameter(parameters.get("flexibleServerDelegatedSubnetId"), "string", "");
             checkParameter(parameters.get("existingDatabasePrivateDnsZoneId"), "string", "");
             checkParameter(parameters.get("privateEndpointName"), "String", "pe-b1ca0b4d-to-dbsvr-d5844028-b646-4ecd-a48d-e0b520bfd15f");
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(AzurePostgresAccessType.class)
+    void testFlexibleTemplateUsesOnlyGaPostgresApiVersions(AzurePostgresAccessType setup) throws IOException {
+        Template template = Optional.ofNullable(factoryBean.getObject())
+                .map(config -> {
+                    try {
+                        return config.getTemplate("templates/arm-flexible-dbstack.ftl", "UTF-8");
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }).orElseThrow();
+        when(azureDatabaseTemplateModelBuilderMap.get(AzureDatabaseType.FLEXIBLE_SERVER)).thenReturn(azureDatabaseTemplateModelBuilder);
+        Pair<Map<String, Object>, DatabaseStack> modelDatabasePair = createFlexibleModel(setup);
+        when(azureDatabaseTemplateModelBuilder.buildModel(any(AzureDatabaseServerView.class), any(AzureNetworkView.class), any(DatabaseStack.class)))
+                .thenReturn(modelDatabasePair.getLeft());
+        when(azureDatabaseTemplateProvider.getTemplate(modelDatabasePair.getRight())).thenReturn(template);
+
+        String result = underTest.build(cloudContext, modelDatabasePair.getRight());
+
+        JsonNode resources = JsonUtil.readTree(result).get("resources");
+        List<String> postgresResourceTypes = new ArrayList<>();
+        for (JsonNode resource : resources) {
+            String type = resource.get("type").textValue();
+            if (type.startsWith("Microsoft.DBforPostgreSQL/")) {
+                postgresResourceTypes.add(type);
+                assertThat(resource.get("apiVersion").textValue())
+                        .overridingErrorMessage("%s must use a GA apiVersion, but uses %s", type, resource.get("apiVersion").textValue())
+                        .doesNotContain("preview");
+            }
+        }
+        assertThat(postgresResourceTypes).contains("Microsoft.DBforPostgreSQL/flexibleServers", "Microsoft.DBforPostgreSQL/flexibleServers/configurations");
+        JsonNode dataEncryption = resources.get(0).get("properties").get("dataEncryption");
+        if (dataEncryption != null) {
+            assertFalse(dataEncryption.has("primaryEncryptionKeyStatus"), "primaryEncryptionKeyStatus is read-only in GA API versions");
         }
     }
 

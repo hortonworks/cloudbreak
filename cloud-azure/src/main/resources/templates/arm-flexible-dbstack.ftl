@@ -154,7 +154,7 @@
   "resources": [
     {
       "type": "Microsoft.DBforPostgreSQL/flexibleServers",
-      "apiVersion": "2023-06-01-preview",
+      "apiVersion": "2025-08-01",
       "name": "[parameters('dbServerName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -175,7 +175,6 @@
         "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
         <#if dataEncryption == true>
         "dataEncryption": {
-            "primaryEncryptionKeyStatus": "Valid",
             "type": "AzureKeyVault",
             "primaryKeyURI": "[parameters('encryptionKeyName')]",
             "primaryUserAssignedIdentityId": "[parameters('encryptionUserManagedIdentity')]"
@@ -211,7 +210,7 @@
     <#if !useSslEnforcement>
     ,{
       "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
-      "apiVersion": "2022-12-01",
+      "apiVersion": "2025-08-01",
       "name": "[concat(parameters('dbServerName'), '/require_secure_transport')]",
       "dependsOn": [
         "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('dbServerName'))]"

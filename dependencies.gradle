@@ -49,7 +49,7 @@ ext {
   azureSdkResourceManagerMarketplaceVersion = '1.0.0-beta.2'
   azureSdkResourceManagerDataLakeStoreVersion = '1.0.0'
   azureSdkResourceManagerPostgresqlVersion = '1.1.0'
-  azureSdkResourceManagerFlexiblePostgresqlVersion = '1.2.0-beta.1'
+  azureSdkResourceManagerFlexiblePostgresqlVersion = '2.0.0'
   azureSdkVersion = '1.41.4'
   azureStorageSdkVersion = '8.4.0'
   openstack4jVersion='3.12'

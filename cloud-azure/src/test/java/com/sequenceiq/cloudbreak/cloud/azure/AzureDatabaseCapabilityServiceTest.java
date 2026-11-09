@@ -30,13 +30,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerEditionCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.Capability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerSkuCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageMbCapability;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHaSupportedEnum;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHighAvailabilitySupport;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
@@ -91,11 +91,11 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus"), azureCoordinate("westus"),
                 Region.region("westus2"), azureCoordinate("westus2"));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of("MemoryOptimized", List.of("instanceType1", "Standard_E4ds_v6", "Standard_E4ds_v4")));
-        FlexibleServerCapability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.ENABLED,
+        Capability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.ENABLED,
                 Map.of("MemoryOptimized", List.of("instanceType3", "instanceType4", "Standard_E4s_v1")));
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability),
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
@@ -131,11 +131,11 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus"), azureCoordinate("westus"),
                 Region.region("westus2"), azureCoordinate("westus2"));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of("MemoryOptimized", List.of("instanceType1", "Standard_E4ds_v6", "Standard_E4ds_v4")));
-        FlexibleServerCapability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.ENABLED,
+        Capability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.ENABLED,
                 Map.of("MemoryOptimized", List.of("instanceType3", "instanceType4", "Standard_E4s_v1")));
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability),
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
@@ -170,15 +170,15 @@ class AzureDatabaseCapabilityServiceTest {
         Map<Region, AzureCoordinate> regions = Map.of(
                 Region.region("westus"), azureCoordinate("westus"));
         when(azureRegionProvider.filterEnabledRegions(Region.region("westus"))).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of(
                         "serverEdition1", List.of("instanceType11", "instanceType12"),
                         "MemoryOptimized", List.of("instanceType21", "instanceType22", "Standard_E4ds_v6")));
-        FlexibleServerCapability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.ENABLED,
+        Capability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.ENABLED,
                 Map.of(
                         "serverEdition1", List.of("instanceType13", "instanceType14"),
                         "serverEdition2", List.of("instanceType23", "instanceType24")));
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability),
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
@@ -210,15 +210,15 @@ class AzureDatabaseCapabilityServiceTest {
         Map<Region, AzureCoordinate> regions = Map.of(
                 Region.region("westus"), azureCoordinate("westus"));
         when(azureRegionProvider.filterEnabledRegions(Region.region("westus"))).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of(
                         "serverEdition1", List.of("instanceType11", "instanceType12"),
                         "MemoryOptimized", List.of("instanceType21", "instanceType22", "instanceType23")));
-        FlexibleServerCapability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.ENABLED,
+        Capability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.ENABLED,
                 Map.of(
                         "serverEdition1", List.of("instanceType13", "instanceType14"),
                         "serverEdition2", List.of("instanceType23", "instanceType24")));
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability),
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
@@ -245,15 +245,15 @@ class AzureDatabaseCapabilityServiceTest {
         Map<Region, AzureCoordinate> regions = Map.of(
                 Region.region("westus"), azureCoordinate("westus"));
         when(azureRegionProvider.filterEnabledRegions(Region.region("westus"))).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of(
                         "serverEdition1", List.of("instanceType11", "instanceType12"),
                         "serverEdition2", List.of("instanceType21", "instanceType22", "Standard_E4ds_v6")));
-        FlexibleServerCapability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.ENABLED,
+        Capability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.ENABLED,
                 Map.of(
                         "serverEdition1", List.of("instanceType13", "instanceType14"),
                         "serverEdition2", List.of("instanceType23", "instanceType24")));
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability),
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
@@ -284,15 +284,15 @@ class AzureDatabaseCapabilityServiceTest {
         Map<Region, AzureCoordinate> regions = Map.of(
                 Region.region("westus"), azureCoordinate("westus"));
         when(azureRegionProvider.filterEnabledRegions(Region.region("westus"))).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of(
                         "serverEdition1", List.of("instanceType11", "instanceType12"),
                         "serverEdition2", List.of("instanceType21", "instanceType22")));
-        FlexibleServerCapability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.ENABLED,
+        Capability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.ENABLED,
                 Map.of(
                         "serverEdition1", List.of("instanceType13", "instanceType14"),
                         "serverEdition2", List.of("instanceType23", "instanceType24")));
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability),
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
@@ -318,7 +318,7 @@ class AzureDatabaseCapabilityServiceTest {
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
         AzureCoordinate azureCoordinate = azureCoordinate("westus");
         when(azureRegionProvider.getAzureCoordinate(Region.region("westus"))).thenReturn(Optional.of(azureCoordinate));
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(Map.of("MemoryOptimized",
+        Capability flexibleServerCapability = createFlexibleServerCapability(Map.of("MemoryOptimized",
                         Map.of("serverEdition1", List.of(128L, 256L),
                                 "ManagedDisk", List.of(128L, 256L, 512L))));
         when(azureFlexibleServerClient.getFlexibleServerCapability(azureCoordinate)).thenReturn(Optional.of(flexibleServerCapability));
@@ -335,7 +335,7 @@ class AzureDatabaseCapabilityServiceTest {
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
         AzureCoordinate azureCoordinate = azureCoordinate("westus");
         when(azureRegionProvider.getAzureCoordinate(Region.region("westus"))).thenReturn(Optional.of(azureCoordinate));
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(Map.of("MemoryOptimized",
+        Capability flexibleServerCapability = createFlexibleServerCapability(Map.of("MemoryOptimized",
                 Map.of("serverEdition1", List.of(128L, 256L))));
         when(azureFlexibleServerClient.getFlexibleServerCapability(azureCoordinate)).thenReturn(Optional.of(flexibleServerCapability));
 
@@ -379,17 +379,17 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus2"), azureCoordinate("westus2"));
         when(azureRegionProvider.filterEnabledRegions(Region.region("westus"))).thenReturn(regions);
 
-        FlexibleServerCapability flexibleServerCapability1 = createFlexibleServerCapabilityForVersionUpgrades(Map.of(
+        Capability flexibleServerCapability1 = createFlexibleServerCapabilityForVersionUpgrades(Map.of(
                 "14", List.of("15", "16"),
                 "15", List.of("16"),
                 "16", List.of()
         ));
-        FlexibleServerCapability flexibleServerCapability2 = createFlexibleServerCapabilityForVersionUpgrades(Map.of(
+        Capability flexibleServerCapability2 = createFlexibleServerCapabilityForVersionUpgrades(Map.of(
                 "14", List.of("15", "16", "17"),
                 "15", List.of("16", "17"),
                 "16", List.of("17")
         ));
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability1),
                 Region.region("westus2"), Optional.of(flexibleServerCapability2));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
@@ -419,9 +419,9 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus"), azureCoordinateWithDbTypes("westus",
                         List.of("Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4")));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of("MemoryOptimized", List.of("Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4")));
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
 
@@ -444,9 +444,9 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus"), azureCoordinateWithDbTypes("westus",
                         List.of("Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4")));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of("MemoryOptimized", List.of("Standard_E4ds_v5", "Standard_E4ds_v4")));
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.of(flexibleServerCapability));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
 
@@ -467,7 +467,7 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus"), azureCoordinateWithDbTypes("westus",
                         List.of("Standard_E4ds_v5", "Standard_E4ads_v5", "Standard_E4ds_v4")));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+        Map<Region, Optional<Capability>> flexibleServerCapabilityMap = Map.of(
                 Region.region("westus"), Optional.empty());
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
 
@@ -487,7 +487,7 @@ class AzureDatabaseCapabilityServiceTest {
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
         Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of("MemoryOptimized", List.of("Standard_E4ds_v6", "Standard_E4ds_v5", "Standard_E4ds_v4")));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
                 Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
@@ -508,7 +508,7 @@ class AzureDatabaseCapabilityServiceTest {
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
         Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of("MemoryOptimized", List.of("Standard_E4ds_v6")));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
                 Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
@@ -527,7 +527,7 @@ class AzureDatabaseCapabilityServiceTest {
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
         Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of("MemoryOptimized", List.of("Standard_E4ds_v6", "Standard_E4ds_v5")));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
                 Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
@@ -547,7 +547,7 @@ class AzureDatabaseCapabilityServiceTest {
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
         Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of("MemoryOptimized", List.of("Standard_E4ds_v4")));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
                 Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
@@ -568,7 +568,7 @@ class AzureDatabaseCapabilityServiceTest {
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
         Map<Region, AzureCoordinate> regions = Map.of(Region.region("westus"), azureCoordinate("westus"));
         when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
-        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+        Capability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport.DISABLED,
                 Map.of("MemoryOptimized", List.of("Standard_E4ds", "Standard_E4ds_v6")));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(
                 Map.of(Region.region("westus"), Optional.of(flexibleServerCapability)));
@@ -607,19 +607,19 @@ class AzureDatabaseCapabilityServiceTest {
                 .build();
     }
 
-    private FlexibleServerCapability createFlexibleServerCapability(ZoneRedundantHaSupportedEnum zoneRedundantHaSupportedEnum,
+    private Capability createFlexibleServerCapability(ZoneRedundantHighAvailabilitySupport zoneRedundantHaSupportedEnum,
             Map<String, List<String>> instanceTypes) {
-        FlexibleServerCapability flexibleServerCapability = mock(FlexibleServerCapability.class);
+        Capability flexibleServerCapability = mock(Capability.class);
         lenient().when(flexibleServerCapability.zoneRedundantHaSupported()).thenReturn(zoneRedundantHaSupportedEnum);
-        List<FlexibleServerEditionCapability> flexibleServerEditionCapabilities = instanceTypes.entrySet().stream()
+        List<ServerEditionCapability> flexibleServerEditionCapabilities = instanceTypes.entrySet().stream()
                 .map(entry -> createFlexibleServerEditionCapability(entry.getKey(), entry.getValue()))
                 .toList();
         lenient().when(flexibleServerCapability.supportedServerEditions()).thenReturn(flexibleServerEditionCapabilities);
         return flexibleServerCapability;
     }
 
-    private FlexibleServerEditionCapability createFlexibleServerEditionCapability(String name, List<String> instanceTypes) {
-        FlexibleServerEditionCapability flexibleServerEditionCapability = mock(FlexibleServerEditionCapability.class);
+    private ServerEditionCapability createFlexibleServerEditionCapability(String name, List<String> instanceTypes) {
+        ServerEditionCapability flexibleServerEditionCapability = mock(ServerEditionCapability.class);
         lenient().when(flexibleServerEditionCapability.name()).thenReturn(name);
         List<ServerSkuCapability> serverSkus = instanceTypes.stream()
                 .map(instanceType -> {
@@ -632,18 +632,18 @@ class AzureDatabaseCapabilityServiceTest {
         return flexibleServerEditionCapability;
     }
 
-    private FlexibleServerCapability createFlexibleServerCapability(Map<String, Map<String, List<Long>>> storageSizes) {
-        FlexibleServerCapability flexibleServerCapability = mock(FlexibleServerCapability.class);
-        List<FlexibleServerEditionCapability> flexibleServerEditionCapabilities = storageSizes.entrySet().stream()
+    private Capability createFlexibleServerCapability(Map<String, Map<String, List<Long>>> storageSizes) {
+        Capability flexibleServerCapability = mock(Capability.class);
+        List<ServerEditionCapability> flexibleServerEditionCapabilities = storageSizes.entrySet().stream()
                 .map(entry -> createFlexibleServerEditionCapabilityWithStorage(entry.getKey(), entry.getValue()))
                 .toList();
         lenient().when(flexibleServerCapability.supportedServerEditions()).thenReturn(flexibleServerEditionCapabilities);
         return flexibleServerCapability;
     }
 
-    private FlexibleServerEditionCapability createFlexibleServerEditionCapabilityWithStorage(
+    private ServerEditionCapability createFlexibleServerEditionCapabilityWithStorage(
             String serverEdition, Map<String, List<Long>> storageSizes) {
-        FlexibleServerEditionCapability flexibleServerEditionCapability = mock(FlexibleServerEditionCapability.class);
+        ServerEditionCapability flexibleServerEditionCapability = mock(ServerEditionCapability.class);
         lenient().when(flexibleServerEditionCapability.name()).thenReturn(serverEdition);
         List<StorageEditionCapability> storageEditionCapabilities = storageSizes.entrySet().stream()
                 .map(entry -> createStorageEditionCapability(entry.getKey(), entry.getValue()))
@@ -666,8 +666,8 @@ class AzureDatabaseCapabilityServiceTest {
         return storageEditionCapability;
     }
 
-    private FlexibleServerCapability createFlexibleServerCapabilityForVersionUpgrades(Map<String, List<String>> serverVersionUpgrades) {
-        FlexibleServerCapability flexibleServerCapability = mock(FlexibleServerCapability.class);
+    private Capability createFlexibleServerCapabilityForVersionUpgrades(Map<String, List<String>> serverVersionUpgrades) {
+        Capability flexibleServerCapability = mock(Capability.class);
         List<ServerVersionCapability> flexibleServerVersionCapabilities = serverVersionUpgrades.entrySet().stream()
                 .map(AzureDatabaseCapabilityServiceTest::createServerVersionCapability)
                 .toList();

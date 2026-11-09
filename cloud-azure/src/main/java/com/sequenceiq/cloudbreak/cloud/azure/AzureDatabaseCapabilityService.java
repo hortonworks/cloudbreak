@@ -29,13 +29,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerEditionCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.Capability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerSkuCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageMbCapability;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHaSupportedEnum;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHighAvailabilitySupport;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -93,7 +93,7 @@ public class AzureDatabaseCapabilityService {
         LOGGER.debug("Database capabilities will be collected in the following regions: {}", regions);
         Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions = new HashMap<>();
         enabledRegions.put(databaseAvailabiltyType(SAME_ZONE.name()), getSameZoneSupportedRegions(regions));
-        Map<Region, Optional<FlexibleServerCapability>> capabilityMap = client.getFlexibleServerClient().getFlexibleServerCapabilityMap(regions);
+        Map<Region, Optional<Capability>> capabilityMap = client.getFlexibleServerClient().getFlexibleServerCapabilityMap(regions);
         enabledRegions.put(databaseAvailabiltyType(ZONE_REDUNDANT.name()), getZoneRedundantSupportedRegions(regions, capabilityMap));
         Map<Region, String> regionInstanceTypeMap = getRegionInstanceTypeMap(regions, capabilityMap, filters);
         Map<Region, List<String>> regionFallbackInstanceTypeMap = getRegionFallbackInstanceTypeMap(regions, regionInstanceTypeMap, capabilityMap);
@@ -124,7 +124,7 @@ public class AzureDatabaseCapabilityService {
     public CloudDatabaseVmTypes databaseVmTypes(CloudCredential cloudCredential, Region region) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<Region, AzureCoordinate> regions = azureRegionProvider.filterEnabledRegions(region);
-        Map<Region, Optional<FlexibleServerCapability>> capabilityMap = client.getFlexibleServerClient().getFlexibleServerCapabilityMap(regions);
+        Map<Region, Optional<Capability>> capabilityMap = client.getFlexibleServerClient().getFlexibleServerCapabilityMap(regions);
         Map<Region, Set<DatabaseVmType>> types = getRegionInstancesTypeMap(regions, capabilityMap);
         Map<Region, String> regionInstanceTypeMap = getRegionInstanceTypeMap(regions, capabilityMap, Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
         return new CloudDatabaseVmTypes(types, regionInstanceTypeMap);
@@ -140,9 +140,9 @@ public class AzureDatabaseCapabilityService {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Optional<AzureCoordinate> azureCoordinate = azureRegionProvider.getAzureCoordinate(region);
         if (azureCoordinate.isPresent()) {
-            Optional<FlexibleServerCapability> serverCapability = client.getFlexibleServerClient().getFlexibleServerCapability(azureCoordinate.get());
+            Optional<Capability> serverCapability = client.getFlexibleServerClient().getFlexibleServerCapability(azureCoordinate.get());
             List<Long> supportedStorageSizes = serverCapability.stream()
-                    .map(FlexibleServerCapability::supportedServerEditions)
+                    .map(Capability::supportedServerEditions)
                     .flatMap(Collection::stream)
                     .filter(this::matchesServerEdition)
                     .flatMap(serverEdition -> serverEdition.supportedStorageEditions().stream())
@@ -160,11 +160,11 @@ public class AzureDatabaseCapabilityService {
     }
 
     private Collection<Region> getZoneRedundantSupportedRegions(Map<Region, AzureCoordinate> regions, Map<Region,
-            Optional<FlexibleServerCapability>> capabilityMap) {
+            Optional<Capability>> capabilityMap) {
         Collection<Region> zoneRedundantRegions = new ArrayList<>();
         for (Map.Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
             if (capabilityMap.getOrDefault(entry.getKey(), Optional.empty())
-                    .map(capability -> ZoneRedundantHaSupportedEnum.ENABLED.equals(capability.zoneRedundantHaSupported()))
+                    .map(capability -> ZoneRedundantHighAvailabilitySupport.ENABLED.equals(capability.zoneRedundantHaSupported()))
                     .orElse(false)) {
                 addRegion(zoneRedundantRegions, entry);
             }
@@ -181,13 +181,13 @@ public class AzureDatabaseCapabilityService {
     }
 
     private Map<Region, String> getRegionInstanceTypeMap(Map<Region, AzureCoordinate> regions, Map<Region,
-            Optional<FlexibleServerCapability>> capabilityMap, Map<String, String> filters) {
+            Optional<Capability>> capabilityMap, Map<String, String> filters) {
         Map<Region, String> instanceTypeMap = new HashMap<>();
 
         String type = filters.get(DATABASE_TYPE);
         boolean flexible = Strings.isNullOrEmpty(type) ? false : AZURE_FLEXIBLE.name().equalsIgnoreCase(type);
         for (Map.Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
-            Optional<FlexibleServerCapability> serverCapability = capabilityMap.getOrDefault(entry.getKey(), Optional.empty());
+            Optional<Capability> serverCapability = capabilityMap.getOrDefault(entry.getKey(), Optional.empty());
             String instanceType;
             if (flexible) {
                 instanceType = getServerSkus(serverCapability)
@@ -206,7 +206,7 @@ public class AzureDatabaseCapabilityService {
     }
 
     private Map<Region, List<String>> getRegionFallbackInstanceTypeMap(Map<Region, AzureCoordinate> regions,
-            Map<Region, String> regionInstanceTypeMap, Map<Region, Optional<FlexibleServerCapability>> capabilityMap) {
+            Map<Region, String> regionInstanceTypeMap, Map<Region, Optional<Capability>> capabilityMap) {
         Map<Region, List<String>> fallbackInstanceTypeMap = new HashMap<>();
         for (Map.Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
             com.azure.core.management.Region azureRegion = com.azure.core.management.Region.fromName(entry.getKey().getRegionName());
@@ -219,15 +219,15 @@ public class AzureDatabaseCapabilityService {
         return fallbackInstanceTypeMap;
     }
 
-    private Stream<ServerSkuCapability> getServerSkus(Optional<FlexibleServerCapability> capability) {
+    private Stream<ServerSkuCapability> getServerSkus(Optional<Capability> capability) {
         return capability.stream()
-                .map(FlexibleServerCapability::supportedServerEditions)
+                .map(Capability::supportedServerEditions)
                 .flatMap(Collection::stream)
                 .filter(this::matchesServerEdition)
                 .flatMap(edition -> edition.supportedServerSkus().stream());
     }
 
-    private Set<String> getAvailableSkuNames(Optional<FlexibleServerCapability> capability) {
+    private Set<String> getAvailableSkuNames(Optional<Capability> capability) {
         return getServerSkus(capability)
                 .map(ServerSkuCapability::name)
                 .collect(Collectors.toSet());
@@ -250,11 +250,11 @@ public class AzureDatabaseCapabilityService {
     }
 
     private Map<Region, Set<DatabaseVmType>> getRegionInstancesTypeMap(Map<Region, AzureCoordinate> regions, Map<Region,
-            Optional<FlexibleServerCapability>> capabilityMap) {
+            Optional<Capability>> capabilityMap) {
         Map<Region, Set<DatabaseVmType>> instanceTypeMap = new HashMap<>();
 
         for (Map.Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
-            Optional<FlexibleServerCapability> serverCapability = capabilityMap.getOrDefault(entry.getKey(), Optional.empty());
+            Optional<Capability> serverCapability = capabilityMap.getOrDefault(entry.getKey(), Optional.empty());
             Set<DatabaseVmType> types = getServerSkus(serverCapability)
                     .filter(sku -> matchesMaxInstanceTypeVersion(sku.name()))
                     .map(sku -> {
@@ -274,7 +274,7 @@ public class AzureDatabaseCapabilityService {
         return instanceTypeMap;
     }
 
-    private boolean matchesServerEdition(FlexibleServerEditionCapability serverEditionCapability) {
+    private boolean matchesServerEdition(ServerEditionCapability serverEditionCapability) {
         return StringUtils.isEmpty(serverEdition) || serverEdition.equals(serverEditionCapability.name());
     }
 
@@ -312,7 +312,7 @@ public class AzureDatabaseCapabilityService {
     }
 
     private Map<Region, Map<String, List<String>>> getSupportedServerVersionsToUpgrade(Map<Region, AzureCoordinate> regions, Map<Region,
-            Optional<FlexibleServerCapability>> capabilityMap) {
+            Optional<Capability>> capabilityMap) {
         return regions.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,

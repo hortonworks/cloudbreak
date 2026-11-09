@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.Capability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.CapabilityStatus;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.PostgresMajorVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -61,12 +61,12 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
         }
     }
 
-    public Map<Region, Optional<FlexibleServerCapability>> getFlexibleServerCapabilityMap(Map<Region, AzureCoordinate> regions) {
+    public Map<Region, Optional<Capability>> getFlexibleServerCapabilityMap(Map<Region, AzureCoordinate> regions) {
         return regions.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, regionEntry -> getFlexibleServerCapability(regionEntry.getValue().getKey())));
     }
 
-    public Optional<FlexibleServerCapability> getFlexibleServerCapability(AzureCoordinate azureCoordinate) {
+    public Optional<Capability> getFlexibleServerCapability(AzureCoordinate azureCoordinate) {
         return getFlexibleServerCapability(azureCoordinate.getKey());
     }
 
@@ -80,12 +80,12 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
     }
 
     public void upgrade(String resourceGroupName, String serverName, String targetVersion) {
-        if (StringUtils.isNotBlank(targetVersion) && ServerVersion.values().contains(ServerVersion.fromString(targetVersion))) {
+        if (StringUtils.isNotBlank(targetVersion) && PostgresMajorVersion.values().contains(PostgresMajorVersion.fromString(targetVersion))) {
             Optional<Server> server = getFlexibleServer(resourceGroupName, serverName);
             if (server.isEmpty()) {
                 throwNotFound(resourceGroupName, serverName);
             } else {
-                handleException(() -> server.get().update().withVersion(ServerVersion.fromString(targetVersion)).apply());
+                handleException(() -> server.get().update().withVersion(PostgresMajorVersion.fromString(targetVersion)).apply());
             }
         } else {
             throw new CloudConnectorException(String.format("Upgrading Azure PostgreSQL Flexible Server to version %s is not supported", targetVersion));
@@ -98,17 +98,17 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
         throw new CloudConnectorException(message);
     }
 
-    private Optional<FlexibleServerCapability> getFlexibleServerCapability(String locationName) {
+    private Optional<Capability> getFlexibleServerCapability(String locationName) {
         try {
-            List<FlexibleServerCapability> flexibleServerCapabilities = getAzureListResultFactory().create(
-                            postgreSqlFlexibleManager.locationBasedCapabilities().execute(locationName))
+            List<Capability> flexibleServerCapabilities = getAzureListResultFactory().create(
+                            postgreSqlFlexibleManager.capabilitiesByLocations().list(locationName))
                     .getStream()
                     .filter(capability -> !CapabilityStatus.DISABLED.equals(capability.status()))
                     .toList();
             if (flexibleServerCapabilities.size() > 1) {
                 LOGGER.warn("There are more than one flexible server capability has been provided, will use the first one." +
                                 " Provided flexible server capabilites in region {}: {}", locationName,
-                        flexibleServerCapabilities.stream().map(FlexibleServerCapability::name).collect(Collectors.joining(",")));
+                        flexibleServerCapabilities.stream().map(Capability::name).collect(Collectors.joining(",")));
             }
             return flexibleServerCapabilities.isEmpty() ? Optional.empty() : Optional.of(flexibleServerCapabilities.get(0));
         } catch (ManagementException managementException) {

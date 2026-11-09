@@ -35,12 +35,12 @@ import com.azure.core.http.HttpResponse;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.CapabilitiesByLocations;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.Capability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.CapabilityStatus;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.LocationBasedCapabilities;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.PostgresMajorVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
-import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Servers;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureCapacityErrorMessageProvider;
@@ -161,20 +161,20 @@ class AzureFlexibleServerClientTest {
         Map<Region, AzureCoordinate> regionMap = Map.of(
                 Region.region("us-west-1"), azureCoordinate("us-west-1"),
                 Region.region("us-west-2"), azureCoordinate("us-west-2"));
-        LocationBasedCapabilities locationBasedCapabilities = mock(LocationBasedCapabilities.class);
-        PagedIterable<FlexibleServerCapability> emptyCapabilities = mock(PagedIterable.class);
+        CapabilitiesByLocations capabilitiesByLocations = mock(CapabilitiesByLocations.class);
+        PagedIterable<Capability> emptyCapabilities = mock(PagedIterable.class);
         when(emptyCapabilities.stream()).thenReturn(Stream.empty());
-        PagedIterable<FlexibleServerCapability> capabilities = mock(PagedIterable.class);
-        FlexibleServerCapability capability = mock(FlexibleServerCapability.class);
-        FlexibleServerCapability disabledCapability = mock(FlexibleServerCapability.class);
+        PagedIterable<Capability> capabilities = mock(PagedIterable.class);
+        Capability capability = mock(Capability.class);
+        Capability disabledCapability = mock(Capability.class);
         when(disabledCapability.status()).thenReturn(CapabilityStatus.DISABLED);
         when(capabilities.stream()).thenReturn(Stream.of(capability, disabledCapability));
 
-        when(locationBasedCapabilities.execute("us-west-1key")).thenReturn(emptyCapabilities);
-        when(locationBasedCapabilities.execute("us-west-2key")).thenReturn(capabilities);
-        when(postgreSqlFlexibleManager.locationBasedCapabilities()).thenReturn(locationBasedCapabilities);
+        when(capabilitiesByLocations.list("us-west-1key")).thenReturn(emptyCapabilities);
+        when(capabilitiesByLocations.list("us-west-2key")).thenReturn(capabilities);
+        when(postgreSqlFlexibleManager.capabilitiesByLocations()).thenReturn(capabilitiesByLocations);
 
-        Map<Region, Optional<FlexibleServerCapability>> actualCapabilityMap = underTest.getFlexibleServerCapabilityMap(regionMap);
+        Map<Region, Optional<Capability>> actualCapabilityMap = underTest.getFlexibleServerCapabilityMap(regionMap);
         assertEquals(actualCapabilityMap.get(Region.region("us-west-1")), Optional.empty());
         assertEquals(actualCapabilityMap.get(Region.region("us-west-2")).get(), capability);
     }
@@ -184,16 +184,16 @@ class AzureFlexibleServerClientTest {
         Map<Region, AzureCoordinate> regionMap = Map.of(
                 Region.region("us-west-1"), azureCoordinate("us-west-1"),
                 Region.region("us-west-2"), azureCoordinate("us-west-2"));
-        LocationBasedCapabilities locationBasedCapabilities = mock(LocationBasedCapabilities.class);
-        PagedIterable<FlexibleServerCapability> capabilities = mock(PagedIterable.class);
-        FlexibleServerCapability capability = mock(FlexibleServerCapability.class);
+        CapabilitiesByLocations capabilitiesByLocations = mock(CapabilitiesByLocations.class);
+        PagedIterable<Capability> capabilities = mock(PagedIterable.class);
+        Capability capability = mock(Capability.class);
         when(capabilities.stream()).thenReturn(Stream.of(capability));
 
-        when(locationBasedCapabilities.execute("us-west-1key")).thenThrow(new ManagementException(null, null));
-        when(locationBasedCapabilities.execute("us-west-2key")).thenReturn(capabilities);
-        when(postgreSqlFlexibleManager.locationBasedCapabilities()).thenReturn(locationBasedCapabilities);
+        when(capabilitiesByLocations.list("us-west-1key")).thenThrow(new ManagementException(null, null));
+        when(capabilitiesByLocations.list("us-west-2key")).thenReturn(capabilities);
+        when(postgreSqlFlexibleManager.capabilitiesByLocations()).thenReturn(capabilitiesByLocations);
 
-        Map<Region, Optional<FlexibleServerCapability>> actualCapabilityMap = underTest.getFlexibleServerCapabilityMap(regionMap);
+        Map<Region, Optional<Capability>> actualCapabilityMap = underTest.getFlexibleServerCapabilityMap(regionMap);
         assertEquals(actualCapabilityMap.get(Region.region("us-west-1")), Optional.empty());
         assertEquals(actualCapabilityMap.get(Region.region("us-west-2")).get(), capability);
     }
@@ -246,14 +246,14 @@ class AzureFlexibleServerClientTest {
             when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenReturn(server);
             Server.Update update = mock(Server.Update.class);
             when(server.update()).thenReturn(update);
-            when(update.withVersion(any(ServerVersion.class))).thenReturn(update);
+            when(update.withVersion(any(PostgresMajorVersion.class))).thenReturn(update);
             when(update.apply()).thenReturn(server);
 
             underTest.upgrade(RESOURCE_GROUP_NAME, SERVER_NAME, targetVersion);
             verify(postgreSqlFlexibleManager, times(1)).servers();
             verify(servers, times(1)).getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME));
             verify(server, times(1)).update();
-            verify(update, times(1)).withVersion(eq(ServerVersion.fromString(targetVersion)));
+            verify(update, times(1)).withVersion(eq(PostgresMajorVersion.fromString(targetVersion)));
             verify(update, times(1)).apply();
         }
 }
