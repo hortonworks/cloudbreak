@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.mock.grpc.GrpcServer;
 import com.sequenceiq.mock.grpc.service.CcmV2Service;
 import com.sequenceiq.mock.grpc.service.LiftieService;
+import com.sequenceiq.mock.grpc.service.WorkloadConnectivityAdminService;
 
 @Configuration
 public class GrpcServerConfig {
@@ -22,10 +23,14 @@ public class GrpcServerConfig {
     @Inject
     private CcmV2Service ccmV2Service;
 
+    @Inject
+    private WorkloadConnectivityAdminService workloadConnectivityAdminService;
+
     @Bean
     public GrpcServer grpcServer() {
         return new GrpcServer(
                 grpcServerPort,
+                workloadConnectivityAdminService.bindService(),
                 liftieService.bindService(),
                 ccmV2Service.bindService());
     }

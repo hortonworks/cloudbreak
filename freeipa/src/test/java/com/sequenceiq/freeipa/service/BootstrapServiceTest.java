@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +27,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,6 +51,7 @@ import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.JumpgateTunnelStatusService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
@@ -93,6 +96,9 @@ class BootstrapServiceTest {
 
     @Mock
     private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
+
+    @Mock
+    private JumpgateTunnelStatusService jumpgateTunnelStatusService;
 
     @InjectMocks
     private BootstrapService underTest;
@@ -226,6 +232,9 @@ class BootstrapServiceTest {
         assertEquals(stack.getCloudPlatform(), bootstrapParams.getCloud());
         StackBasedExitCriteriaModel exitCriteriaModel = (StackBasedExitCriteriaModel) exitCriteriaModelCaptor.getValue();
         assertEquals(STACK_ID, exitCriteriaModel.getStackId().get());
+        InOrder inOrder = inOrder(jumpgateTunnelStatusService, hostOrchestrator);
+        inOrder.verify(jumpgateTunnelStatusService).logTunnelStatus(eq(stack), anySet());
+        inOrder.verify(hostOrchestrator).bootstrapNewNodes(any(), anySet(), anySet(), any(), any(), any(), anyBoolean());
     }
 
     @Test
@@ -376,6 +385,9 @@ class BootstrapServiceTest {
         assertEquals(stack.getCloudPlatform(), bootstrapParams.getCloud());
         StackBasedExitCriteriaModel exitCriteriaModel = (StackBasedExitCriteriaModel) exitCriteriaModelCaptor.getValue();
         assertEquals(STACK_ID, exitCriteriaModel.getStackId().get());
+        InOrder inOrder = inOrder(jumpgateTunnelStatusService, hostOrchestrator);
+        inOrder.verify(jumpgateTunnelStatusService).logTunnelStatus(stack, Set.of(instanceMetaData));
+        inOrder.verify(hostOrchestrator).reBootstrapExistingNodes(any(), anySet(), any(), any());
     }
 
     @Test

@@ -29,6 +29,7 @@ import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.JumpgateTunnelStatusService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
@@ -63,6 +64,9 @@ public class BootstrapService {
 
     @Inject
     private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
+
+    @Inject
+    private JumpgateTunnelStatusService jumpgateTunnelStatusService;
 
     public void bootstrap(Long stackId) throws CloudbreakOrchestratorException {
         bootstrap(stackId, null, false);
@@ -113,6 +117,7 @@ public class BootstrapService {
         params.setRestartNeededFlagSupported(true);
 
         StackBasedExitCriteriaModel exitCriteriaModel = new StackBasedExitCriteriaModel(stack.getId());
+        jumpgateTunnelStatusService.logTunnelStatus(stack, instanceMetaDatas);
         try {
             if (reBootstrap) {
                 hostOrchestrator.reBootstrapExistingNodes(gatewayConfigs, allNodes, params, exitCriteriaModel);

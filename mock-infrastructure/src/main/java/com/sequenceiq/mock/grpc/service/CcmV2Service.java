@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Formatter;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.crypto.BadPaddingException;
@@ -142,6 +143,12 @@ public class CcmV2Service extends ClusterConnectivityManagementV2Grpc.ClusterCon
         // Do nothing
         responseObserver.onNext(ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse.getDefaultInstance());
         responseObserver.onCompleted();
+    }
+
+    public Optional<ClusterConnectivityManagementV2Proto.InvertingProxyAgent> findAgentByEnvironmentCrn(String environmentCrn) {
+        return agents.values().stream()
+                .filter(agent -> environmentCrn.equals(agent.getEnvironmentCrn()))
+                .findFirst();
     }
 
     private static String getHostname(String host, @Nullable Integer port) {

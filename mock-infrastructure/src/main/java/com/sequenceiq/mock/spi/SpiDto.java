@@ -55,4 +55,8 @@ public class SpiDto {
     public int getFailedScalingInstanceCount() {
         return failedScalingInstanceCount.get();
     }
+
+    public String getMockUuid() {
+        return mockuuid;
+    }
 }

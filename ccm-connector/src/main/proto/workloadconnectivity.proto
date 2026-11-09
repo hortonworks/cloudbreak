@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package workloadconnectivity;
+
+option java_package = "com.cloudera.thunderhead.service.workloadconnectivity";
+option java_outer_classname = "WorkloadConnectivityProto";
+option go_package = "com/cloudera/cdp/protobuf";
+
+import "options.proto";
+
+// Represents the status of a workload-connectivity tunnel for an instance ID along with the last seen time and status of the channel.
+message TunnelStatus {
+  // ID Should be generated and shared by jumpgate-agent across its lifetime.
+  // Can be a UUID, but backendId (composed by `$agentCrn-$instanceId`) is the
+  // only thing that exists for older agents, and fits the bill.
+  string id = 1;
+  // Account ID of the agent instance.
+  string accountId = 2;
+  // The CRN of the environment whose workload-connectivity channel status is requested.
+  string environmentCrn = 3;
+  // Crn of the associated agent.
+  string agentCrn = 4;
+  // Id of the node the agent is deployed on. Unique across agent instances of an agentCrn.
+  string instanceId = 5;
+  // User-Agent string of the agent instance. Would be used to derive the version of agent binary.
+  string userAgent = 6;
+  // Internal address of the relay instance that the agent instance has connected to. This is also the relay reporting this status.
+  string relayAddress = 7;
+  // The (UNIX) timestamp in ns at which this report was made.
+  int64 timestamp = 8;
+  // Size of the pending requests queue.
+  int64 queueSize = 9;
+}

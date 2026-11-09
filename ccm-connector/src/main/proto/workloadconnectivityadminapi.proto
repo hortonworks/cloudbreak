@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package workloadconnectivityadminapi;
+
+option java_package = "com.cloudera.thunderhead.service.workloadconnectivity";
+option java_outer_classname = "WorkloadConnectivityAdminApiProto";
+option go_package = "com/cloudera/cdp/protobuf";
+
+import "options.proto";
+import "workloadconnectivity.proto";
+
+option (options.FileExtension.audit) = true;
+
+// The admin service catering to managing connectivity between Cloudera's control plane and customer owned environments.
+service WorkloadConnectivityAdminApi {
+  option (options.ServiceExtension.admin) = true;
+  option (options.ServiceExtension.apiServiceName) = {
+    lowercase: "workloadconnectivityadmin"
+    camelcase: "WorkloadConnectivityAdmin"
+  };
+
+  // List the status of tunnels between jumpgate server and agents :: Returns a list of tunnels (with their status) which enable a specified environment's link with the control plane.
+  rpc ListTunnelStatus(ListTunnelStatusRequest)
+      returns (ListTunnelStatusResponse) {
+
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.right) = "workloadconnectivityadmin/listTunnelStatus";
+  }
+}
+
+message ListTunnelStatusRequest {
+  string accountId = 1;
+  string environmentCrn = 2 [(options.FieldExtension.required) = true];
+}
+
+message ListTunnelStatusResponse {
+  repeated workloadconnectivity.TunnelStatus tunnels = 1 [(options.FieldExtension.required) = true];
+}
