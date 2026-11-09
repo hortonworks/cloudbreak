@@ -36,51 +36,56 @@ public class CoreImageProvider implements ImageProvider {
 
     @Override
     public Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings imageFilterSettings) {
-        try {
-            List<Image> candidateImages = getImagesInCatalogForPlatform(imageFilterSettings.catalog(), imageFilterSettings.platform());
-            List<Image> images = freeIpaImageFilter.filterImages(candidateImages, imageFilterSettings);
-            Optional<Image> image = freeIpaImageFilter.findMostRecentImage(images);
+        List<Image> candidateImages = getImagesInCatalogForPlatform(imageFilterSettings.catalog(), imageFilterSettings.platform());
+        List<Image> images = freeIpaImageFilter.filterImages(candidateImages, imageFilterSettings);
+        Optional<Image> image = freeIpaImageFilter.findMostRecentImage(images);
 
-            return image.map(i -> ImageWrapper.ofCoreImage(i, imageFilterSettings.catalog()));
-        } catch (WebApplicationException e) {
-            String errorMessage = messageExtractor.getErrorMessage(e);
-            LOGGER.warn("Image lookup in image catalog '{}' failed with: {}", imageFilterSettings.catalog(), errorMessage, e);
-            throw new ImageNotFoundException(String.format("Could not get the FreeIPA images of image catalog '%s'. %s",
-                    imageFilterSettings.catalog(), errorMessage), e);
-        } catch (Exception ex) {
-            LOGGER.warn("Image lookup failed: {}", ex.getMessage());
-            return Optional.empty();
-        }
+        return image.map(i -> ImageWrapper.ofCoreImage(i, imageFilterSettings.catalog()));
     }
 
     @Override
     public List<ImageWrapper> getImages(FreeIpaImageFilterSettings imageFilterSettings) {
+        List<Image> images = getImagesInCatalogForPlatform(imageFilterSettings.catalog(), imageFilterSettings.platform());
+        List<Image> compatibleImages = filterImagesOrEmpty(images, imageFilterSettings);
+        return compatibleImages.stream()
+                .map(i -> ImageWrapper.ofCoreImage(i, imageFilterSettings.catalog()))
+                .collect(Collectors.toList());
+    }
+
+    private List<Image> filterImagesOrEmpty(List<Image> images, FreeIpaImageFilterSettings imageFilterSettings) {
         try {
-            List<Image> images = getImagesInCatalogForPlatform(imageFilterSettings.catalog(), imageFilterSettings.platform());
-            List<Image> compatibleImages = freeIpaImageFilter.filterImages(images, imageFilterSettings);
-            return compatibleImages.stream()
-                    .map(i -> ImageWrapper.ofCoreImage(i, imageFilterSettings.catalog()))
-                    .collect(Collectors.toList());
-        } catch (WebApplicationException e) {
-            String errorMessage = messageExtractor.getErrorMessage(e);
-            LOGGER.warn("Fetching images failed with: {}", errorMessage, e);
-            return List.of();
-        } catch (Exception e) {
-            LOGGER.warn("Fetching images failed", e);
+            return freeIpaImageFilter.filterImages(images, imageFilterSettings);
+        } catch (ImageNotFoundException e) {
+            LOGGER.debug("No matching FreeIPA images in image catalog '{}'", imageFilterSettings.catalog(), e);
             return List.of();
         }
     }
 
-    private List<Image> getImagesInCatalogForPlatform(String catalog, String platform) throws Exception {
-        ImagesV4Response imagesV4Response = imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, catalog, null,
-                platform, null,
-                null, false, false, null);
+    private List<Image> getImagesInCatalogForPlatform(String catalog, String platform) {
+        ImagesV4Response imagesV4Response = fetchImagesFromCore(catalog, platform);
         LOGGER.trace("Images received: {}", imagesV4Response);
-        return Optional.ofNullable(imagesV4Response.getFreeipaImages()).
-                orElseGet(List::of).stream()
+        return Optional.ofNullable(imagesV4Response)
+                .map(ImagesV4Response::getFreeipaImages)
+                .orElseGet(List::of).stream()
                 .map(this::convert)
                 .flatMap(Optional::stream)
                 .toList();
+    }
+
+    private ImagesV4Response fetchImagesFromCore(String catalog, String platform) {
+        try {
+            return imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, catalog, null,
+                    platform, null, null, false, false, null);
+        } catch (WebApplicationException e) {
+            throw imageLookupFailed(catalog, messageExtractor.getErrorMessage(e), e);
+        } catch (Exception e) {
+            throw imageLookupFailed(catalog, e.getMessage(), e);
+        }
+    }
+
+    private ImageNotFoundException imageLookupFailed(String catalog, String errorMessage, Exception cause) {
+        LOGGER.warn("Image lookup in image catalog '{}' failed with: {}", catalog, errorMessage, cause);
+        return new ImageNotFoundException(String.format("Could not get the FreeIPA images of image catalog '%s'. %s", catalog, errorMessage), cause);
     }
 
     private Optional<Image> convert(ImageV4Response response) {

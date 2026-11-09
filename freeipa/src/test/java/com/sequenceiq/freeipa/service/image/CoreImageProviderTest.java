@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import jakarta.ws.rs.ForbiddenException;
-import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.ProcessingException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,13 +76,29 @@ class CoreImageProviderTest {
     private CoreImageProvider victim;
 
     @Test
-    void shouldReturnEmptyInCaseOfException() throws Exception {
+    void shouldThrowImageNotFoundExceptionWhenCoreCannotBeReached() throws Exception {
+        ProcessingException failure = new ProcessingException("Connection refused");
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
-                .thenThrow(new RuntimeException());
+                .thenThrow(failure);
 
-        Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
+        ImageNotFoundException exception = assertThrows(ImageNotFoundException.class, () -> victim.getImage(createImageFilterSettings()));
 
-        assertTrue(actual.isEmpty());
+        assertEquals("Could not get the FreeIPA images of image catalog '" + CATALOG_NAME + "'. " + failure.getMessage(), exception.getMessage());
+        assertSame(failure, exception.getCause());
+    }
+
+    @Test
+    void shouldPropagateFilterImageNotFoundException() throws Exception {
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
+                .thenReturn(anImagesResponse());
+        String filterError = "Could not find any FreeIPA image on platform 'AWS' in region 'region' with os 'redhat9' in catalog 'catalog name'";
+        ImageNotFoundException failure = new ImageNotFoundException(filterError);
+        when(freeIpaImageFilter.filterImages(any(), any())).thenThrow(failure);
+
+        ImageNotFoundException exception = assertThrows(ImageNotFoundException.class, () -> victim.getImage(createImageFilterSettings()));
+
+        assertSame(failure, exception);
+        assertEquals(filterError, exception.getMessage());
     }
 
     @Test
@@ -144,9 +160,8 @@ class CoreImageProviderTest {
     }
 
     @Test
-    void testGetImagesdReturnsEmptyListWhenWebApplicationExceptionThrown() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
-                .thenThrow(new WebApplicationException());
+    void testGetImagesReturnsEmptyListInCaseOfNullResponse() throws Exception {
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null)).thenReturn(null);
 
         List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
 
@@ -154,13 +169,60 @@ class CoreImageProviderTest {
     }
 
     @Test
-    void testGetImagesdReturnsEmptyListWhenExceptionThrown() throws Exception {
+    void testGetImagesThrowsImageNotFoundExceptionWithCoreError() throws Exception {
+        ForbiddenException forbidden = new ForbiddenException();
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
-                .thenThrow(new Exception());
+                .thenThrow(forbidden);
+        String coreError = "Error message: \"This API is not prepared to use it in service-to-service communication.\"";
+        when(messageExtractor.getErrorMessage(forbidden)).thenReturn(coreError);
 
-        List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
+        ImageNotFoundException exception = assertThrows(ImageNotFoundException.class, () -> victim.getImages(createImageFilterSettings()));
 
-        assertTrue(result.isEmpty());
+        assertEquals("Could not get the FreeIPA images of image catalog '" + CATALOG_NAME + "'. " + coreError, exception.getMessage());
+        assertSame(forbidden, exception.getCause());
+    }
+
+    @Test
+    void testGetImagesWrapsCheckedEndpointException() throws Exception {
+        Exception failure = new Exception("Core lookup failed");
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
+                .thenThrow(failure);
+
+        ImageNotFoundException exception = assertThrows(ImageNotFoundException.class, () -> victim.getImages(createImageFilterSettings()));
+
+        assertEquals("Could not get the FreeIPA images of image catalog '" + CATALOG_NAME + "'. " + failure.getMessage(), exception.getMessage());
+        assertSame(failure, exception.getCause());
+    }
+
+    @Test
+    void testGetImagesThrowsImageNotFoundExceptionWhenCoreCannotBeReached() throws Exception {
+        ProcessingException failure = new ProcessingException("Connection refused");
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
+                .thenThrow(failure);
+
+        ImageNotFoundException exception = assertThrows(ImageNotFoundException.class, () -> victim.getImages(createImageFilterSettings()));
+
+        assertEquals("Could not get the FreeIPA images of image catalog '" + CATALOG_NAME + "'. " + failure.getMessage(), exception.getMessage());
+        assertSame(failure, exception.getCause());
+    }
+
+    @Test
+    void testGetImagesReturnsEmptyListWhenFilterThrowsImageNotFoundException() throws Exception {
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
+                .thenReturn(anImagesResponse());
+        FreeIpaImageFilterSettings settings = new FreeIpaImageFilterSettings(null, CATALOG_NAME, null, null, REGION, PLATFORM, false, Architecture.X86_64);
+        when(freeIpaImageFilter.filterImages(any(), any())).thenThrow(new ImageNotFoundException("No matching FreeIPA image"));
+
+        assertTrue(victim.getImages(settings).isEmpty());
+    }
+
+    @Test
+    void testGetImagesReturnsEmptyListWhenFilterReturnsEmptyList() throws Exception {
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
+                .thenReturn(anImagesResponse());
+        when(freeIpaImageFilter.filterImages(any(), any())).thenReturn(List.of());
+
+        assertTrue(victim.getImages(createImageFilterSettings()).isEmpty());
     }
 
     @Test
