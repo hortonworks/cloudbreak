@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.gcp.tag;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.util.Data;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.Settings;
@@ -69,12 +72,19 @@ public class GcpDatabaseTagUpdateStrategy implements TagUpdateStrategy {
         Settings existingSettings = fetchSettings(sqlAdmin, project, instanceName);
         Map<String, String> existingLabels = existingSettings.getUserLabels();
         if (hasTagKeysToDelete(existingLabels, labelKeys)) {
-            Map<String, String> remainingLabels = removeTagKeys(existingLabels, labelKeys);
-            logTagDeletion(LOGGER, instanceName, labelKeys, existingLabels, remainingLabels.keySet());
-            patchUserLabels(sqlAdmin, project, instanceName, remainingLabels, existingSettings.getSettingsVersion());
+            logTagDeletion(LOGGER, instanceName, labelKeys, existingLabels, removeTagKeys(existingLabels, labelKeys).keySet());
+            patchUserLabels(sqlAdmin, project, instanceName, labelRemovals(existingLabels, labelKeys), existingSettings.getSettingsVersion());
         } else {
             LOGGER.debug("No labels to delete for database {}, skipping.", instanceName);
         }
+    }
+
+    // Cloud SQL patch merges userLabels: a label is removed only by sending its key with a JSON null value.
+    // The Google API client drops plain null map values, so Data.NULL_STRING is needed to serialize an explicit null.
+    private Map<String, String> labelRemovals(Map<String, String> existingLabels, Set<String> labelKeys) {
+        return labelKeys.stream()
+                .filter(existingLabels::containsKey)
+                .collect(Collectors.toMap(Function.identity(), key -> Data.NULL_STRING));
     }
 
     private Settings fetchSettings(SQLAdmin sqlAdmin, String project, String instanceName) throws IOException {
