@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.upgrade;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,10 +21,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.common.model.OsType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.image.FreeIpaImageFilter;
 import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
 import com.sequenceiq.freeipa.service.image.FreeipaPlatformStringTransformer;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
@@ -90,36 +93,44 @@ public class UpgradeImageService {
         Optional<String> currentImageDate = getCurrentImageDate(stack, currentImage);
         List<Pair<ImageWrapper, String>> imagesWrapperAndName = imageService.fetchImagesWrapperAndName(stack, catalog, currentImage.getOs(),
                 allowMajorOsUpgrade);
-        List<ImageInfoResponse> targetImages = imagesWrapperAndName.stream()
+        List<Pair<ImageWrapper, String>> candidateImages = imagesWrapperAndName.stream()
                 .filter(imageWrapperAndName -> currentImageDate.isPresent()
                         && isCandidateImageNewerThanCurrent(imageWrapperAndName.getLeft(), currentImageDate.get()))
                 .filter(imageWrapperAndName -> !currentImage.getId().equals(imageWrapperAndName.getLeft().getImage().getUuid()))
                 .filter(imageWrapperAndName -> filterBasedOnTags(tagFilters, imageWrapperAndName))
-                .map(this::convertImageWrapperAndNameToImageInfoResponse)
-                .collect(Collectors.toList());
+                .toList();
+        List<ImageInfoResponse> targetImages = getLatestImagesGroupedByOs(candidateImages);
         fetchDefaultOsImageIfNotPresentInTargets(stack, catalog, currentImage, targetImages, allowMajorOsUpgrade).ifPresent(targetImages::add);
-        return getLatestImagesGroupedByOs(targetImages);
+        return targetImages;
     }
 
-    private List<ImageInfoResponse> getLatestImagesGroupedByOs(List<ImageInfoResponse> targetImages) {
-        return new java.util.ArrayList<>(targetImages.stream()
+    private List<ImageInfoResponse> getLatestImagesGroupedByOs(List<Pair<ImageWrapper, String>> candidateImages) {
+        return candidateImages.stream()
                 .collect(Collectors.toMap(
-                        image -> StringUtils.defaultString(image.getOs()),
+                        image -> StringUtils.defaultString(image.getLeft().getImage().getOs()),
                         image -> image,
-                        this::selectLatestImageByDate,
+                        this::selectLatestImage,
                         LinkedHashMap::new))
-                .values());
+                .values().stream()
+                .map(this::convertImageWrapperAndNameToImageInfoResponse)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private ImageInfoResponse selectLatestImageByDate(ImageInfoResponse first, ImageInfoResponse second) {
-        String firstDate = first.getDate();
-        String secondDate = second.getDate();
+    private Pair<ImageWrapper, String> selectLatestImage(Pair<ImageWrapper, String> first, Pair<ImageWrapper, String> second) {
+        Image firstImage = first.getLeft().getImage();
+        Image secondImage = second.getLeft().getImage();
+        String firstDate = firstImage.getDate();
+        String secondDate = secondImage.getDate();
         try {
-            return compareImageDates(firstDate, secondDate) ? first : second;
+            if (compareImageDates(firstDate, secondDate)) {
+                return first;
+            } else if (compareImageDates(secondDate, firstDate)) {
+                return second;
+            }
         } catch (ParseException e) {
             LOGGER.debug("Unable to compare image dates [{}] and [{}]", secondDate, firstDate, e);
-            return first;
         }
+        return FreeIpaImageFilter.BY_CREATED_THEN_UUID.compare(firstImage, secondImage) >= 0 ? first : second;
     }
 
     private Optional<ImageInfoResponse> fetchDefaultOsImageIfNotPresentInTargets(Stack stack, String catalog, ImageInfoResponse currentImage,

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -45,10 +46,43 @@ class FreeIpaImageFilterTest {
     @Mock
     private ProviderSpecificImageFilter providerSpecificImageFilter;
 
+    @Mock
+    private PreferredOsService preferredOsService;
+
     @BeforeEach
     void setUp() {
         lenient().when(supportedOsService.isSupported(any())).thenReturn(true);
         lenient().when(providerSpecificImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
+    }
+
+    @Test
+    void findMostRecentImagePrefersLatestCreatedRegardlessOfOrder() {
+        when(preferredOsService.getDefaultOs()).thenReturn(REDHAT_8);
+        Image older = createDatedImage("image-z", "2021-09-01", 100L, REDHAT_8);
+        Image newer = createDatedImage("image-a", "2021-09-01", 200L, REDHAT_8);
+
+        assertThat(underTest.findMostRecentImage(List.of(older, newer))).contains(newer);
+        assertThat(underTest.findMostRecentImage(List.of(newer, older))).contains(newer);
+    }
+
+    @Test
+    void findMostRecentImageBreaksCreatedTieByUuidRegardlessOfOrder() {
+        when(preferredOsService.getDefaultOs()).thenReturn(REDHAT_8);
+        Image first = createDatedImage("image-a", "2021-09-01", 200L, REDHAT_8);
+        Image last = createDatedImage("image-z", "2021-09-01", 200L, REDHAT_8);
+
+        assertThat(underTest.findMostRecentImage(List.of(first, last))).contains(last);
+        assertThat(underTest.findMostRecentImage(List.of(last, first))).contains(last);
+    }
+
+    @Test
+    void findMostRecentImagePreservesPreferredOsAndDatePriority() {
+        when(preferredOsService.getDefaultOs()).thenReturn(REDHAT_8);
+        Image otherOs = createDatedImage("image-z", "2021-10-01", 300L, CENTOS_7);
+        Image olderDate = createDatedImage("image-y", "2021-08-01", 200L, REDHAT_8);
+        Image preferred = createDatedImage("image-a", "2021-09-01", 100L, REDHAT_8);
+
+        assertThat(underTest.findMostRecentImage(List.of(otherOs, olderDate, preferred))).contains(preferred);
     }
 
     @Test
@@ -231,4 +265,7 @@ class FreeIpaImageFilterTest {
         return new Image(null, null, null, os, imageId, Map.of(platform, Map.of(region, "imageName")), null, null, true, "x86_64", Map.of(), sourceImageId);
     }
 
+    private Image createDatedImage(String uuid, String date, long created, String os) {
+        return new Image(created, date, null, os, uuid, Map.of(), null, Map.of(), true, "x86_64", Map.of());
+    }
 }

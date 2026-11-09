@@ -23,6 +23,9 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 @Component
 public class FreeIpaImageFilter {
 
+    public static final Comparator<Image> BY_CREATED_THEN_UUID = Comparator.comparingLong(Image::getCreated)
+            .thenComparing(Image::getUuid, Comparator.nullsFirst(Comparator.naturalOrder()));
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaImageFilter.class);
 
     private static final String DEFAULT_REGION = "default";
@@ -150,6 +153,7 @@ public class FreeIpaImageFilter {
     public Comparator<Image> newestImageWithPreferredOs() {
         String preferredOs = preferredOsService.getDefaultOs();
         return Comparator.<Image, Integer>comparing(img -> preferredOs.equalsIgnoreCase(img.getOs()) ? 1 : 0)
-                .thenComparing(Image::getDate);
+                .thenComparing(Image::getDate)
+                .thenComparing(BY_CREATED_THEN_UUID);
     }
 }

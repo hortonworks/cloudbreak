@@ -403,6 +403,48 @@ class UpgradeImageServiceTest {
     }
 
     @Test
+    void findTargetImagesPrefersLatestCreatedRegardlessOfOrder() {
+        Image older = new Image(100L, "2021-09-01", null, DEFAULT_OS, "image-z", Map.of(), null, Map.of(), true, "x86_64");
+        Image newer = new Image(200L, "2021-09-01", null, DEFAULT_OS, "image-a", Map.of(), null, Map.of(), true, "x86_64");
+
+        assertTargetImageRegardlessOfOrder(older, newer);
+    }
+
+    @Test
+    void findTargetImagesBreaksCreatedTieByUuidRegardlessOfOrder() {
+        Image first = new Image(200L, "2021-09-01", null, DEFAULT_OS, "image-a", Map.of(), null, Map.of(), true, "x86_64");
+        Image last = new Image(200L, "2021-09-01", null, DEFAULT_OS, "image-z", Map.of(), null, Map.of(), true, "x86_64");
+
+        assertTargetImageRegardlessOfOrder(first, last);
+    }
+
+    @Test
+    void findTargetImagesPreservesDatePriorityOverCreated() {
+        Image olderDate = new Image(200L, "2021-09-01", null, DEFAULT_OS, "image-z", Map.of(), null, Map.of(), true, "x86_64");
+        Image newerDate = new Image(100L, "2021-10-01", null, DEFAULT_OS, "image-a", Map.of(), null, Map.of(), true, "x86_64");
+
+        assertTargetImageRegardlessOfOrder(olderDate, newerDate);
+    }
+
+    private void assertTargetImageRegardlessOfOrder(Image other, Image expected) {
+        setDefaultOsToRhel8();
+        Stack stack = new Stack();
+        Pair<ImageWrapper, String> otherWrapper = Pair.of(ImageWrapper.ofFreeipaImage(other, CATALOG_URL), other.getUuid());
+        Pair<ImageWrapper, String> expectedWrapper = Pair.of(ImageWrapper.ofFreeipaImage(expected, CATALOG_URL), expected.getUuid());
+        when(imageService.fetchImagesWrapperAndName(stack, CATALOG_URL, DEFAULT_OS, false))
+                .thenReturn(List.of(otherWrapper, expectedWrapper), List.of(expectedWrapper, otherWrapper));
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setDate("2021-08-01");
+        currentImage.setId("current-image");
+        currentImage.setOs(DEFAULT_OS);
+
+        assertThat(underTest.findTargetImages(stack, CATALOG_URL, currentImage, false))
+                .extracting(ImageInfoResponse::getId).containsExactly(expected.getUuid());
+        assertThat(underTest.findTargetImages(stack, CATALOG_URL, currentImage, false))
+                .extracting(ImageInfoResponse::getId).containsExactly(expected.getUuid());
+    }
+
+    @Test
     void testFindTargetImagesReturnsLatestPerOs() {
         ReflectionTestUtils.setField(underTest, UpgradeImageService.class, "defaultOs", "centos7", String.class);
         Stack stack = new Stack();
