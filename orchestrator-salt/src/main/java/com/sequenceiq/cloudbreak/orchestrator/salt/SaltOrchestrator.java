@@ -757,7 +757,6 @@ public class SaltOrchestrator implements HostOrchestrator {
         for (String existingReplicaHostname : existingFreeIpaReplicaHostnames) {
             LOGGER.debug("Applying changes to FreeIPA replica {}", existingReplicaHostname);
             runNewService(sc, new HighStateRunner(saltStateService, Set.of(existingReplicaHostname), allNodes), exitCriteriaModel);
-            delayFreeIpaReplicaActions(existingFreeIpaReplicaHostnames);
         }
     }
 
