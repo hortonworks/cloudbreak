@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.common.model.ImageCatalogConstants.FREEIPA_DEFAULT_CATALOG_NAME;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,8 +46,6 @@ public class DefaultImageCatalogServiceTest {
     private static final String DEFAULT_FREEIPA_CATALOG_URL = "http://freeipa.url";
 
     private static final String DEFAULT_CATALOG_URL = "http://cb.url";
-
-    private static final String FREEIPA_DEFAULT_CATALOG_NAME = "freeipa-default";
 
     @Mock
     private ImageCatalogService imageCatalogService;

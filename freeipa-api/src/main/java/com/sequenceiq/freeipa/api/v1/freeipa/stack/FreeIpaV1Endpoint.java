@@ -53,6 +53,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachCh
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImageCatalogRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.DefaultImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
@@ -331,6 +332,14 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = LIST_RETRYABLE_FLOWS, description = FreeIpaNotes.FREEIPA_NOTES, operationId = "listRetryableFlowsV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<RetryableFlowResponse> listRetryableFlows(@QueryParam("environment") @NotEmpty String environmentCrn);
+
+    @GET
+    @Path("default_image_catalog")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.GET_DEFAULT_IMAGE_CATALOG, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "getDefaultImageCatalog",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DefaultImageCatalogResponse getDefaultImageCatalog();
 
     @PUT
     @Path("change_image_catalog")

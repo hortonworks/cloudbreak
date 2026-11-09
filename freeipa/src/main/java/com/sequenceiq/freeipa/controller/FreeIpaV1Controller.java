@@ -20,9 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -58,6 +60,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachCh
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImageCatalogRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.DefaultImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
@@ -88,6 +91,7 @@ import com.sequenceiq.freeipa.orchestrator.SaltUpdateService;
 import com.sequenceiq.freeipa.service.binduser.BindUserCreateService;
 import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
+import com.sequenceiq.freeipa.service.image.FreeIpaImageProvider;
 import com.sequenceiq.freeipa.service.image.ImageCatalogChangeService;
 import com.sequenceiq.freeipa.service.image.ImageCatalogGeneratorService;
 import com.sequenceiq.freeipa.service.image.ImageChangeService;
@@ -191,6 +195,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private ImageCatalogGeneratorService imageCatalogGeneratorService;
+
+    @Inject
+    private FreeIpaImageProvider freeIpaImageProvider;
 
     @Inject
     private FreeIpaUpgradeCcmService upgradeCcmService;
@@ -464,6 +471,13 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public List<RetryableFlowResponse> listRetryableFlows(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return retryService.getRetryableFlows(environmentCrn, accountId);
+    }
+
+    @Override
+    @AccountIdNotNeeded
+    @DisableCheckPermissions
+    public DefaultImageCatalogResponse getDefaultImageCatalog() {
+        return freeIpaImageProvider.getDefaultImageCatalog();
     }
 
     @Override

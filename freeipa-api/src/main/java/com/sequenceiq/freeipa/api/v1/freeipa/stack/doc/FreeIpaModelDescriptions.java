@@ -95,6 +95,8 @@ public class FreeIpaModelDescriptions {
 
     public static class ImageSettingsModelDescription {
         public static final String IMAGE_CATALOG = "custom image catalog URL or name";
+        public static final String DEFAULT_IMAGE_CATALOG_NAME = "Name of the default FreeIPA image catalog";
+        public static final String DEFAULT_IMAGE_CATALOG_URL = "URL of the default FreeIPA image catalog used for creating instances";
         public static final String IMAGE_ID = "virtual machine image id from ImageCatalog, machines of the cluster will be started from this image";
         public static final String OS_TYPE = "os type of the image, this property is only considered when no specific image id is provided";
         public static final String LDAP_AGENT_VERSION = "LDAP agent version present on the image, if the image contains LDAP agent.";

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static com.sequenceiq.common.model.ImageCatalogConstants.FREEIPA_DEFAULT_CATALOG_NAME;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.DefaultImageCatalogResponse;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 
 @Service
@@ -36,6 +38,13 @@ public class FreeIpaImageProvider implements ImageProvider {
 
     @Inject
     private FreeIpaImageFilter freeIpaImageFilter;
+
+    public DefaultImageCatalogResponse getDefaultImageCatalog() {
+        DefaultImageCatalogResponse response = new DefaultImageCatalogResponse();
+        response.setName(FREEIPA_DEFAULT_CATALOG_NAME);
+        response.setUrl(defaultCatalogUrl);
+        return response;
+    }
 
     @Override
     public Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings imageFilterParams) {

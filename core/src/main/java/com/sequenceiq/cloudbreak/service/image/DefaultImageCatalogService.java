@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
+import static com.sequenceiq.common.model.ImageCatalogConstants.FREEIPA_DEFAULT_CATALOG_NAME;
 
 import java.util.Comparator;
 import java.util.List;
@@ -26,8 +27,6 @@ import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Component
 public class DefaultImageCatalogService {
-
-    public static final String FREEIPA_DEFAULT_CATALOG_NAME = "freeipa-default";
 
     public static final String CDP_DEFAULT_CATALOG_NAME = "cdp-default";
 

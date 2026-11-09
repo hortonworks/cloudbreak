@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
+import static com.sequenceiq.common.model.ImageCatalogConstants.FREEIPA_DEFAULT_CATALOG_NAME;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static com.sequenceiq.common.model.OsType.getLatestOsType;
 import static java.util.Collections.emptyList;
@@ -83,8 +84,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public static final String UNDEFINED = "";
 
     public static final String CDP_DEFAULT_CATALOG_NAME = "cdp-default";
-
-    public static final String FREEIPA_DEFAULT_CATALOG_NAME = "freeipa-default";
 
     static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
 

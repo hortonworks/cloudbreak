@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.DefaultImageCatalogResponse;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -103,6 +104,17 @@ class FreeIpaImageProviderTest {
 
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
         ReflectionTestUtils.setField(underTest, "freeIpaImageFilter", freeIpaImageFilter);
+    }
+
+    @Test
+    void testGetDefaultImageCatalog() {
+        String configuredCatalogUrl = "https://example.com/configured-freeipa-catalog.json";
+        ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", configuredCatalogUrl);
+
+        DefaultImageCatalogResponse response = underTest.getDefaultImageCatalog();
+
+        assertEquals("freeipa-default", response.getName());
+        assertEquals(configuredCatalogUrl, response.getUrl());
     }
 
     @Test

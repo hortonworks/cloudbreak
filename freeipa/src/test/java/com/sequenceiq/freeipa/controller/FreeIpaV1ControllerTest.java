@@ -43,6 +43,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachCh
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.DefaultImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.network.ModifyNetworkCidrsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
@@ -57,6 +58,7 @@ import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidato
 import com.sequenceiq.freeipa.dto.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService;
 import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
+import com.sequenceiq.freeipa.service.image.FreeIpaImageProvider;
 import com.sequenceiq.freeipa.service.image.ImageCatalogGeneratorService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
@@ -126,6 +128,9 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private ImageCatalogGeneratorService imageCatalogGeneratorService;
+
+    @Mock
+    private FreeIpaImageProvider freeIpaImageProvider;
 
     @Mock
     private FreeIpaUpgradeCcmService upgradeCcmService;
@@ -304,6 +309,19 @@ class FreeIpaV1ControllerTest {
 
         underTest.repairInstances(request);
         verify(repairInstancesService, times(1)).repairInstances(crnService.getCurrentAccountId(), request);
+    }
+
+    @Test
+    void getDefaultImageCatalog() {
+        DefaultImageCatalogResponse response = new DefaultImageCatalogResponse();
+        response.setName("freeipa-default");
+        response.setUrl("https://example.com/freeipa-catalog.json");
+        when(freeIpaImageProvider.getDefaultImageCatalog()).thenReturn(response);
+
+        assertThat(underTest.getDefaultImageCatalog()).isSameAs(response);
+
+        verify(freeIpaImageProvider).getDefaultImageCatalog();
+        verifyNoInteractions(crnService);
     }
 
     @Test
