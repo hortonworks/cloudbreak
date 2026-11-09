@@ -1,30 +1,43 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_IMAGE_CATALOG_CHANGED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +48,12 @@ class ImageCatalogChangeServiceTest {
     private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:cloudera:environment:ded616a1-799b-42ec-9b8b-510a829b901d";
 
     private static final String IMAGE_CATALOG = "https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-freeipa-image-catalog.json";
+
+    private static final String OLD_IMAGE_CATALOG_URL = "https://example.com/old-freeipa-image-catalog.json";
+
+    private static final String OLD_IMAGE_CATALOG_NAME = "old-custom-catalog";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:ded616a1-799b-42ec-9b8b-510a829b901d";
 
     private static final Long STACK_ID = 123L;
 
@@ -64,6 +83,9 @@ class ImageCatalogChangeServiceTest {
     @Mock
     private FreeipaPlatformStringTransformer platformStringTransformer;
 
+    @Mock
+    private EventSenderService eventSenderService;
+
     @InjectMocks
     private ImageCatalogChangeService underTest;
 
@@ -84,8 +106,11 @@ class ImageCatalogChangeServiceTest {
 
     @BeforeEach
     void setUp() {
+        STACK.getImage().setImageCatalogUrl(OLD_IMAGE_CATALOG_URL);
+        STACK.getImage().setImageCatalogName(OLD_IMAGE_CATALOG_NAME);
         lenient().when(stackService.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(STACK);
         lenient().when(platformStringTransformer.getPlatformString(STACK)).thenReturn(PLATFORM);
+        lenient().when(imageService.changeImage(eq(STACK), any(FreeIpaImageFilterSettings.class))).thenAnswer(invocation -> STACK.getImage());
     }
 
     @Test
@@ -103,6 +128,7 @@ class ImageCatalogChangeServiceTest {
         assertThatThrownBy(() -> underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG))
                 .isInstanceOf(CloudbreakServiceException.class)
                 .hasMessage("Operation is running for stack 'stack-name'. Please try again later.");
+        verifyNoInteractions(eventSenderService);
     }
 
     @Test
@@ -114,6 +140,90 @@ class ImageCatalogChangeServiceTest {
         assertThatThrownBy(() -> underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG))
                 .isInstanceOf(CloudbreakServiceException.class)
                 .hasMessage("Could not find current image in new catalog");
+        verifyNoInteractions(eventSenderService);
+    }
+
+    @Test
+    void shouldSendCatalogChangedEventWithOldCatalogUrlBeforeImageIsMutated() {
+        Image current = currentImage(null);
+        when(imageService.getImageForStack(STACK)).thenReturn(current);
+        doAnswer(invocation -> {
+            STACK.getImage().setImageCatalogUrl(IMAGE_CATALOG);
+            STACK.getImage().setImageCatalogName("new-catalog");
+            return STACK.getImage();
+        }).when(imageService).changeImage(eq(STACK), any(FreeIpaImageFilterSettings.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG));
+
+        verify(eventSenderService).sendEventAndNotification(STACK, USER_CRN, FREEIPA_IMAGE_CATALOG_CHANGED,
+                List.of(OLD_IMAGE_CATALOG_URL, IMAGE_CATALOG));
+        verifyNoMoreInteractions(eventSenderService);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = " ")
+    void shouldSendCatalogChangedEventWithOldCatalogNameWhenUrlIsMissing(String oldCatalogUrl) {
+        STACK.getImage().setImageCatalogUrl(oldCatalogUrl);
+        Image current = currentImage(SOURCE_IMAGE_ID);
+        when(imageService.getImageForStack(STACK)).thenReturn(current);
+        String newCatalogName = "new-custom-catalog";
+        doAnswer(invocation -> {
+            STACK.getImage().setImageCatalogName(newCatalogName);
+            return STACK.getImage();
+        }).when(imageService).changeImage(eq(STACK), any(FreeIpaImageFilterSettings.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, newCatalogName));
+
+        verify(eventSenderService).sendEventAndNotification(STACK, USER_CRN, FREEIPA_IMAGE_CATALOG_CHANGED,
+                List.of(OLD_IMAGE_CATALOG_NAME, newCatalogName));
+        verifyNoMoreInteractions(eventSenderService);
+    }
+
+    @Test
+    void shouldSendCatalogChangedEventWithEmptyOldCatalogWhenNeitherUrlNorNameIsStored() {
+        STACK.getImage().setImageCatalogUrl(null);
+        STACK.getImage().setImageCatalogName(null);
+        Image current = currentImage(null);
+        when(imageService.getImageForStack(STACK)).thenReturn(current);
+        doAnswer(invocation -> {
+            STACK.getImage().setImageCatalogUrl(IMAGE_CATALOG);
+            return STACK.getImage();
+        }).when(imageService).changeImage(eq(STACK), any(FreeIpaImageFilterSettings.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG));
+
+        verify(eventSenderService).sendEventAndNotification(STACK, USER_CRN, FREEIPA_IMAGE_CATALOG_CHANGED, List.of("", IMAGE_CATALOG));
+        verifyNoMoreInteractions(eventSenderService);
+    }
+
+    @Test
+    void shouldSucceedWhenTheCatalogChangedEventCannotBeSentAfterTheCatalogIsSaved() {
+        Image current = currentImage(null);
+        when(imageService.getImageForStack(STACK)).thenReturn(current);
+        doAnswer(invocation -> {
+            STACK.getImage().setImageCatalogUrl(IMAGE_CATALOG);
+            return STACK.getImage();
+        }).when(imageService).changeImage(eq(STACK), any(FreeIpaImageFilterSettings.class));
+        doThrow(new RuntimeException("UMS is unavailable")).when(eventSenderService)
+                .sendEventAndNotification(STACK, USER_CRN, FREEIPA_IMAGE_CATALOG_CHANGED, List.of(OLD_IMAGE_CATALOG_URL, IMAGE_CATALOG));
+
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG)))
+                .doesNotThrowAnyException();
+
+        verify(imageService).changeImage(eq(STACK), any(FreeIpaImageFilterSettings.class));
+    }
+
+    @Test
+    void shouldNotSendCatalogChangedEventWhenTheStoredCatalogIsUnchanged() {
+        STACK.getImage().setImageCatalogUrl(IMAGE_CATALOG);
+        Image current = currentImage(null);
+        when(imageService.getImageForStack(STACK)).thenReturn(current);
+
+        underTest.changeImageCatalog(ENVIRONMENT_CRN, ACCOUNT_ID, IMAGE_CATALOG);
+
+        verify(imageService).changeImage(eq(STACK), any(FreeIpaImageFilterSettings.class));
+        verifyNoInteractions(eventSenderService);
     }
 
     @Test
