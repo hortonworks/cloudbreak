@@ -4,8 +4,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,18 +12,16 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXInternalV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaInternalV1Endpoint;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
+import com.sequenceiq.maintenance.api.util.MaintenanceNotFoundExceptions;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @Service
 public class MaintenanceResourceEnvironmentCrnResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintenanceResourceEnvironmentCrnResolver.class);
-
-    private static final int HTTP_NOT_FOUND = Response.Status.NOT_FOUND.getStatusCode();
 
     private final DistroXInternalV1Endpoint distroXInternalV1Endpoint;
 
@@ -81,27 +77,12 @@ public class MaintenanceResourceEnvironmentCrnResolver {
             }
             return Optional.of(environmentCrn);
         } catch (RuntimeException e) {
-            if (isNotFoundFailure(e)) {
+            if (MaintenanceNotFoundExceptions.isNotFound(e)) {
                 LOGGER.debug("No owning-service resource for resourceCrn={}; skipping environment inheritance", resourceCrn, e);
                 return Optional.empty();
             }
             throw e;
         }
-    }
-
-    private static boolean isNotFoundFailure(Throwable throwable) {
-        for (Throwable current = throwable; current != null; current = current.getCause()) {
-            if (current instanceof NotFoundException) {
-                return true;
-            }
-            if (current instanceof WebApplicationException webApplicationException) {
-                Response response = webApplicationException.getResponse();
-                if (response != null && response.getStatus() == HTTP_NOT_FOUND) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @FunctionalInterface

@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentMaintenanceWindowScheduleEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentMaintenanceWindowScheduleRequest;
 import com.sequenceiq.maintenance.api.internal.schedule.endpoint.MaintenanceWindowScheduleInternalEndpoint;
@@ -39,6 +40,8 @@ class EnvironmentMaintenanceWindowScheduleServiceTest {
     private static final String ACCOUNT_ID = "acc-12345";
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:acc-12345:environment:env-1";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:acc-12345:user:1";
 
     @Mock
     private MaintenanceWindowScheduleEndpoint maintenanceWindowScheduleEndpoint;
@@ -198,16 +201,16 @@ class EnvironmentMaintenanceWindowScheduleServiceTest {
     void restoreEnvironmentScheduleRestoresPriorStateByIdUnderInternalActor() {
         MaintenanceWindowScheduleResponse prior = priorScheduleResponse();
         when(maintenanceWindowScheduleInternalEndpoint.restore(
-                eq(ACCOUNT_ID), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN),
+                eq(ACCOUNT_ID), eq(USER_CRN), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN),
                 any(MaintenanceWindowScheduleRestoreRequest.class)))
                 .thenReturn(new MaintenanceWindowScheduleResponse());
 
-        underTest.restoreEnvironmentSchedule(ENV_CRN, Optional.of(prior));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.restoreEnvironmentSchedule(ENV_CRN, Optional.of(prior)));
 
         ArgumentCaptor<MaintenanceWindowScheduleRestoreRequest> captor =
                 ArgumentCaptor.forClass(MaintenanceWindowScheduleRestoreRequest.class);
         verify(maintenanceWindowScheduleInternalEndpoint).restore(
-                eq(ACCOUNT_ID), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN), captor.capture());
+                eq(ACCOUNT_ID), eq(USER_CRN), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN), captor.capture());
         MaintenanceWindowScheduleRestoreRequest request = captor.getValue();
         // Prior id is carried so the maintenance service reactivates the same row (skips preserved)
         assertThat(request.getId()).isEqualTo(42L);
@@ -225,16 +228,16 @@ class EnvironmentMaintenanceWindowScheduleServiceTest {
         MaintenanceWindowScheduleResponse prior = priorScheduleResponse();
         prior.setDescription(null);
         when(maintenanceWindowScheduleInternalEndpoint.restore(
-                eq(ACCOUNT_ID), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN),
+                eq(ACCOUNT_ID), eq(USER_CRN), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN),
                 any(MaintenanceWindowScheduleRestoreRequest.class)))
                 .thenReturn(new MaintenanceWindowScheduleResponse());
 
-        underTest.restoreEnvironmentSchedule(ENV_CRN, Optional.of(prior));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.restoreEnvironmentSchedule(ENV_CRN, Optional.of(prior)));
 
         ArgumentCaptor<MaintenanceWindowScheduleRestoreRequest> captor =
                 ArgumentCaptor.forClass(MaintenanceWindowScheduleRestoreRequest.class);
         verify(maintenanceWindowScheduleInternalEndpoint).restore(
-                eq(ACCOUNT_ID), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN), captor.capture());
+                eq(ACCOUNT_ID), eq(USER_CRN), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN), captor.capture());
         assertThat(captor.getValue().getDescription()).isNull();
     }
 
@@ -242,11 +245,11 @@ class EnvironmentMaintenanceWindowScheduleServiceTest {
     void restoreEnvironmentScheduleDoesNotPropagateMaintenanceErrors() {
         MaintenanceWindowScheduleResponse prior = priorScheduleResponse();
         when(maintenanceWindowScheduleInternalEndpoint.restore(
-                eq(ACCOUNT_ID), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN),
+                eq(ACCOUNT_ID), eq(USER_CRN), eq(MaintenanceScopeType.ENVIRONMENT.name()), eq(ENV_CRN),
                 any(MaintenanceWindowScheduleRestoreRequest.class)))
                 .thenThrow(new RuntimeException("maintenance unavailable"));
 
-        assertThatCode(() -> underTest.restoreEnvironmentSchedule(ENV_CRN, Optional.of(prior)))
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.restoreEnvironmentSchedule(ENV_CRN, Optional.of(prior))))
                 .doesNotThrowAnyException();
     }
 

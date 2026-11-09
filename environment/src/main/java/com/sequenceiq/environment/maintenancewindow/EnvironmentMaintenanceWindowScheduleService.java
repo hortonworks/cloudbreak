@@ -78,10 +78,14 @@ public class EnvironmentMaintenanceWindowScheduleService {
             }
             MaintenanceWindowScheduleResponse prior = priorSchedule.get();
             String accountId = prior.getAccountId();
+            // Captured before switching to the internal actor so the restored schedule's updatedBy reflects the real
+            // user performing the environment edit, not the internal actor the call runs as.
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             LOGGER.info("Restoring ENVIRONMENT maintenance window schedule after failed environment edit");
             ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                     maintenanceWindowScheduleInternalEndpoint.restore(
                             accountId,
+                            initiatorUserCrn,
                             MaintenanceScopeType.ENVIRONMENT.name(),
                             environmentCrn,
                             EnvironmentMaintenanceWindowScheduleMapper.toRestoreRequest(prior, environmentCrn)),

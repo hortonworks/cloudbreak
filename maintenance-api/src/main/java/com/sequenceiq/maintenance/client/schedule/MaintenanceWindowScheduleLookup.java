@@ -1,8 +1,5 @@
 package com.sequenceiq.maintenance.client.schedule;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +8,7 @@ import com.sequenceiq.maintenance.api.internal.schedule.endpoint.MaintenanceWind
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeTypes;
 import com.sequenceiq.maintenance.api.model.MaintenanceSubmitterService;
+import com.sequenceiq.maintenance.api.util.MaintenanceNotFoundExceptions;
 
 /**
  * Resolves whether a maintenance window schedule exists for a resource (resource → environment → tenant).
@@ -19,8 +17,6 @@ import com.sequenceiq.maintenance.api.model.MaintenanceSubmitterService;
 public class MaintenanceWindowScheduleLookup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintenanceWindowScheduleLookup.class);
-
-    private static final int HTTP_NOT_FOUND = Response.Status.NOT_FOUND.getStatusCode();
 
     private final MaintenanceWindowScheduleInternalEndpoint scheduleInternalEndpoint;
 
@@ -63,22 +59,12 @@ public class MaintenanceWindowScheduleLookup {
             scheduleInternalEndpoint.get(accountId, scopeType, scopeId);
             return true;
         } catch (RuntimeException e) {
-            if (isNotFound(e)) {
+            if (MaintenanceNotFoundExceptions.isNotFound(e)) {
                 return false;
             }
             LOGGER.warn("Failed to resolve maintenance schedule for accountId={} scopeType={} scopeId={}",
                     accountId, scopeType, scopeId, e);
             throw e;
         }
-    }
-
-    private static boolean isNotFound(Throwable throwable) {
-        for (Throwable current = throwable; current != null; current = current.getCause()) {
-            if (current instanceof WebApplicationException webApplicationException
-                    && webApplicationException.getResponse().getStatus() == HTTP_NOT_FOUND) {
-                return true;
-            }
-        }
-        return false;
     }
 }

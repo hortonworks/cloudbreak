@@ -3,7 +3,9 @@ package com.sequenceiq.maintenance.api.internal.schedule.endpoint;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -14,6 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.util.OneOfEnum;
 import com.sequenceiq.maintenance.api.doc.MaintenanceWindowScheduleInternalOpDescription;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRestoreRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 
@@ -49,18 +52,54 @@ public interface MaintenanceWindowScheduleInternalEndpoint {
     @PUT
     @Path("scope/{scopeType}/scopeId/{scopeId}/restore")
     @Operation(summary = MaintenanceWindowScheduleInternalOpDescription.RESTORE,
-            description = MaintenanceWindowScheduleInternalOpDescription.RESTORE_NOTES,
-            operationId = "restoreMaintenanceWindowScheduleInternal")
+        description = MaintenanceWindowScheduleInternalOpDescription.RESTORE_NOTES,
+        operationId = "restoreMaintenanceWindowScheduleInternal")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Schedule restored", useReturnTypeSchema = true),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
+        @ApiResponse(responseCode = "200", description = "Schedule restored", useReturnTypeSchema = true),
+        @ApiResponse(responseCode = "400", description = "Invalid request")
     })
     MaintenanceWindowScheduleResponse restore(
-            @QueryParam("accountId") @NotEmpty String accountId,
-            @OneOfEnum(enumClass = MaintenanceScopeType.class, message = "Value must be one of the followings %s", fieldName = "scopeType")
-            @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.SCOPE_TYPE, required = true)
-            @PathParam("scopeType") String scopeType,
-            @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.SCOPE_ID, required = true)
-            @PathParam("scopeId") String scopeId,
-            @Valid MaintenanceWindowScheduleRestoreRequest request);
+        @QueryParam("accountId") @NotEmpty String accountId,
+        @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.INITIATOR_USER_CRN, required = true)
+        @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
+        @OneOfEnum(enumClass = MaintenanceScopeType.class, message = "Value must be one of the followings %s", fieldName = "scopeType")
+        @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.SCOPE_TYPE, required = true)
+        @PathParam("scopeType") String scopeType,
+        @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.SCOPE_ID, required = true)
+        @PathParam("scopeId") String scopeId,
+        @Valid MaintenanceWindowScheduleRestoreRequest request);
+
+    @POST
+    @Operation(summary = MaintenanceWindowScheduleInternalOpDescription.CREATE,
+        description = MaintenanceWindowScheduleInternalOpDescription.CREATE_NOTES,
+        operationId = "createMaintenanceWindowScheduleInternal")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Schedule created", useReturnTypeSchema = true),
+        @ApiResponse(responseCode = "400", description = "Invalid request"),
+        @ApiResponse(responseCode = "409", description = "Schedule already exists for the scope")
+    })
+    MaintenanceWindowScheduleResponse create(
+        @QueryParam("accountId") @NotEmpty String accountId,
+        @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.INITIATOR_USER_CRN, required = true)
+        @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
+        @Valid MaintenanceWindowScheduleRequest request);
+
+    @DELETE
+    @Path("scope/{scopeType}/scopeId/{scopeId}")
+    @Operation(summary = MaintenanceWindowScheduleInternalOpDescription.DELETE,
+        description = MaintenanceWindowScheduleInternalOpDescription.DELETE_NOTES,
+        operationId = "deleteMaintenanceWindowScheduleInternal")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Schedule deleted"),
+        @ApiResponse(responseCode = "404", description = "Schedule not found")
+    })
+    void delete(
+        @QueryParam("accountId") @NotEmpty String accountId,
+        @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.INITIATOR_USER_CRN, required = true)
+        @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
+        @OneOfEnum(enumClass = MaintenanceScopeType.class, message = "Value must be one of the followings %s", fieldName = "scopeType")
+        @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.SCOPE_TYPE, required = true)
+        @PathParam("scopeType") String scopeType,
+        @Parameter(description = MaintenanceWindowScheduleInternalOpDescription.SCOPE_ID, required = true)
+        @PathParam("scopeId") String scopeId);
 }

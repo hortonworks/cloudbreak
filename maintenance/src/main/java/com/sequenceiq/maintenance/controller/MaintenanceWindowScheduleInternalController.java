@@ -5,9 +5,10 @@ import static com.sequenceiq.maintenance.domain.MaintenanceEnumValues.toScopeTyp
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.maintenance.api.internal.schedule.endpoint.MaintenanceWindowScheduleInternalEndpoint;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRestoreRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 import com.sequenceiq.maintenance.service.MaintenanceWindowScheduleService;
@@ -34,14 +35,34 @@ public class MaintenanceWindowScheduleInternalController implements MaintenanceW
     @InternalOnly
     public MaintenanceWindowScheduleResponse restore(
             @AccountId String accountId,
+            @InitiatorUserCrn String initiatorUserCrn,
             String scopeType,
             String scopeId,
             MaintenanceWindowScheduleRestoreRequest request) {
         return scheduleService.restore(
-                accountId,
-                toScopeType(scopeType),
-                scopeId,
-                request,
-                ThreadBasedUserCrnProvider.getUserCrn());
+            accountId,
+            toScopeType(scopeType),
+            scopeId,
+            request,
+            initiatorUserCrn);
+    }
+
+    @Override
+    @InternalOnly
+    public MaintenanceWindowScheduleResponse create(
+            @AccountId String accountId,
+            @InitiatorUserCrn String initiatorUserCrn,
+            MaintenanceWindowScheduleRequest request) {
+        return scheduleService.create(request, accountId, initiatorUserCrn);
+    }
+
+    @Override
+    @InternalOnly
+    public void delete(
+            @AccountId String accountId,
+            @InitiatorUserCrn String initiatorUserCrn,
+            String scopeType,
+            String scopeId) {
+        scheduleService.delete(accountId, toScopeType(scopeType), scopeId, initiatorUserCrn);
     }
 }
