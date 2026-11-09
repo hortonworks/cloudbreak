@@ -63,6 +63,7 @@ base:
              - cdpluksvolumebackup
              {% endif %}
              - freeipa.healthagent
+             - freeipa.iptables
              - freeipa.ldapagent
              - freeipa.selinux-mode
              - faillock
@@ -82,6 +83,7 @@ base:
              - cdpluksvolumebackup
              {% endif %}
              - freeipa.healthagent
+             - freeipa.iptables
              - freeipa.ldapagent
              - freeipa.selinux-mode
              - faillock

@@ -58,82 +58,29 @@ save_iptables_rules:
     - name: iptables.save
     - filename: /etc/sysconfig/iptables
 {%- elif osMajorRelease >= 9 %}
-ensure_filter_table:
-  nftables.table_present:
-    - name: filter
-    - family: inet
+deploy_freeipa_nftables_conf:
+  file.managed:
+    - name: /etc/nftables.d/freeipa.conf
+    - source: salt://freeipa/templates/freeipa-nftables.conf
+    - mode: 600
+    - user: root
+    - group: root
+    - makedirs: True
 
-ensure_input_chain:
-  nftables.chain_present:
-    - name: INPUT
-    - table: filter
-    - family: inet
-    - table_type: filter
-    - hook: input
-    - priority: 0
+include_freeipa_nftables_conf:
+  file.append:
+    - name: /etc/sysconfig/nftables.conf
+    - text: 'include "/etc/nftables.d/freeipa.conf"'
     - require:
-      - nftables: ensure_filter_table
+      - file: deploy_freeipa_nftables_conf
 
-accept_tcp_8443_on_lo:
-  nftables.append:
-    - position: 1
-    - table: filter
-    - chain: INPUT
-    - family: inet
-    - iifname: "lo"
-    - proto: tcp
-    - dport: 8443
-    - jump: accept
-    - save: True
-    - unless: nft list chain inet filter INPUT | grep -q "tcp dport 8443 accept"
+nftables:
+  service.running:
+    - enable: True
     - require:
-      - nftables: ensure_input_chain
-
-accept_tcp_8080_on_lo:
-  nftables.append:
-    - position: 2
-    - table: filter
-    - chain: INPUT
-    - family: inet
-    - iifname: "lo"
-    - proto: tcp
-    - dport: 8080
-    - jump: accept
-    - save: True
-    - unless: nft list chain inet filter INPUT | grep -q "tcp 8080 8443 accept"
-    - require:
-      - nftables: ensure_input_chain
-
-drop_tcp_8443_nftables:
-  nftables.append:
-    - position: 3
-    - table: filter
-    - chain: INPUT
-    - family: inet
-    - proto: tcp
-    - dport: 8443
-    - connstate: new  # Changed from ctstate to connstate for broader compatibility
-    - jump: drop
-    - save: True
-    - unless: nft list chain inet filter INPUT | grep -q "tcp dport 8443 drop"
-    - require:
-      - nftables: ensure_input_chain
-      - nftables: accept_tcp_8443_on_lo
-
-drop_tcp_8080_nftables:
-  nftables.append:
-    - position: 4
-    - table: filter
-    - chain: INPUT
-    - family: inet
-    - proto: tcp
-    - dport: 8080
-    - connstate: new
-    - jump: drop
-    - save: True
-    - unless: nft list chain inet filter INPUT | grep -q "tcp dport 8080 drop"
-    - require:
-      - nftables: ensure_input_chain
-      - nftables: accept_tcp_8080_on_lo
+      - file: include_freeipa_nftables_conf
+    - watch:
+      - file: deploy_freeipa_nftables_conf
+      - file: include_freeipa_nftables_conf
 {%- endif %}
 {%- endif %}
