@@ -126,6 +126,32 @@
           "version": "7\\.3\\.(1|2)"
         }
       ]
+    },
+    {
+      "target_runtime": {
+        "version": "7\\.3\\.4"
+      },
+      "source_runtime": [
+        {
+          "version": "7\\.2\\.18"
+        },
+        {
+          "version": "7\\.3\\.(1|2|3)"
+        }
+      ]
+    },
+    {
+      "target_runtime": {
+        "version": "7\\.3\\.5"
+      },
+      "source_runtime": [
+        {
+          "version": "7\\.2\\.18"
+        },
+        {
+          "version": "7\\.3\\.(1|2|3|4)"
+        }
+      ]
     }
   ]
 }
