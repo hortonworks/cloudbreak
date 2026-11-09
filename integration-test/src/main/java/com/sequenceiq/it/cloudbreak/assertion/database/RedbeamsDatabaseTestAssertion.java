@@ -2,7 +2,9 @@ package com.sequenceiq.it.cloudbreak.assertion.database;
 
 import static java.lang.String.format;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.BaseMicroserviceClientDependentAssertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -28,6 +31,8 @@ public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDepende
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsDatabaseTestAssertion.class);
 
     private static final String EXHAUSTED_FALLBACK_REASON = "exhausted";
+
+    private static final Set<CloudPlatform> PLATFORMS_WITH_DATABASE_INSTANCE_TYPE_FALLBACK = EnumSet.of(CloudPlatform.AWS, CloudPlatform.AZURE);
 
     private RedbeamsDatabaseTestAssertion() {
     }
@@ -153,14 +158,18 @@ public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDepende
                         + "provisioned with fallback instance type '%s' (fallbacks %s)!", databaseServer.getCrn(), instanceType, fallbackInstanceTypes));
             }
             boolean fallbackEntitled = isEntitled(testContext, Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE);
+            CloudPlatform cloudPlatform = testContext.getCloudPlatform();
+            boolean fallbackExpected = fallbackEntitled && PLATFORMS_WITH_DATABASE_INSTANCE_TYPE_FALLBACK.contains(cloudPlatform);
             String region = testContext.getCloudProvider().region();
-            if (fallbackEntitled && CollectionUtils.isEmpty(fallbackInstanceTypes)) {
+            if (fallbackExpected && CollectionUtils.isEmpty(fallbackInstanceTypes)) {
                 throw new TestFailException(format("The '%s' entitlement is granted, yet database server '%s' has no fallback instance types in "
                         + "region '%s'! Check that the region has database instance types configured in its enabled-regions definition.",
                         Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE.name(), databaseServer.getCrn(), region));
-            } else if (!fallbackEntitled && CollectionUtils.isNotEmpty(fallbackInstanceTypes)) {
-                throw new TestFailException(format("The '%s' entitlement is not granted, yet database server '%s' has fallback instance types %s in "
-                        + "region '%s'!", Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE.name(), databaseServer.getCrn(), fallbackInstanceTypes, region));
+            } else if (!fallbackExpected && CollectionUtils.isNotEmpty(fallbackInstanceTypes)) {
+                throw new TestFailException(format("Database server '%s' on %s has fallback instance types %s in region '%s', but none were expected "
+                        + "('%s' entitlement granted: %s, platforms supporting database instance type fallback: %s)!", databaseServer.getCrn(),
+                        cloudPlatform, fallbackInstanceTypes, region, Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE.name(), fallbackEntitled,
+                        PLATFORMS_WITH_DATABASE_INSTANCE_TYPE_FALLBACK));
             }
             LOGGER.info("Database server '{}' uses its primary instance type '{}' with fallback instance types {} in region '{}'.",
                     databaseServer.getCrn(), instanceType, fallbackInstanceTypes, region);
