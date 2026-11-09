@@ -91,6 +91,33 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
     @Inject
     private DatabaseServerSslCertificateConfig underTest;
 
+    @MockBean
+    private CommonAwsClient awsClient;
+
+    @MockBean
+    private AwsDefaultZoneProvider awsDefaultZoneProvider;
+
+    @MockBean
+    private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
+
+    @MockBean
+    private AwsAvailabilityZoneProvider awsAvailabilityZoneProvider;
+
+    @MockBean
+    private MinimalHardwareFilter minimalHardwareFilter;
+
+    @MockBean
+    private AwsPageCollector awsPageCollector;
+
+    @MockBean
+    private EntitlementService entitlementService;
+
+    @MockBean
+    private AmazonKmsUtil amazonKmsUtil;
+
+    @MockBean
+    private DbOverrideConfig dbOverrideConfig;
+
     @Test
     void enabledAwsRegionsTest() {
         Set<String> enabledAwsRegions = getEnabledAwsRegions();
@@ -325,33 +352,6 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
     })
     @PropertySource("classpath:application.yml")
     static class TestAppContext {
-
-        @MockBean
-        private CommonAwsClient awsClient;
-
-        @MockBean
-        private AwsDefaultZoneProvider awsDefaultZoneProvider;
-
-        @MockBean
-        private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
-
-        @MockBean
-        private AwsAvailabilityZoneProvider awsAvailabilityZoneProvider;
-
-        @MockBean
-        private MinimalHardwareFilter minimalHardwareFilter;
-
-        @MockBean
-        private AwsPageCollector awsPageCollector;
-
-        @MockBean
-        private EntitlementService entitlementService;
-
-        @MockBean
-        private AmazonKmsUtil amazonKmsUtil;
-
-        @MockBean
-        private DbOverrideConfig dbOverrideConfig;
 
     }
 

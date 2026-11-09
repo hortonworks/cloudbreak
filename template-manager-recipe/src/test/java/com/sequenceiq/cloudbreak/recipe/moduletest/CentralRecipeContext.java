@@ -35,6 +35,11 @@ public class CentralRecipeContext {
     @Inject
     private CentralRecipeUpdater underTest;
 
+    // RecipeModulTest extends this class, so a bean override declared here is in the test class
+    // hierarchy and is honoured. On the nested SpringConfig it is silently ignored (CB-35471).
+    @MockBean
+    private EntitlementService entitlementService;
+
     public CentralRecipeUpdater getUnderTest() {
         return underTest;
     }
@@ -45,9 +50,6 @@ public class CentralRecipeContext {
 
         @Inject
         private List<FileSystemConfigurator<?>> fileSystemConfigurators;
-
-        @MockBean
-        private EntitlementService entitlementService;
 
         @Bean
         public Map<FileSystemType, FileSystemConfigurator<?>> fileSystemConfigurators() {
