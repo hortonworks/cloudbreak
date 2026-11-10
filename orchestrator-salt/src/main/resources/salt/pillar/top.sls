@@ -27,6 +27,7 @@ base:
 {{ include_if_exists('mount', 'disk') }}
 {{ include_if_exists('postgresql', 'root-certs') }}
 {{ include_if_exists('java') }}
+{{ include_if_exists('kernel-tuning') }}
 {{ include_if_exists('paywall') }}
     - cdpluksvolumebackup
 

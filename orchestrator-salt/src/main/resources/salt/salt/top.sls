@@ -3,6 +3,9 @@
 base:
   '*':
     - prevalidation
+    {% if salt['pillar.get']('kernel-tuning:minFreeKbytes', {}) %}
+    - kernel-tuning
+    {% endif %}
     - pkg-mgr-proxy
     - unbound
     - java

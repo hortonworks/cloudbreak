@@ -104,6 +104,7 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.kerberos.KerberosPillarConfigGenerator;
+import com.sequenceiq.cloudbreak.kerneltuning.KernelTuningProperties;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -288,6 +289,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private JavaPillarDecorator javaPillarDecorator;
+
+    @Inject
+    private KernelTuningProperties kernelTuningProperties;
 
     @Inject
     private RangerRazDatahubConfigProvider rangerRazDatahubConfigProvider;
@@ -575,6 +579,8 @@ public class ClusterHostServiceRunner {
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto, detailedEnvironmentResponse);
         servicePillar.putAll(javaPillarDecorator.createJavaPillars(stackDto, detailedEnvironmentResponse));
+        servicePillar.put(KernelTuningProperties.PILLAR_KEY,
+                new SaltPillarProperties(KernelTuningProperties.PILLAR_PATH, kernelTuningProperties.toPillarMap()));
 
         addClouderaManagerConfig(stackDto, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));

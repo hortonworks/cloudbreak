@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.kerneltuning.KernelTuningProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -52,6 +53,9 @@ public class SaltConfigProvider {
     @Inject
     private CachedEnvironmentClientService environmentClientService;
 
+    @Inject
+    private KernelTuningProperties kernelTuningProperties;
+
     public SaltConfig getSaltConfig(Stack stack, Set<Node> hosts) {
         SaltConfig saltConfig = new SaltConfig();
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
@@ -64,6 +68,8 @@ public class SaltConfigProvider {
         servicePillarConfig.putAll(getCcmPillarProperties(stack));
         servicePillarConfig.putAll(ldapAgentConfigProvider.generateConfig(stack, freeIpaConfigView.getDomain()));
         servicePillarConfig.putAll(paywallConfigService.createPaywallPillarConfig(stack));
+        servicePillarConfig.put(KernelTuningProperties.PILLAR_KEY,
+                new SaltPillarProperties(KernelTuningProperties.PILLAR_PATH, kernelTuningProperties.toPillarMap()));
         if (freeIpaConfigView.isSecretEncryptionEnabled()) {
             servicePillarConfig.put("cdpluksvolumebackup", new SaltPillarProperties("/cdpluksvolumebackup/init.sls",
                     singletonMap("cdpluksvolumebackup", getCdpLuksVolumeBackUpProperties(stack))));

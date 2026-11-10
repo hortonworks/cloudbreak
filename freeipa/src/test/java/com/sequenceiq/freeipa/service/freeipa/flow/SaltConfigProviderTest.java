@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
+import com.sequenceiq.cloudbreak.kerneltuning.KernelTuningProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.common.api.type.EnvironmentType;
@@ -89,6 +90,9 @@ class SaltConfigProviderTest {
     @Mock
     private CachedEnvironmentClientService environmentClientService;
 
+    @Mock
+    private KernelTuningProperties kernelTuningProperties;
+
     @InjectMocks
     private SaltConfigProvider underTest;
 
@@ -114,11 +118,17 @@ class SaltConfigProviderTest {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setEnvironmentType(EnvironmentType.PUBLIC_CLOUD.name());
         when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(environmentResponse);
+        Map<String, Object> kernelPillar = Map.of("kernel-tuning", Map.of("minFreeKbytes", Map.of("enabled", true)));
+        when(kernelTuningProperties.toPillarMap()).thenReturn(kernelPillar);
 
         SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
 
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
         assertNotNull(servicePillarConfig);
+
+        SaltPillarProperties kernelProperties = servicePillarConfig.get("kernel-tuning");
+        assertEquals("/kernel-tuning/init.sls", kernelProperties.getPath());
+        assertEquals(kernelPillar, kernelProperties.getProperties());
 
         SaltPillarProperties freeIpaProperties = servicePillarConfig.get("freeipa");
         assertNotNull(freeIpaProperties);

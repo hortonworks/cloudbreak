@@ -97,6 +97,7 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.kerberos.KerberosPillarConfigGenerator;
+import com.sequenceiq.cloudbreak.kerneltuning.KernelTuningProperties;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -317,6 +318,9 @@ class ClusterHostServiceRunnerTest {
 
     @Mock
     private JavaPillarDecorator javaPillarDecorator;
+
+    @Mock
+    private KernelTuningProperties kernelTuningProperties;
 
     @Mock
     private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
@@ -968,6 +972,31 @@ class ClusterHostServiceRunnerTest {
 
         verify(hostOrchestrator).runService(any(), any(), any());
         verify(javaPillarDecorator).createJavaPillars(eq(stack), any());
+    }
+
+    @Test
+    void testAddKernelTuningPillarToSaltConfig() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
+        when(encryptionProfileResponse.getTlsVersions()).thenReturn(Set.of("TLSv1.2", "TLSv1.3"));
+        when(encryptionProfileService.getEffectiveEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(encryptionProfileResponse);
+        when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
+        when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+        Map<String, Object> kernelPillar = Map.of("kernel-tuning", Map.of("minFreeKbytes", Map.of("enabled", true)));
+        when(kernelTuningProperties.toPillarMap()).thenReturn(kernelPillar);
+
+        underTest.runClusterServices(stack, Collections.emptyMap(), false);
+
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).initServiceRun(any(), any(), any(), any(), saltConfig.capture(), any(), any());
+        SaltPillarProperties kernelPillarProperties = saltConfig.getValue().getServicePillarConfig().get("kernel-tuning");
+        assertEquals("/kernel-tuning/init.sls", kernelPillarProperties.getPath());
+        assertEquals(kernelPillar, kernelPillarProperties.getProperties());
     }
 
     @Test

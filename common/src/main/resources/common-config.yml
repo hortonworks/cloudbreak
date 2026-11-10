@@ -167,6 +167,25 @@ cb:
       11: "2023-11-09"
       14: "2026-11-12"
 
+cluster:
+  kernel-tuning:
+    # vm.min_free_kbytes on every CB-managed RHEL 8+ node (Data Hub, Data Lake, FreeIPA), see CB-35426 / ENGESC-34608.
+    # Sizing: 1% of RAM, at least floor-kb, no cap; e.g. 4 GB -> 66 MB (floor), 8 GB -> ~80 MB, 64 GB -> ~650 MB, 2 TiB -> ~20.5 GiB,
+    # far below the 5-10% Red Hat warns about. The value lives in /etc/sysctl.d/00-00-cdp-min-free-kbytes.conf, which sorts
+    # first, so any other sysctl config that sets the key wins. Live-only changes (sysctl -w) are not persistent and get
+    # reconciled to the configured value on the next highstate.
+    min-free-kbytes:
+      enabled: true
+      ratio-percent: 1
+      # 67584 is the RHEL 8 THP recommendation for 3 populated zones (DMA, DMA32, Normal on a single NUMA node):
+      # 512 x 3 x (2 + 9) pages x 4 KiB. RHEL 8 CB images keep it after THP is turned off at boot; RHEL 9 recalculates
+      # sqrt(RAM kB x 16) then (e.g. 32163 on 64 GB), and with THP on a 2-socket node would pick ~90112.
+      # lower bound of the tuned value, so small nodes never go below the RHEL 8 default
+      floor-kb: 67584
+      # fixed fallback written into our sysctl file on disable, on nodes that were tuned before; the file stays in place,
+      # so the value may differ from the node's original kernel value (e.g. 32163 on a 64 GB RHEL 9 node)
+      restore-kb: 67584
+
 quartz:
   initialization:
     delay: 30

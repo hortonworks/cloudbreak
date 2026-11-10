@@ -16,3 +16,6 @@ base:
     - ldapagent
     - paywall
     - cdpluksvolumebackup
+{%- if salt['file.file_exists']('/srv/pillar/kernel-tuning/init.sls') %}
+    - kernel-tuning
+{%- endif %}

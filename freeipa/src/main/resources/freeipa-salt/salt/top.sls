@@ -1,6 +1,9 @@
 base:
            '*':
              - prevalidation
+             {% if salt['pillar.get']('kernel-tuning:minFreeKbytes', {}) %}
+             - kernel-tuning
+             {% endif %}
              - freeipa.grow-disk
              - nginx
              - tags
