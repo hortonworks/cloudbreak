@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerHostHealthUtil.HOST_SCM_HEALTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,6 +39,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
@@ -49,6 +51,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiHealthCheck;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
@@ -81,6 +84,10 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 @ExtendWith(MockitoExtension.class)
 public class ClouderaManagerDecommissionerTest {
@@ -875,6 +882,160 @@ public class ClouderaManagerDecommissionerTest {
                 Set.of("host1.example.com", "host2.example.com", "host3.example.com", "host4.example.com"), true);
         verify(clouderaManagerResourceApi, times(1)).hostsStopRolesCommand(any());
         assertThat(apiHostNameListArgumentCaptor.getValue().getItems()).containsExactly("host1.example.com", "host3.example.com", "host4.example.com");
+    }
+
+    @Test
+    public void testStopRolesOnHostsLogsOnlyHostsRemovedByAgentStatusFilter() throws CloudbreakException, ApiException {
+        ApiHost badHost = createApiHostRef("bad-host", ApiHealthSummary.BAD);
+        badHost.setHealthChecks(List.of(createAgentHealthCheck(ApiHealthSummary.BAD)));
+        ApiHost concerningHost = createApiHostRef("concerning-host", ApiHealthSummary.CONCERNING);
+        concerningHost.setHealthChecks(List.of(createAgentHealthCheck(ApiHealthSummary.CONCERNING)));
+        Logger logger = (Logger) LoggerFactory.getLogger(ClouderaManagerDecommissioner.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            assertHostsSelectedForStopping(List.of(badHost, concerningHost), Set.of());
+
+            assertThat(appender.list)
+                    .extracting(ILoggingEvent::getFormattedMessage)
+                    .filteredOn(message -> message.startsWith("Skipping stopping services and roles on hosts with"))
+                    .containsExactly("Skipping stopping services and roles on hosts with unhealthy agent status: [concerning-host]");
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    @Test
+    public void testStopRolesOnHostsFailureIdentifiesOnlySelectedHosts() throws ApiException {
+        ApiHost skippedHost = createApiHostRef("skipped-host", ApiHealthSummary.CONCERNING);
+        skippedHost.setHealthChecks(List.of(createAgentHealthCheck(ApiHealthSummary.CONCERNING)));
+        ApiHost selectedHost = createApiHostRef("selected-host", ApiHealthSummary.GOOD);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
+        when(hostsResourceApi.readHosts(null, null, "FULL")).thenReturn(new ApiHostList().items(List.of(skippedHost, selectedHost)));
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(v51Client)).thenReturn(clouderaManagerResourceApi);
+        ApiException cause = new ApiException("Stop failed");
+        when(clouderaManagerResourceApi.hostsStopRolesCommand(any())).thenThrow(cause);
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.stopRolesOnHosts(stack, v53Client, v51Client, Set.of("skipped-host", "selected-host"), false));
+
+        assertThat(exception).hasMessage("Failed to stop roles on nodes: [selected-host]").hasCause(cause);
+    }
+
+    static Object[][] hostAgentHealth() {
+        return new Object[][]{
+                {ApiHealthSummary.CONCERNING, ApiHealthSummary.CONCERNING, false},
+                {ApiHealthSummary.CONCERNING, ApiHealthSummary.BAD, false},
+                {ApiHealthSummary.GOOD, ApiHealthSummary.CONCERNING, false},
+                {ApiHealthSummary.GOOD, ApiHealthSummary.BAD, false},
+                {ApiHealthSummary.CONCERNING, ApiHealthSummary.GOOD, true},
+                {ApiHealthSummary.GOOD, null, true},
+                {ApiHealthSummary.CONCERNING, ApiHealthSummary.DISABLED, true},
+                {ApiHealthSummary.CONCERNING, ApiHealthSummary.NOT_AVAILABLE, true},
+                {ApiHealthSummary.CONCERNING, ApiHealthSummary.HISTORY_NOT_AVAILABLE, true}
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("hostAgentHealth")
+    public void testStopRolesOnHostsFiltersUnhealthyAgentStatus(ApiHealthSummary hostHealth, ApiHealthSummary agentHealth, boolean stopped)
+            throws CloudbreakException, ApiException {
+        ApiHost host = createApiHostRef("host1.example.com", hostHealth);
+        host.setHealthChecks(agentHealth == null ? null : List.of(createAgentHealthCheck(agentHealth)));
+
+        assertHostsSelectedForStopping(List.of(host), stopped ? Set.of(host.getHostname()) : Set.of());
+    }
+
+    @Test
+    public void testStopRolesOnHostsWithEmptyHealthChecks() throws CloudbreakException, ApiException {
+        ApiHost host = createApiHostRef("host1.example.com", ApiHealthSummary.CONCERNING);
+        host.setHealthChecks(List.of());
+
+        assertHostsSelectedForStopping(List.of(host), Set.of(host.getHostname()));
+    }
+
+    @Test
+    public void testStopRolesOnHostsWithNoAgentHealthCheck() throws CloudbreakException, ApiException {
+        ApiHost host = createApiHostRef("host1.example.com", ApiHealthSummary.CONCERNING);
+        host.setHealthChecks(List.of(new ApiHealthCheck().name("HOST_SOMETHING_ELSE").summary(ApiHealthSummary.BAD)));
+
+        assertHostsSelectedForStopping(List.of(host), Set.of(host.getHostname()));
+    }
+
+    @Test
+    public void testStopRolesOnHostsWithUnhealthyAndHealthyAgentStatuses() throws CloudbreakException, ApiException {
+        ApiHost unhealthyAgentHost = createApiHostRef("host1.example.com", ApiHealthSummary.CONCERNING);
+        unhealthyAgentHost.setHealthChecks(List.of(createAgentHealthCheck(ApiHealthSummary.CONCERNING)));
+        ApiHost healthyAgentHost = createApiHostRef("host2.example.com", ApiHealthSummary.CONCERNING);
+        healthyAgentHost.setHealthChecks(List.of(createAgentHealthCheck(ApiHealthSummary.GOOD)));
+
+        assertHostsSelectedForStopping(List.of(unhealthyAgentHost, healthyAgentHost), Set.of(healthyAgentHost.getHostname()));
+    }
+
+    @Test
+    public void testStopRolesOnHostsWithAllAgentStatusesUnhealthy() throws CloudbreakException, ApiException {
+        ApiHost firstHost = createApiHostRef("host1.example.com", ApiHealthSummary.CONCERNING);
+        firstHost.setHealthChecks(List.of(createAgentHealthCheck(ApiHealthSummary.CONCERNING)));
+        ApiHost secondHost = createApiHostRef("host2.example.com", ApiHealthSummary.GOOD);
+        secondHost.setHealthChecks(List.of(createAgentHealthCheck(ApiHealthSummary.BAD)));
+
+        assertHostsSelectedForStopping(List.of(firstHost, secondHost), Set.of());
+    }
+
+    @Test
+    public void testStopRolesOnHostsWithNullAgentHealthSummary() throws CloudbreakException, ApiException {
+        ApiHost host = createApiHostRef("host1.example.com", ApiHealthSummary.CONCERNING);
+        host.setHealthChecks(List.of(createAgentHealthCheck(null)));
+
+        assertHostsSelectedForStopping(List.of(host), Set.of(host.getHostname()));
+    }
+
+    @Test
+    public void testStopRolesOnHostsWithDuplicateAgentChecksSkipsAnyUnhealthyStatus() throws CloudbreakException, ApiException {
+        ApiHost host = createApiHostRef("host1.example.com", ApiHealthSummary.CONCERNING);
+        host.setHealthChecks(List.of(createAgentHealthCheck(ApiHealthSummary.GOOD), createAgentHealthCheck(ApiHealthSummary.BAD)));
+
+        assertHostsSelectedForStopping(List.of(host), Set.of());
+    }
+
+    @Test
+    public void testStopRolesOnHostsReadFailureIdentifiesRequestedHosts() throws ApiException {
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
+        ApiException cause = new ApiException("Read failed");
+        when(hostsResourceApi.readHosts(null, null, "FULL")).thenThrow(cause);
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.stopRolesOnHosts(stack, v53Client, v51Client, Set.of("requested-host"), false));
+
+        assertThat(exception).hasMessage("Failed to select hosts for stopping roles: [requested-host]").hasCause(cause);
+        verifyNoInteractions(clouderaManagerResourceApi, pollingServiceProvider);
+    }
+
+    private ApiHealthCheck createAgentHealthCheck(ApiHealthSummary summary) {
+        return new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(summary);
+    }
+
+    private void assertHostsSelectedForStopping(List<ApiHost> hosts, Set<String> expectedHostNames) throws CloudbreakException, ApiException {
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
+        when(hostsResourceApi.readHosts(null, null, "FULL")).thenReturn(new ApiHostList().items(hosts));
+        if (!expectedHostNames.isEmpty()) {
+            when(clouderaManagerApiFactory.getClouderaManagerResourceApi(v51Client)).thenReturn(clouderaManagerResourceApi);
+            when(clouderaManagerResourceApi.hostsStopRolesCommand(any())).thenReturn(getApiCommand(1L));
+            when(pollingServiceProvider.startPollingStopRolesCommand(stack, v51Client, 1L)).thenReturn(mock(ExtendedPollingResult.class));
+        }
+
+        underTest.stopRolesOnHosts(stack, v53Client, v51Client, hosts.stream().map(ApiHost::getHostname).collect(Collectors.toSet()), false);
+
+        if (expectedHostNames.isEmpty()) {
+            verify(clouderaManagerResourceApi, never()).hostsStopRolesCommand(any());
+            verifyNoInteractions(pollingServiceProvider);
+        } else {
+            ArgumentCaptor<ApiHostNameList> hostNamesCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
+            verify(clouderaManagerResourceApi).hostsStopRolesCommand(hostNamesCaptor.capture());
+            assertThat(hostNamesCaptor.getValue().getItems()).containsExactlyInAnyOrderElementsOf(expectedHostNames);
+        }
     }
 
     @Test

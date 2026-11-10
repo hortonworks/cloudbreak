@@ -7,6 +7,7 @@ import static com.cloudera.api.swagger.model.ApiHealthSummary.GOOD;
 import static com.cloudera.api.swagger.model.ApiHealthSummary.HISTORY_NOT_AVAILABLE;
 import static com.cloudera.api.swagger.model.ApiHealthSummary.NOT_AVAILABLE;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerHostHealthUtil.getHostScmHealthChecks;
 import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.HEALTHY;
 import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.UNHEALTHY;
 import static java.util.Objects.nonNull;
@@ -70,8 +71,6 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 @Service
 @Scope("prototype")
 public class ClouderaManagerClusterHealthService implements ClusterHealthService {
-
-    private static final String HOST_SCM_HEALTH = "HOST_SCM_HEALTH";
 
     private static final String NODE_MANAGER_HOST_HEALTH = "NODE_MANAGER_HOST_HEALTH";
 
@@ -211,8 +210,7 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     }
 
     private Optional<DetailedHostHealthCheck> getDetailedHostHealthCheck(ApiHost apiHost) {
-        return emptyIfNull(apiHost.getHealthChecks()).stream()
-                .filter(health -> HOST_SCM_HEALTH.equals(health.getName()))
+        return getHostScmHealthChecks(apiHost)
                 .filter(health -> !IGNORED_HEALTH_SUMMARIES.contains(health.getSummary()))
                 .findFirst()
                 .map(apiHealthCheck -> new DetailedHostHealthCheck(healthSummaryToHealthCheckResult(apiHealthCheck.getSummary()),

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerHostHealthUtil.getHostScmHealthChecks;
+import static java.util.function.Predicate.not;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -598,9 +600,15 @@ public class ClouderaManagerDecommissioner {
     public void stopRolesOnHosts(StackDtoDelegate stack, ApiClient v53Client, ApiClient v51Client, Set<String> hosts,
             boolean stopServicesGracefully)
             throws CloudbreakException {
+        LOGGER.info("Stop roles requested on hosts: {}", hosts);
+        List<String> hostsSelectedForStopping;
         try {
-            LOGGER.info("Stop roles on hosts: {}", hosts);
-            List<String> hostsSelectedForStopping = getExistingHostsWithGoodHealth(v51Client, hosts);
+            hostsSelectedForStopping = getExistingHostsWithGoodHealth(v51Client, hosts);
+        } catch (ApiException e) {
+            LOGGER.error("Failed to select hosts for stopping roles from requested hosts: {}", hosts, e);
+            throw new CloudbreakException("Failed to select hosts for stopping roles: " + hosts, e);
+        }
+        try {
             if (CollectionUtils.isNotEmpty(hostsSelectedForStopping)) {
                 if (stopServicesGracefully && v53Client != null) {
                     stopServicesOnHosts(stack, v53Client, hostsSelectedForStopping);
@@ -608,8 +616,8 @@ public class ClouderaManagerDecommissioner {
                 stopRolesOnHosts(stack, v51Client, hostsSelectedForStopping);
             }
         } catch (ApiException e) {
-            LOGGER.error("Failed to stop roles on nodes: {}", hosts, e);
-            throw new CloudbreakException("Failed to stop roles on nodes: " + hosts, e);
+            LOGGER.error("Failed to stop roles on nodes: {}", hostsSelectedForStopping, e);
+            throw new CloudbreakException("Failed to stop roles on nodes: " + hostsSelectedForStopping, e);
         }
     }
 
@@ -624,10 +632,19 @@ public class ClouderaManagerDecommissioner {
             LOGGER.info("No host is selected to stop services and roles.");
             return List.of();
         } else {
-            List<String> hostsWithGoodHealth = selectedHosts
-                    .stream()
+            List<ApiHost> hostsWithGoodOrConcerningHealth = selectedHosts.stream()
                     .filter(apiHost -> ApiHealthSummary.GOOD.equals(apiHost.getHealthSummary())
                             || ApiHealthSummary.CONCERNING.equals(apiHost.getHealthSummary()))
+                    .toList();
+            List<String> hostsWithUnhealthyAgentStatus = hostsWithGoodOrConcerningHealth.stream()
+                    .filter(this::isAgentStatusUnhealthy)
+                    .map(ApiHost::getHostname)
+                    .toList();
+            if (CollectionUtils.isNotEmpty(hostsWithUnhealthyAgentStatus)) {
+                LOGGER.info("Skipping stopping services and roles on hosts with unhealthy agent status: {}", hostsWithUnhealthyAgentStatus);
+            }
+            List<String> hostsWithGoodHealth = hostsWithGoodOrConcerningHealth.stream()
+                    .filter(not(this::isAgentStatusUnhealthy))
                     .map(ApiHost::getHostname)
                     .toList();
             if (CollectionUtils.isEmpty(hostsWithGoodHealth)) {
@@ -635,6 +652,12 @@ public class ClouderaManagerDecommissioner {
             }
             return hostsWithGoodHealth;
         }
+    }
+
+    private boolean isAgentStatusUnhealthy(ApiHost apiHost) {
+        return getHostScmHealthChecks(apiHost)
+                .anyMatch(healthCheck -> ApiHealthSummary.CONCERNING.equals(healthCheck.getSummary())
+                        || ApiHealthSummary.BAD.equals(healthCheck.getSummary()));
     }
 
     private void stopServicesOnHosts(StackDtoDelegate stack, ApiClient apiClient, List<String> hostsSelectedForStopping)

@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.F
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.SUMMARY;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerHealthService.FULL_WITH_EXPLANATION_VIEW;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerHealthService.HOST_AGENT_CERTIFICATE_EXPIRY;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerHealthService.HOST_SCM_HEALTH;
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerHostHealthUtil.HOST_SCM_HEALTH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

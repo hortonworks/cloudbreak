@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.healthcheck;
 
-import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerHostHealthUtil.getHostScmHealthChecks;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,8 +20,6 @@ import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 @Component
 public class ClouderaManagerHostBasicHealthCheck implements ClouderaManagerHostHealthCheck {
 
-    private static final String HOST_SCM_HEALTH = "HOST_SCM_HEALTH";
-
     private static final String DEFAULT_STATUS_REASON = "Cloudera Manager reported bad health for this host.";
 
     private static final String MAINTENANCE_MODE = "This host is in maintenance mode.";
@@ -39,8 +37,7 @@ public class ClouderaManagerHostBasicHealthCheck implements ClouderaManagerHostH
 
     @Override
     public Optional<HealthCheck> getHealthCheck(Optional<String> runtimeVersion, ApiHost apiHost, List<ApiService> apiServices) {
-        return emptyIfNull(apiHost.getHealthChecks()).stream()
-                .filter(health -> HOST_SCM_HEALTH.equals(health.getName()))
+        return getHostScmHealthChecks(apiHost)
                 .filter(health -> !IGNORED_HEALTH_SUMMARIES.contains(health.getSummary()))
                 .findFirst()
                 .map(apiHealthCheck -> new HealthCheck(

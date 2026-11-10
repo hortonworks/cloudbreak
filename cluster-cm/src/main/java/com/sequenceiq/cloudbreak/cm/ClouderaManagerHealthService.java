@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerHostHealthUtil.getHostScmHealthChecks;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.HashMap;
@@ -42,8 +43,6 @@ import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 
 @Service
 public class ClouderaManagerHealthService {
-
-    public static final String HOST_SCM_HEALTH = "HOST_SCM_HEALTH";
 
     public static final Set<ApiHealthSummary> IGNORED_HEALTH_SUMMARIES = Sets.immutableEnumSet(
             ApiHealthSummary.DISABLED,
@@ -149,9 +148,7 @@ public class ClouderaManagerHealthService {
         HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
             return api.readHosts(null, null, FULL_VIEW).getItems().stream()
-                    .filter(host -> host.getHealthChecks() != null)
-                    .flatMap(host -> host.getHealthChecks().stream()
-                            .filter(check -> ClouderaManagerHealthService.HOST_SCM_HEALTH.equals(check.getName()))
+                    .flatMap(host -> getHostScmHealthChecks(host)
                             .map(ApiHealthCheck::getSummary)
                             .filter(healthSummary -> !ClouderaManagerHealthService.IGNORED_HEALTH_SUMMARIES.contains(healthSummary))
                             .map(healthSummary -> Pair.of(hostName(host.getHostname()), healthSummary))

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.healthcheck;
 
+import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerHostHealthUtil.getHostScmHealthChecks;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.util.ArrayList;
@@ -24,8 +25,6 @@ import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 
 @Component
 public class ClouderaManagerHostServicesHealthCheck implements ClouderaManagerHostHealthCheck {
-
-    private static final String HOST_SCM_HEALTH = "HOST_SCM_HEALTH";
 
     @Value("${cb.cm.healthcheck.stoppedservices.enabled:false}")
     private boolean stoppedServicesCheckEnabled;
@@ -76,8 +75,7 @@ public class ClouderaManagerHostServicesHealthCheck implements ClouderaManagerHo
     }
 
     private boolean isHostAlive(ApiHost host) {
-        return emptyIfNull(host.getHealthChecks()).stream()
-                .filter(hc -> HOST_SCM_HEALTH.equals(hc.getName()))
+        return getHostScmHealthChecks(host)
                 .map(ApiHealthCheck::getSummary)
                 .findFirst()
                 .map(summary -> summary == ApiHealthSummary.GOOD || summary == ApiHealthSummary.CONCERNING)
