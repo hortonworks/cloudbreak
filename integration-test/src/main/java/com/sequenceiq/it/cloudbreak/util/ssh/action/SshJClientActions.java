@@ -60,6 +60,10 @@ public class SshJClientActions {
 
     private static final Set<String> AZURE_SKIPPED_FREEIPA_LOGGING_AGENT_STATUSES = Set.of("s3Accessible", "databusS3Accessible");
 
+    private static final String LOGGING_AGENT_STATUS_MARKER = "LOGGING_AGENT_STATUS: ";
+
+    private static final String SERVICE_STATUS_MARKER = "SERVICE_STATUS: ";
+
     @Inject
     private SshJClientFactory sshJClientFactory;
 
@@ -546,8 +550,11 @@ public class SshJClientActions {
     private <T extends CloudbreakTestDto> T checkLoggingAgentStatus(T testDto, List<String> instanceIps, boolean freeIpaInstances) {
         // CB-34702: cdp-doctor validates the hardcoded production DataBus endpoints instead of the ones configured on the node, so read the configured
         // endpoints from the telemetry pillar and pass them explicitly.
-        // CB-35500: Salt 3006.25 prints IPC tracebacks on stderr when salt-call exits, which would be reported as statuses.
-        String loggingAgentNokStatusCommand = """
+        // CB-35500: Salt 3006.25 prints IPC tracebacks on stderr when salt-call exits.
+        // CB-35514: the command runs over a PTY, so stderr lands in the output as well, hence only the marked lines are reported as statuses.
+        // jq 1.6 on the images accepts an empty input as valid JSON, so an empty report is rejected explicitly, and the OK statuses are reported too,
+        // so that a report without any status fails the check.
+        String loggingAgentStatusCommand = """
                 DBUS=$(sudo sh -c '. activate_salt_env; salt-call pillar.get "telemetry:databusEndpoint" --output json 2>/dev/null' \
                     | jq -r '.local // empty'); \
                 DBUS_S3=$(sudo sh -c '. activate_salt_env; salt-call pillar.get "telemetry:databusS3Endpoint" --output json 2>/dev/null' \
@@ -562,13 +569,13 @@ public class SshJClientActions {
                     AGENT=fluentd; \
                 fi; \
                 STATUS=$(sudo cdp-doctor $AGENT status --format json --databus-url $DBUS --databus-s3-url $DBUS_S3 | tail -1); \
-                if ! echo "$STATUS" | jq -e . > /dev/null 2>&1; then \
+                if [ -z "$STATUS" ] || ! echo "$STATUS" | jq -e . > /dev/null 2>&1; then \
                     echo "The 'cdp-doctor $AGENT status' report is not a valid JSON: $STATUS"; \
                     exit 1; \
                 fi; \
-                echo "$STATUS" | jq -r '.. | objects | to_entries | map(select(.value == "NOK"))[] | .key'\
-                """;
-        SshCommandOutcomes loggingAgentNokStatusReports = executeOnIps(instanceIps, loggingAgentNokStatusCommand)
+                echo "$STATUS" | jq -r '.. | objects | to_entries[] | select(.value == "OK" or .value == "NOK") | "%s\\(.key) \\(.value)"'\
+                """.formatted(LOGGING_AGENT_STATUS_MARKER);
+        SshCommandOutcomes loggingAgentStatusReports = executeOnIps(instanceIps, loggingAgentStatusCommand)
                 .requireAllSucceeded("Logging agent status check");
 
         // CB-34157: the FreeIPA instances of our Azure E2E environments cannot reach public endpoints, so the S3 addresses that cdp-doctor probes for
@@ -577,10 +584,15 @@ public class SshJClientActions {
         Set<String> skippedStatuses = freeIpaInstances && CloudPlatform.AZURE.name().equalsIgnoreCase(commonCloudProperties.getCloudProvider())
                 ? AZURE_SKIPPED_FREEIPA_LOGGING_AGENT_STATUSES
                 : Set.of();
-        for (SshCommandOutcome statusReport : loggingAgentNokStatusReports) {
-            String loggingAgentNotOkStatuses = StringUtils.defaultString(statusReport.commandOutput()).lines()
-                    .map(StringUtils::trimToEmpty)
-                    .filter(StringUtils::isNotEmpty)
+        for (SshCommandOutcome statusReport : loggingAgentStatusReports) {
+            List<String> loggingAgentStatusLines = getMarkedLines(statusReport, LOGGING_AGENT_STATUS_MARKER);
+            if (loggingAgentStatusLines.isEmpty()) {
+                throw new TestFailException(format("Logging agent status cannot be checked on '%s' instance: %s", statusReport.instanceIp(),
+                        statusReport.commandOutput()));
+            }
+            String loggingAgentNotOkStatuses = loggingAgentStatusLines.stream()
+                    .filter(status -> StringUtils.endsWith(status, " NOK"))
+                    .map(status -> StringUtils.removeEnd(status, " NOK"))
                     .filter(status -> !skippedStatuses.contains(status))
                     .collect(Collectors.joining(", "));
             if (StringUtils.isNotBlank(loggingAgentNotOkStatuses)) {
@@ -606,15 +618,18 @@ public class SshJClientActions {
 
     private <T extends CloudbreakTestDto> T doCheckCdpServiceStatus(T testDto, List<String> instanceIps, List<String> statusCategories) {
         statusCategories.forEach(statusCategory -> {
-            String cdpServiceStatusCommand =
-                    format("sudo cdp-doctor service status --format json | jq -r '.%s[] | \"\\(.name) \\(.status)\"'", statusCategory);
+            String cdpServiceStatusCommand = format("sudo cdp-doctor service status --format json | jq -r '.%s[] | \"%s\\(.name) \\(.status)\"'",
+                    statusCategory, SERVICE_STATUS_MARKER);
             for (SshCommandOutcome statusReport : executeOnIps(instanceIps, cdpServiceStatusCommand).requireAllExecuted()) {
-                String servicesStatuses = statusReport.commandOutput();
-                if (!statusReport.returnCodeSuccess() || StringUtils.isBlank(servicesStatuses)) {
+                List<String> servicesStatusLines = getMarkedLines(statusReport, SERVICE_STATUS_MARKER);
+                if (!statusReport.returnCodeSuccess() || servicesStatusLines.isEmpty()) {
                     throw new TestFailException(format("CDP Services '%s' status cannot be checked on '%s' instance: %s", statusCategory,
-                            statusReport.instanceIp(), servicesStatuses));
+                            statusReport.instanceIp(), statusReport.commandOutput()));
                 }
-                if (StringUtils.containsIgnoreCase(servicesStatuses, " NOK")) {
+                String servicesStatuses = servicesStatusLines.stream()
+                        .filter(serviceStatus -> StringUtils.endsWithIgnoreCase(serviceStatus, " NOK"))
+                        .collect(Collectors.joining(", "));
+                if (StringUtils.isNotBlank(servicesStatuses)) {
                     Log.error(LOGGER, format(" There is 'Not OK' CDP Services status %s is present on '%s' instance! ", servicesStatuses,
                             statusReport.instanceIp()));
                     throw new TestFailException(format("There is 'Not OK' CDP Services status %s is present on '%s' instance!", servicesStatuses,
@@ -623,6 +638,19 @@ public class SshJClientActions {
             }
         });
         return testDto;
+    }
+
+    private List<String> getMarkedLines(SshCommandOutcome statusReport, String marker) {
+        Map<Boolean, List<String>> linesByMarked = StringUtils.defaultString(statusReport.commandOutput()).lines()
+                .map(StringUtils::trimToEmpty)
+                .filter(StringUtils::isNotEmpty)
+                .collect(Collectors.partitioningBy(line -> line.startsWith(marker)));
+        if (!linesByMarked.get(false).isEmpty()) {
+            Log.log(LOGGER, " Ignored the unmarked output lines on '%s' instance: %s ", statusReport.instanceIp(), linesByMarked.get(false));
+        }
+        return linesByMarked.get(true).stream()
+                .map(line -> StringUtils.removeStart(line, marker).strip())
+                .toList();
     }
 
     public FreeIpaTestDto checkSystemctlServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient,
