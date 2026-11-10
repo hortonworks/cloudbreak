@@ -159,7 +159,7 @@ class BaseImageUpgradeServiceTest {
         Image current = Image.builder().withImageCatalogName("catalog").withOsType("redhat8").withArchitecture("x86_64")
                 .withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), "7.3.1")).build();
         when(componentConfigProviderService.getImage(1L)).thenReturn(current);
-        when(baseImagePackageVersionsEnricher.enrich(current, stack)).thenReturn(current);
+        when(baseImagePackageVersionsEnricher.enrich(current, 3L)).thenReturn(current);
         ClouderaManagerProduct cdh = new ClouderaManagerProduct().withName("CDH").withVersion("7.3.1-1.cdh7.3.1.p1200.84201983");
         when(clusterComponentConfigProvider.getCdhProduct(3L)).thenReturn(Optional.of(cdh));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image base = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder().withUuid("base").build();
