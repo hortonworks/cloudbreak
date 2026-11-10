@@ -143,7 +143,8 @@ public enum Status {
                 STOP_IN_PROGRESS,
                 STOPPED,
                 DELETE_IN_PROGRESS,
-                DELETED_ON_PROVIDER_SIDE
+                DELETED_ON_PROVIDER_SIDE,
+                UPDATE_FAILED
         );
     }
 

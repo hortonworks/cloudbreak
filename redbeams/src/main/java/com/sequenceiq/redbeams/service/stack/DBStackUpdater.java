@@ -23,6 +23,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCerti
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificateSyncService;
 import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
@@ -113,5 +114,17 @@ public class DBStackUpdater {
             stack.setTags(new Json(stackTags));
             dbStackService.save(stack);
         }
+    }
+
+    public void updateInstanceTypeAndStorageSize(Long dbStackId, String instanceType, Long storageSizeInGb) {
+        DBStack dbStack = dbStackService.getById(dbStackId);
+        DatabaseServer databaseServer = dbStack.getDatabaseServer();
+        LOGGER.info("Updating instance type of {} from '{}' to '{}' and storage size from {} GB to {} GB", dbStack.getResourceCrn(),
+                databaseServer.getInstanceType(), instanceType, databaseServer.getStorageSize(), storageSizeInGb);
+        databaseServer.setInstanceType(instanceType);
+        if (storageSizeInGb != null) {
+            databaseServer.setStorageSize(storageSizeInGb);
+        }
+        dbStackService.save(dbStack);
     }
 }

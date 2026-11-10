@@ -1,0 +1,22 @@
+package com.sequenceiq.redbeams.flow.redbeams.changeinstancetype.event;
+
+import com.sequenceiq.flow.core.FlowEvent;
+
+public enum ChangeInstanceTypeStateSelectors implements FlowEvent {
+
+    CHANGE_INSTANCE_TYPE_START_EVENT,
+    CHANGE_INSTANCE_TYPE_SYNC_FINISHED_EVENT,
+    CHANGE_INSTANCE_TYPE_ALREADY_APPLIED_EVENT,
+    CHANGE_INSTANCE_TYPE_VALIDATION_FINISHED_EVENT,
+    CHANGE_INSTANCE_TYPE_MODIFY_FINISHED_EVENT,
+    CHANGE_INSTANCE_TYPE_WAIT_FINISHED_EVENT,
+    FINALIZE_CHANGE_INSTANCE_TYPE_EVENT,
+    CHANGE_INSTANCE_TYPE_VALIDATION_FAILED_EVENT,
+    FAILED_CHANGE_INSTANCE_TYPE_EVENT,
+    HANDLED_FAILED_CHANGE_INSTANCE_TYPE_EVENT;
+
+    @Override
+    public String event() {
+        return name();
+    }
+}

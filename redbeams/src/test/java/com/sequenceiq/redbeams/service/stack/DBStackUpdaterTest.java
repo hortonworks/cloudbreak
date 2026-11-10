@@ -37,6 +37,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCerti
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificateSyncService;
 import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
@@ -252,5 +253,38 @@ public class DBStackUpdaterTest {
 
         assertEquals(expectedTags, stack.getTags());
         verify(dbStackService).save(stack);
+    }
+
+    @Test
+    void testUpdateInstanceTypeAndStorageSize() {
+        DBStack stack = createStackWithDatabaseServer();
+        when(dbStackService.getById(STACK_ID)).thenReturn(stack);
+
+        underTest.updateInstanceTypeAndStorageSize(STACK_ID, "db.m5.xlarge", 200L);
+
+        assertEquals("db.m5.xlarge", stack.getDatabaseServer().getInstanceType());
+        assertEquals(200L, stack.getDatabaseServer().getStorageSize());
+        verify(dbStackService).save(stack);
+    }
+
+    @Test
+    void testUpdateInstanceTypeKeepsTheStorageSizeWhenItIsNotReported() {
+        DBStack stack = createStackWithDatabaseServer();
+        when(dbStackService.getById(STACK_ID)).thenReturn(stack);
+
+        underTest.updateInstanceTypeAndStorageSize(STACK_ID, "db.m5.xlarge", null);
+
+        assertEquals("db.m5.xlarge", stack.getDatabaseServer().getInstanceType());
+        assertEquals(100L, stack.getDatabaseServer().getStorageSize());
+        verify(dbStackService).save(stack);
+    }
+
+    private static DBStack createStackWithDatabaseServer() {
+        DatabaseServer databaseServer = new DatabaseServer();
+        databaseServer.setInstanceType("db.m5.large");
+        databaseServer.setStorageSize(100L);
+        DBStack stack = new DBStack();
+        stack.setDatabaseServer(databaseServer);
+        return stack;
     }
 }

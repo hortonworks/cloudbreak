@@ -87,6 +87,14 @@ redbeams:
     interval-in-minutes: 1440
     storage-monitoring-enabled: true
     storage-low-threshold-percentage: 10
+  change-instance-type:
+    polling-interval-in-seconds: 30
+    timeout-in-minutes:
+      aws: 30
+      azure-ha: 30
+      azure: 15
+      gcp: 15
+      default: 30
 spring:
   application:
     name: RedbeamsService

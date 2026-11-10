@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerInstanceTypeState;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -31,6 +33,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
+import com.sequenceiq.redbeams.service.stack.DBStackUpdater;
 
 @Component
 public class DBStackStatusSyncService {
@@ -58,6 +61,9 @@ public class DBStackStatusSyncService {
     @Inject
     private DBStackService dbStackService;
 
+    @Inject
+    private DBStackUpdater dbStackUpdater;
+
     public void sync(DBStack dbStack) {
         DetailedDBStackStatus detailedDBStackStatus = getDetailedStatusFromProvider(dbStack);
         LOGGER.debug(":::Auto sync::: Provider status got converted to DetailedDBStackStatus.{}", detailedDBStackStatus);
@@ -70,6 +76,9 @@ public class DBStackStatusSyncService {
             } else {
                 LOGGER.debug(":::Auto sync::: Update DB Stack Status from '{}' to '{}'", dbStack.getStatus(), status);
 
+                if (dbStack.getStatus() == Status.UPDATE_FAILED && status == Status.AVAILABLE) {
+                    refreshInstanceTypeAndStorageFromProvider(dbStack);
+                }
                 dbStackStatusUpdater.updateStatus(dbStack.getId(), detailedDBStackStatus);
             }
         }
@@ -77,6 +86,31 @@ public class DBStackStatusSyncService {
         if (status != null && Status.getUnscheduleAutoSyncStatuses().contains(status)) {
             LOGGER.debug(":::Auto sync::: Unschedule DB Stack Status sync as the status is '{}'", status);
             dbStackJobService.unschedule(dbStack.getId(), dbStack.getName());
+        }
+    }
+
+    /**
+     * A failed instance type change can leave the persisted instance type and storage size out of sync with the provider, for example when the
+     * provider applied the change but the flow failed afterwards. When the auto sync recovers such a database server from UPDATE_FAILED to
+     * AVAILABLE, the live values are read back from the provider and persisted. The read is best effort: some providers do not report the instance
+     * type state (the default connector throws), so any failure is logged and the sync keeps going.
+     */
+    private void refreshInstanceTypeAndStorageFromProvider(DBStack dbStack) {
+        try {
+            DBStackConnector.ConnectedDatabaseStack connected = dbStackConnector.connect(dbStack);
+            DatabaseServerInstanceTypeState liveState =
+                    connected.connector().resources().getDatabaseServerInstanceTypeState(connected.authenticatedContext(), connected.databaseStack());
+            if (StringUtils.isBlank(liveState.instanceType())) {
+                LOGGER.info(":::Auto sync::: The provider did not report an instance type for database server {}, skipping the refresh: {}",
+                        dbStack.getId(), liveState);
+                return;
+            }
+            LOGGER.info(":::Auto sync::: Refreshing the persisted instance type and storage size of database server {} from the provider: {}",
+                    dbStack.getId(), liveState);
+            dbStackUpdater.updateInstanceTypeAndStorageSize(dbStack.getId(), liveState.instanceType(), liveState.storageSizeInGb());
+        } catch (Exception ex) {
+            LOGGER.warn(":::Auto sync::: Could not refresh the instance type and storage size of database server {} from the provider, "
+                    + "skipping the refresh", dbStack.getId(), ex);
         }
     }
 

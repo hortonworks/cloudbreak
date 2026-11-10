@@ -44,6 +44,11 @@ class StatusTest {
     }
 
     @Test
+    void testGetAutoSyncStatusesContainsUpdateFailed() {
+        assertThat(Status.getAutoSyncStatuses(), hasItem(Status.UPDATE_FAILED));
+    }
+
+    @Test
     void mapToFailedIfInProgressTest() {
         for (Status status : Status.values()) {
             Status result = status.mapToFailedIfInProgress();

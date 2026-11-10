@@ -21,6 +21,8 @@ public enum MetricType implements Metric {
     DB_VALIDATE_UPGRADE_FAILED("db.validate.upgrade.failed"),
     DB_VALIDATE_UPGRADE_CLEANUP_FINISHED("db.validate.upgrade.cleanup.finished"),
     DB_VALIDATE_UPGRADE_CLEANUP_FAILED("db.validate.upgrade.cleanup.failed"),
+    DB_CHANGE_INSTANCE_TYPE_FINISHED("db.changeinstancetype.finished"),
+    DB_CHANGE_INSTANCE_TYPE_FAILED("db.changeinstancetype.failed"),
     DB_INSTANCE_TYPE_FALLBACK_CONFIGURED("db.instancetype.fallback.configured"),
     DB_INSTANCE_TYPE_FALLBACK_USED("db.instancetype.fallback.used"),
     DB_INSTANCE_TYPE_FALLBACK_EXHAUSTED("db.instancetype.fallback.exhausted");

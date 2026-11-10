@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerInstanceTypeState;
 import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerStorageMetrics;
 import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -363,6 +364,33 @@ public interface ResourceConnector {
     default Optional<DatabaseServerStorageMetrics> getDatabaseServerStorageMetrics(AuthenticatedContext authenticatedContext, DatabaseStack stack)
             throws Exception {
         return Optional.empty();
+    }
+
+    /**
+     * Reads the live instance type, storage size, high availability and modification state of a database server from the cloud provider.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
+     * @param stack                contains the full description of infrastructure; must not be {@code null}
+     * @return the live instance type state of the given database server; never {@code null}
+     * @throws Exception in case of any error
+     */
+    default DatabaseServerInstanceTypeState getDatabaseServerInstanceTypeState(AuthenticatedContext authenticatedContext, DatabaseStack stack)
+            throws Exception {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
+     * Starts changing the instance type of a database server. The call returns once the provider accepted the modification, the caller has to
+     * poll {@link #getDatabaseServerInstanceTypeState(AuthenticatedContext, DatabaseStack)} until the modification is applied.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
+     * @param stack                contains the full description of infrastructure; must not be {@code null}
+     * @param targetInstanceType   the provider specific instance type to change to; must not be {@code null}
+     * @throws Exception in case of any error
+     */
+    default void changeDatabaseServerInstanceType(AuthenticatedContext authenticatedContext, DatabaseStack stack, String targetInstanceType)
+            throws Exception {
+        throw new UnsupportedOperationException("Interface not implemented.");
     }
 
     /**

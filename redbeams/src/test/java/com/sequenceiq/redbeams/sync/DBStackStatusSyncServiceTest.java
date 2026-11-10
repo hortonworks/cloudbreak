@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.database.DatabaseServerInstanceTypeState;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AzureDatabaseType;
@@ -46,6 +47,7 @@ import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
+import com.sequenceiq.redbeams.service.stack.DBStackUpdater;
 
 @ExtendWith(MockitoExtension.class)
 public class DBStackStatusSyncServiceTest {
@@ -100,6 +102,9 @@ public class DBStackStatusSyncServiceTest {
     @Mock
     private DBStackService dbStackService;
 
+    @Mock
+    private DBStackUpdater dbStackUpdater;
+
     @InjectMocks
     private DBStackStatusSyncService victim;
 
@@ -117,6 +122,8 @@ public class DBStackStatusSyncServiceTest {
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.DELETED, DetailedDBStackStatus.DELETED_ON_PROVIDER_SIDE),
                 //Recovery: provider reports STARTED for a previously DELETED_ON_PROVIDER_SIDE resource
                 Arguments.of(Status.DELETED_ON_PROVIDER_SIDE, ExternalDatabaseStatus.STARTED, DetailedDBStackStatus.STARTED),
+                //Recovery: provider reports STARTED after a failed update, e.g. a failed instance type change
+                Arguments.of(Status.UPDATE_FAILED, ExternalDatabaseStatus.STARTED, DetailedDBStackStatus.STARTED),
                 //UPDATE_IN_PROGRESS status covers all non handled statuses. In this case DB Stack status should not be updated.
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.UPDATE_IN_PROGRESS, DetailedDBStackStatus.UNKNOWN)
         );
@@ -384,6 +391,68 @@ public class DBStackStatusSyncServiceTest {
 
         verify(dbResourceService, never()).findByStatusAndTypeAndStack(any(), any(), any());
         verify(dbResourceService, never()).save(any());
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldRefreshInstanceTypeAndStorageWhenRecoveringFromUpdateFailedToAvailable()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.STARTED);
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.UPDATE_FAILED);
+        when(resourceConnector.getDatabaseServerInstanceTypeState(authenticatedContext, databaseStack))
+                .thenReturn(new DatabaseServerInstanceTypeState("db.m5.xlarge", 250L, true, false));
+
+        victim.sync(dbStack);
+
+        verify(dbStackUpdater).updateInstanceTypeAndStorageSize(DB_STACK_ID, "db.m5.xlarge", 250L);
+        verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.STARTED);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldNotRefreshInstanceTypeAndStorageWhenRecoveringFromOtherStatuses()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.STARTED);
+        lenient().when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.DELETED_ON_PROVIDER_SIDE);
+
+        victim.sync(dbStack);
+
+        verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.STARTED);
+        verifyNoInteractions(dbStackUpdater);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldSwallowRefreshFailureAndKeepSyncingWhenRecoveringFromUpdateFailed()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.STARTED);
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.UPDATE_FAILED);
+        when(resourceConnector.getDatabaseServerInstanceTypeState(authenticatedContext, databaseStack))
+                .thenThrow(new UnsupportedOperationException("not supported"));
+
+        victim.sync(dbStack);
+
+        verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.STARTED);
+        verifyNoInteractions(dbStackUpdater);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldNotPersistInstanceTypeWhenProviderReportsBlankInstanceTypeOnRefresh()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.STARTED);
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.UPDATE_FAILED);
+        when(resourceConnector.getDatabaseServerInstanceTypeState(authenticatedContext, databaseStack))
+                .thenReturn(new DatabaseServerInstanceTypeState(" ", 250L, true, false));
+
+        victim.sync(dbStack);
+
+        verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.STARTED);
+        verifyNoInteractions(dbStackUpdater);
         verifyNoInteractions(dbStackJobService);
     }
 }
