@@ -31,7 +31,7 @@ plugins {
   id "com.adarshr.test-logger" version "4.0.0"
   id "com.netflix.nebula.resolution-rules" version "13.1.2"
   id 'com.diffplug.spotless' version '8.11.0'
-  id 'com.autonomousapps.dependency-analysis' version '3.19.2' apply false
+  id 'com.autonomousapps.dependency-analysis' version '3.20.2' apply false
 }
 
 // Dependency analysis (buildHealth, projectHealth, reason) is only applied when one of its tasks is requested,
