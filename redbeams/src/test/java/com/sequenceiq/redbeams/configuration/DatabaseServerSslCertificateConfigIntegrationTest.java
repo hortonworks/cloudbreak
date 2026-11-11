@@ -22,10 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -91,31 +91,31 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
     @Inject
     private DatabaseServerSslCertificateConfig underTest;
 
-    @MockBean
+    @MockitoBean
     private CommonAwsClient awsClient;
 
-    @MockBean
+    @MockitoBean
     private AwsDefaultZoneProvider awsDefaultZoneProvider;
 
-    @MockBean
+    @MockitoBean
     private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
 
-    @MockBean
+    @MockitoBean
     private AwsAvailabilityZoneProvider awsAvailabilityZoneProvider;
 
-    @MockBean
+    @MockitoBean
     private MinimalHardwareFilter minimalHardwareFilter;
 
-    @MockBean
+    @MockitoBean
     private AwsPageCollector awsPageCollector;
 
-    @MockBean
+    @MockitoBean
     private EntitlementService entitlementService;
 
-    @MockBean
+    @MockitoBean
     private AmazonKmsUtil amazonKmsUtil;
 
-    @MockBean
+    @MockitoBean
     private DbOverrideConfig dbOverrideConfig;
 
     @Test
@@ -352,7 +352,6 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
     })
     @PropertySource("classpath:application.yml")
     static class TestAppContext {
-
     }
 
 }

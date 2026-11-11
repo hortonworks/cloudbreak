@@ -8,12 +8,12 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.vault.core.VaultTemplate;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -35,9 +35,7 @@ public class CentralRecipeContext {
     @Inject
     private CentralRecipeUpdater underTest;
 
-    // RecipeModulTest extends this class, so a bean override declared here is in the test class
-    // hierarchy and is honoured. On the nested SpringConfig it is silently ignored (CB-35471).
-    @MockBean
+    @MockitoBean
     private EntitlementService entitlementService;
 
     public CentralRecipeUpdater getUnderTest() {
@@ -95,10 +93,6 @@ public class CentralRecipeContext {
             return new CloudbreakResourceReaderService();
         }
 
-        private int parseCardinality(Map<String, Integer> cardinalityReps, String cardinalityString, int defaultValue) {
-            Integer cardinality = cardinalityReps.get(cardinalityString);
-            return cardinality == null ? defaultValue : cardinality;
-        }
     }
 
 }

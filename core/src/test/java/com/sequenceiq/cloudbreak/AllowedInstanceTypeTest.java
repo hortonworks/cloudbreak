@@ -26,11 +26,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.AllowedInstanceTypeTest.TestAppContext;
@@ -65,50 +65,46 @@ class AllowedInstanceTypeTest {
     @Inject
     private DefaultClusterTemplateCache templateCache;
 
-    // These overrides have to be declared on the test class: Spring only honours a bean override on
-    // the test class hierarchy, not on an imported @Configuration. Three of them are also taken as
-    // parameters by TestAppContext#stubDefaults below, which is where they get stubbed - see the note
-    // there for why the stubbing cannot live in a @BeforeEach.
-    @MockBean
+    @MockitoBean
     private ClusterTemplateService clusterTemplateService;
 
-    @MockBean
+    @MockitoBean
     private DefaultClusterTemplateV4RequestToClusterTemplateConverter converter;
 
-    @MockBean
+    @MockitoBean
     private StackToTemplatePreparationObjectConverter mockPreparationObject;
 
-    @MockBean
+    @MockitoBean
     private WorkspaceService workspaceService;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
-    @MockBean
+    @MockitoBean
     private PreferencesService preferencesService;
 
-    @MockBean
+    @MockitoBean
     private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
 
-    @MockBean
+    @MockitoBean
     private BlueprintService blueprintService;
 
-    @MockBean
+    @MockitoBean
     private EntitlementService entitlementService;
 
-    @MockBean
+    @MockitoBean
     private ProviderPreferencesService providerPreferencesService;
 
-    @MockBean
+    @MockitoBean
     private CommonGovService commonGovService;
 
-    @MockBean
+    @MockitoBean
     private InternalClusterTemplateValidator internalClusterTemplateValidator;
 
-    @MockBean
+    @MockitoBean
     private DefaultBlueprintCache defaultBlueprintCache;
 
-    @MockBean
+    @MockitoBean
     private CrnGeneratorService crnGeneratorService;
 
     @Test
@@ -167,13 +163,7 @@ class AllowedInstanceTypeTest {
     @PropertySource("classpath:application.yml")
     static class TestAppContext {
 
-        // The mocks are declared on the test class because a bean override is only honoured there, but
-        // they must be stubbed before DefaultClusterTemplateCache's @PostConstruct consumes them, which
-        // happens while the context is still building - so a @BeforeEach is too late. An @Autowired
-        // method runs during this configuration's initialisation with its parameters already resolved;
-        // @Inject fields read from a @PostConstruct can still be null at that point. Declaring these as
-        // @Bean mocks here instead does not work: @Bean adds a definition rather than replacing the
-        // component-scanned one, and the context then fails on BlueprintEntities (CB-35471).
+        // DefaultClusterTemplateCache's @PostConstruct reads these while the context builds, so a @BeforeEach is too late.
         @Autowired
         void stubDefaults(DefaultClusterTemplateV4RequestToClusterTemplateConverter converter,
                 CrnGeneratorService crnGeneratorService,
