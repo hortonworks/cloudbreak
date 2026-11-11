@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -339,6 +340,7 @@ class BootstrapServiceTest {
         BootstrapParams bootstrapParams = bootstrapParamsCaptor.getValue();
         assertTrue(bootstrapParams.isSaltBootstrapFpSupported());
         assertTrue(bootstrapParams.isRestartNeededFlagSupported());
+        assertFalse(bootstrapParams.isRestartNeeded());
         assertEquals(image.getOs(), bootstrapParams.getOs());
         assertEquals(stack.getCloudPlatform(), bootstrapParams.getCloud());
         StackBasedExitCriteriaModel exitCriteriaModel = (StackBasedExitCriteriaModel) exitCriteriaModelCaptor.getValue();
@@ -381,6 +383,7 @@ class BootstrapServiceTest {
         BootstrapParams bootstrapParams = bootstrapParamsCaptor.getValue();
         assertTrue(bootstrapParams.isSaltBootstrapFpSupported());
         assertTrue(bootstrapParams.isRestartNeededFlagSupported());
+        assertTrue(bootstrapParams.isRestartNeeded());
         assertEquals(image.getOs(), bootstrapParams.getOs());
         assertEquals(stack.getCloudPlatform(), bootstrapParams.getCloud());
         StackBasedExitCriteriaModel exitCriteriaModel = (StackBasedExitCriteriaModel) exitCriteriaModelCaptor.getValue();

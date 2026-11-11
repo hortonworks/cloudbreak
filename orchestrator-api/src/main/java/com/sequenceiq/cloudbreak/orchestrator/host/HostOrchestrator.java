@@ -155,7 +155,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     Map<String, String> runShellCommandOnNodes(OrchestratorRunParams runParams);
 
-    void removeDeadSaltMinions(GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException;
+    void removeDeadSaltMinions(GatewayConfig gatewayConfig, Set<String> remainingNodesFqdn) throws CloudbreakOrchestratorFailedException;
 
     boolean unboundClusterConfigPresentOnAnyNodes(GatewayConfig primaryGateway, Set<String> nodes);
 

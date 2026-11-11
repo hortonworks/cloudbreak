@@ -93,7 +93,7 @@ public class BootstrapService {
 
     public void reBootstrap(Stack stack, Set<InstanceMetaData> instanceMetaDatas) throws CloudbreakOrchestratorException {
         LOGGER.info("Re-bootstrapping nodes {} of stack {}", instanceMetaDatas, stack.getResourceCrn());
-        bootstrap(stack, instanceMetaDatas, true, false);
+        bootstrap(stack, instanceMetaDatas, true, true);
     }
 
     private void bootstrap(Stack stack, Set<InstanceMetaData> instanceMetaDatas, boolean reBootstrap, boolean restartAll)
@@ -120,6 +120,7 @@ public class BootstrapService {
         jumpgateTunnelStatusService.logTunnelStatus(stack, instanceMetaDatas);
         try {
             if (reBootstrap) {
+                params.setRestartNeeded(restartAll);
                 hostOrchestrator.reBootstrapExistingNodes(gatewayConfigs, allNodes, params, exitCriteriaModel);
             } else {
                 byte[] stateConfigZip = getStateConfigZip();

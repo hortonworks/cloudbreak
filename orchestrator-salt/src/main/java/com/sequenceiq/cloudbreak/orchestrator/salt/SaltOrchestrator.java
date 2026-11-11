@@ -1022,10 +1022,11 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
         List<GatewayConfig> liveGateways = allGatewayConfigs.stream()
                 .filter(gw -> remainingIps.contains(gw.getPrivateAddress())).collect(Collectors.toList());
+        Set<String> remainingNodeFqdn = remainingNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         for (GatewayConfig gatewayConfig : liveGateways) {
             try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
                 sc.wheel("key.delete", removeNodePrivateIPsByFQDN.keySet(), Object.class);
-                removeDeadSaltMinions(gatewayConfig);
+                removeDeadSaltMinions(gatewayConfig, remainingNodeFqdn);
             } catch (Exception e) {
                 LOGGER.warn("Error occurred during salt minion tear down", e);
                 throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -1113,11 +1114,16 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public void removeDeadSaltMinions(GatewayConfig gateway) throws CloudbreakOrchestratorFailedException {
+    public void removeDeadSaltMinions(GatewayConfig gateway, Set<String> remainingNodesFqdn) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             MinionStatusSaltResponse minionStatusSaltResponse = saltStateService.collectNodeStatus(saltConnector);
-            List<String> downNodes = minionStatusSaltResponse.downMinions();
-            LOGGER.info("Deleting dead minions {} from {}", StringUtils.join(downNodes, ", "), gateway.getHostname());
+            List<String> downNodes = minionStatusSaltResponse.downMinions()
+                    .stream()
+                    .filter(node -> !remainingNodesFqdn.contains(node))
+                    .collect(Collectors.toList());
+            Sets.SetView<String> sparedNodes = Sets.intersection(Set.copyOf(minionStatusSaltResponse.downMinions()), remainingNodesFqdn);
+            LOGGER.info("Deleting dead minions {} from {}. Skipping: {}",
+                    StringUtils.join(downNodes, ", "), gateway.getHostname(), StringUtils.join(sparedNodes, ", "));
             if (!CollectionUtils.isEmpty(downNodes)) {
                 saltConnector.wheel("key.delete", downNodes, Object.class);
             }

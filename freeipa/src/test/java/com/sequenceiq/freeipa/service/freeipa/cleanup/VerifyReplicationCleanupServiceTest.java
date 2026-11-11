@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -24,6 +25,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -111,27 +114,64 @@ class VerifyReplicationCleanupServiceTest {
     }
 
     @Test
-    void testVerifyOnSurvivingMastersWhenOrchestratorThrowsThenPropagates() throws CloudbreakOrchestratorException {
-        Stack stack = mock(Stack.class);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(
-                mock(InstanceMetaData.class),
-                mock(InstanceMetaData.class)
-        ));
-        stubStatePresent(stack, true);
-
-        OrchestratorStateParams stateParams = new OrchestratorStateParams();
-        when(orchestratorParamsProvider.createStateParams(STACK_ID, "freeipa/verify-replication-cleanup")).thenReturn(stateParams);
-
-        CloudbreakOrchestratorFailedException cause = new CloudbreakOrchestratorFailedException("salt failed");
-        org.mockito.Mockito.doThrow(cause).when(hostOrchestrator).runOrchestratorState(any());
+    void testVerifyOnSurvivingMastersWhenScriptTimesOutThenReportsNotConverged() throws CloudbreakOrchestratorException {
+        stubStateRun();
+        Multimap<String, String> nodesWithErrors = ArrayListMultimap.create();
+        nodesWithErrors.put("ipaserver1.example.com", "Failed to execute: {Name=/opt/salt/scripts/freeipa_check_replication_cleanup.sh, "
+                + "Stdout=TIMEOUT after 600s waiting for FreeIPA replication cleanup on ldap://localhost for hosts 'host1.example.com'.}");
+        CloudbreakOrchestratorFailedException runnerException = new CloudbreakOrchestratorFailedException(
+                "Failed: Orchestrator component went failed in 10 min(s), message: Target: [ipaserver1.example.com]", nodesWithErrors);
+        // Mirrors SaltOrchestrator.runOrchestratorState, which re-wraps the runner's exception without its nodesWithErrors.
+        CloudbreakOrchestratorFailedException cause = new CloudbreakOrchestratorFailedException(runnerException.getMessage(), runnerException);
+        doThrow(cause).when(hostOrchestrator).runOrchestratorState(any());
 
         CloudbreakOrchestratorException thrown = assertThrows(CloudbreakOrchestratorException.class,
                 () -> underTest.verifyOnSurvivingMasters(STACK_ID, Set.of("host1.example.com")));
 
         // The curated, actionable message must reach the flow (and thus the UI), not the raw salt dump.
-        assertThat(thrown.getMessage()).contains("host1.example.com").contains("ipa-replica-manage clean-dangling-ruv");
+        assertThat(thrown.getMessage())
+                .startsWith("FreeIPA replication cleanup did not converge within 600 seconds")
+                .contains("host1.example.com")
+                .contains("ipa-replica-manage clean-dangling-ruv");
         assertThat(thrown.getCause()).isSameAs(cause);
+    }
+
+    @Test
+    void testVerifyOnSurvivingMastersWhenSaltFailsBeforeCheckRunsThenReportsUnderlyingError() throws CloudbreakOrchestratorException {
+        stubStateRun();
+        CloudbreakOrchestratorFailedException cause = new CloudbreakOrchestratorFailedException(
+                "Failed: Orchestrator component went failed in 1 min(s), message: Salt returned null jid. Please check the salt log.",
+                ArrayListMultimap.create());
+        doThrow(cause).when(hostOrchestrator).runOrchestratorState(any());
+
+        CloudbreakOrchestratorException thrown = assertThrows(CloudbreakOrchestratorException.class,
+                () -> underTest.verifyOnSurvivingMasters(STACK_ID, Set.of("host1.example.com")));
+
+        // CB-35485: an orchestration failure must not be misreported as a CleanAllRUV non-convergence.
+        assertThat(thrown.getMessage())
+                .startsWith("FreeIPA replication cleanup verification failed on the surviving FreeIPA master(s) before")
+                .contains("host1.example.com")
+                .contains("Salt returned null jid")
+                .doesNotContain("did not converge")
+                .doesNotContain("CleanAllRUV");
+        assertThat(thrown.getCause()).isSameAs(cause);
+    }
+
+    @Test
+    void testVerifyOnSurvivingMastersWhenNodeErrorsWithoutTimeoutMarkerThenReportsUnderlyingError() throws CloudbreakOrchestratorException {
+        stubStateRun();
+        Multimap<String, String> nodesWithErrors = ArrayListMultimap.create();
+        nodesWithErrors.put("ipaserver1.example.com", "Salt minion is not responding.");
+        CloudbreakOrchestratorFailedException cause = new CloudbreakOrchestratorFailedException("minion did not return", nodesWithErrors);
+        doThrow(cause).when(hostOrchestrator).runOrchestratorState(any());
+
+        CloudbreakOrchestratorException thrown = assertThrows(CloudbreakOrchestratorException.class,
+                () -> underTest.verifyOnSurvivingMasters(STACK_ID, Set.of("host1.example.com", "host2.example.com")));
+
+        assertThat(thrown.getMessage())
+                .startsWith("FreeIPA replication cleanup verification failed on the surviving FreeIPA master(s) before")
+                .contains("minion did not return")
+                .doesNotContain("did not converge");
     }
 
     @Test
@@ -193,6 +233,14 @@ class VerifyReplicationCleanupServiceTest {
         // A probe failure is a precondition error, not the check itself — do not introduce a new downscale failure mode.
         verify(hostOrchestrator, never()).runOrchestratorState(any());
         verifyNoInteractions(orchestratorParamsProvider);
+    }
+
+    private void stubStateRun() throws CloudbreakOrchestratorException {
+        Stack stack = mock(Stack.class);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(mock(InstanceMetaData.class), mock(InstanceMetaData.class)));
+        stubStatePresent(stack, true);
+        when(orchestratorParamsProvider.createStateParams(STACK_ID, "freeipa/verify-replication-cleanup")).thenReturn(new OrchestratorStateParams());
     }
 
     private void stubStatePresent(Stack stack, boolean present) throws CloudbreakOrchestratorException {

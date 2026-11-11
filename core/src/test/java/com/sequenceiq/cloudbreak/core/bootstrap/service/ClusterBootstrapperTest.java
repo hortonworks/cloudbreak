@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -187,7 +188,7 @@ public class ClusterBootstrapperTest {
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
         verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
-        verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(eq(gatewayConfig), any());
         verify(hostOrchestrator).bootstrapNewNodes(any(), any(), any(), any(), bootstrapParamsCaptor.capture(), any(), anyBoolean());
         BootstrapParams bootstrapParams = bootstrapParamsCaptor.getValue();
         assertEquals(12, bootstrapParams.getMasterWorkerThreads());
@@ -226,7 +227,7 @@ public class ClusterBootstrapperTest {
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
         verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
-        verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(eq(gatewayConfig), any());
         verify(hostOrchestrator).bootstrapNewNodes(any(), any(), any(), any(), bootstrapParamsCaptor.capture(), any(), anyBoolean());
         BootstrapParams bootstrapParams = bootstrapParamsCaptor.getValue();
         assertNull(bootstrapParams.getMasterWorkerThreads());
@@ -299,7 +300,7 @@ public class ClusterBootstrapperTest {
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
         verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
-        verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(eq(gatewayConfig), any());
     }
 
     @Test
@@ -339,8 +340,8 @@ public class ClusterBootstrapperTest {
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
         verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
-        verify(hostOrchestrator, never()).removeDeadSaltMinions(deadConfig);
-        verify(hostOrchestrator, times(1)).removeDeadSaltMinions(aliveConfig);
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(eq(deadConfig), any());
+        verify(hostOrchestrator, times(1)).removeDeadSaltMinions(aliveConfig, Set.of());
     }
 
     @Test
@@ -383,8 +384,8 @@ public class ClusterBootstrapperTest {
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
         verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData, instanceMetaData2));
-        verify(hostOrchestrator, never()).removeDeadSaltMinions(deadConfig1);
-        verify(hostOrchestrator, never()).removeDeadSaltMinions(deadConfig2);
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(eq(deadConfig1), any());
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(eq(deadConfig2), any());
     }
 
     @Test

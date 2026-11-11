@@ -448,7 +448,7 @@ public class ClusterBootstrapper {
                 .collect(Collectors.toList());
         for (GatewayConfig masterToCorrect : saltMastersToCorrect) {
             LOGGER.info("Remove dead salt minions on master: {}", masterToCorrect);
-            hostOrchestrator.removeDeadSaltMinions(masterToCorrect);
+            hostOrchestrator.removeDeadSaltMinions(masterToCorrect, Set.of());
         }
     }
 

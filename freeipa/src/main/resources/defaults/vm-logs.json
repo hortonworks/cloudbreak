@@ -198,5 +198,9 @@
   {
     "path": "/var/log/ipaupgrade.log",
     "label": "ipaupgrade"
+  },
+  {
+    "path": "/var/log/freeipa_replication_cleanup.log",
+    "label": "freeipa-replication-cleanup"
   }
 ]

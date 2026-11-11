@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.handler;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -11,12 +12,14 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Multimaps;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -143,8 +146,12 @@ class RemoveHostsHandlerTest {
         underTest.accept(new Event<>(request));
 
         verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
-        verify(bootstrapService).reBootstrap(any(), any());
-        verify(hostOrchestrator).tearDown(any(), any(), eq(Multimaps.forMap(Map.of("example1.com", "192.168.0.1"))), any(), any());
+        verify(bootstrapService).reBootstrap(any(), eq(Set.of(im2, im3)));
+        ArgumentCaptor<Set<Node>> remainingNodesCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(hostOrchestrator).tearDown(any(), any(), eq(Multimaps.forMap(Map.of("example1.com", "192.168.0.1"))),
+                remainingNodesCaptor.capture(), any());
+        // SaltOrchestrator.tearDown spares the salt keys of remaining nodes by matching Node hostname against the minion id (FQDN).
+        assertThat(remainingNodesCaptor.getValue()).extracting(Node::getHostname).containsExactlyInAnyOrder("example2.com", "example3.com");
     }
 
     @Test

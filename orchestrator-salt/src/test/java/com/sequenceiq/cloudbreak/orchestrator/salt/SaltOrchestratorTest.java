@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -407,6 +408,44 @@ class SaltOrchestratorTest {
     }
 
     @Test
+    void tearDownDoesNotDeleteKeysOfRemainingNodesReportedDownTest() throws Exception {
+        String removedFqdn = "10-0-0-1.example.com";
+        String remainingFqdn2 = "10-0-0-2.example.com";
+        String remainingFqdn3 = "10-0-0-3.example.com";
+        String deadFqdn = "10-0-0-4.example.com";
+        Map<String, String> privateIpsByFQDN = Map.of(removedFqdn, "10.0.0.1");
+
+        GatewayConfig liveGateway2 = createGatewayConfig("10.0.0.2", "10-0-0-2");
+        GatewayConfig liveGateway3 = createGatewayConfig("10.0.0.3", "10-0-0-3");
+        NodeVolumes nodeVolumes = mock(NodeVolumes.class);
+        Node remainingNode2 = new Node("10.0.0.2", "1.1.1.2", "instanceid2", "hg", remainingFqdn2, "hg",
+                nodeVolumes, TemporaryStorage.EPHEMERAL_VOLUMES);
+        Node remainingNode3 = new Node("10.0.0.3", "1.1.1.3", "instanceid3", "hg", remainingFqdn3, "hg",
+                nodeVolumes, TemporaryStorage.EPHEMERAL_VOLUMES);
+
+        // simulates the CB-35485 race: remaining nodes are temporarily reported as down by salt
+        MinionStatusSaltResponse minionStatusSaltResponse = createMinionStatusResponse(
+                List.of(), List.of(remainingFqdn2, remainingFqdn3, deadFqdn));
+        when(saltStateService.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
+        Callable<Boolean> callable = mock(Callable.class);
+        when(saltRunner.runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+                .thenReturn(callable);
+        ExitCriteriaModel exitCriteriaModel = mock(ExitCriteriaModel.class);
+        OrchestratorAware orchestratorAware = mock(OrchestratorAware.class);
+        when(orchestratorAware.getAllNotDeletedNodes()).thenReturn(Set.of());
+
+        saltOrchestrator.tearDown(orchestratorAware, List.of(gatewayConfig, liveGateway2, liveGateway3), Multimaps.forMap(privateIpsByFQDN),
+                Set.of(remainingNode2, remainingNode3), exitCriteriaModel);
+
+        verify(saltService, times(2)).createSaltConnector(liveGateway2);
+        verify(saltService, times(2)).createSaltConnector(liveGateway3);
+        verify(saltConnector, times(2)).wheel("key.delete", Set.of(removedFqdn), Object.class);
+        verify(saltConnector, times(2)).wheel("key.delete", List.of(deadFqdn), Object.class);
+        verify(saltConnector, never()).wheel(eq("key.delete"),
+                argThat(minions -> minions.contains(remainingFqdn2) || minions.contains(remainingFqdn3)), eq(Object.class));
+    }
+
+    @Test
     void tearDownFailTest() throws Exception {
         Map<String, String> privateIpsByFQDN = new HashMap<>();
         privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
@@ -793,7 +832,7 @@ class SaltOrchestratorTest {
         minionStatusSaltResponse.setResult(minionStatusList);
 
         when(saltStateService.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
-        saltOrchestrator.removeDeadSaltMinions(gatewayConfig);
+        saltOrchestrator.removeDeadSaltMinions(gatewayConfig, Set.of());
         verify(saltConnector, times(1)).wheel("key.delete", downNodes, Object.class);
     }
 
@@ -810,15 +849,70 @@ class SaltOrchestratorTest {
         minionStatusSaltResponse.setResult(minionStatusList);
 
         when(saltStateService.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
-        saltOrchestrator.removeDeadSaltMinions(gatewayConfig);
+        saltOrchestrator.removeDeadSaltMinions(gatewayConfig, Set.of());
         verify(saltConnector, never()).wheel("key.delete", downNodes, Object.class);
+    }
+
+    @Test
+    void testRemoveDeadSaltMinionsSkipsRemainingNodes() throws Exception {
+        MinionStatusSaltResponse minionStatusSaltResponse = createMinionStatusResponse(
+                List.of("10-0-0-1.example.com"), List.of("10-0-0-4.example.com", "10-0-0-5.example.com"));
+
+        when(saltStateService.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
+        saltOrchestrator.removeDeadSaltMinions(gatewayConfig, Set.of("10-0-0-5.example.com"));
+
+        verify(saltConnector, times(1)).wheel("key.delete", List.of("10-0-0-4.example.com"), Object.class);
+        verify(saltConnector, never()).wheel(eq("key.delete"), argThat(minions -> minions.contains("10-0-0-5.example.com")), eq(Object.class));
+    }
+
+    @Test
+    void testRemoveDeadSaltMinionsDoesNotDeleteWhenAllDownMinionsAreRemaining() throws Exception {
+        MinionStatusSaltResponse minionStatusSaltResponse = createMinionStatusResponse(
+                List.of("10-0-0-1.example.com"), List.of("10-0-0-4.example.com", "10-0-0-5.example.com"));
+
+        when(saltStateService.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
+        saltOrchestrator.removeDeadSaltMinions(gatewayConfig, Set.of("10-0-0-4.example.com", "10-0-0-5.example.com", "10-0-0-6.example.com"));
+
+        verify(saltConnector, never()).wheel(eq("key.delete"), anyCollection(), eq(Object.class));
     }
 
     @Test
     void testCannotRemoveDeadMinions() {
         when(saltStateService.collectNodeStatus(eq(saltConnector))).thenThrow(new RuntimeException("connection failed"));
         assertThrows(CloudbreakOrchestratorFailedException.class, () ->
-                saltOrchestrator.removeDeadSaltMinions(gatewayConfig));
+                saltOrchestrator.removeDeadSaltMinions(gatewayConfig, Set.of()));
+    }
+
+    private MinionStatusSaltResponse createMinionStatusResponse(List<String> upNodes, List<String> downNodes) {
+        MinionStatus minionStatus = new MinionStatus();
+        minionStatus.setUp(upNodes);
+        minionStatus.setDown(downNodes);
+        MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
+        minionStatusSaltResponse.setResult(List.of(minionStatus));
+        return minionStatusSaltResponse;
+    }
+
+    private GatewayConfig createGatewayConfig(String privateAddress, String hostname) {
+        return GatewayConfig.builder()
+                .withConnectionAddress(privateAddress)
+                .withPublicAddress(privateAddress)
+                .withPrivateAddress(privateAddress)
+                .withHostname(hostname)
+                .withGatewayPort(9443)
+                .withInstanceId("instanceid-" + hostname)
+                .withServerCert("servercert")
+                .withClientCert("clientcert")
+                .withClientKey("clientkey")
+                .withSaltPassword("saltpasswd")
+                .withSaltBootPassword("saltbootpassword")
+                .withSignatureKey("signkey")
+                .withKnoxGatewayEnabled(false)
+                .withPrimary(false)
+                .withSaltMasterPrivateKey("masterPrivateKey")
+                .withSaltMasterPublicKey("masterPublicKey")
+                .withSaltSignPrivateKey("privatekey")
+                .withSaltSignPublicKey("publickey")
+                .build();
     }
 
     @Test

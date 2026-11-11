@@ -4,15 +4,18 @@ import static com.sequenceiq.cloudbreak.util.TimeUtil.MILLISEC_MULTIPLIER;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -45,6 +48,8 @@ public class VerifyReplicationCleanupService {
     private static final int POLL_MARGIN = 12;
 
     private static final int MAX_RETRY_ON_ERROR = 2;
+
+    private static final String CONVERGENCE_TIMEOUT_MARKER = "TIMEOUT after";
 
     @Value("${freeipa.replication.cleanup.polling.timeout-sec:600}")
     private long timeoutSec;
@@ -90,8 +95,11 @@ public class VerifyReplicationCleanupService {
                     hostOrchestrator.runOrchestratorState(stateParams);
                     LOGGER.info("Replication cleanup verification completed successfully for stack {}", stackId);
                 } catch (CloudbreakOrchestratorException e) {
-                    LOGGER.error("Replication cleanup verification failed for stack {}, removed hosts: {}", stackId, removedHosts, e);
-                    throw new CloudbreakOrchestratorFailedException(buildUserFacingError(removedHosts), e);
+                    boolean notConverged = isConvergenceTimeout(e);
+                    LOGGER.error("Replication cleanup verification failed for stack {}, removed hosts: {}, cleanup did not converge: {}",
+                            stackId, removedHosts, notConverged, e);
+                    String message = notConverged ? buildNotConvergedError(removedHosts) : buildExecutionError(removedHosts, e);
+                    throw new CloudbreakOrchestratorFailedException(message, e);
                 }
             }
         }
@@ -117,7 +125,29 @@ public class VerifyReplicationCleanupService {
         return retryParams;
     }
 
-    private String buildUserFacingError(Collection<String> removedHosts) {
+    /**
+     * The check script exits non-zero only on its own timeout and then prints "TIMEOUT after ...", which salt surfaces
+     * in the failed state's output. Any other failure (e.g. salt returned null jid, unresponsive minions) means the check never ran.
+     */
+    private boolean isConvergenceTimeout(CloudbreakOrchestratorException e) {
+        // SaltOrchestrator.runOrchestratorState re-wraps the runner's exception without its nodesWithErrors, so walk the cause chain.
+        return ExceptionUtils.getThrowableList(e).stream()
+                .filter(CloudbreakOrchestratorException.class::isInstance)
+                .map(t -> ((CloudbreakOrchestratorException) t).getNodesWithErrors())
+                .filter(Objects::nonNull)
+                .map(Multimap::values)
+                .flatMap(Collection::stream)
+                .anyMatch(error -> error != null && error.contains(CONVERGENCE_TIMEOUT_MARKER));
+    }
+
+    private String buildExecutionError(Collection<String> removedHosts, CloudbreakOrchestratorException e) {
+        return String.format(
+                "FreeIPA replication cleanup verification failed on the surviving FreeIPA master(s) before the replication state "
+                        + "could be evaluated for removed host(s): %s. Reason: %s",
+                String.join(", ", removedHosts), e.getMessage());
+    }
+
+    private String buildNotConvergedError(Collection<String> removedHosts) {
         return String.format(
                 "FreeIPA replication cleanup did not converge within %d seconds for removed host(s): %s. "
                         + "A surviving FreeIPA master is still running a CleanAllRUV task or holds a lingering replication "
