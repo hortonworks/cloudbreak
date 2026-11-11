@@ -21,11 +21,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -100,55 +99,52 @@ class CancelTrustSetupFlowIntegrationTest extends AbstractFreeIpaFlowIntegration
     @Inject
     private FreeIpaFlowManager freeIpaFlowManager;
 
-    @MockBean
+    @MockitoBean
     private StackToCloudStackConverter stackToCloudStackConverter;
 
-    @MockBean
+    @MockitoBean
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    @MockBean
+    @MockitoBean
     private CredentialService credentialService;
 
-    @MockBean
+    @MockitoBean
     private StackUpdater stackUpdater;
 
-    @MockBean
+    @MockitoBean
     private FlowOperationStatsRepository flowOperationStatsRepository;
 
-    @MockBean
+    @MockitoBean
     private FlowCancelService flowCancelService;
 
-    @MockBean
+    @MockitoBean
     private FlowUsageSender flowUsageSender;
 
-    @MockBean
-    private FlowEventListener flowEventListener;
-
-    @MockBean
+    @MockitoBean
     private MeterRegistry meterRegistry;
 
-    @MockBean
+    @MockitoBean
     private NodeConfig nodeConfig;
 
-    @MockBean
+    @MockitoBean
     private OperationService operationService;
 
-    @MockBean
+    @MockitoBean
     private NodeValidator nodeValidator;
 
-    @MockBean
+    @MockitoBean
     private ActiveDirectoryTrustService activeDirectoryTrustService;
 
-    @MockBean
+    @MockitoBean
     private CrossRealmTrustService crossRealmTrustService;
 
-    @MockBean
+    @MockitoBean
     private StackStatusFinalizer stackStatusFinalizer;
 
-    @MockBean
+    @MockitoBean
     private EventSenderService eventSenderService;
 
-    @Inject
+    @MockitoBean
     private StackService stackService;
 
     private Stack stack;
@@ -250,7 +246,5 @@ class CancelTrustSetupFlowIntegrationTest extends AbstractFreeIpaFlowIntegration
             TaskResultConverter.class
     })
     static class Config {
-        @MockBean
-        private StackService stackService;
     }
 }

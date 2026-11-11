@@ -23,12 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockReset;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
@@ -119,79 +118,76 @@ class FreeIpaRollingVerticalScaleFlowIntegrationTest extends AbstractFreeIpaFlow
 
     private static final String STACK_CRN = "crn:cdp:freeipa:us-west-1:" + ACCOUNT_ID + ":freeipa:test-freeipa-resource";
 
-    @MockBean(reset = MockReset.NONE)
+    @MockitoBean(reset = MockReset.NONE)
     private StackService stackService;
 
-    @MockBean
+    @MockitoBean
     private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
-    @MockBean
+    @MockitoBean
     private StackUpdater stackUpdater;
 
-    @MockBean
+    @MockitoBean
     private CredentialService credentialService;
 
-    @MockBean
+    @MockitoBean
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    @MockBean
+    @MockitoBean
     private StackToCloudStackConverter stackToCloudStackConverter;
 
-    @MockBean
+    @MockitoBean
     private ResourceService resourceService;
 
-    @MockBean
+    @MockitoBean
     private InstanceMetaDataService instanceMetaDataService;
 
-    @MockBean
+    @MockitoBean
     private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
 
-    @MockBean
+    @MockitoBean
     private CloudPlatformConnectors cloudPlatformConnectors;
 
-    @MockBean
+    @MockitoBean
     private OperationService operationService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaServicesStopService freeIpaServicesStopService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaInstanceHealthDetailsService healthDetailsService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaLoadBalancerService loadBalancerService;
 
-    @MockBean
+    @MockitoBean
     private HealthAgentService healthAgentService;
 
-    @MockBean
+    @MockitoBean
     private DelayedExecutorService delayedExecutorService;
 
-    @MockBean
+    @MockitoBean
     private EventSenderService eventSenderService;
 
-    @MockBean
+    @MockitoBean
     private MeterRegistry meterRegistry;
 
-    @MockBean
+    @MockitoBean
     private NodeConfig nodeConfig;
 
-    @MockBean
+    @MockitoBean
     private NodeValidator nodeValidator;
 
-    @MockBean
+    @MockitoBean
     private FlowCancelService flowCancelService;
 
-    @MockBean
+    @MockitoBean
     private FlowUsageSender flowUsageSender;
 
-    @MockBean
-    private FlowEventListener flowEventListener;
-
-    @MockBean
+    @MockitoBean
     private StackStatusFinalizer stackStatusFinalizer;
 
-    @MockBean
+    @MockitoBean
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
@@ -202,6 +198,9 @@ class FreeIpaRollingVerticalScaleFlowIntegrationTest extends AbstractFreeIpaFlow
 
     @Inject
     private FreeIpaFlowManager freeIpaFlowManager;
+
+    @MockitoBean
+    private FreeipaJobService jobService;
 
     @BeforeEach
     public void setup() throws Exception {
@@ -316,7 +315,5 @@ class FreeIpaRollingVerticalScaleFlowIntegrationTest extends AbstractFreeIpaFlow
     })
     static class TestConfig {
 
-        @MockBean
-        private FreeipaJobService jobService;
     }
 }

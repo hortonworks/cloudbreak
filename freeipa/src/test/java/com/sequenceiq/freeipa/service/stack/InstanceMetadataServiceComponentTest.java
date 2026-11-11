@@ -23,9 +23,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -61,17 +61,38 @@ public class InstanceMetadataServiceComponentTest {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    @Inject
+    @MockitoBean
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
-    @Inject
+    @MockitoBean
     private FreeIpaService freeIpaService;
 
-    @Inject
+    @MockitoBean
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Captor
     private ArgumentCaptor<InstanceMetaData> instanceMetaDataArgumentCaptor;
+
+    @MockitoBean
+    private TransactionService transactionService;
+
+    @MockitoBean
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @MockitoBean
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @MockitoBean
+    private CredentialService credentialService;
+
+    @MockitoBean
+    private ImageService imageService;
+
+    @MockitoBean
+    private AvailabilityZoneConverter availabilityZoneConverter;
+
+    @MockitoBean
+    private Clock clock;
 
     @Test
     public void saveInstanceAndGetUpdatedStack() {
@@ -205,34 +226,5 @@ public class InstanceMetadataServiceComponentTest {
     )
     public static class TestConfig {
 
-        @MockBean
-        private InstanceMetaDataRepository repository;
-
-        @MockBean
-        private TransactionService transactionService;
-
-        @MockBean
-        private CachedEnvironmentClientService cachedEnvironmentClientService;
-
-        @MockBean
-        private FreeIpaService freeIpaService;
-
-        @MockBean
-        private CloudPlatformConnectors cloudPlatformConnectors;
-
-        @MockBean
-        private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
-
-        @MockBean
-        private CredentialService credentialService;
-
-        @MockBean
-        private ImageService imageService;
-
-        @MockBean
-        private AvailabilityZoneConverter availabilityZoneConverter;
-
-        @MockBean
-        private Clock clock;
     }
 }

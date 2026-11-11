@@ -23,12 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.util.Pair;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockReset;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -55,7 +55,6 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
@@ -135,127 +134,124 @@ class FreeIpaDownscaleFlowIntegrationTest extends AbstractFreeIpaFlowIntegration
 
     private static final String ENVIRONMENT_CRN = "env-crn";
 
-    @MockBean(reset = MockReset.NONE)
+    @MockitoBean(reset = MockReset.NONE)
     private StackService stackService;
 
-    @MockBean
+    @MockitoBean
     private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
-    @MockBean
+    @MockitoBean
     private StackUpdater stackUpdater;
 
-    @MockBean
+    @MockitoBean
     private TerminationService terminationService;
 
-    @MockBean
+    @MockitoBean
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
-    @MockBean
+    @MockitoBean
     private CredentialService credentialService;
 
-    @MockBean
+    @MockitoBean
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    @MockBean
+    @MockitoBean
     private StackToCloudStackConverter stackToCloudStackConverter;
 
-    @MockBean
+    @MockitoBean
     private ResourceService resourceService;
 
-    @MockBean
+    @MockitoBean
     private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
 
-    @MockBean
+    @MockitoBean
     private CloudPlatformConnectors cloudPlatformConnectors;
 
-    @MockBean
+    @MockitoBean
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
 
-    @MockBean
+    @MockitoBean
     private PollTaskFactory pollTaskFactory;
 
-    @MockBean
+    @MockitoBean
     private ClusterProxyService clusterProxyService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaClientFactory freeIpaClientFactory;
 
-    @MockBean
+    @MockitoBean
     private TelemetryAgentService telemetryAgentService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
-    @MockBean
+    @MockitoBean
     private InstanceGroupService instanceGroupService;
 
-    @MockBean
+    @MockitoBean
     private CleanupService cleanupService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaTopologyService freeIpaTopologyService;
 
     @Inject
     private FreeIpaService freeIpaService;
 
-    @MockBean
+    @MockitoBean
     private DnsSoaRecordService dnsSoaRecordService;
 
-    @MockBean
+    @MockitoBean
     private HostOrchestrator hostOrchestrator;
 
-    @MockBean
+    @MockitoBean
     private GatewayConfigService gatewayConfigService;
 
-    @MockBean
+    @MockitoBean
     private BootstrapService bootstrapService;
 
-    @MockBean
+    @MockitoBean
     private VerifyReplicationCleanupService verifyReplicationCleanupService;
 
-    @MockBean
+    @MockitoBean
     private KerberosConfigUpdateService kerberosConfigUpdateService;
 
-    @MockBean
+    @MockitoBean
     private EnvironmentEndpoint environmentEndpoint;
 
-    @MockBean
+    @MockitoBean
     private OperationService operationService;
 
-    @MockBean
+    @MockitoBean
     private EnvironmentService environmentService;
 
-    @MockBean
+    @MockitoBean
     private MeterRegistry meterRegistry;
 
-    @MockBean
+    @MockitoBean
     private NodeConfig nodeConfig;
 
-    @MockBean
+    @MockitoBean
     private NodeValidator nodeValidator;
 
-    @MockBean
+    @MockitoBean
     private FlowCancelService flowCancelService;
 
-    @MockBean
+    @MockitoBean
     private FlowUsageSender flowUsageSender;
 
-    @MockBean
-    private FlowEventListener flowEventListener;
-
-    @MockBean
+    @MockitoBean
     private StackStatusFinalizer stackStatusFinalizer;
 
-    @MockBean
+    @MockitoBean
     private EventSenderService eventSenderService;
 
-    @MockBean
+    @MockitoBean
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
-    @MockBean
+    @MockitoBean
     private FreeIpaServicesStopService freeIpaServicesStopService;
 
     @Inject
@@ -268,6 +264,9 @@ class FreeIpaDownscaleFlowIntegrationTest extends AbstractFreeIpaFlowIntegration
     private FreeIpaFlowManager freeIpaFlowManager;
 
     private Stack stack;
+
+    @MockitoBean
+    private FreeipaJobService jobService;
 
     @BeforeEach
     public void setup() throws Exception {
@@ -399,7 +398,5 @@ class FreeIpaDownscaleFlowIntegrationTest extends AbstractFreeIpaFlowIntegration
     })
     static class TestConfig {
 
-        @MockBean
-        private FreeipaJobService jobService;
     }
 }

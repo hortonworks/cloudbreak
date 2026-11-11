@@ -28,11 +28,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockReset;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -74,7 +74,6 @@ import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
@@ -141,93 +140,114 @@ class StackProvisionFlowIntegrationTest extends AbstractFreeIpaFlowIntegrationTe
     @Inject
     private FreeIpaFlowManager freeIpaFlowManager;
 
-    @MockBean(reset = MockReset.NONE)
+    @MockitoBean(reset = MockReset.NONE)
     private StackService stackService;
 
-    @MockBean
+    @MockitoBean
     private StackParameterService stackParameterService;
 
-    @MockBean
+    @MockitoBean
     private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
-    @MockBean
+    @MockitoBean
     private ImageService imageService;
 
-    @MockBean
+    @MockitoBean
     private ImageFallbackService imageFallbackService;
 
-    @MockBean
+    @MockitoBean
     private EntitlementService entitlementService;
 
-    @MockBean
+    @MockitoBean
     private StackToCloudStackConverter stackToCloudStackConverter;
 
-    @MockBean
+    @MockitoBean
     private StackUpdater stackUpdater;
 
-    @MockBean
+    @MockitoBean
     private MetadataSetupService metadataSetupService;
 
-    @MockBean
+    @MockitoBean
     private TlsSetupService tlsSetupService;
 
-    @MockBean
+    @MockitoBean
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
-    @MockBean
+    @MockitoBean
     private ResourceService resourceService;
 
-    @MockBean
+    @MockitoBean
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    @MockBean
+    @MockitoBean
     private CloudPlatformConnectors cloudPlatformConnectors;
 
-    @MockBean
+    @MockitoBean
     private CredentialService credentialService;
 
-    @MockBean
+    @MockitoBean
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
 
-    @MockBean
+    @MockitoBean
     private PollTaskFactory pollTaskFactory;
 
-    @MockBean
+    @MockitoBean
     private InstanceMetaDataService instanceMetaDataService;
 
-    @MockBean
+    @MockitoBean
     private NodeConfig nodeConfig;
 
-    @MockBean
+    @MockitoBean
     private MeterRegistry meterRegistry;
 
-    @MockBean
+    @MockitoBean
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
-    @MockBean
+    @MockitoBean
     private EncryptionKeyService encryptionKeyService;
 
-    @MockBean
+    @MockitoBean
     private NodeValidator nodeValidator;
 
-    @MockBean
+    @MockitoBean
     private FlowCancelService flowCancelService;
 
-    @MockBean
+    @MockitoBean
     private FlowUsageSender flowUsageSender;
 
-    @MockBean
-    private FlowEventListener flowEventListener;
-
-    @MockBean
+    @MockitoBean
     private StackStatusFinalizer stackStatusFinalizer;
 
-    @MockBean
+    @MockitoBean
     private EventSenderService eventSenderService;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 
     private Stack stack;
+
+    @MockitoBean
+    private ClusterProxyService clusterProxyService;
+
+    @MockitoBean
+    private UserDataService userDataService;
+
+    @MockitoBean
+    private SecurityConfigService securityConfigService;
+
+    @MockitoBean
+    private ResourceNotifier resourceNotifier;
+
+    @MockitoBean
+    private UserdataSecretsService userdataSecretsService;
+
+    @MockitoBean
+    private StackEncryptionService stackEncryptionService;
+
+    @MockitoBean
+    private ResourceRetriever resourceRetriever;
+
+    @MockitoBean
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
 
     @BeforeEach
     public void setup() {
@@ -379,28 +399,6 @@ class StackProvisionFlowIntegrationTest extends AbstractFreeIpaFlowIntegrationTe
             UpdateUserdataSecretsHandler.class
     })
     static class Config {
-        @MockBean
-        private ClusterProxyService clusterProxyService;
 
-        @MockBean
-        private UserDataService userDataService;
-
-        @MockBean
-        private SecurityConfigService securityConfigService;
-
-        @MockBean
-        private ResourceNotifier resourceNotifier;
-
-        @MockBean
-        private UserdataSecretsService userdataSecretsService;
-
-        @MockBean
-        private StackEncryptionService stackEncryptionService;
-
-        @MockBean
-        private ResourceRetriever resourceRetriever;
-
-        @MockBean
-        private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
     }
 }
