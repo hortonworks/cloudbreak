@@ -1,0 +1,116 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url = "$repoUrl" }
+    maven { url = "$springRepoUrl" }
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath "org.openapitools:openapi-generator-gradle-plugin:$openapiGeneratorGradlePlugin"
+  }
+}
+
+plugins {
+  id 'java-library'
+  id 'org.openapi.generator' version "$openapiGeneratorGradlePlugin"
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+repositories {
+  mavenCentral()
+}
+
+dependencyManagement {
+  dependencies {
+    dependencySet(group: 'org.springframework.boot', version: "$springBootVersion") {
+      entry('spring-boot-starter-web') {
+        exclude group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+      }
+    }
+
+    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: "$jacksonVersion"
+  }
+}
+
+// Copies the Smart Router OpenAPI spec from a local checkout of the smartrouter repository.
+// Usage: ./gradlew :smartrouter-connector:syncSmartRouterOpenApiSpec [-PsmartRouterRepoDir=../smartrouter]
+tasks.register('syncSmartRouterOpenApiSpec', Copy) {
+  def smartRouterRepoDir = project.findProperty('smartRouterRepoDir') ?: "$rootProject.projectDir/../smartrouter"
+  from("$smartRouterRepoDir/service/src/main/resources/static/openapi.yaml")
+  into("$projectDir/src/main/yaml")
+  rename { 'smartrouter.yaml' }
+}
+
+openApiGenerate {
+  globalProperties.set([
+          apis: "",
+          models: "",
+          supportingFiles: "",
+
+          apiDocs: "false",
+          apiTests: "false",
+          verbose: "false",
+          modelDocs: "false",
+          modelTests: "false"
+  ])
+  generatorName = "java"
+  library = "resttemplate"
+  inputSpec = "$projectDir/src/main/yaml/smartrouter.yaml"
+  outputDir = "$projectDir/src/generated"
+  invokerPackage = "com.cloudera.smartrouter.client"
+  apiPackage = "com.cloudera.smartrouter.client.api"
+  modelPackage = "com.cloudera.smartrouter.client.model"
+  templateDir = "$projectDir/openapi-templates".toString()
+  configOptions.set([
+          openApiNullable: "true",
+          containerDefaultToNull: "true",
+          dateLibrary: "java8",
+          useJakartaEe: "true"
+  ])
+  additionalProperties.set([
+          hideGenerationTimestamp: "true"
+  ])
+}
+
+tasks.named('openApiGenerate') {
+  doLast {
+    delete(fileTree("${projectDir}/src/generated").matching {
+      exclude("src/main/**")
+    })
+    delete("${projectDir}/src/generated/.gitignore")
+    delete("${projectDir}/src/generated/src/main/AndroidManifest.xml")
+  }
+}
+
+dependencies {
+  implementation project(':common')
+  implementation project(':cluster-proxy')
+
+  implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-web'
+  implementation     group: 'com.fasterxml.jackson.datatype',      name: 'jackson-datatype-jsr310',        version: "$jacksonVersion"
+  implementation     group: 'org.openapitools',                    name: 'jackson-databind-nullable',      version: "$jacksonDatabindNullable"
+  implementation     group: 'org.apache.httpcomponents.client5',   name: 'httpclient5',                    version: "$httpClientVersion"
+
+  testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: "$assertjVersion"
+  testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: "$mockitoVersion"
+  testImplementation(group: "org.springframework.boot",            name: "spring-boot-starter-test",       version: "$springBootVersion") {
+    exclude group: "junit"
+  }
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+sourceSets {
+  main {
+    java.srcDir(files("${projectDir}/src/generated/src/main/java").builtBy(tasks.openApiGenerate))
+  }
+}
+
+checkstyle {
+  checkstyleMain.exclude '**/generated/**'
+}
+
+clean {
+  delete "${projectDir}/src/generated/"
+}

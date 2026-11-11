@@ -39,8 +39,24 @@ public class ClusterProxyProxyClient {
         return callClusterProxy(fullPath, () -> restTemplate.postForObject(fullPath, JsonUtil.writeValueAsStringUnchecked(request), responseType));
     }
 
+    /**
+     * The absolute URL of the proxied service, for clients which build their request URLs themselves, e.g. generated OpenAPI clients
+     * using {@link #getRestTemplate()}.
+     */
+    public String getServiceUrl() {
+        return restTemplate.getUriTemplateHandler().expand(getServicePath()).toString();
+    }
+
+    public RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
+
     private String getFullPath(String path) {
-        return String.format("/%s/%s/%s", clusterCrn, serviceName, path);
+        return String.format("%s/%s", getServicePath(), path);
+    }
+
+    private String getServicePath() {
+        return String.format("/%s/%s", clusterCrn, serviceName);
     }
 
     public <T> T callClusterProxy(String fullPath, Supplier<T> callable) {

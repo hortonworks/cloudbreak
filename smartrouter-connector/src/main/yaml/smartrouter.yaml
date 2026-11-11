@@ -1,0 +1,3073 @@
+openapi: 3.0.3
+info:
+  title: Smart Router Service API
+  version: 0.1.0
+  description: |
+    Bootstrap OpenAPI description for the Smart Router control-plane service.
+servers:
+  - url: http://localhost:18080
+paths:
+  /v1/resolve:
+    post:
+      operationId: resolveRoutingDecision
+      summary: Resolve the routing decision for a workload request
+      parameters:
+        - name: dryRun
+          in: query
+          required: false
+          description: When true, collect facts and evaluate policy but skip the decision-audit write.
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingRequest'
+      responses:
+        '200':
+          description: Routing decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingDecision'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+  /v1/health:
+    get:
+      operationId: serviceHealth
+      summary: Liveness health endpoint
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /v1/ready:
+    get:
+      operationId: serviceReadiness
+      summary: Readiness endpoint with dependency checks
+      responses:
+        '200':
+          description: Service is ready to accept traffic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Service is not ready due to a critical dependency outage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+  /v1/provider-snapshots:
+    post:
+      operationId: providerSnapshots
+      summary: Per-provider decision-input snapshots (diagnostics)
+      description: Runs each decision input provider through the bounded, cached collection path and reports its outcome.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingRequest'
+      responses:
+        '200':
+          description: Snapshot of each decision input provider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionInputSnapshotsResponse'
+  /v1/policies:
+    get:
+      tags:
+      - policies
+      operationId: listPolicies
+      summary: List policies with derived priority and pinned system layers
+      description: >-
+        Filters combine with AND; a multi-valued filter matches any listed value. They also apply to the System default
+        layer (systemLayers.bottom), which is returned only when it matches every given filter: it is Active, has a global
+        scope and the objective default, and q and name see only its name (system-default) and display name (System default).
+        With no filter it is always returned. limit, cursor, total and nextCursor count items only; systemLayers.bottom is
+        never counted or paged. The application/yaml export contains policies only, never system layers.
+      parameters:
+      - name: q
+        in: query
+        description: >-
+          Case-insensitive substring of metadata.name, metadata.displayName, metadata.description, or any rule's reason
+          or when expression.
+        schema:
+          type: string
+          maxLength: 100
+      - name: phase
+        in: query
+        explode: true
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyPhase'
+      - name: objective
+        in: query
+        explode: true
+        description: >-
+          A preset id matches policies with that preset; custom matches custom objectives; none matches policies without
+          an objective. default is the objective of the System default layer: it matches no policy and keeps
+          systemLayers.bottom, which any objective filter without default omits. default cannot be set on a policy.
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - cost-saver
+            - balanced
+            - performance
+            - custom
+            - none
+            - default
+      - name: scopeType
+        in: query
+        explode: true
+        description: Matches a policy when any of its scopes has a listed type; none matches policies without scopes.
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - global
+            - queue
+            - service
+            - none
+      - name: name
+        in: query
+        explode: true
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceName'
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+      - name: cursor
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Policy page. With Accept application/yaml, multi-document export (max 500, status omitted).
+          headers:
+            X-Policy-Store:
+              schema:
+                type: string
+                enum:
+                - jdbc
+                - in-memory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyListResponse'
+            application/yaml:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/PolicyStoreUnavailable'
+    post:
+      tags:
+      - policies
+      operationId: createPolicy
+      summary: Create a policy (final wizard action)
+      parameters:
+      - name: anchor
+        in: query
+        schema:
+          $ref: '#/components/schemas/ResourceName'
+      - name: position
+        in: query
+        schema:
+          type: string
+          enum:
+          - before
+          - after
+      - $ref: '#/components/parameters/IfMatchOrderOptional'
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingPolicy'
+      responses:
+        '201':
+          description: Created. metadata.name is authoritative when it was generated.
+          headers:
+            ETag:
+              $ref: '#/components/headers/PolicyETag'
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/PolicyInvalid'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies/{name}:
+    parameters:
+    - $ref: '#/components/parameters/Name'
+    get:
+      tags:
+      - policies
+      operationId: getPolicy
+      responses:
+        '200':
+          description: Policy document
+          headers:
+            ETag:
+              $ref: '#/components/headers/PolicyETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicy'
+            application/yaml:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+      - policies
+      operationId: replacePolicy
+      parameters:
+      - $ref: '#/components/parameters/IfMatchPolicy'
+      - $ref: '#/components/parameters/IfPolicyOrderMatch'
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingPolicy'
+      responses:
+        '200':
+          description: Updated
+          headers:
+            ETag:
+              $ref: '#/components/headers/PolicyETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/PolicyInvalid'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+    patch:
+      tags:
+      - policies
+      operationId: patchPolicy
+      description: Merge patch limited to metadata.displayName, metadata.description, spec.enabled, spec.scopes, spec.targets.
+        Arrays (spec.scopes, spec.targets) are replaced as a whole.
+      parameters:
+      - $ref: '#/components/parameters/IfMatchPolicy'
+      - $ref: '#/components/parameters/IfPolicyOrderMatch'
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/PolicyPatch'
+      responses:
+        '200':
+          description: Patched
+          headers:
+            ETag:
+              $ref: '#/components/headers/PolicyETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/PolicyInvalid'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+    delete:
+      tags:
+      - policies
+      operationId: deletePolicy
+      description: Soft delete; name and display names stay reserved; order row removed in the same transaction.
+      parameters:
+      - $ref: '#/components/parameters/IfMatchPolicy'
+      - $ref: '#/components/parameters/IfPolicyOrderMatch'
+      - $ref: '#/components/parameters/ChangeComment'
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies/{name}:clone:
+    post:
+      tags:
+      - policies
+      operationId: clonePolicy
+      description: Creates a disabled clone; a scoped clone is inserted directly below its source.
+      parameters:
+      - $ref: '#/components/parameters/Name'
+      - $ref: '#/components/parameters/IfPolicyOrderMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloneRequest'
+      responses:
+        '201':
+          description: Clone created
+          headers:
+            ETag:
+              $ref: '#/components/headers/PolicyETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicy'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies:bulk-delete:
+    post:
+      tags:
+      - policies
+      operationId: bulkDeletePolicies
+      description: Atomic; any version or order conflict aborts the whole request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteRequest'
+      responses:
+        '200':
+          description: All deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkDeleteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies/identity-availability:
+    get:
+      tags:
+      - policies
+      operationId: checkIdentityAvailability
+      description: Advisory only; create remains the atomic uniqueness authority.
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      - name: displayName
+        in: query
+        schema:
+          type: string
+          maxLength: 120
+      responses:
+        '200':
+          description: Availability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityAvailability'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /v1/policies/{name}/revisions:
+    get:
+      tags:
+      - policies
+      operationId: listPolicyRevisions
+      parameters:
+      - $ref: '#/components/parameters/Name'
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+      - name: cursor
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Revision summaries, newest first
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/policies/{name}/revisions/{version}:
+    get:
+      tags:
+      - policies
+      operationId: getPolicyRevision
+      parameters:
+      - $ref: '#/components/parameters/Name'
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: Historical document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicy'
+            application/yaml:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/policies/{name}/diff:
+    get:
+      tags:
+      - policies
+      operationId: diffPolicyRevisions
+      parameters:
+      - $ref: '#/components/parameters/Name'
+      - name: from
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      - name: to
+        in: query
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: Rule-ID-aware semantic diff
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyDiffResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/policies/{name}:rollback:
+    post:
+      tags:
+      - policies
+      operationId: rollbackPolicy
+      description: Forward-only; re-validated against the current catalog; creates a new version.
+      parameters:
+      - $ref: '#/components/parameters/Name'
+      - $ref: '#/components/parameters/IfMatchPolicy'
+      - $ref: '#/components/parameters/IfPolicyOrderMatch'
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RollbackRequest'
+      responses:
+        '200':
+          description: Rolled back
+          headers:
+            ETag:
+              $ref: '#/components/headers/PolicyETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/PolicyInvalid'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies/order:
+    get:
+      tags:
+      - order
+      operationId: getPolicyOrder
+      responses:
+        '200':
+          description: Live scoped policies in evaluation order (System default excluded)
+          headers:
+            ETag:
+              $ref: '#/components/headers/OrderETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicyOrder'
+            application/yaml:
+              schema:
+                type: string
+    put:
+      tags:
+      - order
+      operationId: replacePolicyOrder
+      parameters:
+      - $ref: '#/components/parameters/IfMatchOrder'
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingPolicyOrder'
+      responses:
+        '200':
+          description: Order replaced
+          headers:
+            ETag:
+              $ref: '#/components/headers/OrderETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicyOrder'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies/{name}:move:
+    post:
+      tags:
+      - order
+      operationId: movePolicy
+      parameters:
+      - $ref: '#/components/parameters/Name'
+      - $ref: '#/components/parameters/IfMatchOrder'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveRequest'
+      responses:
+        '200':
+          description: Moved
+          headers:
+            ETag:
+              $ref: '#/components/headers/OrderETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingPolicyOrder'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies/priority-seed:
+    get:
+      tags:
+      - order
+      operationId: getPrioritySeed
+      parameters:
+      - name: scopeType
+        in: query
+        required: true
+        description: For a policy with several scopes, pass its most specific scope type (service, then queue, then global).
+        schema:
+          type: string
+          enum:
+          - global
+          - queue
+          - service
+      responses:
+        '200':
+          description: Suggested insertion slot for the Prioritize step
+          headers:
+            ETag:
+              $ref: '#/components/headers/OrderETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrioritySeed'
+  /v1/policies:validate:
+    post:
+      tags:
+      - authoring
+      operationId: validatePolicy
+      parameters:
+      - name: context
+        in: query
+        schema:
+          type: string
+          enum:
+          - create
+          - update
+          default: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingPolicy'
+          application/yaml:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Report for any parseable document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationReport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /v1/policies:simulate:
+    post:
+      tags:
+      - authoring
+      operationId: simulatePolicy
+      description: Side-effect free; no providers, cache writes, EXPLAIN or audit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationRequest'
+          application/yaml:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Outcome and ordered trace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/SimulationLimit'
+  /v1/policies:materialize-objective:
+    post:
+      tags:
+      - authoring
+      operationId: materializeObjective
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaterializeObjectiveRequest'
+      responses:
+        '200':
+          description: Deterministic generated rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaterializeObjectiveResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /v1/policies:apply:
+    post:
+      tags:
+      - authoring
+      operationId: applyPolicies
+      description: Atomic multi-document apply of RoutingPolicy, RoutingGuardrail and at most one RoutingPolicyOrder.
+      parameters:
+      - name: dryRun
+        in: query
+        schema:
+          type: boolean
+          default: false
+      - name: planHash
+        in: query
+        description: When present, refuse with 412 if the computed plan differs.
+        schema:
+          type: string
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/yaml:
+            schema:
+              type: string
+              maxLength: 262144
+      responses:
+        '200':
+          description: Plan (dryRun) or committed result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/PolicyInvalid'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies/catalog/fields:
+    get:
+      tags:
+      - authoring
+      operationId: getFieldCatalog
+      responses:
+        '200':
+          description: Versioned CEL field catalog
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldCatalog'
+  /v1/policies/presets:
+    get:
+      tags:
+      - authoring
+      operationId: getPresets
+      responses:
+        '200':
+          description: Versioned presets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresetsResponse'
+  /v1/policies/lookups/default-target:
+    get:
+      tags:
+      - lookups
+      operationId: lookupDefaultTarget
+      responses:
+        '200':
+          description: Effective default (From Default) target
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultTargetLookup'
+  /v1/policies/lookups/burst-targets:
+    get:
+      tags:
+      - lookups
+      operationId: lookupBurstTargets
+      responses:
+        '200':
+          description: Eligible burst targets (To Target)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BurstTargetsLookup'
+  /v1/policies/lookups/queues:
+    get:
+      tags:
+      - lookups
+      operationId: lookupQueues
+      responses:
+        '200':
+          description: YARN queues with burstability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueuesLookup'
+  /v1/policies/lookups/services:
+    get:
+      tags:
+      - lookups
+      operationId: lookupServices
+      parameters:
+      - name: target
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Services and effective endpoints on a target
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicesLookup'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/policies/guardrails:
+    get:
+      tags:
+      - guardrails
+      operationId: listGuardrails
+      responses:
+        '200':
+          description: Intrinsic (read-only) and discretionary guardrails plus kill-switch state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuardrailListResponse'
+    post:
+      tags:
+      - guardrails
+      operationId: createGuardrail
+      parameters:
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingGuardrail'
+      responses:
+        '201':
+          description: Created
+          headers:
+            ETag:
+              $ref: '#/components/headers/PolicyETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingGuardrail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PolicyInvalid'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies/guardrails/{name}:
+    parameters:
+    - $ref: '#/components/parameters/Name'
+    get:
+      tags:
+      - guardrails
+      operationId: getGuardrail
+      responses:
+        '200':
+          description: Guardrail
+          headers:
+            ETag:
+              $ref: '#/components/headers/PolicyETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingGuardrail'
+            application/yaml:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+      - guardrails
+      operationId: replaceGuardrail
+      parameters:
+      - $ref: '#/components/parameters/IfMatchPolicy'
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingGuardrail'
+      responses:
+        '200':
+          description: Updated
+          headers:
+            ETag:
+              $ref: '#/components/headers/PolicyETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingGuardrail'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/PolicyInvalid'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+    delete:
+      tags:
+      - guardrails
+      operationId: deleteGuardrail
+      description: Intrinsic guardrails cannot be deleted (403).
+      parameters:
+      - $ref: '#/components/parameters/IfMatchPolicy'
+      - $ref: '#/components/parameters/ChangeComment'
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/policies/guardrails/{name}/revisions:
+    get:
+      tags:
+      - guardrails
+      operationId: listGuardrailRevisions
+      parameters:
+      - $ref: '#/components/parameters/Name'
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+      - name: cursor
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Revision summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/decisions/{id}/chain:
+    get:
+      tags:
+      - decisions
+      operationId: getDecisionChain
+      summary: Recorded evaluation chain of a routing decision
+      description: Every chain entry consulted for the decision, in evaluation order, and the entry that decided.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Recorded chain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionChainResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/config/killswitch:
+    get:
+      tags:
+      - guardrails
+      operationId: getKillSwitch
+      description: Existing endpoint; response shape unchanged.
+      responses:
+        '200':
+          description: Kill-switch state
+          headers:
+            ETag:
+              schema:
+                type: string
+                example: '"k3"'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KillSwitchResponse'
+    put:
+      tags:
+      - guardrails
+      operationId: updateKillSwitch
+      description: 'Existing endpoint; shape unchanged. New: persisted, audited, role-gated (403); X-Actor ignored; If-Match
+        optional.'
+      parameters:
+      - name: If-Match
+        in: header
+        required: false
+        schema:
+          type: string
+          example: '"k3"'
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KillSwitchUpdateRequest'
+      responses:
+        '200':
+          description: Updated state
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KillSwitchResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/config/queues:
+    get:
+      tags:
+      - queues
+      operationId: listQueues
+      description: 'Queue registry: which YARN queues may burst to the cloud. A declaration covers the queue and its
+        descendants; the nearest declared ancestor wins and an explicit false overrides a burstable parent. Queues
+        without a declared ancestor are not burstable. With Accept application/yaml the registry is returned as a
+        QueueRegistry document (export, edit, PUT).'
+      responses:
+        '200':
+          description: Registered queues with their YARN status
+          headers:
+            ETag:
+              schema:
+                type: string
+                example: '"q3"'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueListResponse'
+            application/yaml:
+              schema:
+                $ref: '#/components/schemas/QueueRegistry'
+    put:
+      tags:
+      - queues
+      operationId: replaceQueues
+      description: Replaces every declaration. Requires a security or platform administrator and the current registry
+        version. A queue new to the registry must exist in YARN when the inventory is loaded. metadata is ignored.
+      parameters:
+      - $ref: '#/components/parameters/IfMatchQueueRegistry'
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueueRegistry'
+          application/yaml:
+            schema:
+              $ref: '#/components/schemas/QueueRegistry'
+      responses:
+        '200':
+          description: The registry after the change
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueRegistry'
+            application/yaml:
+              schema:
+                $ref: '#/components/schemas/QueueRegistry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          $ref: '#/components/responses/QueuePreconditionFailed'
+        '422':
+          $ref: '#/components/responses/QueueInvalid'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/config/queues/sync:
+    post:
+      tags:
+      - queues
+      operationId: syncQueues
+      description: Re-reads the YARN queue list now and reports how the registered queues' status changed. Never deletes
+        declarations. Requires a security or platform administrator.
+      responses:
+        '200':
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueSyncResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+  /v1/config/queues/{queuePath}:
+    put:
+      tags:
+      - queues
+      operationId: updateQueue
+      description: Declares one queue burstable or not burstable. Requires a security or platform administrator and the
+        current registry version. A queue new to the registry must exist in YARN when the inventory is loaded.
+      parameters:
+      - $ref: '#/components/parameters/QueuePath'
+      - $ref: '#/components/parameters/IfMatchQueueRegistry'
+      - $ref: '#/components/parameters/ChangeComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueueUpdateRequest'
+      responses:
+        '200':
+          description: The declaration; updated is false when it already had this value
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          $ref: '#/components/responses/QueuePreconditionFailed'
+        '422':
+          $ref: '#/components/responses/QueueInvalid'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+    delete:
+      tags:
+      - queues
+      operationId: deleteQueue
+      description: Removes one declaration (the queue then inherits from its nearest declared ancestor, if any).
+        Requires a security or platform administrator and the current registry version.
+      parameters:
+      - $ref: '#/components/parameters/QueuePath'
+      - $ref: '#/components/parameters/IfMatchQueueRegistry'
+      - $ref: '#/components/parameters/ChangeComment'
+      responses:
+        '204':
+          description: Removed
+          headers:
+            ETag:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/QueuePreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '503':
+          $ref: '#/components/responses/WriteUnavailable'
+components:
+  parameters:
+    QueuePath:
+      name: queuePath
+      in: path
+      required: true
+      description: Full YARN queue path such as root.etl
+      schema:
+        type: string
+        pattern: ^root(\.[A-Za-z0-9_-]+)*$
+        maxLength: 512
+    IfMatchQueueRegistry:
+      name: If-Match
+      in: header
+      required: true
+      description: Current queue registry version; missing returns 428, stale returns 412 with the current ETag
+      schema:
+        type: string
+        pattern: ^"q[0-9]+"$
+        example: '"q3"'
+    Name:
+      name: name
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceName'
+    IfMatchPolicy:
+      name: If-Match
+      in: header
+      required: true
+      description: Policy or guardrail version ETag, e.g. "v3". Missing returns 428; stale returns 412; "*" returns 400.
+      schema:
+        type: string
+        pattern: ^"v[0-9]+"$
+    IfMatchOrder:
+      name: If-Match
+      in: header
+      required: true
+      description: Order version ETag, e.g. "o17".
+      schema:
+        type: string
+        pattern: ^"o[0-9]+"$
+    IfMatchOrderOptional:
+      name: If-Match
+      in: header
+      required: false
+      description: Order version ETag; required (428) when anchor is present.
+      schema:
+        type: string
+        pattern: ^"o[0-9]+"$
+    IfPolicyOrderMatch:
+      name: If-Policy-Order-Match
+      in: header
+      required: false
+      description: "Order version ETag; required (428) when the request changes order membership (ADR-001 v3 \xA76.2)."
+      schema:
+        type: string
+        pattern: ^"o[0-9]+"$
+    ChangeComment:
+      name: X-Change-Comment
+      in: header
+      required: false
+      description: Stored in the revision/event; required for lock and unlock.
+      schema:
+        type: string
+        maxLength: 500
+  headers:
+    PolicyETag:
+      schema:
+        type: string
+        example: '"v3"'
+    OrderETag:
+      schema:
+        type: string
+        example: '"o17"'
+  responses:
+    BadRequest:
+      description: Malformed body, bad parameter or schema violation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    Forbidden:
+      description: Missing role or intrinsic resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    NotFound:
+      description: Absent or tombstoned
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    Conflict:
+      description: Name or display name taken, reserved or a reserved word
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    PreconditionFailed:
+      description: Stale policy, order or plan precondition
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    PreconditionRequired:
+      description: Required precondition header missing
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    QueueInvalid:
+      description: QUEUE_INVALID; errors[].field is a JSON pointer, errors[].rejectedValue the check id (queue.path,
+        queue.unique, queue.known, queue.burstable, queue.count, queue.document)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    QueuePreconditionFailed:
+      description: Stale queue registry version; the ETag header carries the current version
+      headers:
+        ETag:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    PolicyInvalid:
+      description: POLICY_INVALID; errors[].field is a JSON pointer, errors[].rejectedValue the check id
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    PolicyStoreUnavailable:
+      description: POLICY_STORE_UNAVAILABLE; the durable policy store is unreachable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    WriteUnavailable:
+      description: POLICY_STORE_UNAVAILABLE when the durable policy store is unreachable, or IDENTITY_UNAVAILABLE when no
+        trusted caller identity is configured (SPNEGO or mTLS off) and unauthenticated writes are disabled
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    SimulationLimit:
+      description: SIMULATION_LIMIT
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    PayloadTooLarge:
+      description: More than 256 KiB or 100 documents
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+    UnsupportedMediaType:
+      description: Media type not accepted by this endpoint
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
+  schemas:
+    RoutingRequest:
+      type: object
+      required:
+        - target
+      properties:
+        target:
+          $ref: '#/components/schemas/RoutingTarget'
+        context:
+          $ref: '#/components/schemas/RoutingContext'
+        overrides:
+          $ref: '#/components/schemas/RoutingOverrides'
+    RoutingTarget:
+      type: object
+      required:
+        - engine
+        - operation
+      properties:
+        engine:
+          type: string
+          example: impala
+        operation:
+          type: string
+          description: For spark targets, canonical operations are submit, batch, interactive, sql; known aliases are normalized server-side.
+          enum: [submit, batch, interactive, sql, connect, rest, session, thrift, cli]
+          example: submit
+    RoutingContext:
+      type: object
+      properties:
+        queue:
+          type: string
+          example: burstable
+        criticality:
+          type: string
+          example: high
+        region:
+          type: string
+          example: eu
+        user:
+          type: string
+          example: alice
+        sqlText:
+          type: string
+          description: Optional SQL text used by engine-specific explain analyzers.
+          example: SELECT * FROM sales.orders WHERE dt = '2026-03-01'
+        appName:
+          type: string
+          example: nightly-etl
+        workloadClass:
+          type: string
+          enum: [interactive, batch, notebook, etl, bi]
+          example: etl
+    RoutingOverrides:
+      type: object
+      properties:
+        placement:
+          type: string
+          example: onprem
+        defaultJdbcUrl:
+          type: string
+          example: jdbc:hive2://onprem-hive:10000/default
+        environmentId:
+          type: string
+          description: Optional environment selector from external router-environments.json.
+          example: prod-eu
+        cloudClusterId:
+          type: string
+          description: Optional cloud cluster id selector inside the resolved environment.
+          example: dp-hyb-imp-1
+    RoutingDecision:
+      type: object
+      required:
+        - decisionId
+        - placement
+        - engine
+        - message
+        - endpoint
+        - reasoning
+        - ttlSeconds
+        - issuedAt
+      properties:
+        decisionId:
+          type: string
+        placement:
+          type: string
+          example: onprem
+        engine:
+          type: string
+          example: impala
+        message:
+          type: string
+          description: Human-readable explanation of why this routing decision was made.
+        renderedMessageStored:
+          type: string
+          description: Stored immutable customer-facing message captured at decision time.
+        messageKey:
+          type: string
+          description: I18n message template key used to compose the explanation.
+        messageArgs:
+          type: object
+          additionalProperties:
+            type: string
+        policyRule:
+          type: string
+        policyVersion:
+          type: string
+        facts:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingDecisionFact'
+        confidence:
+          type: number
+          format: double
+        factCoverage:
+          type: number
+          format: double
+        endpoint:
+          $ref: '#/components/schemas/RoutingEndpoint'
+        reasoning:
+          type: object
+          additionalProperties: true
+        ttlSeconds:
+          type: integer
+          format: int32
+          example: 30
+        issuedAt:
+          type: string
+          format: date-time
+    RoutingEndpoint:
+      type: object
+      properties:
+        jdbcUrl:
+          type: string
+        host:
+          type: string
+        port:
+          type: integer
+          format: int32
+        restBaseUrl:
+          type: string
+        compute:
+          type: object
+          additionalProperties:
+            type: string
+    RoutingDecisionFact:
+      type: object
+      properties:
+        fact:
+          type: string
+        value: {}
+        source:
+          type: string
+        observedAt: {}
+        confidence:
+          type: number
+          format: double
+    DecisionInputSnapshotsResponse:
+      type: object
+      properties:
+        engine:
+          type: string
+        operation:
+          type: string
+        queue:
+          type: string
+        region:
+          type: string
+        user:
+          type: string
+        observedAt:
+          type: string
+          format: date-time
+        providers:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionInputProviderSnapshot'
+    DecisionInputProviderSnapshot:
+      type: object
+      properties:
+        provider:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+          enum: [ok, error, timeout]
+        observedAt:
+          type: string
+          format: date-time
+        ttlMs:
+          type: integer
+          format: int64
+        factCount:
+          type: integer
+          format: int32
+        facts:
+          type: object
+          additionalProperties: true
+        error:
+          type: string
+          nullable: true
+    ApiErrorResponse:
+      type: object
+      required:
+        - timestamp
+        - status
+        - code
+        - message
+        - path
+        - errors
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        path:
+          type: string
+          example: /v1/resolve
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiFieldError'
+    ApiFieldError:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+          example: target.operation
+        message:
+          type: string
+        rejectedValue:
+          nullable: true
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - checkedAt
+      properties:
+        status:
+          type: string
+          example: UP
+        checkedAt:
+          type: string
+          format: date-time
+    ReadinessResponse:
+      type: object
+      required:
+        - status
+        - checkedAt
+        - dependencies
+      properties:
+        status:
+          type: string
+          enum: [READY, NOT_READY]
+        checkedAt:
+          type: string
+          format: date-time
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DependencyStatus'
+    DependencyStatus:
+      type: object
+      required:
+        - name
+        - critical
+        - up
+        - message
+      properties:
+        name:
+          type: string
+        critical:
+          type: boolean
+        up:
+          type: boolean
+        message:
+          type: string
+    ResourceName:
+      type: string
+      pattern: ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+      description: "Immutable lowercase slug. Reserved words are rejected (ADR-001 v3 \xA74.1)."
+      example: burst-etl-on-capacity
+    PolicyPhase:
+      type: string
+      enum:
+      - Active
+      - Disabled
+      - NeedsScope
+    RoutingPolicy:
+      type: object
+      additionalProperties: false
+      required:
+      - apiVersion
+      - kind
+      - metadata
+      - spec
+      properties:
+        apiVersion:
+          type: string
+          enum:
+          - smartrouter.cloudera.com/v1
+        kind:
+          type: string
+          enum:
+          - RoutingPolicy
+        metadata:
+          $ref: '#/components/schemas/PolicyMetadata'
+        spec:
+          $ref: '#/components/schemas/PolicySpec'
+        status:
+          $ref: '#/components/schemas/PolicyStatus'
+    PolicyMetadata:
+      type: object
+      additionalProperties: false
+      required:
+      - displayName
+      properties:
+        name:
+          $ref: '#/components/schemas/ResourceName'
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        version:
+          type: integer
+          minimum: 1
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        createdBy:
+          type: string
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedBy:
+          type: string
+          readOnly: true
+    PolicySpec:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+          default: true
+        objective:
+          $ref: '#/components/schemas/Objective'
+        targets:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/TargetRef'
+        scopes:
+          $ref: '#/components/schemas/PolicyScopes'
+        hitPolicy:
+          type: string
+          enum:
+          - first
+          default: first
+        rules:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/PolicyRule'
+        tests:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/PolicyTest'
+    Objective:
+      type: object
+      additionalProperties: false
+      required:
+      - mode
+      properties:
+        mode:
+          type: string
+          enum:
+          - preset
+          - custom
+        preset:
+          type: string
+          enum:
+          - cost-saver
+          - balanced
+          - performance
+        aggressivenessPct:
+          type: integer
+          minimum: 0
+          maximum: 100
+        compilerVersion:
+          type: string
+          example: preset-v1
+        basedOn:
+          type: string
+          enum:
+          - cost-saver
+          - balanced
+          - performance
+    TargetRef:
+      type: object
+      additionalProperties: false
+      required:
+      - clusterId
+      properties:
+        clusterId:
+          type: string
+          maxLength: 128
+    PolicyScopes:
+      type: array
+      maxItems: 3
+      description: >-
+        Where the policy applies: it applies to a workload when any scope matches. Absent or empty means NeedsScope.
+        At most one scope per type; a global scope must be the only scope. A newly scoped policy is seeded at the
+        position of its most specific scope type (service, then queue, then global).
+      items:
+        $ref: '#/components/schemas/PolicyScope'
+    PolicyScope:
+      type: object
+      additionalProperties: false
+      required:
+      - type
+      properties:
+        type:
+          type: string
+          enum:
+          - global
+          - queue
+          - service
+        queues:
+          type: array
+          minItems: 1
+          maxItems: 200
+          uniqueItems: true
+          items:
+            type: string
+            pattern: ^root(\.[A-Za-z0-9_-]+)*$
+        services:
+          type: array
+          minItems: 1
+          maxItems: 4
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+            - spark
+            - hive
+            - impala
+            - trino
+    PolicyRule:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - when
+      - then
+      properties:
+        id:
+          type: string
+          pattern: ^[a-z][a-z0-9_-]{0,31}$
+        when:
+          type: string
+          maxLength: 4096
+          description: CEL boolean expression over the nested activation
+        then:
+          $ref: '#/components/schemas/RuleAction'
+        reason:
+          type: string
+          maxLength: 200
+        reasonKey:
+          type: string
+          maxLength: 128
+          pattern: ^[A-Za-z0-9._-]+$
+        lock:
+          type: boolean
+          default: false
+        generatedBy:
+          $ref: '#/components/schemas/GeneratedBy'
+    RuleAction:
+      type: object
+      additionalProperties: false
+      required:
+      - placement
+      properties:
+        placement:
+          type: string
+          enum:
+          - cloud
+          - onprem
+        target:
+          type: string
+          maxLength: 128
+          description: Only for cloud; must be one of spec.targets
+    GeneratedBy:
+      type: object
+      additionalProperties: false
+      required:
+      - kind
+      - id
+      - version
+      properties:
+        kind:
+          type: string
+          enum:
+          - preset
+        id:
+          type: string
+        version:
+          type: string
+    PolicyTest:
+      type: object
+      additionalProperties: false
+      required:
+      - name
+      - input
+      - expect
+      properties:
+        name:
+          type: string
+          pattern: ^[a-z0-9][a-z0-9-]{0,62}$
+        input:
+          $ref: '#/components/schemas/Activation'
+        expect:
+          type: object
+          additionalProperties: false
+          properties:
+            placement:
+              type: string
+              enum:
+              - cloud
+              - onprem
+            target:
+              type: string
+            ruleId:
+              type: string
+              nullable: true
+    Activation:
+      type: object
+      additionalProperties: true
+      description: Canonical nested CEL activation (engine, operation, context.*, queue.*, tag.*, capacity.*, score.*, plan.*).
+      example:
+        engine: spark
+        operation: submit
+        context:
+          queue: root.dev_default
+          workloadClass: etl
+        queue:
+          burstable: true
+        capacity:
+          onprem:
+            utilizationPct: 92.0
+        score:
+          burstability: 0.92
+    PolicyStatus:
+      type: object
+      readOnly: true
+      properties:
+        phase:
+          $ref: '#/components/schemas/PolicyPhase'
+        priority:
+          $ref: '#/components/schemas/Priority'
+        policySetGeneration:
+          type: integer
+          format: int64
+        approval:
+          type: object
+          nullable: true
+          description: Reserved for approval workflows; always null.
+    Priority:
+      type: object
+      nullable: true
+      required:
+      - position
+      - of
+      properties:
+        position:
+          type: integer
+          minimum: 1
+        of:
+          type: integer
+          minimum: 1
+    PolicyPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        metadata:
+          type: object
+          additionalProperties: false
+          properties:
+            displayName:
+              type: string
+              minLength: 1
+              maxLength: 120
+            description:
+              type: string
+              maxLength: 1000
+              nullable: true
+        spec:
+          type: object
+          additionalProperties: false
+          properties:
+            enabled:
+              type: boolean
+            scopes:
+              allOf:
+              - $ref: '#/components/schemas/PolicyScopes'
+              nullable: true
+            targets:
+              type: array
+              maxItems: 10
+              items:
+                $ref: '#/components/schemas/TargetRef'
+    PolicySummary:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/ResourceName'
+        displayName:
+          type: string
+        phase:
+          $ref: '#/components/schemas/PolicyPhase'
+        priority:
+          $ref: '#/components/schemas/Priority'
+        objective:
+          $ref: '#/components/schemas/Objective'
+        scopes:
+          type: array
+          description: One entry per scope; empty when the policy has no scope.
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                - global
+                - queue
+                - service
+              count:
+                type: integer
+                description: Number of queues or services; absent for a global scope.
+        version:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        etag:
+          type: string
+    PolicyListResponse:
+      type: object
+      required:
+      - items
+      - total
+      - orderVersion
+      - systemLayers
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicySummary'
+        total:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+        orderVersion:
+          type: integer
+          format: int64
+        systemLayers:
+          type: object
+          properties:
+            top:
+              type: object
+              properties:
+                killSwitch:
+                  $ref: '#/components/schemas/KillSwitchResponse'
+                guardrailCount:
+                  type: integer
+            bottom:
+              type: object
+              description: >-
+                The System default row. Omitted when the list filters exclude it (see listPolicies); not counted in total.
+              properties:
+                name:
+                  type: string
+                  enum:
+                  - system-default
+                displayName:
+                  type: string
+                  example: System default
+                priority:
+                  $ref: '#/components/schemas/Priority'
+                placement:
+                  type: string
+                  enum:
+                  - cloud
+                  - onprem
+                target:
+                  type: string
+                updatedBy:
+                  type: string
+                  enum:
+                  - System
+    CloneRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - displayName
+      properties:
+        name:
+          $ref: '#/components/schemas/ResourceName'
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 120
+    BulkDeleteRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      - orderVersion
+      properties:
+        orderVersion:
+          type: integer
+          format: int64
+        items:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - name
+            - version
+            properties:
+              name:
+                $ref: '#/components/schemas/ResourceName'
+              version:
+                type: integer
+                minimum: 1
+    BulkDeleteResponse:
+      type: object
+      properties:
+        deleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceName'
+        orderVersion:
+          type: integer
+          format: int64
+    IdentityAvailability:
+      type: object
+      properties:
+        nameAvailable:
+          type: boolean
+        displayNameAvailable:
+          type: boolean
+        suggestedName:
+          $ref: '#/components/schemas/ResourceName'
+        reason:
+          type: string
+          nullable: true
+          description: Why the name (checked first) or the display name is not available.
+          enum:
+          - taken
+          - reserved
+          - reservedWord
+          - invalid
+    RevisionSummary:
+      type: object
+      properties:
+        version:
+          type: integer
+        changeKind:
+          type: string
+          enum:
+          - created
+          - updated
+          - enabled
+          - disabled
+          - scoped
+          - unscoped
+          - retargeted
+          - locked
+          - unlocked
+          - rolledBack
+          - applied
+          - deleted
+        comment:
+          type: string
+          nullable: true
+        policySetGeneration:
+          type: integer
+          format: int64
+        at:
+          type: string
+          format: date-time
+        by:
+          type: string
+    RevisionListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevisionSummary'
+        nextCursor:
+          type: string
+          nullable: true
+    PolicyDiffResponse:
+      type: object
+      properties:
+        from:
+          type: integer
+        to:
+          type: integer
+        changes:
+          type: array
+          items:
+            type: object
+            properties:
+              op:
+                type: string
+                enum:
+                - added
+                - removed
+                - changed
+                - moved
+              path:
+                type: string
+                example: /spec/rules[id=r1]/when
+              from: {}
+              to: {}
+    RollbackRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - toVersion
+      properties:
+        toVersion:
+          type: integer
+          minimum: 1
+    RoutingPolicyOrder:
+      type: object
+      additionalProperties: false
+      required:
+      - apiVersion
+      - kind
+      - spec
+      properties:
+        apiVersion:
+          type: string
+          enum:
+          - smartrouter.cloudera.com/v1
+        kind:
+          type: string
+          enum:
+          - RoutingPolicyOrder
+        metadata:
+          type: object
+          properties:
+            version:
+              type: integer
+              format: int64
+        spec:
+          type: object
+          additionalProperties: false
+          required:
+          - policies
+          properties:
+            policies:
+              type: array
+              description: Exactly the live scoped policies (incl. disabled); System default excluded.
+              items:
+                $ref: '#/components/schemas/ResourceName'
+    MoveRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - position
+      - anchor
+      properties:
+        position:
+          type: string
+          enum:
+          - before
+          - after
+        anchor:
+          $ref: '#/components/schemas/ResourceName'
+    PrioritySeed:
+      type: object
+      properties:
+        position:
+          type: integer
+        of:
+          type: integer
+        anchor:
+          $ref: '#/components/schemas/ResourceName'
+        relative:
+          type: string
+          enum:
+          - before
+          - after
+          nullable: true
+        orderVersion:
+          type: integer
+          format: int64
+    ValidationReport:
+      type: object
+      required:
+      - valid
+      - summary
+      - checks
+      properties:
+        valid:
+          type: boolean
+        summary:
+          type: object
+          properties:
+            passed:
+              type: integer
+            warned:
+              type: integer
+            failed:
+              type: integer
+            skipped:
+              type: integer
+            total:
+              type: integer
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckResult'
+    CheckResult:
+      type: object
+      required:
+      - id
+      - status
+      - message
+      properties:
+        id:
+          type: string
+          example: rules.when.typecheck
+        status:
+          type: string
+          enum:
+          - pass
+          - warn
+          - fail
+          - skipped
+        message:
+          type: string
+        path:
+          type: string
+          description: JSON pointer
+        ruleId:
+          type: string
+        line:
+          type: integer
+        column:
+          type: integer
+    SimulationRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - mode
+      - input
+      properties:
+        mode:
+          type: string
+          enum:
+          - single
+          - chain
+        policy:
+          $ref: '#/components/schemas/RoutingPolicy'
+        placement:
+          type: object
+          properties:
+            anchor:
+              $ref: '#/components/schemas/ResourceName'
+            position:
+              type: string
+              enum:
+              - before
+              - after
+        input:
+          $ref: '#/components/schemas/Activation'
+        inputMeta:
+          type: object
+          description: Keyed by JSON pointer into input.
+          additionalProperties:
+            type: object
+            properties:
+              observedAt:
+                type: string
+                format: date-time
+              confidence:
+                type: number
+                minimum: 0
+                maximum: 1
+    SimulationResponse:
+      type: object
+      properties:
+        enforcement:
+          type: string
+          enum:
+          - enforced
+        policySetGeneration:
+          type: integer
+          format: int64
+        catalogVersion:
+          type: string
+        compilerVersion:
+          type: string
+        outcome:
+          type: object
+          properties:
+            placement:
+              type: string
+              enum:
+              - cloud
+              - onprem
+            target:
+              type: object
+              properties:
+                clusterId:
+                  type: string
+                kind:
+                  type: string
+                  enum:
+                  - burst
+                  - default
+            decidedBy:
+              type: object
+              properties:
+                layer:
+                  type: string
+                  enum:
+                  - killSwitch
+                  - guardrail
+                  - override
+                  - policy
+                  - systemDefault
+                name:
+                  type: string
+                version:
+                  type: integer
+                ruleId:
+                  type: string
+                reason:
+                  type: string
+        trace:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceEntry'
+        missingInputs:
+          type: array
+          items:
+            type: string
+        qualityWarnings:
+          type: array
+          items:
+            type: string
+    DecisionChainResponse:
+      type: object
+      properties:
+        decisionId:
+          type: string
+        policySetGeneration:
+          type: integer
+          format: int64
+          nullable: true
+        decidedBy:
+          type: object
+          description: The deciding chain entry; policy fields are present only when a user policy decided.
+          properties:
+            layer:
+              type: string
+              enum:
+              - killSwitch
+              - guardrail
+              - override
+              - policy
+              - systemDefault
+            name:
+              type: string
+            version:
+              type: integer
+            ruleId:
+              type: string
+            position:
+              type: integer
+              description: Position of the deciding policy in the evaluation order at decision time.
+        trace:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceEntry'
+    TraceEntry:
+      type: object
+      properties:
+        layer:
+          type: string
+          enum:
+          - killSwitch
+          - guardrail
+          - override
+          - policy
+          - systemDefault
+        name:
+          type: string
+        position:
+          type: integer
+        status:
+          type: string
+          enum:
+          - pass
+          - armed
+          - matched
+          - notMatched
+          - skipped
+          - unresolvable
+          - ignored
+          - notEvaluated
+        skipReason:
+          type: string
+          enum:
+          - disabled
+          - needsScope
+          - outOfScope
+          - invalid
+        terminal:
+          type: boolean
+        rules:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              result:
+                type: string
+                enum:
+                - 'true'
+                - 'false'
+                - error
+                - unresolvable
+        detail:
+          type: string
+    MaterializeObjectiveRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - preset
+      - aggressivenessPct
+      properties:
+        preset:
+          type: string
+          enum:
+          - cost-saver
+          - balanced
+          - performance
+        aggressivenessPct:
+          type: integer
+          minimum: 0
+          maximum: 100
+        scopes:
+          $ref: '#/components/schemas/PolicyScopes'
+        targets:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/TargetRef'
+    MaterializeObjectiveResponse:
+      type: object
+      properties:
+        objective:
+          $ref: '#/components/schemas/Objective'
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyRule'
+    FieldCatalog:
+      type: object
+      properties:
+        catalogVersion:
+          type: string
+        fields:
+          type: array
+          items:
+            type: object
+            required:
+            - path
+            - type
+            - operators
+            - status
+            properties:
+              path:
+                type: string
+                example: capacity.onprem.utilizationPct
+              label:
+                type: string
+              kind:
+                type: string
+                enum:
+                - context
+                - fact
+                - derived
+              type:
+                type: string
+                enum:
+                - bool
+                - int
+                - double
+                - string
+              unit:
+                type: string
+              min:
+                type: number
+              max:
+                type: number
+              values:
+                type: array
+                items:
+                  type: string
+              operators:
+                type: array
+                items:
+                  type: string
+              status:
+                type: string
+                enum:
+                - available
+                - planned
+    PresetsResponse:
+      type: object
+      properties:
+        compilerVersion:
+          type: string
+        presets:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                enum:
+                - cost-saver
+                - balanced
+                - performance
+              label:
+                type: string
+              description:
+                type: string
+              defaultAggressivenessPct:
+                type: integer
+    ApplyResponse:
+      type: object
+      properties:
+        dryRun:
+          type: boolean
+        planHash:
+          type: string
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              kind:
+                type: string
+                enum:
+                - RoutingPolicy
+                - RoutingGuardrail
+                - RoutingPolicyOrder
+              name:
+                type: string
+              action:
+                type: string
+                enum:
+                - create
+                - update
+                - unchanged
+              version:
+                type: integer
+    Health:
+      type: string
+      enum:
+      - connected
+      - degraded
+      - unreachable
+      - unknown
+    DefaultTargetLookup:
+      type: object
+      properties:
+        clusterId:
+          type: string
+        placement:
+          type: string
+          enum:
+          - cloud
+          - onprem
+        health:
+          $ref: '#/components/schemas/Health'
+        services:
+          type: array
+          items:
+            type: string
+            enum:
+            - spark
+            - hive
+            - impala
+            - trino
+        observedAt:
+          type: string
+          format: date-time
+        environment:
+          type: string
+        cmEndpoint:
+          type: string
+          description: Cloudera Manager base URL of the default cluster, reduced to scheme, host, port and path (no
+            userinfo, query or fragment). Omitted when not configured or not safely parseable.
+          example: https://cm.example.com:7183
+    BurstTargetsLookup:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              clusterId:
+                type: string
+              environment:
+                type: string
+              status:
+                $ref: '#/components/schemas/Health'
+              services:
+                type: array
+                items:
+                  type: string
+                  enum:
+                  - spark
+                  - hive
+                  - impala
+                  - trino
+              role:
+                type: string
+                nullable: true
+        observedAt:
+          type: string
+          format: date-time
+    QueuesLookup:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              burstable:
+                type: boolean
+              source:
+                type: string
+        inventory:
+          type: string
+          description: loaded (YARN queue list read) or unavailable; burstability comes from the queue registry
+          enum:
+          - loaded
+          - unavailable
+        observedAt:
+          type: string
+          format: date-time
+          nullable: true
+    ServicesLookup:
+      type: object
+      properties:
+        target:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              engine:
+                type: string
+                enum:
+                - spark
+                - hive
+                - impala
+                - trino
+              endpoint:
+                type: string
+                description: Endpoint the router routes this engine to on the target, reduced to scheme, host(s), port(s)
+                  and path; userinfo, query, fragment and JDBC ;key=value session properties are removed. Omitted when
+                  there is none or it is not safely parseable.
+                example: jdbc:impala://impala-cloud.example.com:443/
+    RoutingGuardrail:
+      type: object
+      additionalProperties: false
+      required:
+      - apiVersion
+      - kind
+      - metadata
+      - spec
+      properties:
+        apiVersion:
+          type: string
+          enum:
+          - smartrouter.cloudera.com/v1
+        kind:
+          type: string
+          enum:
+          - RoutingGuardrail
+        metadata:
+          $ref: '#/components/schemas/PolicyMetadata'
+        spec:
+          type: object
+          additionalProperties: false
+          required:
+          - when
+          - effect
+          properties:
+            enabled:
+              type: boolean
+              default: true
+            when:
+              type: string
+              maxLength: 4096
+            effect:
+              type: object
+              additionalProperties: false
+              required:
+              - type
+              properties:
+                type:
+                  type: string
+                  enum:
+                  - forceOnprem
+                  - denyTargets
+                targets:
+                  type: array
+                  maxItems: 10
+                  description: Cluster ids; at least one for denyTargets
+                  items:
+                    type: string
+                    minLength: 1
+            reason:
+              type: string
+              maxLength: 200
+            reasonKey:
+              type: string
+              maxLength: 128
+              pattern: ^[A-Za-z0-9._-]+$
+        status:
+          type: object
+          readOnly: true
+          properties:
+            intrinsic:
+              type: boolean
+            policySetGeneration:
+              type: integer
+              format: int64
+    GuardrailListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutingGuardrail'
+        killSwitch:
+          $ref: '#/components/schemas/KillSwitchResponse'
+    QueueStatus:
+      type: string
+      description: active (YARN lists the queue), missing (YARN no longer lists it) or unknown (inventory unavailable)
+      enum:
+      - active
+      - missing
+      - unknown
+    Queue:
+      type: object
+      required:
+      - queuePath
+      - burstable
+      - status
+      properties:
+        queuePath:
+          type: string
+        burstable:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/QueueStatus'
+    QueueListResponse:
+      type: object
+      required:
+      - version
+      - inventory
+      - items
+      properties:
+        version:
+          type: integer
+          format: int64
+        inventory:
+          type: string
+          enum:
+          - loaded
+          - unavailable
+        syncedAt:
+          type: string
+          format: date-time
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Queue'
+    QueueUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - burstable
+      properties:
+        burstable:
+          type: boolean
+    QueueUpdateResponse:
+      type: object
+      properties:
+        queuePath:
+          type: string
+        updated:
+          type: boolean
+        queue:
+          $ref: '#/components/schemas/Queue'
+    QueueSyncResponse:
+      type: object
+      properties:
+        synced:
+          type: integer
+          description: Queues YARN reported
+        updated:
+          type: integer
+          description: Registered queues whose status changed
+        removed:
+          type: integer
+          description: Registered queues YARN no longer reports (declarations are kept)
+        syncedAt:
+          type: string
+          format: date-time
+    QueueRegistry:
+      type: object
+      additionalProperties: false
+      required:
+      - apiVersion
+      - kind
+      - spec
+      properties:
+        apiVersion:
+          type: string
+          enum:
+          - smartrouter.cloudera.com/v1
+        kind:
+          type: string
+          enum:
+          - QueueRegistry
+        metadata:
+          type: object
+          additionalProperties: false
+          description: Read-only; ignored on PUT
+          properties:
+            version:
+              type: integer
+              format: int64
+            updatedAt:
+              type: string
+              format: date-time
+              nullable: true
+            updatedBy:
+              type: string
+              nullable: true
+        spec:
+          type: object
+          additionalProperties: false
+          required:
+          - queues
+          properties:
+            queues:
+              type: array
+              maxItems: 1000
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                - queuePath
+                - burstable
+                properties:
+                  queuePath:
+                    type: string
+                    pattern: ^root(\.[A-Za-z0-9_-]+)*$
+                    maxLength: 512
+                  burstable:
+                    type: boolean
+    KillSwitchResponse:
+      type: object
+      description: Existing wire shape (ConfigDomainController.KillSwitchResponse).
+      properties:
+        enabled:
+          type: boolean
+        lastToggledAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastToggledBy:
+          type: string
+          nullable: true
+    KillSwitchUpdateRequest:
+      type: object
+      description: Existing wire shape (ConfigDomainController.KillSwitchUpdateRequest).
+      properties:
+        enabled:
+          type: boolean

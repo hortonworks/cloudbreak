@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
@@ -99,6 +100,15 @@ class ClusterProxyProxyClientTest {
         when(restTemplate.postForObject(anyString(), anyString(), any())).thenThrow(RuntimeException.class);
 
         validateException(() -> underTest.post("post", new Object(), Object.class));
+    }
+
+    @Test
+    void getServiceUrlIsResolvedAgainstRootUri() {
+        RestTemplate rootUriRestTemplate = new RestTemplateBuilder().rootUri("http://localhost:10180/cluster-proxy/proxy").build();
+
+        String result = new ClusterProxyProxyClient(rootUriRestTemplate, CLUSTER_CRN, SERVICE_NAME).getServiceUrl();
+
+        assertThat(result).isEqualTo("http://localhost:10180/cluster-proxy/proxy/crn/serviceName");
     }
 
     private void validateRestClientResponseException(ThrowableAssert.ThrowingCallable callable) {
