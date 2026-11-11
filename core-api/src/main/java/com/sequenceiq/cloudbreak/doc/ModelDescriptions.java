@@ -399,6 +399,11 @@ public class ModelDescriptions {
                 "Highest version number of the SSL certificate available for the database server; does not necessarily equal the active version";
         public static final String SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER =
                 "Cloud provider specific identifier of the SSL certificate currently active for the database server";
+        public static final String INSTANCE_TYPE = "The provider specific target instance type, e.g. db.m5.xlarge on AWS";
+        public static final String CURRENT_INSTANCE_TYPE = "The current instance type of the database server";
+        public static final String VALID_INSTANCE_TYPES = "The instance types the instance type of the database server can be changed to";
+        public static final String STORAGE_SIZE_IN_GB = "The target storage size in GB, must be larger than the current size";
+        public static final String FLOW_IDENTIFIER = "The identifier of the flow started for the operation";
     }
 
     public static class FileSystem {

@@ -70,6 +70,14 @@ public class DistroXOpDescription {
     public static final String RENEW_CERTIFICATE = "Trigger a certificate renewal on the desired cluster which is identified via crn";
     public static final String RENEW_CERTIFICATE_INTERNAL = "Trigger a certificate renewal on the desired cluster which is identified via crn";
     public static final String GET_DATABASE_SERVER_BY_CLUSTER_CRN = "get database server for Distrox cluster by cluster crn";
+    public static final String CHANGE_DATABASE_SERVER_INSTANCE_TYPE_BY_NAME = "change the instance type of the database server of the Distrox cluster by name";
+    public static final String CHANGE_DATABASE_SERVER_INSTANCE_TYPE_BY_CRN = "change the instance type of the database server of the Distrox cluster by crn";
+    public static final String INCREASE_DATABASE_SERVER_STORAGE_SIZE_BY_NAME = "increase the storage size of the database server of the Distrox cluster by name";
+    public static final String INCREASE_DATABASE_SERVER_STORAGE_SIZE_BY_CRN = "increase the storage size of the database server of the Distrox cluster by crn";
+    public static final String GET_DATABASE_SERVER_VALID_INSTANCE_TYPE_OPTIONS_BY_NAME =
+            "get the valid target instance types of the database server of the Distrox cluster by name";
+    public static final String GET_DATABASE_SERVER_VALID_INSTANCE_TYPE_OPTIONS_BY_CRN =
+            "get the valid target instance types of the database server of the Distrox cluster by crn";
     public static final String GET_LAST_FLOW_PROGRESS = "Get last flow operation progress details for resource by resource crn";
     public static final String LIST_FLOW_PROGRESS = "List recent flow operations progress details for resource by resource crn";
     public static final String GET_OPERATION = "Get flow operation progress details for resource by resource crn";
