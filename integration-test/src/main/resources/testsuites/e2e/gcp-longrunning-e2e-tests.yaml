@@ -2,8 +2,13 @@ name: "gcp-longrunning-e2e-tests"
 tests:
   - name: "gcp_longrunning_e2e_tests"
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
+      # The longest tests (1.5-3h) go first, so they start right away instead of waiting for a free thread
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzUpgradeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzLifecycleTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzRepairTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzScalingTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXDatahubOnSharedDlTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.dbserverencryption.GcpExternalDatabaseServerEncryptionTests
@@ -21,11 +26,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeWithSameShapeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCustomInstanceResizeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildv2Tests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzScalingTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRollingVerticalScaleTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxMultiAzLifecycleTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiAzRepairAndScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXKraftMigrationTest
