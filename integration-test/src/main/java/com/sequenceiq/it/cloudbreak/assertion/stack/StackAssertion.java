@@ -33,7 +33,8 @@ public class StackAssertion {
 
     private static final String VALIDATE_FILE_CONTENT_CMD = "sudo grep -Pq '%s' %s && echo Success || echo Failure";
 
-    private static final String VALIDATE_FILE_CONTENT_DOES_NOT_EXIST_CMD = "sudo grep -Pq '%s' %s && echo Failure || echo Success";
+    private static final String VALIDATE_FILE_CONTENT_DOES_NOT_EXIST_CMD =
+            "if sudo test -f %2$s; then sudo grep -Pq '%1$s' %2$s && echo Failure || echo Success; else echo Failure; fi";
 
     private static final String VALIDATE_FILE_NOT_EXISTS_CMD = "sudo test ! -e %s && echo Success || echo Failure";
 
@@ -102,13 +103,25 @@ public class StackAssertion {
                 "Error trying to check file content exists");
     }
 
+    public void validateFileContentDoesNotExist(SdxTestDto sdxTestDto, String fileName, String fileContent) {
+        validateFileContentDoesNotExist(sdxTestDto.getResponse().getStackV4Response(), fileName, fileContent);
+    }
+
     public void validateFileContentDoesNotExist(DistroXTestDto distroXTestDto, String fileName, String fileContent) {
         validateFileContentDoesNotExist(distroXTestDto.getResponse(), fileName, fileContent);
     }
 
+    public void validateFileContentDoesNotExist(FreeIpaTestDto freeIpaTestDto, String fileName, String fileContent) {
+        List<String> instanceIps = InstanceIPCollectorUtil.getAllFreeIpaInstanceIps(freeIpaTestDto.getResponse().getInstanceGroups(), false);
+        String cmd = String.format(VALIDATE_FILE_CONTENT_DOES_NOT_EXIST_CMD, fileContent, fileName);
+        assertSshResult(() -> sshJClientActions.executeSshCommandOnHosts(instanceIps, cmd), cmd,
+                () -> "File " + fileName + " is missing or pattern " + fileContent + " unexpectedly matches its content",
+                "Error trying to check file content is absent on FreeIPA");
+    }
+
     private void validateFileContentDoesNotExist(StackV4Response stackV4Response, String fileName, String fileContent) {
         assertSshResultOnPrimaryGateways(stackV4Response, String.format(VALIDATE_FILE_CONTENT_DOES_NOT_EXIST_CMD, fileContent, fileName),
-                () -> "Pattern " + fileContent + " unexpectedly matches content of " + fileName,
+                () -> "File " + fileName + " is missing or pattern " + fileContent + " unexpectedly matches its content",
                 "Error trying to check file content is absent");
     }
 

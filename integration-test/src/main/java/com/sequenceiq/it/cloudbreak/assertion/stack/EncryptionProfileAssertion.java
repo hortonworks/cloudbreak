@@ -1,19 +1,27 @@
 package com.sequenceiq.it.cloudbreak.assertion.stack;
 
+import static java.lang.String.format;
+
+import java.util.List;
 import java.util.function.BiConsumer;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 @Component
 public class EncryptionProfileAssertion {
 
     private static final String CM_SETTINGS = "/etc/cloudera-scm-server/cm.settings";
+
+    private static final String CM_DEFAULT_SERVER = "/etc/default/cloudera-scm-server";
 
     private static final String NGINX_SSL_CONF = "/etc/nginx/sites-enabled/ssl.conf";
 
@@ -68,6 +76,29 @@ public class EncryptionProfileAssertion {
     private static final String POSTGRES_TLS_1_2_MIN_PROTOCOL_REGEX = "MinProtocol\\s*=\\s*TLSv1.2";
 
     private static final String POSTGRES_SYSTEMD_OPENSSL_CONF_REGEX = "Environment=OPENSSL_CONF=" + POSTGRES_OPENSSL_CONF;
+
+    private static final String CM_DELETE_SUPPORTED_TLS_VERSIONS_REGEX = "deletesettings SUPPORTED_TLS_VERSIONS";
+
+    private static final String CM_DELETE_TLS_CIPHERS_REGEX = "deletesettings tls_ciphers";
+
+    private static final String CM_SET_SUPPORTED_TLS_VERSIONS_REGEX = "setsettings SUPPORTED_TLS_VERSIONS";
+
+    private static final String CM_TLS_ADVANCED_CONTROL_REGEX = "CMF_FF_TLS_ADVANCED_CONTROL";
+
+    private static final String CM_OVERRIDE_TLS_CIPHERS_REGEX = "CMF_OVERRIDE_TLS_CIPHERS";
+
+    private static final String NGINX_DEFAULT_TLS_REGEX = "ssl_protocols\\s*TLSv1.2";
+
+    private static final String NGINX_ALTERNATIVE_USER_FACING_CERT_REGEX = "alternative-server.pem";
+
+    private static final String NGINX_CUSTOM_TLS_1_3_CIPHERSUITES_REGEX = NGINX_TLS_1_3_CIPHERSUITES_REGEX + ";";
+
+    private static final String NGINX_CUSTOM_SSL_CIPHERS_TLS_1_2_REGEX = NGINX_SSL_CIPHERS_TLS_1_2_REGEX + ";";
+
+    private static final String NGINX_CUSTOM_SSL_CIPHERS_TLS_1_2_AES256_REGEX = NGINX_SSL_CIPHERS_TLS_1_2_AES256_REGEX + ";";
+
+    private static final List<String> NGINX_CUSTOM_CIPHERS_REGEXES = List.of(NGINX_CUSTOM_TLS_1_3_CIPHERSUITES_REGEX,
+            NGINX_CUSTOM_SSL_CIPHERS_TLS_1_2_REGEX, NGINX_CUSTOM_SSL_CIPHERS_TLS_1_2_AES256_REGEX);
 
     @Inject
     private StackAssertion stackAssertion;
@@ -190,5 +221,71 @@ public class EncryptionProfileAssertion {
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_CONF, NGINX_TLS_1_2_1_3_REGEX);
         stackAssertion.validateFileContentExists(testDto, NGINX_SSL_USER_FACING_CONF, NGINX_TLS_1_2_1_3_REGEX);
         return testDto;
+    }
+
+    public FreeIpaTestDto assertEncryptionProfileDisabled(FreeIpaTestDto testDto) {
+        stackAssertion.validateFileContentExists(testDto, NGINX_SSL_CONF, NGINX_DEFAULT_TLS_REGEX);
+        NGINX_CUSTOM_CIPHERS_REGEXES.forEach(regex -> stackAssertion.validateFileContentDoesNotExist(testDto, NGINX_SSL_CONF, regex));
+        return testDto;
+    }
+
+    public SdxTestDto assertEncryptionProfileDisabled(SdxTestDto testDto) {
+        assertEncryptionProfileDisabledOnStack((file, regex) -> stackAssertion.validateFileContentExists(testDto, file, regex),
+                (file, regex) -> stackAssertion.validateFileContentDoesNotExist(testDto, file, regex));
+        return testDto;
+    }
+
+    public DistroXTestDto assertEncryptionProfileDisabled(DistroXTestDto testDto) {
+        assertEncryptionProfileDisabledOnStack((file, regex) -> stackAssertion.validateFileContentExists(testDto, file, regex),
+                (file, regex) -> stackAssertion.validateFileContentDoesNotExist(testDto, file, regex));
+        return testDto;
+    }
+
+    private void assertEncryptionProfileDisabledOnStack(BiConsumer<String, String> fileContentExistsValidator,
+            BiConsumer<String, String> fileContentDoesNotExistValidator) {
+        fileContentExistsValidator.accept(CM_SETTINGS, CM_DELETE_SUPPORTED_TLS_VERSIONS_REGEX);
+        fileContentExistsValidator.accept(CM_SETTINGS, CM_DELETE_TLS_CIPHERS_REGEX);
+        fileContentDoesNotExistValidator.accept(CM_SETTINGS, CM_SET_SUPPORTED_TLS_VERSIONS_REGEX);
+        fileContentExistsValidator.accept(CM_DEFAULT_SERVER, CM_OVERRIDE_TLS_CIPHERS_REGEX);
+        fileContentDoesNotExistValidator.accept(CM_DEFAULT_SERVER, CM_TLS_ADVANCED_CONTROL_REGEX);
+        fileContentExistsValidator.accept(NGINX_SSL_CONF, NGINX_DEFAULT_TLS_REGEX);
+        fileContentExistsValidator.accept(NGINX_SSL_USER_FACING_CONF, NGINX_DEFAULT_TLS_REGEX);
+        fileContentDoesNotExistValidator.accept(NGINX_SSL_USER_FACING_CONF, NGINX_ALTERNATIVE_USER_FACING_CERT_REGEX);
+        NGINX_CUSTOM_CIPHERS_REGEXES.forEach(regex -> {
+            fileContentDoesNotExistValidator.accept(NGINX_SSL_CONF, regex);
+            fileContentDoesNotExistValidator.accept(NGINX_SSL_USER_FACING_CONF, regex);
+        });
+    }
+
+    public EnvironmentTestDto assertEncryptionProfileCrnEmpty(EnvironmentTestDto testDto) {
+        assertEncryptionProfileCrnEmpty("Environment", testDto.getName(), testDto.getResponse().getEncryptionProfileCrn());
+        return testDto;
+    }
+
+    public SdxTestDto assertEncryptionProfileCrnEmpty(SdxTestDto testDto) {
+        assertEncryptionProfileCrnEmpty("Data Lake", testDto.getName(),
+                testDto.getResponse().getStackV4Response().getCluster().getEncryptionProfileCrn());
+        return testDto;
+    }
+
+    public DistroXTestDto assertEncryptionProfileCrnEmpty(DistroXTestDto testDto) {
+        assertEncryptionProfileCrnEmpty("Data Hub", testDto.getName(), testDto.getResponse().getCluster().getEncryptionProfileCrn());
+        return testDto;
+    }
+
+    public DistroXTestDto assertEncryptionProfileCrn(DistroXTestDto testDto, String expectedEncryptionProfileCrn) {
+        String encryptionProfileCrn = testDto.getResponse().getCluster().getEncryptionProfileCrn();
+        if (!StringUtils.equals(expectedEncryptionProfileCrn, encryptionProfileCrn)) {
+            throw new TestFailException(format("Data Hub '%s' has encryption profile '%s' but '%s' was expected",
+                    testDto.getName(), encryptionProfileCrn, expectedEncryptionProfileCrn));
+        }
+        return testDto;
+    }
+
+    private void assertEncryptionProfileCrnEmpty(String resourceType, String resourceName, String encryptionProfileCrn) {
+        if (StringUtils.isNotBlank(encryptionProfileCrn)) {
+            throw new TestFailException(format("%s '%s' still has encryption profile '%s' after disabling it",
+                    resourceType, resourceName, encryptionProfileCrn));
+        }
     }
 }

@@ -23,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMulti
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteTagsByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDirectionalTrustSetupAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentEditByNameAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentEncryptionProfileDisableAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentEncryptionProfileEnableAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentFinishTrustSetupAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentForceDeleteAction;
@@ -169,6 +170,10 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> enableEncryptionProfileOnEnvironment() {
         return new EnvironmentEncryptionProfileEnableAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> disableEncryptionProfileOnEnvironment() {
+        return new EnvironmentEncryptionProfileDisableAction();
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> triggerEnvironmentEdit(EnvironmentEditRequest environmentEditRequest) {
