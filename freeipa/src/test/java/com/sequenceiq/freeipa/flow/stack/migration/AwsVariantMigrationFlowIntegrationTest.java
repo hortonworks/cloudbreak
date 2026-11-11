@@ -64,6 +64,7 @@ import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
+import com.sequenceiq.freeipa.flow.AbstractFreeIpaFlowIntegrationTest;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
@@ -84,7 +85,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
-class AwsVariantMigrationFlowIntegrationTest {
+class AwsVariantMigrationFlowIntegrationTest extends AbstractFreeIpaFlowIntegrationTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 

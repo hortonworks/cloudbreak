@@ -104,6 +104,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
+import com.sequenceiq.freeipa.flow.AbstractFreeIpaFlowIntegrationTest;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
@@ -190,7 +191,7 @@ import io.micrometer.core.instrument.MeterRegistry;
         "cb.max.salt.restore.dl_and_validate.retry=90",
         "cb.max.salt.restore.dl_and_validate.retry.onerror=5"
 })
-class RebuildFlowIntegrationTest {
+class RebuildFlowIntegrationTest extends AbstractFreeIpaFlowIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 

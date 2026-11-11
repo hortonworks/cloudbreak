@@ -107,6 +107,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.events.EventSenderService;
+import com.sequenceiq.freeipa.flow.AbstractFreeIpaFlowIntegrationTest;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
@@ -171,7 +172,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 @TestPropertySource(properties = {
         "freeipa.delayed.scale-sec=1",
 })
-class FreeIpaUpscaleFlowIntegrationTest {
+class FreeIpaUpscaleFlowIntegrationTest extends AbstractFreeIpaFlowIntegrationTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
     private static final long STACK_ID = 1L;

@@ -67,6 +67,7 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
+import com.sequenceiq.freeipa.flow.AbstractFreeIpaFlowIntegrationTest;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataFlowConfig;
@@ -103,7 +104,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
-class UpgradeCcmFlowChainIntegrationTest {
+class UpgradeCcmFlowChainIntegrationTest extends AbstractFreeIpaFlowIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
