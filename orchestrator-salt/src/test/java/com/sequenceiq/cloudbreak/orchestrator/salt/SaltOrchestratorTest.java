@@ -424,16 +424,6 @@ class SaltOrchestratorTest {
     }
 
     @Test
-    void getMissingNodesTest() {
-        assertThat(saltOrchestrator.getMissingNodes(gatewayConfig, targets)).hasSize(0);
-    }
-
-    @Test
-    void getAvailableNodesTest() {
-        assertThat(saltOrchestrator.getAvailableNodes(gatewayConfig, targets)).hasSize(0);
-    }
-
-    @Test
     void isBootstrapApiAvailableTest() {
         GenericResponse response = new GenericResponse();
         response.setStatusCode(200);

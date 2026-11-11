@@ -70,7 +70,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.converter.ProviderSyncSetToStringConverter;
 import com.sequenceiq.cloudbreak.converter.stack.AutoscaleStackToAutoscaleStackResponseJsonConverter;
 import com.sequenceiq.cloudbreak.converter.stack.StackIdViewToStackResponseConverter;
@@ -78,9 +77,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConve
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.StackToStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
@@ -93,19 +90,14 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
@@ -180,12 +172,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
-
-    @Inject
-    private NetworkConfigurationValidator networkConfigurationValidator;
-
-    @Inject
-    private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -808,24 +794,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return instanceMetaDataList.stream()
                 .filter(instanceMetaData -> privateId.equals(instanceMetaData.getPrivateId()))
                 .findFirst();
-    }
-
-    @Measure(StackService.class)
-    public void validateStack(StackValidation stackValidation) {
-        if (stackValidation.getNetwork() != null) {
-            networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
-        }
-    }
-
-    public void validateOrchestrator(Orchestrator orchestrator) {
-        try {
-            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
-            containerOrchestrator.validateApiEndpoint(new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap()));
-        } catch (CloudbreakException e) {
-            throw new BadRequestException(format("Invalid orchestrator type: %s", e.getMessage()));
-        } catch (CloudbreakOrchestratorException e) {
-            throw new BadRequestException(format("Error occurred when trying to reach orchestrator API: %s", e.getMessage()));
-        }
     }
 
     public void checkLiveStackExistenceByName(String name, String accountId, StackType stackType) {

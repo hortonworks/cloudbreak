@@ -269,7 +269,6 @@ dependencies {
   implementation project(path: ':orchestrator-salt')
   implementation project(':service-common')
 
-  runtimeOnly project(':orchestrator-yarn')
   runtimeOnly project(':cloud-reactor')
   runtimeOnly project(':cloud-gcp')
   runtimeOnly project(':cloud-mock')

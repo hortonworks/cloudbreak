@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.converter.ConfigStalenessStateConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
@@ -166,9 +165,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ClusterComponent> components = new HashSet<>();
-
-    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Container> containers = new HashSet<>();
 
     @ManyToMany
     private Set<RDSConfig> rdsConfigs;
@@ -362,14 +358,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     public void setHostGroups(Set<HostGroup> hostGroups) {
         this.hostGroups = hostGroups;
-    }
-
-    public Set<Container> getContainers() {
-        return containers;
-    }
-
-    public void setContainers(Set<Container> containers) {
-        this.containers = containers;
     }
 
     public boolean isCreateFailed() {

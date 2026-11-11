@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -37,9 +36,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -52,7 +49,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -84,15 +80,6 @@ public class ClusterBootstrapperTest {
 
     @Mock
     private HostBootstrapApiCheckerTask hostBootstrapApiCheckerTask;
-
-    @Mock
-    private PollingService<HostOrchestratorClusterContext> hostClusterAvailabilityPollingService;
-
-    @Mock
-    private HostClusterAvailabilityCheckerTask hostClusterAvailabilityCheckerTask;
-
-    @Mock
-    private ClusterBootstrapperErrorHandler clusterBootstrapperErrorHandler;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -193,8 +180,6 @@ public class ClusterBootstrapperTest {
                         .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
-        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
-                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
 
@@ -235,9 +220,6 @@ public class ClusterBootstrapperTest {
                 .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
-        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
-                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
-
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
 
         verify(instanceMetaDataService).getReachableInstanceMetadataByStackId(1L);
@@ -277,8 +259,6 @@ public class ClusterBootstrapperTest {
                 .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
-        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
-                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         when(clusterNodeNameGenerator.getNodeNameForInstanceMetadata(any(), any(), any(), any())).thenReturn(NODE_NAME);
         when(resourceAttributeUtil.getTypedAttributes(any(), any())).thenReturn(Optional.of(volumeSetAttributes));
         ArgumentCaptor<String> fqdnCaptor = ArgumentCaptor.forClass(String.class);
@@ -312,8 +292,6 @@ public class ClusterBootstrapperTest {
                 .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
-        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
-                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
 
@@ -354,8 +332,6 @@ public class ClusterBootstrapperTest {
                 .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(deadConfig, aliveConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
-        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
-                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
 
@@ -400,8 +376,6 @@ public class ClusterBootstrapperTest {
                 .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(deadConfig1, deadConfig2));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
-        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
-                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1", "1.1.1.2"));
 
@@ -443,8 +417,6 @@ public class ClusterBootstrapperTest {
                 .withKnoxGatewayEnabled(false)
                 .build()));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
-        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
-                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
 

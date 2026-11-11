@@ -88,7 +88,6 @@ public class ClusterTerminationService {
         Set<HostGroup> hostGroups = hostGroupService.findHostGroupsInCluster(cluster.getId());
         hostGroupService.deleteAll(hostGroups);
         cluster.getHostGroups().clear();
-        cluster.getContainers().clear();
         clusterService.save(cluster);
     }
 

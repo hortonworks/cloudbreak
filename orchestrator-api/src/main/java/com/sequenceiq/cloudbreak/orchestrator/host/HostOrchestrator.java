@@ -76,10 +76,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void upgradeClusterManager(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
-    List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
-
-    List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
-
     NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig, boolean targeted);
 
     void tearDown(OrchestratorAware stack, List<GatewayConfig> allGatewayConfigs, Multimap<String, String> removeNodePrivateIPsByFQDN,

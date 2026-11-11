@@ -46,9 +46,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredenti
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -108,15 +106,6 @@ public class ClusterBootstrapper {
 
     @Inject
     private HostBootstrapApiCheckerTask hostBootstrapApiCheckerTask;
-
-    @Inject
-    private PollingService<HostOrchestratorClusterContext> hostClusterAvailabilityPollingService;
-
-    @Inject
-    private HostClusterAvailabilityCheckerTask hostClusterAvailabilityCheckerTask;
-
-    @Inject
-    private ClusterBootstrapperErrorHandler clusterBootstrapperErrorHandler;
 
     @Inject
     private HostOrchestrator hostOrchestrator;
@@ -198,8 +187,6 @@ public class ClusterBootstrapper {
 
             BootstrapParams params = createBootstrapParams(stack);
             hostOrchestrator.reBootstrapExistingNodes(allGatewayConfig, gatewayNodes, params, clusterDeletionBasedModel(stack.getId(), null));
-
-            checkIfAllNodesAvailable(stack, gatewayNodes, stack.getPrimaryGatewayInstance());
         } catch (TransactionExecutionException e) {
             throw new CloudbreakException(e.getCause());
         } catch (Exception e) {
@@ -219,7 +206,6 @@ public class ClusterBootstrapper {
 
             InstanceMetadataView primaryGateway = stack.getPrimaryGatewayInstance();
             saveOrchestrator(stack, primaryGateway);
-            checkIfAllNodesAvailable(stack, nodes, primaryGateway);
         } catch (TransactionExecutionException e) {
             throw new CloudbreakException(e.getCause());
         } catch (CloudbreakOrchestratorFailedException e) {
@@ -248,20 +234,6 @@ public class ClusterBootstrapper {
 
     public void reBootstrapOnHost(StackDto stackDto) throws CloudbreakException {
         bootstrapOnHostInternal(stackDto, this::updateSaltComponent, false);
-    }
-
-    private void checkIfAllNodesAvailable(StackDto stack, Set<Node> nodes, InstanceMetadataView primaryGateway)
-            throws CloudbreakOrchestratorFailedException {
-        LOGGER.info("Checking availability of nodes {}", nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
-        GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack.getStack(), stack.getSecurityConfig(), primaryGateway, isKnoxEnabled(stack));
-        ExtendedPollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(
-                hostClusterAvailabilityCheckerTask, new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes),
-                POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
-        validatePollingResultForCancellation(allNodesAvailabilityPolling.getPollingResult(), "Polling of all nodes availability was cancelled.");
-        if (allNodesAvailabilityPolling.isTimeout()) {
-            clusterBootstrapperErrorHandler.terminateFailedNodes(hostOrchestrator, null, stack, gatewayConfig, nodes);
-        }
-        LOGGER.info("All nodes are available");
     }
 
     private void saveSaltComponent(StackView stack) {
@@ -510,16 +482,6 @@ public class ClusterBootstrapper {
         BootstrapParams params = createBootstrapParams(stack);
 
         hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stateZip, params, clusterDeletionBasedModel(stack.getId(), null), false);
-
-        InstanceMetadataView primaryGateway = stack.getPrimaryGatewayInstance();
-        GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack.getStack(), stack.getSecurityConfig(), primaryGateway, enableKnox);
-        ExtendedPollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService
-                .pollWithAbsoluteTimeout(hostClusterAvailabilityCheckerTask,
-                        new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
-        validatePollingResultForCancellation(allNodesAvailabilityPolling.getPollingResult(), "Polling of new nodes availability was cancelled.");
-        if (allNodesAvailabilityPolling.isTimeout()) {
-            clusterBootstrapperErrorHandler.terminateFailedNodes(hostOrchestrator, null, stack, gatewayConfig, nodes);
-        }
     }
 
     /*

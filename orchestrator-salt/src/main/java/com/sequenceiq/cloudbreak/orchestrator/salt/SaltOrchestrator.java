@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1342,16 +1341,6 @@ public class SaltOrchestrator implements HostOrchestrator {
         return roles.values().stream().findFirst()
                 .map(GrainsJsonPropertyUtil::getPropertySet)
                 .orElse(Collections.emptySet());
-    }
-
-    @Override
-    public List<String> getMissingNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes) {
-        return new ArrayList<>();
     }
 
     @Override

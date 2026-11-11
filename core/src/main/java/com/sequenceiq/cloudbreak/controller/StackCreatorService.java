@@ -298,11 +298,6 @@ public class StackCreatorService {
                         LOGGER,
                         "Decorate Stack with data took {} ms");
 
-                if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
-                    measure(() -> stackService.validateOrchestrator(stack.getOrchestrator()),
-                            LOGGER,
-                            "Validate orchestrator took {} ms");
-                }
                 stack.setResourceCrn(crn);
                 stack.setUseCcm(environment.getTunnel().useCcm());
                 stack.setTunnel(environment.getTunnel());
