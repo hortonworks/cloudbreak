@@ -96,7 +96,11 @@ set -ex -o pipefail
     cd integration-test
 
     export PRIMARYKEY_CHECK=true
-    echo "export CPUS_FOR_CLOUDBREAK=4.0" >> integcb/Profile_template
+    echo "export CPUS_FOR_CLOUDBREAK=12.0" >> integcb/Profile_template
+    echo "export CPUS_FOR_SERVICES=8.0" >> integcb/Profile_template
+    echo "export MEMORY_FOR_OTHER_SERVICES=4096M" >> integcb/Profile_template
+    echo "export CPUS_FOR_MOCK_INFRASTRUCTURE=10.0" >> integcb/Profile_template
+    echo "export MEMORY_FOR_MOCK_INFRASTRUCTURE=2048M" >> integcb/Profile_template
     # without-build: download cbd, start docker stack, run selected TestNG suite(s).
     VERSION=$(get_latest_version) TARGET_BRANCH=$BRANCH make without-build
     RESULT=$?

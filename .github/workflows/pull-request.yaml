@@ -210,7 +210,7 @@ jobs:
   schema-compatibility-test:
     permissions: write-all
     name: Schema Compatibility Test
-    runs-on: [cb-ubuntu22-large]
+    runs-on: [cb-ubuntu22-8xlarge]
     timeout-minutes: 90
     steps:
       - name: checkout
@@ -240,7 +240,7 @@ jobs:
   fedramp-integration-test:
     permissions: write-all
     name: FedRAMP Integration Test
-    runs-on: [cb-ubuntu22-large]
+    runs-on: [cb-ubuntu22-8xlarge]
     timeout-minutes: 90
     # Opt-in: only run when the PR carries the `fedramp-it` label. Without it the job's
     # own script is a no-op ("no need for build"), so skipping the whole job avoids the
@@ -285,7 +285,7 @@ jobs:
   aws-test:
     permissions: write-all
     name: Aws Test
-    runs-on: [cb-ubuntu22-large]
+    runs-on: [cb-ubuntu22-8xlarge]
     timeout-minutes: 120
     # Opt-in: only run the real-AWS smoke suite when the PR carries one of the smoke labels.
     # Each label selects a suite in aws-test-steps_aws_test.sh (datahub > datalake >

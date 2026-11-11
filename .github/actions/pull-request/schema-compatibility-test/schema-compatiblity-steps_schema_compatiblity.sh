@@ -51,7 +51,11 @@ main() {
     cd integration-test/
     docker rm -f $(docker ps -aq) || true
 
-    echo "export CPUS_FOR_CLOUDBREAK=4.0" >> integcb/Profile_template
+    echo "export CPUS_FOR_CLOUDBREAK=12.0" >> integcb/Profile_template
+    echo "export CPUS_FOR_SERVICES=8.0" >> integcb/Profile_template
+    echo "export MEMORY_FOR_OTHER_SERVICES=4096M" >> integcb/Profile_template
+    echo "export CPUS_FOR_MOCK_INFRASTRUCTURE=10.0" >> integcb/Profile_template
+    echo "export MEMORY_FOR_MOCK_INFRASTRUCTURE=2048M" >> integcb/Profile_template
     export TARGET_BRANCH=CB-$(echo $PRODUCTION_VERSION | sed -E "s/-b[0-9]+//g")
     make without-build
     git checkout -- integcb/Profile_template
