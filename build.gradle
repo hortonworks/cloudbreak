@@ -29,7 +29,7 @@ plugins {
   id "org.ajoberstar.grgit" version "5.3.3"
   id "com.github.spotbugs" version "6.5.13"
   id "com.adarshr.test-logger" version "4.0.0"
-  id "com.netflix.nebula.resolution-rules" version "13.1.2"
+  id "com.netflix.nebula.resolution-rules" version "13.3.0"
   id 'com.diffplug.spotless' version '8.11.0'
   id 'com.autonomousapps.dependency-analysis' version '3.20.2' apply false
 }
