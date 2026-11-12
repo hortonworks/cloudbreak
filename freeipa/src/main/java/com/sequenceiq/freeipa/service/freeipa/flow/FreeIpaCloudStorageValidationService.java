@@ -50,7 +50,7 @@ public class FreeIpaCloudStorageValidationService {
     private void validateCloudStorageBackup(Stack stack, List<GatewayConfig> allGateways, Set<Node> allNodes, StackBasedExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
         try {
-            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfigForSalt(stack);
             hostOrchestrator.validateCloudStorageBackup(primaryGatewayConfig, allGateways, allNodes, exitCriteriaModel);
         } catch (CloudbreakOrchestratorException e) {
             String errorMessage = getErrorMessage(stack, "backup");

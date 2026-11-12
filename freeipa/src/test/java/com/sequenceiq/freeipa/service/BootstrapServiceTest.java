@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,8 +16,11 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,13 +28,19 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -40,19 +50,24 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.salt.utils.SaltMinimumAuthVersionCalculator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackParameter;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.JumpgateTunnelStatusService;
+import com.sequenceiq.freeipa.service.stack.StackParameterService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
@@ -100,6 +115,12 @@ class BootstrapServiceTest {
 
     @Mock
     private JumpgateTunnelStatusService jumpgateTunnelStatusService;
+
+    @Mock
+    private StackParameterService stackParameterService;
+
+    @Spy
+    private SaltMinimumAuthVersionCalculator saltMinimumAuthVersionCalculator;
 
     @InjectMocks
     private BootstrapService underTest;
@@ -444,6 +465,240 @@ class BootstrapServiceTest {
         when(hostDiscoveryService.generateHostname(anyString(), any(), anyLong(), anyBoolean())).thenCallRealMethod();
 
         assertThrows(CloudbreakOrchestratorException.class, () -> underTest.bootstrap(STACK_ID));
+    }
+
+    static Stream<Arguments> saltVersionsOfFreeIpa() {
+        return Stream.of(
+                Arguments.of("3006.25", List.of("3006.25", "3006.10"), 2),
+                Arguments.of("3006.25", List.of("3006.25", "3006.25"), 3),
+                Arguments.of("3006.25", List.of("3006.25", ""), 0)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("saltVersionsOfFreeIpa")
+    void bootstrapRestartsEverySaltMasterWithTheMinimumAuthVersionOfTheOldestInstance(String imageSaltVersion, List<String> instanceSaltVersions,
+            int expectedMinimumAuthVersion) throws Exception {
+        BootstrapParams bootstrapParams = bootstrapFreeIpaWithSaltVersions(imageSaltVersion, instanceSaltVersions);
+
+        assertEquals(expectedMinimumAuthVersion, bootstrapParams.getSaltMasterMinimumAuthVersion());
+        assertTrue(bootstrapParams.isSaltMasterRestartNeeded());
+    }
+
+    @Test
+    void firstBootstrapSavesTheValueWithoutStoppingNewMasters() throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(replicas("replica1"));
+        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25"));
+        Stack stack = stackRepository.findOneWithLists(STACK_ID).orElseThrow();
+        stack.setStackStatus(new StackStatus(stack, "Bootstrapping machines", DetailedStackStatus.BOOTSTRAPPING_MACHINES));
+
+        underTest.bootstrap(STACK_ID);
+
+        BootstrapParams params = capturedBootstrapParams(gatewayConfigs);
+        assertEquals(3, params.getSaltMasterMinimumAuthVersion());
+        assertFalse(params.isSaltMasterRestartNeeded());
+        InOrder order = inOrder(stackParameterService, hostOrchestrator);
+        order.verify(stackParameterService).setStackParameter(STACK_ID, "SALT_MASTER_MINIMUM_AUTH_VERSION", "unknown");
+        order.verify(hostOrchestrator).bootstrapNewNodes(any(), anySet(), anySet(), any(), any(), any(), anyBoolean());
+        order.verify(stackParameterService).setStackParameter(STACK_ID, "SALT_MASTER_MINIMUM_AUTH_VERSION", "3");
+    }
+
+    @Test
+    void failedFirstBootstrapRestartsTheMastersOnRetry() throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(replicas("replica1"));
+        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25"));
+        Stack stack = stackRepository.findOneWithLists(STACK_ID).orElseThrow();
+        stack.setStackStatus(new StackStatus(stack, "Bootstrapping machines", DetailedStackStatus.BOOTSTRAPPING_MACHINES));
+        appliedMinimumAuthVersion("unknown");
+
+        underTest.bootstrap(STACK_ID);
+
+        assertTrue(capturedBootstrapParams(gatewayConfigs).isSaltMasterRestartNeeded());
+    }
+
+    @Test
+    void rebuiltStackWithUnknownAppliedValueStillRestartsTheMasters() throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(replicas("replica1"));
+        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25"));
+        Stack stack = stackRepository.findOneWithLists(STACK_ID).orElseThrow();
+        stack.setStackStatus(new StackStatus(stack, "Bootstrapping machines", DetailedStackStatus.REBUILD_IN_PROGRESS));
+
+        underTest.bootstrap(STACK_ID);
+
+        assertTrue(capturedBootstrapParams(gatewayConfigs).isSaltMasterRestartNeeded());
+    }
+
+    @Test
+    void unchangedAppliedValueNeedsNoMasterRestartAndNoWrite() throws Exception {
+        appliedMinimumAuthVersion("2");
+
+        BootstrapParams params = bootstrapFreeIpaWithSaltVersions("3006.25", List.of("3006.25", "3006.10"));
+
+        assertEquals(2, params.getSaltMasterMinimumAuthVersion());
+        assertFalse(params.isSaltMasterRestartNeeded());
+        verify(stackParameterService, never()).setStackParameter(anyLong(), anyString(), anyString());
+    }
+
+    @Test
+    void failedBootstrapKeepsTheValueUnknownAndRestartsAgainOnRetry() throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(replicas("replica1", "replica2"));
+        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25", "3006.25"));
+        StackParameter parameter = appliedMinimumAuthVersion("2");
+        doAnswer(invocation -> {
+            parameter.setParamValue(invocation.getArgument(2));
+            return null;
+        }).when(stackParameterService).setStackParameter(eq(STACK_ID), eq("SALT_MASTER_MINIMUM_AUTH_VERSION"), anyString());
+        doThrow(new CloudbreakOrchestratorCancelledException("failed"))
+                .doNothing().when(hostOrchestrator).bootstrapNewNodes(any(), anySet(), anySet(), any(), any(), any(), anyBoolean());
+
+        assertThrows(CloudbreakOrchestratorException.class, () -> underTest.bootstrap(STACK_ID));
+        assertEquals("unknown", parameter.getParamValue());
+
+        underTest.bootstrap(STACK_ID);
+
+        ArgumentCaptor<BootstrapParams> params = ArgumentCaptor.forClass(BootstrapParams.class);
+        verify(hostOrchestrator, times(2)).bootstrapNewNodes(eq(gatewayConfigs), anySet(), anySet(), any(), params.capture(), any(),
+                eq(false));
+        assertTrue(params.getAllValues().stream().allMatch(BootstrapParams::isSaltMasterRestartNeeded));
+        assertEquals("3", parameter.getParamValue());
+    }
+
+    @Test
+    void bootstrapLeavesSaltMasterConfigAloneWhenOnlyTheStackImageHasNewSalt() throws Exception {
+        BootstrapParams params = bootstrapFreeIpaWithSaltVersions("3006.25", List.of("3006.10", "3006.10"));
+
+        assertNull(params.getSaltMasterMinimumAuthVersion());
+        assertFalse(params.isSaltMasterRestartNeeded());
+        verify(stackParameterService, never()).setStackParameter(anyLong(), anyString(), anyString());
+    }
+
+    @Test
+    void bootstrapLeavesSaltMasterConfigAloneWithoutNewSalt() throws Exception {
+        BootstrapParams bootstrapParams = bootstrapFreeIpaWithSaltVersions("3006.10", List.of("3006.10", "3006.10"));
+
+        assertNull(bootstrapParams.getSaltMasterMinimumAuthVersion());
+        assertFalse(bootstrapParams.isSaltMasterRestartNeeded());
+    }
+
+    @Test
+    void reBootstrapLeavesSaltMasterConfigAlone() throws Exception {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setInstanceGroups(Set.of());
+        when(freeIpaService.findByStack(stack)).thenReturn(new FreeIpa());
+        List<GatewayConfig> gatewayConfigs = gatewayConfigsWithSaltVersions(List.of("3006.25", "3006.10"));
+        when(gatewayConfigService.getGatewayConfigs(eq(stack), anySet())).thenReturn(gatewayConfigs);
+        ImageEntity image = new ImageEntity();
+        image.setSaltVersion("3006.25");
+        when(imageService.getByStack(stack)).thenReturn(image);
+
+        underTest.reBootstrap(stack);
+
+        ArgumentCaptor<BootstrapParams> bootstrapParamsCaptor = ArgumentCaptor.forClass(BootstrapParams.class);
+        verify(hostOrchestrator).reBootstrapExistingNodes(eq(gatewayConfigs), anySet(), bootstrapParamsCaptor.capture(), any());
+        assertNull(bootstrapParamsCaptor.getValue().getSaltMasterMinimumAuthVersion());
+        assertFalse(bootstrapParamsCaptor.getValue().isSaltMasterRestartNeeded());
+    }
+
+    @Test
+    void bootstrapOfSomeInstancesLeavesSaltMasterConfigAlone() throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID))
+                .thenReturn(Set.of(createInstance(INSTANCE_WITH_FQDN, "instance1." + DOMAIN), createInstance(INSTANCE_WO_FQDN, "instance2." + DOMAIN)));
+        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25"));
+
+        underTest.bootstrap(STACK_ID, List.of(INSTANCE_WITH_FQDN), false);
+
+        BootstrapParams bootstrapParams = capturedBootstrapParams(gatewayConfigs);
+        assertNull(bootstrapParams.getSaltMasterMinimumAuthVersion());
+        assertFalse(bootstrapParams.isSaltMasterRestartNeeded());
+    }
+
+    @Test
+    void bootstrapOfEveryReplicaByIdRestartsEverySaltMasterWithTheMinimumAuthVersionOfTheOldestReplica() throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(replicas("replica1", "replica2", "replica3"));
+        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25", "3006.10", "3006.10"));
+
+        underTest.bootstrap(STACK_ID, List.of("replica1", "replica2", "replica3"), false);
+
+        BootstrapParams bootstrapParams = capturedBootstrapParams(gatewayConfigs);
+        assertEquals(2, bootstrapParams.getSaltMasterMinimumAuthVersion());
+        assertTrue(bootstrapParams.isSaltMasterRestartNeeded());
+    }
+
+    @Test
+    void replicaAddedDuringTheBootstrapLeavesSaltMasterConfigAlone() throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID))
+                .thenReturn(replicas("replica1", "replica2"), replicas("replica1", "replica2", "replica3"));
+        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25", "3006.25"));
+
+        underTest.bootstrap(STACK_ID);
+
+        BootstrapParams bootstrapParams = capturedBootstrapParams(gatewayConfigs);
+        assertNull(bootstrapParams.getSaltMasterMinimumAuthVersion());
+        assertFalse(bootstrapParams.isSaltMasterRestartNeeded());
+    }
+
+    @Test
+    void replicaAddedAfterParamsWereConfiguredPreventsSavingTheAppliedValue() throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID))
+                .thenReturn(replicas("replica1", "replica2"), replicas("replica1", "replica2"), replicas("replica1", "replica2", "replica3"));
+        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25", "3006.25"));
+
+        underTest.bootstrap(STACK_ID);
+
+        assertEquals(3, capturedBootstrapParams(gatewayConfigs).getSaltMasterMinimumAuthVersion());
+        verify(stackParameterService).setStackParameter(STACK_ID, "SALT_MASTER_MINIMUM_AUTH_VERSION", "unknown");
+        verify(stackParameterService, never()).setStackParameter(STACK_ID, "SALT_MASTER_MINIMUM_AUTH_VERSION", "3");
+    }
+
+    private StackParameter appliedMinimumAuthVersion(String value) {
+        StackParameter parameter = new StackParameter();
+        parameter.setParamValue(value);
+        when(stackParameterService.findStackParameterByStackIdAndParamKey(STACK_ID, "SALT_MASTER_MINIMUM_AUTH_VERSION"))
+                .thenReturn(Optional.of(parameter));
+        return parameter;
+    }
+
+    private BootstrapParams bootstrapFreeIpaWithSaltVersions(String imageSaltVersion, List<String> instanceSaltVersions) throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(createInstance(INSTANCE_WITH_FQDN, "instance1." + DOMAIN)));
+        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions(imageSaltVersion, instanceSaltVersions);
+
+        underTest.bootstrap(STACK_ID);
+
+        return capturedBootstrapParams(gatewayConfigs);
+    }
+
+    private List<GatewayConfig> freeIpaWithSaltVersions(String imageSaltVersion, List<String> instanceSaltVersions) {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        when(stackRepository.findOneWithLists(STACK_ID)).thenReturn(Optional.of(stack));
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigsWithSaltVersions(instanceSaltVersions);
+        when(gatewayConfigService.getGatewayConfigs(eq(stack), anySet())).thenReturn(gatewayConfigs);
+        ImageEntity image = new ImageEntity();
+        image.setSaltVersion(imageSaltVersion);
+        when(imageService.getByStack(stack)).thenReturn(image);
+        return gatewayConfigs;
+    }
+
+    private BootstrapParams capturedBootstrapParams(List<GatewayConfig> gatewayConfigs) throws Exception {
+        ArgumentCaptor<BootstrapParams> bootstrapParamsCaptor = ArgumentCaptor.forClass(BootstrapParams.class);
+        verify(hostOrchestrator).bootstrapNewNodes(eq(gatewayConfigs), anySet(), anySet(), any(), bootstrapParamsCaptor.capture(), any(), eq(false));
+        return bootstrapParamsCaptor.getValue();
+    }
+
+    private List<GatewayConfig> gatewayConfigsWithSaltVersions(List<String> saltVersions) {
+        return saltVersions.stream()
+                .map(saltVersion -> GatewayConfig.builder().withSaltVersion(saltVersion).build())
+                .toList();
+    }
+
+    private Set<InstanceMetaData> replicas(String... instanceIds) {
+        return Stream.of(instanceIds)
+                .map(instanceId -> createInstance(instanceId, instanceId + "." + DOMAIN))
+                .collect(Collectors.toSet());
     }
 
     private InstanceMetaData createInstance(String instanceId, String fqdn) {

@@ -59,4 +59,17 @@ class GatewayConfigComparatorTest {
         assertEquals("gw6", sorted.get(6).getInstanceId());
     }
 
+    @Test
+    void testSortingOrderComparesSaltVersionsNumerically() {
+        GatewayConfig primaryWithOldSalt = GatewayConfig.builder().withInstanceId("old").withPrimary(true).withSaltVersion("3006.9").build();
+        GatewayConfig nonPrimaryWithNewSalt = GatewayConfig.builder().withInstanceId("new").withPrimary(false).withSaltVersion("3006.25").build();
+        GatewayConfig primaryWithBlankSalt = GatewayConfig.builder().withInstanceId("blank").withPrimary(true).withSaltVersion("").build();
+
+        List<GatewayConfig> sorted = List.of(primaryWithBlankSalt, primaryWithOldSalt, nonPrimaryWithNewSalt).stream()
+                .sorted(new GatewayConfigComparator())
+                .toList();
+
+        assertEquals(List.of("new", "old", "blank"), sorted.stream().map(GatewayConfig::getInstanceId).toList());
+    }
+
 }

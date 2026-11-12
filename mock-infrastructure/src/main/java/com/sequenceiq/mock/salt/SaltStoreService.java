@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class SaltStoreService {
     public void setSaltAction(String mockUuid, SaltAction saltAction) {
         LOGGER.debug("set salt actions to {}. Salt action: {}", mockUuid, saltAction);
         read(mockUuid).setSaltAction(saltAction);
-        addMinions(mockUuid, saltAction.getMinions());
+        Optional.ofNullable(saltAction.getMinions()).ifPresent(minions -> addMinions(mockUuid, minions));
     }
 
     public void addMinions(String mockUuid, List<Minion> minions) {

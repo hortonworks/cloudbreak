@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,16 +21,20 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.salt.utils.SaltMinimumAuthVersionCalculator;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackParameter;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.JumpgateTunnelStatusService;
+import com.sequenceiq.freeipa.service.stack.StackParameterService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
@@ -37,6 +42,10 @@ import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 public class BootstrapService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BootstrapService.class);
+
+    private static final String APPLIED_MINIMUM_AUTH_VERSION = "SALT_MASTER_MINIMUM_AUTH_VERSION";
+
+    private static final String UNKNOWN_MINIMUM_AUTH_VERSION = "unknown";
 
     @Inject
     private HostOrchestrator hostOrchestrator;
@@ -67,6 +76,12 @@ public class BootstrapService {
 
     @Inject
     private JumpgateTunnelStatusService jumpgateTunnelStatusService;
+
+    @Inject
+    private SaltMinimumAuthVersionCalculator saltMinimumAuthVersionCalculator;
+
+    @Inject
+    private StackParameterService stackParameterService;
 
     public void bootstrap(Long stackId) throws CloudbreakOrchestratorException {
         bootstrap(stackId, null, false);
@@ -123,9 +138,11 @@ public class BootstrapService {
                 params.setRestartNeeded(restartAll);
                 hostOrchestrator.reBootstrapExistingNodes(gatewayConfigs, allNodes, params, exitCriteriaModel);
             } else {
+                configureSaltMasterMinimumAuthVersion(params, stack, instanceMetaDatas, gatewayConfigs);
                 byte[] stateConfigZip = getStateConfigZip();
                 hostOrchestrator.bootstrapNewNodes(gatewayConfigs, allNodes, allNodes,
                         stateConfigZip, params, exitCriteriaModel, restartAll);
+                saveAppliedMinimumAuthVersion(params, stack, instanceMetaDatas);
             }
         } catch (IOException e) {
             LOGGER.error("Couldn't read state config", e);
@@ -134,6 +151,59 @@ public class BootstrapService {
             LOGGER.error("Bootstrap failed", e);
             throw e;
         }
+    }
+
+    private void configureSaltMasterMinimumAuthVersion(BootstrapParams params, Stack stack, Set<InstanceMetaData> instanceMetaDatas,
+            List<GatewayConfig> gatewayConfigs) {
+        List<String> instanceSaltVersions = gatewayConfigs.stream()
+                .map(gatewayConfig -> gatewayConfig.getSaltVersion().orElse(null))
+                .toList();
+        saltMinimumAuthVersionCalculator.calculate(instanceSaltVersions, instanceSaltVersions)
+                .filter(minimumAuthVersion -> isEveryInstanceBootstrapped(stack, instanceMetaDatas))
+                .ifPresent(minimumAuthVersion -> {
+                    params.setSaltMasterMinimumAuthVersion(minimumAuthVersion);
+                    Optional<String> appliedVersion = getAppliedMinimumAuthVersion(stack);
+                    if (appliedVersion.filter(String.valueOf(minimumAuthVersion)::equals).isEmpty()) {
+                        boolean restartNeeded = !isFirstBootstrap(stack, appliedVersion);
+                        LOGGER.info("Applying Salt master minimum_auth_version {} instead of {}, master restart needed: {}",
+                                minimumAuthVersion, appliedVersion.orElse(UNKNOWN_MINIMUM_AUTH_VERSION), restartNeeded);
+                        params.setSaltMasterRestartNeeded(restartNeeded);
+                        stackParameterService.setStackParameter(stack.getId(), APPLIED_MINIMUM_AUTH_VERSION, UNKNOWN_MINIMUM_AUTH_VERSION);
+                    }
+                });
+    }
+
+    private boolean isFirstBootstrap(Stack stack, Optional<String> appliedVersion) {
+        return appliedVersion.isEmpty() && stack.getStackStatus() != null
+                && DetailedStackStatus.BOOTSTRAPPING_MACHINES == stack.getStackStatus().getDetailedStackStatus();
+    }
+
+    private void saveAppliedMinimumAuthVersion(BootstrapParams params, Stack stack, Set<InstanceMetaData> instanceMetaDatas) {
+        if (params.getSaltMasterMinimumAuthVersion() != null
+                && getAppliedMinimumAuthVersion(stack).filter(String.valueOf(params.getSaltMasterMinimumAuthVersion())::equals).isEmpty()
+                && isEveryInstanceBootstrapped(stack, instanceMetaDatas)) {
+            LOGGER.info("Salt masters run with minimum_auth_version {}", params.getSaltMasterMinimumAuthVersion());
+            stackParameterService.setStackParameter(stack.getId(), APPLIED_MINIMUM_AUTH_VERSION, String.valueOf(params.getSaltMasterMinimumAuthVersion()));
+        }
+    }
+
+    private Optional<String> getAppliedMinimumAuthVersion(Stack stack) {
+        return stackParameterService.findStackParameterByStackIdAndParamKey(stack.getId(), APPLIED_MINIMUM_AUTH_VERSION)
+                .map(StackParameter::getParamValue);
+    }
+
+    private boolean isEveryInstanceBootstrapped(Stack stack, Set<InstanceMetaData> instanceMetaDatas) {
+        Set<String> bootstrappedInstanceIds = instanceMetaDatas.stream()
+                .map(InstanceMetaData::getInstanceId)
+                .collect(Collectors.toSet());
+        Set<String> instancesLeftOut = instanceMetaDataService.findNotTerminatedForStack(stack.getId()).stream()
+                .map(InstanceMetaData::getInstanceId)
+                .filter(instanceId -> !bootstrappedInstanceIds.contains(instanceId))
+                .collect(Collectors.toSet());
+        if (!instancesLeftOut.isEmpty()) {
+            LOGGER.info("Salt master minimum_auth_version is left unchanged, as the instances {} are not bootstrapped", instancesLeftOut);
+        }
+        return instancesLeftOut.isEmpty();
     }
 
     private String getHostname(FreeIpa freeIpa, InstanceMetaData im, boolean fqdnAsHostnameSupported) {

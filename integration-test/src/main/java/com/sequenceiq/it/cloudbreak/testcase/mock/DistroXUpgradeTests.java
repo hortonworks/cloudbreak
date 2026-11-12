@@ -1,12 +1,17 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure.ParameterCheck.HAS_THESE_PARAMETERS;
+import static java.util.function.Predicate.not;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import jakarta.inject.Inject;
 
@@ -15,11 +20,14 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
@@ -35,6 +43,14 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 
 public class DistroXUpgradeTests extends AbstractMockTest {
+
+    private static final String SALT_3006_10_IMAGE_ID = "c1d2e3f4-3006-4a10-9b10-5a17a0000010";
+
+    private static final Map<String, String> SALT_MASTER_MINIMUM_AUTH_VERSION_FILE = Map.of(
+            "file", "minimum_auth_version.conf",
+            "path", "/etc/salt/master.d");
+
+    private static final String SALT_STOP_ACTION = "stop";
 
     @Inject
     private DistroXTestClient distroXTestClient;
@@ -132,6 +148,44 @@ public class DistroXUpgradeTests extends AbstractMockTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "there is a running Cloudbreak, and an environment with Data Lake and a DistroX cluster on an image with Salt 3006.10",
+            when = "OS upgrade by upgrade sets, gateway set first, called on the DistroX cluster to an image with Salt 3006.25",
+            then = "the salt masters get minimum_auth_version and are restarted only when its value changes: "
+                    + "when the first gateway is replaced and when the last old minion is gone")
+    public void testDistroXOsUpgradeByUpgradeSetsFromSaltWithoutMinimumAuthVersion(MockedTestContext testContext) {
+        String imageSettings = "imageSettingsSaltAuthUpgrade";
+        String imageCatalogName = resourcePropertyProvider().getName();
+        createImageCatalog(testContext, imageCatalogName, getImageCatalogMockServerSetup().getSaltAuthUpgradeImageCatalogUrl());
+        String distroXName = resourcePropertyProvider().getName();
+        testContext
+                .given(imageSettings, DistroXImageTestDto.class)
+                .withImageId(SALT_3006_10_IMAGE_ID)
+                .withImageCatalog(imageCatalogName)
+                .given(distroXName, DistroXTestDto.class)
+                .withImageSettings(imageSettings)
+                .when(distroXTestClient.create(), key(distroXName))
+                .enableVerification()
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .mockSalt().saltActionDistribute().post().atLeast(1).verify()
+                .mockSalt().saltFileDistribute().post().parameters(SALT_MASTER_MINIMUM_AUTH_VERSION_FILE, HAS_THESE_PARAMETERS).times(0).verify()
+                .mockSalt().saltActionDistribute().post().bodyCheck(DistroXUpgradeTests::isSaltMasterStop, 0).verify()
+                .resetCalls()
+                .given(DistroXUpgradeTestDto.class)
+                .given(distroXName, DistroXTestDto.class)
+                .then((tc, entity, client) -> {
+                    entity.setOsUpgradeByUpgradeSets(gatewayFirstUpgradeSets(entity.getResponse()));
+                    return entity;
+                })
+                .when(distroXTestClient.osUpgradeByUpgradeSets())
+                .await(STACK_AVAILABLE, key(distroXName))
+                .awaitForHealthyInstances()
+                .mockSalt().saltFileDistribute().post().parameters(SALT_MASTER_MINIMUM_AUTH_VERSION_FILE, HAS_THESE_PARAMETERS).atLeast(2).verify()
+                .mockSalt().saltActionDistribute().post().bodyCheck(DistroXUpgradeTests::isSaltMasterStop, 2).verify()
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "there is a running Cloudbreak, and an environment with Data Lake and DistroX cluster in available state, scale up",
             when = "upgrade by upgrade sets called on the DistroX cluster",
             then = "DistroX upgrade should be successful, the cluster should be up and running")
@@ -208,11 +262,35 @@ public class DistroXUpgradeTests extends AbstractMockTest {
         return String.join(".", elements);
     }
 
+    private static boolean isSaltMasterStop(String saltActionJson) {
+        try {
+            JsonNode saltAction = new ObjectMapper().readTree(saltActionJson);
+            return SALT_STOP_ACTION.equals(saltAction.path("action").asText()) && !saltAction.path("masters").isEmpty();
+        } catch (JsonProcessingException e) {
+            return false;
+        }
+    }
+
+    private static List<OrderedOSUpgradeSet> gatewayFirstUpgradeSets(StackV4Response stack) {
+        List<Set<String>> instanceIdsOfGatewayGroupFirst = stack.getInstanceGroups().stream()
+                .sorted(Comparator.comparing(instanceGroup -> instanceGroup.getType() != InstanceGroupType.GATEWAY))
+                .map(instanceGroup -> instanceGroup.getMetadata().stream().map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toSet()))
+                .filter(not(Set::isEmpty))
+                .toList();
+        return IntStream.range(0, instanceIdsOfGatewayGroupFirst.size())
+                .mapToObj(order -> new OrderedOSUpgradeSet(order, instanceIdsOfGatewayGroupFirst.get(order)))
+                .toList();
+    }
+
     protected void createImageCatalogForOsUpgrade(MockedTestContext testContext, String name) {
+        createImageCatalog(testContext, name, getImageCatalogMockServerSetup().getUpgradeImageCatalogUrl());
+    }
+
+    private void createImageCatalog(MockedTestContext testContext, String name, String url) {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .withName(name)
-                .withUrl(getImageCatalogMockServerSetup().getUpgradeImageCatalogUrl())
+                .withUrl(url)
                 .when(imageCatalogTestClient.createV4(), key(name));
     }
 }

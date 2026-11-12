@@ -27,6 +27,7 @@ import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.Memory;
 import com.sequenceiq.cloudbreak.orchestrator.model.MemoryInfo;
@@ -366,14 +368,35 @@ public class SaltStateService {
         sc.action(saltAction);
     }
 
-    public void stopMasters(SaltConnector sc, Set<String> privateIPs) {
+    public GenericResponses stopMasters(SaltConnector sc, Set<String> privateIPs) {
         SaltAction saltAction = new SaltAction(SaltActionType.STOP);
         for (String entry : privateIPs) {
             SaltMaster master = new SaltMaster();
             master.setAddress(entry);
             saltAction.addMaster(master);
         }
-        sc.action(saltAction);
+        return sc.action(saltAction);
+    }
+
+    public SaltMastersStopResult stopMastersToRestart(SaltConnector sc, Set<String> privateIPs) {
+        LOGGER.info("Stop salt masters to restart them: {}", privateIPs);
+        try {
+            return SaltMastersStopResult.withMastersNotStopped(getMastersNotStopped(stopMasters(sc, privateIPs)));
+        } catch (RuntimeException e) {
+            LOGGER.warn("The request to stop salt masters {} failed, it is unknown which of them were stopped", privateIPs, e);
+            return SaltMastersStopResult.stopRequestFailed(privateIPs, e);
+        }
+    }
+
+    private Set<String> getMastersNotStopped(GenericResponses responses) {
+        Set<String> mastersNotStopped = responses.getResponses().stream()
+                .filter(response -> response.getStatusCode() != HttpStatus.OK.value())
+                .map(GenericResponse::getAddress)
+                .collect(Collectors.toSet());
+        if (!mastersNotStopped.isEmpty()) {
+            LOGGER.warn("Failed to stop salt masters {}: {}", mastersNotStopped, responses.getResponses());
+        }
+        return mastersNotStopped;
     }
 
     public GenericResponses changePassword(SaltConnector sc, Set<String> privateIPs, String password) throws CloudbreakOrchestratorFailedException {

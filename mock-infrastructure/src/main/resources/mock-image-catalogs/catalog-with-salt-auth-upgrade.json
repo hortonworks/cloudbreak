@@ -1,0 +1,176 @@
+{
+  "images": {
+    "cdh-images": [
+      {
+        "created": 1583391600,
+        "date": "2020-03-06",
+        "description": "Official Cloudbreak image with Salt 3006.10",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "c1d2e3f4-3006-4a10-9b10-5a17a0000010",
+        "package-versions": {
+          "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
+          "cm": "CM_VERSION_NEXT",
+          "salt": "3006.10",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME_NEXT",
+          "python38": "3.8.13-1.el7",
+          "java": "8",
+          "java11": "11.0.19",
+          "java17": "17.0.2",
+          "java8": "1.8.0_372",
+          "java21": "21.0.11"
+        },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel",
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME_NEXT",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel"
+        },
+        "version": "CDH_RUNTIME_NEXT",
+        "build-number": "5949264",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      },
+      {
+        "created": 1583877600,
+        "date": "2020-03-10",
+        "description": "Official Cloudbreak image with Salt 3006.25 Upgrade Target",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "c1d2e3f4-3006-4a25-9b25-5a17a0000025",
+        "package-versions": {
+          "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
+          "cm": "CM_VERSION_NEXT",
+          "salt": "3006.25",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME_NEXT",
+          "python38": "3.8.13-1.el7",
+          "java": "8",
+          "java11": "11.0.19",
+          "java17": "17.0.2",
+          "java8": "1.8.0_372",
+          "java21": "21.0.11"
+        },
+        "tags": {
+          "release-version": "CDH_RELEASE_NEXT"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel",
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME_NEXT",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel"
+        },
+        "version": "CDH_RUNTIME_NEXT",
+        "build-number": "5949264",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      }
+    ]
+  },
+  "versions": {
+    "cloudbreak": [
+      {
+        "images": [
+          "c1d2e3f4-3006-4a10-9b10-5a17a0000010",
+          "c1d2e3f4-3006-4a25-9b25-5a17a0000025"
+        ],
+        "defaults": [
+          "c1d2e3f4-3006-4a10-9b10-5a17a0000010",
+          "c1d2e3f4-3006-4a25-9b25-5a17a0000025"
+        ]
+      }
+    ]
+  }
+}

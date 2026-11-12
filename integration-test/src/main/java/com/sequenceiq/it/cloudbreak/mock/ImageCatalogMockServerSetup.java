@@ -89,9 +89,17 @@ public class ImageCatalogMockServerSetup {
     }
 
     public String getUpgradeImageCatalogUrl() {
+        return getUpgradeRuntimeImageCatalogUrl("catalog-with-for-upgrade");
+    }
+
+    public String getSaltAuthUpgradeImageCatalogUrl() {
+        return getUpgradeRuntimeImageCatalogUrl("catalog-with-salt-auth-upgrade");
+    }
+
+    private String getUpgradeRuntimeImageCatalogUrl(String catalogName) {
         return String.format("https://%s/mock-image-catalog?catalog-name=%s&runtime=%s&mock-server-address=%s",
                 mockImageCatalogServer,
-                "catalog-with-for-upgrade",
+                catalogName,
                 cdhUpgradeRuntime,
                 mockImageCatalogServer);
     }

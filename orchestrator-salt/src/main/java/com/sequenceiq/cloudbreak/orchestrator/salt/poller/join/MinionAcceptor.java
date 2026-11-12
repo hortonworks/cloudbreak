@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -208,8 +209,13 @@ public class MinionAcceptor {
         LOGGER.debug("Minions should join: {}", minionId);
         MinionKeysOnMasterResponse response = sc.wheel("key.list_all", null, MinionKeysOnMasterResponse.class);
         LOGGER.debug("Minion keys on master response: {}", response);
-        if (!response.getAllMinions().containsAll(minionId)) {
-            throw new CloudbreakOrchestratorFailedException("There are missing minions from salt response");
+        Set<String> missingMinionIds = minionId.stream()
+                .filter(not(response.getAllMinions()::contains))
+                .collect(Collectors.toCollection(TreeSet::new));
+        if (!missingMinionIds.isEmpty()) {
+            LOGGER.info("Minions {} are missing from the keys of master [{}]", missingMinionIds, sc.getHostname());
+            throw new CloudbreakOrchestratorFailedException(
+                    String.format("There are missing minions from salt response of master %s: %s", sc.getHostname(), missingMinionIds));
         }
         return response;
     }

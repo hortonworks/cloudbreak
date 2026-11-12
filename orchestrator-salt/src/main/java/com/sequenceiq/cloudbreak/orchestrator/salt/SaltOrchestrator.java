@@ -101,6 +101,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltMastersStopResult;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.GrainsJsonPropertyUtil;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -158,6 +159,12 @@ public class SaltOrchestrator implements HostOrchestrator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
     private static final int SWITCH_PGW_FREEIPA_ERROR_RETRY = 5;
+
+    private static final String SALT_MASTER_CONFIG_DIR = "/etc/salt/master.d";
+
+    private static final String WORKER_THREADS_OPTION = "worker_threads";
+
+    private static final String MINIMUM_AUTH_VERSION_OPTION = "minimum_auth_version";
 
     @Value("${cb.max.salt.new.service.retry}")
     private int maxRetry;
@@ -229,13 +236,19 @@ public class SaltOrchestrator implements HostOrchestrator {
             uploadSaltConfig(sc, gatewayTargets, exitModel);
             Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             uploadSaltKeys(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
-            if (restartAll) {
+            SaltMastersStopResult saltMastersStop = SaltMastersStopResult.noStopRequested();
+            if (params.isSaltMasterRestartNeeded()) {
+                saltMastersStop = saltStateService.stopMastersToRestart(sc, gatewayTargets);
+            } else if (restartAll) {
                 saltStateService.stopMasters(sc, gatewayTargets);
+            }
+            if (restartAll) {
                 params.setRestartNeeded(true);
             }
             OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, targets, targets, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
+            saltMastersStop.failIfAnyMasterWasNotStopped();
         } catch (Exception e) {
             LOGGER.warn("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -247,9 +260,16 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void uploadSaltMasterConfig(SaltConnector sc, BootstrapParams params, Set<String> gatewayTargets, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
-        if (params.getMasterWorkerThreads() != null) {
-            String masterConfig = "worker_threads: " + params.getMasterWorkerThreads();
-            uploadFileToTargets(sc, gatewayTargets, exitModel, "/etc/salt/master.d", "worker_threads.conf", masterConfig.getBytes(StandardCharsets.UTF_8));
+        uploadSaltMasterOption(sc, gatewayTargets, exitModel, WORKER_THREADS_OPTION, params.getMasterWorkerThreads());
+        uploadSaltMasterOption(sc, gatewayTargets, exitModel, MINIMUM_AUTH_VERSION_OPTION, params.getSaltMasterMinimumAuthVersion());
+    }
+
+    private void uploadSaltMasterOption(SaltConnector sc, Set<String> gatewayTargets, ExitCriteriaModel exitModel, String option, Integer value)
+            throws CloudbreakOrchestratorFailedException {
+        if (value != null) {
+            String config = option + ": " + value;
+            LOGGER.info("Upload salt master {} to gateways: {}", config, gatewayTargets);
+            uploadFileToTargets(sc, gatewayTargets, exitModel, SALT_MASTER_CONFIG_DIR, option + ".conf", config.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -411,23 +431,30 @@ public class SaltOrchestrator implements HostOrchestrator {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = allGatewayConfigs.stream().filter(gc -> targets.stream().anyMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
                 .map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
+        Set<String> saltMastersToRestart = params.isSaltMasterRestartNeeded() ? getGatewayPrivateIps(allGatewayConfigs) : Set.of();
         List<SaltConnector> saltConnectors = saltService.createSaltConnector(allGatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            Set<String> saltMasterConfigTargets = Sets.union(gatewayTargets, saltMastersToRestart).immutableCopy();
+            if (!saltMasterConfigTargets.isEmpty()) {
+                uploadSaltMasterConfig(sc, params, saltMasterConfigTargets, exitModel);
+            }
             if (!gatewayTargets.isEmpty()) {
                 LOGGER.info("Gateway targets are not empty, upload salt config: {}", gatewayTargets);
-                uploadSaltMasterConfig(sc, params, gatewayTargets, exitModel);
                 uploadSaltConfig(sc, gatewayTargets, stateConfigZip, exitModel);
                 params.setRestartNeeded(true);
-                if (restartAll) {
+                if (restartAll && saltMastersToRestart.isEmpty()) {
                     saltStateService.stopMasters(sc, gatewayTargets);
                 }
             }
             uploadSaltKeys(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
-            // if there is a new salt master then re-bootstrap all nodes
-            Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
+            SaltMastersStopResult saltMastersStop = saltMastersToRestart.isEmpty() ? SaltMastersStopResult.noStopRequested()
+                    : saltStateService.stopMastersToRestart(sc, saltMastersToRestart);
+            // if there is a new or restarted salt master then re-bootstrap all nodes, salt-bootstrap only starts the masters among its targets
+            Set<Node> nodes = gatewayTargets.isEmpty() && saltMastersToRestart.isEmpty() ? targets : allNodes;
             OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, nodes, allNodes, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
+            saltMastersStop.failIfAnyMasterWasNotStopped();
         } catch (Exception e) {
             LOGGER.warn("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);

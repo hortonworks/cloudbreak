@@ -3,11 +3,14 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,26 +18,32 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
@@ -42,23 +51,28 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.salt.SaltMinimumAuthVersionService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
@@ -145,6 +159,9 @@ public class ClusterBootstrapperTest {
     @Mock
     private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
 
+    @Mock
+    private SaltMinimumAuthVersionService saltMinimumAuthVersionService;
+
     @Captor
     private ArgumentCaptor<BootstrapParams> bootstrapParamsCaptor;
 
@@ -192,6 +209,51 @@ public class ClusterBootstrapperTest {
         verify(hostOrchestrator).bootstrapNewNodes(any(), any(), any(), any(), bootstrapParamsCaptor.capture(), any(), anyBoolean());
         BootstrapParams bootstrapParams = bootstrapParamsCaptor.getValue();
         assertEquals(12, bootstrapParams.getMasterWorkerThreads());
+        InOrder saltMasterConfigOrder = inOrder(saltMinimumAuthVersionService, hostOrchestrator);
+        saltMasterConfigOrder.verify(saltMinimumAuthVersionService).configureBootstrapParams(stack, List.of(gatewayConfig), bootstrapParams);
+        saltMasterConfigOrder.verify(hostOrchestrator).bootstrapNewNodes(any(), any(), any(), any(), any(), any(), anyBoolean());
+        saltMasterConfigOrder.verify(saltMinimumAuthVersionService).saveAppliedMinimumAuthVersion(stack, List.of(gatewayConfig), bootstrapParams);
+    }
+
+    @Test
+    void failedBootstrapOfNewNodesDoesNotSaveTheAppliedMinimumAuthVersion() throws Exception {
+        when(stackDtoService.getById(1L)).thenReturn(stack);
+        InstanceMetaData instanceMetaData = newInstanceMetaData();
+        instanceMetaData.setInstanceGroup(newMasterInstanceGroup());
+        when(stack.getId()).thenReturn(1L);
+        when(instanceMetaDataService.getReachableInstanceMetadataByStackId(1L)).thenReturn(Set.of(instanceMetaData));
+        when(stack.getCustomDomain()).thenReturn(DOMAIN);
+        Cluster cluster = new Cluster();
+        cluster.setGateway(new Gateway());
+        when(stack.getCluster()).thenReturn(cluster);
+        GatewayConfig gatewayConfig = GatewayConfig.builder().withPrivateAddress("1.1.1.1").withInstanceId("i-1839").build();
+        when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        doThrow(new CloudbreakOrchestratorFailedException("There are missing minions from salt response")).when(hostOrchestrator)
+                .bootstrapNewNodes(any(), any(), any(), any(), any(), any(), anyBoolean());
+
+        assertThrows(CloudbreakException.class, () -> underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1")));
+
+        verify(saltMinimumAuthVersionService).configureBootstrapParams(any(), any(), any());
+        verify(saltMinimumAuthVersionService, never()).saveAppliedMinimumAuthVersion(any(), any(), any());
+    }
+
+    @Test
+    void updateSaltComponentKeepsTheOtherAttributes() {
+        ReflectionTestUtils.setField(underTest, "cbVersion", "2.115.0");
+        StackView stackView = mock(StackView.class);
+        when(stackView.getClusterId()).thenReturn(2L);
+        ClusterComponent saltComponent = new ClusterComponent(ComponentType.SALT_STATE,
+                new Json(Map.of(ComponentType.SALT_STATE.name(), "old", "SALT_MASTER_MINIMUM_AUTH_VERSION", 2)), null);
+        when(clusterComponentProvider.getComponent(2L, ComponentType.SALT_STATE)).thenReturn(saltComponent);
+        when(clusterComponentProvider.store(saltComponent)).thenReturn(saltComponent);
+
+        underTest.updateSaltComponent(stackView, new byte[]{1});
+
+        assertThat(saltComponent.getAttributes().getMap())
+                .containsEntry(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(new byte[]{1}))
+                .containsEntry(ClusterComponent.CB_VERSION_KEY, "2.115.0")
+                .containsEntry("SALT_MASTER_MINIMUM_AUTH_VERSION", 2);
     }
 
     @Test

@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.salt.SaltMinimumAuthVersionService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
@@ -158,6 +159,9 @@ public class ClusterBootstrapper {
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private SaltMinimumAuthVersionService saltMinimumAuthVersionService;
+
     public void bootstrapMachines(Long stackId, boolean restartAll) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.info("BootstrapMachines for stack [{}] [{}]", stackDto.getName(), stackDto.getResourceCrn());
@@ -202,7 +206,9 @@ public class ClusterBootstrapper {
             saveOrUpdateSaltComponent.accept(stack.getStack());
 
             BootstrapParams params = createBootstrapParams(stack);
+            saltMinimumAuthVersionService.configureBootstrapParams(stack, allGatewayConfig, params);
             hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedModel(stack.getId(), null), restartAll);
+            saltMinimumAuthVersionService.saveAppliedMinimumAuthVersion(stack, allGatewayConfig, params);
 
             InstanceMetadataView primaryGateway = stack.getPrimaryGatewayInstance();
             saveOrchestrator(stack, primaryGateway);
@@ -273,8 +279,10 @@ public class ClusterBootstrapper {
             saltComponent = createSaltComponent(stack, stateConfigZip);
         } else {
             LOGGER.debug("Overwrite existing salt component attributes");
-            saltComponent.setAttributes(new Json(Map.of(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip),
-                    ClusterComponent.CB_VERSION_KEY, cbVersion)));
+            Map<String, Object> attributes = Optional.ofNullable(saltComponent.getAttributes()).map(Json::getMap).orElseGet(HashMap::new);
+            attributes.put(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip));
+            attributes.put(ClusterComponent.CB_VERSION_KEY, cbVersion);
+            saltComponent.setAttributes(new Json(attributes));
         }
         return clusterComponentProvider.store(saltComponent);
     }
@@ -480,8 +488,10 @@ public class ClusterBootstrapper {
 
         byte[] stateZip = getSaltStateZip(cluster);
         BootstrapParams params = createBootstrapParams(stack);
+        saltMinimumAuthVersionService.configureBootstrapParams(stack, allGatewayConfigs, params);
 
         hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stateZip, params, clusterDeletionBasedModel(stack.getId(), null), false);
+        saltMinimumAuthVersionService.saveAppliedMinimumAuthVersion(stack, allGatewayConfigs, params);
     }
 
     /*

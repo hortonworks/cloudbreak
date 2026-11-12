@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.timeoutChecker;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,9 +15,12 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.polling.AttemptBasedTimeoutChecker;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.stack.StackAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -32,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.SaltMinimumAuthVersionExpectation;
 import com.sequenceiq.it.cloudbreak.util.TestUpgradeCandidateProvider;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -39,6 +44,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 public class DistroXUpgradeTests extends AbstractE2ETest {
 
     private static final int RUNTIME_AND_OS_UPGRADE_MAX_ATTEMPTS = 5000;
+
+    private static final String SALT_MASTER_MINIMUM_AUTH_VERSION_CONFIG = "/etc/salt/master.d/minimum_auth_version.conf";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -57,6 +64,9 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
 
     @Inject
     private TestUpgradeCandidateProvider testUpgradeCandidateProvider;
+
+    @Inject
+    private StackAssertion stackAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -99,7 +109,8 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     @Description(
             given = "there is a running Cloudbreak, and an environment with Data Lake and a DistroX (COD) cluster in available state",
             when = "force OS upgrade (runtime + OS) rolling upgrade called on the DistroX (COD) cluster",
-            then = "the runtime upgrade should be successful, and partial OS oupgrade should upgrade the gateway nodes to the new image version")
+            then = "the runtime upgrade should be successful, and partial OS oupgrade should upgrade the gateway nodes to the new image version, " +
+                    "whose salt masters accept the authentication protocol of the salt minions left on the old image")
     public void testForcedOsUpgradeWhenCODCluster(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultDatalake(testContext);
@@ -132,6 +143,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .withEntries(Set.of(StackResponseEntries.HARDWARE_INFO.getEntryName()))
                 .when(distroXTestClient.get())
                 .then((tc, testDto, client) -> checkInstanceImageIds(testDto))
+                .then((tc, testDto, client) -> checkSaltMasterMinimumAuthVersion(testDto))
 
                 .when(distroXTestClient.stop())
                 .awaitForFlow()
@@ -253,11 +265,9 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         StackV4Response stackV4Response = testDto.getResponse();
         String actualImageId = stackV4Response.getImage().getId();
 
-        stackV4Response.getHardwareInfoGroups().stream()
-                .flatMap(group -> group.getHardwareInfos().stream())
+        getInstances(stackV4Response)
                 .forEach(instance -> {
-                    if (InstanceMetadataType.GATEWAY.equals(instance.getInstanceMetadataType())
-                            || InstanceMetadataType.GATEWAY_PRIMARY.equals(instance.getInstanceMetadataType())) {
+                    if (isGateway(instance)) {
                         if (!instance.getImageId().equals(actualImageId)) {
                             throw new TestFailException(
                                     String.format("The clusters's image id (%s) and the gateway's image id (%s) must be identical on the instance: %s",
@@ -272,5 +282,36 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                     }
                 });
         return testDto;
+    }
+
+    private DistroXTestDto checkSaltMasterMinimumAuthVersion(DistroXTestDto testDto) {
+        List<HardwareInfoV4Response> instances = getInstances(testDto.getResponse());
+        List<String> saltMasterVersions = instances.stream()
+                .filter(DistroXUpgradeTests::isGateway)
+                .map(DistroXUpgradeTests::getSaltVersion)
+                .toList();
+        List<String> saltMinionVersions = instances.stream()
+                .map(DistroXUpgradeTests::getSaltVersion)
+                .toList();
+        SaltMinimumAuthVersionExpectation.expectedMinimumAuthVersion(saltMasterVersions, saltMinionVersions).ifPresentOrElse(
+                minimumAuthVersion -> stackAssertion.validateFileContentExistsOnAllGateways(testDto, SALT_MASTER_MINIMUM_AUTH_VERSION_CONFIG,
+                        "^minimum_auth_version: " + minimumAuthVersion + "$"),
+                () -> stackAssertion.validateFileNotExistsOnAllGateways(testDto, SALT_MASTER_MINIMUM_AUTH_VERSION_CONFIG));
+        return testDto;
+    }
+
+    private static List<HardwareInfoV4Response> getInstances(StackV4Response stackV4Response) {
+        return stackV4Response.getHardwareInfoGroups().stream()
+                .flatMap(group -> group.getHardwareInfos().stream())
+                .toList();
+    }
+
+    private static boolean isGateway(HardwareInfoV4Response instance) {
+        return InstanceMetadataType.GATEWAY.equals(instance.getInstanceMetadataType())
+                || InstanceMetadataType.GATEWAY_PRIMARY.equals(instance.getInstanceMetadataType());
+    }
+
+    private static String getSaltVersion(HardwareInfoV4Response instance) {
+        return instance.getPackageVersions().get(ImagePackageVersion.SALT.getKey());
     }
 }

@@ -67,7 +67,7 @@ class FreeIpaCloudStorageValidationServiceTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
         when(gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet)).thenReturn(allGateways);
         when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(allNodes);
-        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(primaryGatewayConfig);
+        when(gatewayConfigService.getPrimaryGatewayConfigForSalt(stack)).thenReturn(primaryGatewayConfig);
     }
 
     @Test

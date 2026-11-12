@@ -18,6 +18,10 @@ public class BootstrapParams {
 
     private Integer masterWorkerThreads = DEFAULT_WORKER_THREADS;
 
+    private Integer saltMasterMinimumAuthVersion;
+
+    private boolean saltMasterRestartNeeded;
+
     public String getCloud() {
         return cloud;
     }
@@ -66,6 +70,22 @@ public class BootstrapParams {
         this.masterWorkerThreads = masterWorkerThreads;
     }
 
+    public Integer getSaltMasterMinimumAuthVersion() {
+        return saltMasterMinimumAuthVersion;
+    }
+
+    public void setSaltMasterMinimumAuthVersion(Integer saltMasterMinimumAuthVersion) {
+        this.saltMasterMinimumAuthVersion = saltMasterMinimumAuthVersion;
+    }
+
+    public boolean isSaltMasterRestartNeeded() {
+        return saltMasterRestartNeeded;
+    }
+
+    public void setSaltMasterRestartNeeded(boolean saltMasterRestartNeeded) {
+        this.saltMasterRestartNeeded = saltMasterRestartNeeded;
+    }
+
     @Override
     public String toString() {
         return "BootstrapParams{" +
@@ -75,6 +95,8 @@ public class BootstrapParams {
                 ", restartNeededFlagSupported=" + restartNeededFlagSupported +
                 ", restartNeeded=" + restartNeeded +
                 ", masterWorkerThreads=" + masterWorkerThreads +
+                ", saltMasterMinimumAuthVersion=" + saltMasterMinimumAuthVersion +
+                ", saltMasterRestartNeeded=" + saltMasterRestartNeeded +
                 '}';
     }
 }

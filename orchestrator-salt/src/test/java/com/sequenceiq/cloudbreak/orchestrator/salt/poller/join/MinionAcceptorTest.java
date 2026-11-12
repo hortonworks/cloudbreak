@@ -95,7 +95,8 @@ class MinionAcceptorTest {
         MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), List.of(m1, m2),
                 new EqualMinionFpMatcher(), new FingerprintFromSbCollector(), saltStateService);
 
-        assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+        assertEquals("There are missing minions from salt response of master hostname.domain: [m1.d]", exception.getMessage());
     }
 
     @Test

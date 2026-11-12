@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
@@ -39,6 +40,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -99,6 +101,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ModifyGrainBas
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltMastersStopResult;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -229,7 +232,7 @@ class SaltOrchestratorTest {
     void bootstrapTest() throws Exception {
         when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
 
-        BootstrapParams bootstrapParams = mock(BootstrapParams.class);
+        BootstrapParams bootstrapParams = new BootstrapParams();
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
 
         saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel, false);
@@ -303,7 +306,7 @@ class SaltOrchestratorTest {
 
     @Test
     void bootstrapNewNodesTest() throws Exception {
-        BootstrapParams bootstrapParams = mock(BootstrapParams.class);
+        BootstrapParams bootstrapParams = new BootstrapParams();
         when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[]{});
 
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel, false);
@@ -312,6 +315,234 @@ class SaltOrchestratorTest {
         verify(saltRunner, times(7)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verify(saltBootstrapFactory, times(1))
                 .of(eq(saltConnector), eq(saltConnectors), eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(targets), eq(bootstrapParams));
+    }
+
+    @Test
+    void bootstrapNewNodesRestartsEverySaltMasterWhenOnlyMinionsAreAdded() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        Node newWorker = workerNode("10.0.0.4");
+        Set<Node> allNodes = withNode(targets, newWorker);
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(3, true);
+        when(saltStateService.stopMastersToRestart(eq(saltConnector), any())).thenReturn(SaltMastersStopResult.withMastersNotStopped(Set.of()));
+        Callable<Boolean> saltBootstrapRun = saltBootstrapRun();
+
+        saltOrchestrator.bootstrapNewNodes(allGatewayConfigs, Set.of(newWorker), allNodes, null, bootstrapParams, exitCriteriaModel, false);
+
+        assertThat(captureMinimumAuthVersionUploads())
+                .singleElement()
+                .satisfies(upload -> assertMinimumAuthVersionUpload(upload, Set.of("10.0.0.1", "10.0.0.2"), "minimum_auth_version: 3"));
+        InOrder inOrder = inOrder(saltStateService, saltBootstrapFactory, saltBootstrapRun);
+        inOrder.verify(saltStateService).stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+        inOrder.verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, allNodes, allNodes, bootstrapParams);
+        inOrder.verify(saltBootstrapRun).call();
+        assertFalse(bootstrapParams.isRestartNeeded());
+    }
+
+    @Test
+    void bootstrapNewNodesWritesMinimumAuthVersionOnlyToTheNewSaltMasterWithoutRestart() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        Node newGateway = targets.stream().filter(node -> "10.0.0.2".equals(node.getPrivateIp())).findFirst().orElseThrow();
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(2, false);
+
+        saltOrchestrator.bootstrapNewNodes(allGatewayConfigs, Set.of(newGateway), targets, null, bootstrapParams, exitCriteriaModel, false);
+
+        assertThat(captureMinimumAuthVersionUploads())
+                .singleElement()
+                .satisfies(upload -> assertMinimumAuthVersionUpload(upload, Set.of("10.0.0.2"), "minimum_auth_version: 2"));
+        verify(saltStateService, never()).stopMastersToRestart(any(), any());
+        verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, targets, targets, bootstrapParams);
+    }
+
+    @Test
+    void bootstrapNewNodesKeepsSaltMastersWhenOnlyMinionsAreAddedWithoutRestart() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        Node newWorker = workerNode("10.0.0.4");
+        Set<Node> allNodes = withNode(targets, newWorker);
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(2, false);
+
+        saltOrchestrator.bootstrapNewNodes(allGatewayConfigs, Set.of(newWorker), allNodes, null, bootstrapParams, exitCriteriaModel, false);
+
+        assertThat(captureMinimumAuthVersionUploads()).isEmpty();
+        verify(saltStateService, never()).stopMastersToRestart(any(), any());
+        verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, Set.of(newWorker), allNodes, bootstrapParams);
+    }
+
+    @Test
+    void bootstrapNewNodesLeavesTheSaltMastersRunningWhenTheKeyUploadFails() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        Node newWorker = workerNode("10.0.0.4");
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(3, true);
+        Callable<Boolean> failingUpload = mock(Callable.class);
+        when(failingUpload.call()).thenThrow(new CloudbreakOrchestratorFailedException("upload failed"));
+        when(saltRunner.runnerWithConfiguredErrorCount(argThat(bootstrap -> isUploadOf(bootstrap, "minion_master.pub")), any(ExitCriteria.class),
+                any(ExitCriteriaModel.class))).thenReturn(failingUpload);
+
+        assertThrows(CloudbreakOrchestratorFailedException.class, () -> saltOrchestrator.bootstrapNewNodes(allGatewayConfigs, Set.of(newWorker),
+                withNode(targets, newWorker), null, bootstrapParams, exitCriteriaModel, false));
+
+        verify(saltStateService, never()).stopMastersToRestart(any(), any());
+    }
+
+    @Test
+    void bootstrapNewNodesStartsTheStoppedSaltMastersBeforeFailingWhenOneCannotBeStopped() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        Node newWorker = workerNode("10.0.0.4");
+        Set<Node> allNodes = withNode(targets, newWorker);
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(3, true);
+        when(saltStateService.stopMastersToRestart(eq(saltConnector), any())).thenReturn(SaltMastersStopResult.withMastersNotStopped(Set.of("10.0.0.2")));
+        Callable<Boolean> saltBootstrapRun = saltBootstrapRun();
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, () ->
+                saltOrchestrator.bootstrapNewNodes(allGatewayConfigs, Set.of(newWorker), allNodes, null, bootstrapParams, exitCriteriaModel, false));
+
+        assertThat(exception.getMessage()).contains("Failed to restart salt master on gateway(s) [10.0.0.2]");
+        verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, allNodes, allNodes, bootstrapParams);
+        verify(saltBootstrapRun).call();
+    }
+
+    @Test
+    void bootstrapNewNodesStartsTheSaltMastersBeforeFailingWhenTheStopRequestFails() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        Node newWorker = workerNode("10.0.0.4");
+        Set<Node> allNodes = withNode(targets, newWorker);
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(3, true);
+        ProcessingException stopRequestFailure = new ProcessingException("Read timed out");
+        when(saltStateService.stopMastersToRestart(eq(saltConnector), any()))
+                .thenReturn(SaltMastersStopResult.stopRequestFailed(Set.of("10.0.0.1", "10.0.0.2"), stopRequestFailure));
+        Callable<Boolean> saltBootstrapRun = saltBootstrapRun();
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, () ->
+                saltOrchestrator.bootstrapNewNodes(allGatewayConfigs, Set.of(newWorker), allNodes, null, bootstrapParams, exitCriteriaModel, false));
+
+        assertThat(exception).rootCause().isSameAs(stopRequestFailure);
+        verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, allNodes, allNodes, bootstrapParams);
+        verify(saltBootstrapRun).call();
+    }
+
+    @Test
+    void firstBootstrapWritesMinimumAuthVersionWithoutStoppingNewMasters() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(3, false);
+
+        saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel, false);
+
+        assertThat(captureMinimumAuthVersionUploads())
+                .singleElement()
+                .satisfies(upload -> assertMinimumAuthVersionUpload(upload, Set.of("10.0.0.1", "10.0.0.2"), "minimum_auth_version: 3"));
+        verify(saltStateService, never()).stopMastersToRestart(any(), any());
+        verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, targets, targets, bootstrapParams);
+    }
+
+    @Test
+    void bootstrapRestartsEverySaltMasterWithoutRestartingTheMinions() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(2, true);
+        when(saltStateService.stopMastersToRestart(eq(saltConnector), any())).thenReturn(SaltMastersStopResult.withMastersNotStopped(Set.of()));
+
+        saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel, false);
+
+        assertThat(captureMinimumAuthVersionUploads())
+                .singleElement()
+                .satisfies(upload -> assertMinimumAuthVersionUpload(upload, Set.of("10.0.0.1", "10.0.0.2"), "minimum_auth_version: 2"));
+        verify(saltStateService).stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+        verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, targets, targets, bootstrapParams);
+        assertFalse(bootstrapParams.isRestartNeeded());
+    }
+
+    @Test
+    void bootstrapStartsTheStoppedSaltMastersBeforeFailingWhenOneCannotBeStopped() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(2, true);
+        when(saltStateService.stopMastersToRestart(eq(saltConnector), any())).thenReturn(SaltMastersStopResult.withMastersNotStopped(Set.of("10.0.0.2")));
+        Callable<Boolean> saltBootstrapRun = mock(Callable.class);
+        when(saltRunner.runnerWithConfiguredErrorCount(eq(saltBootstrap), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(saltBootstrapRun);
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, () ->
+                saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel, false));
+
+        assertThat(exception.getMessage()).contains("Failed to restart salt master on gateway(s) [10.0.0.2]");
+        verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, targets, targets, bootstrapParams);
+        verify(saltBootstrapRun).call();
+    }
+
+    @Test
+    void bootstrapStartsTheSaltMastersBeforeFailingWhenTheStopRequestFails() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(2, true);
+        ProcessingException stopRequestFailure = new ProcessingException("Read timed out");
+        when(saltStateService.stopMastersToRestart(eq(saltConnector), any()))
+                .thenReturn(SaltMastersStopResult.stopRequestFailed(Set.of("10.0.0.1", "10.0.0.2"), stopRequestFailure));
+        Callable<Boolean> saltBootstrapRun = mock(Callable.class);
+        when(saltRunner.runnerWithConfiguredErrorCount(eq(saltBootstrap), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(saltBootstrapRun);
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, () ->
+                saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel, false));
+
+        assertThat(exception).rootCause().isSameAs(stopRequestFailure);
+        verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, targets, targets, bootstrapParams);
+        verify(saltBootstrapRun).call();
+    }
+
+    @Test
+    void bootstrapWritesNoMinimumAuthVersionWhenUnmanaged() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+
+        saltOrchestrator.bootstrap(allGatewayConfigs, targets, new BootstrapParams(), exitCriteriaModel, false);
+
+        assertThat(captureMinimumAuthVersionUploads()).isEmpty();
+        verify(saltStateService, never()).stopMastersToRestart(any(), any());
+    }
+
+    private GatewayConfig secondaryGatewayConfig() {
+        return GatewayConfig.builder()
+                .withPrivateAddress("10.0.0.2")
+                .withHostname("10-0-0-2")
+                .withInstanceId("instanceid2")
+                .withPrimary(false)
+                .build();
+    }
+
+    private Node workerNode(String privateIp) {
+        return new Node(privateIp, "1.1.1.4", "instanceid4", "hg", privateIp.replace('.', '-') + ".example.com", "worker",
+                mock(NodeVolumes.class), TemporaryStorage.EPHEMERAL_VOLUMES);
+    }
+
+    private Set<Node> withNode(Set<Node> nodes, Node node) {
+        Set<Node> result = new HashSet<>(nodes);
+        result.add(node);
+        return result;
+    }
+
+    private BootstrapParams minimumAuthVersionParams(int minimumAuthVersion, boolean saltMasterRestartNeeded) {
+        BootstrapParams bootstrapParams = new BootstrapParams();
+        bootstrapParams.setSaltMasterMinimumAuthVersion(minimumAuthVersion);
+        bootstrapParams.setSaltMasterRestartNeeded(saltMasterRestartNeeded);
+        return bootstrapParams;
+    }
+
+    private List<SaltUpload> captureMinimumAuthVersionUploads() throws Exception {
+        ArgumentCaptor<OrchestratorBootstrap> uploadCaptor = ArgumentCaptor.forClass(OrchestratorBootstrap.class);
+        verify(saltRunner, atLeastOnce()).runnerWithConfiguredErrorCount(uploadCaptor.capture(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        return uploadCaptor.getAllValues().stream()
+                .filter(bootstrap -> isUploadOf(bootstrap, "minimum_auth_version.conf"))
+                .map(SaltUpload.class::cast)
+                .toList();
+    }
+
+    private Callable<Boolean> saltBootstrapRun() {
+        Callable<Boolean> saltBootstrapRun = mock(Callable.class);
+        when(saltRunner.runner(eq(saltBootstrap), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(saltBootstrapRun);
+        return saltBootstrapRun;
+    }
+
+    private boolean isUploadOf(OrchestratorBootstrap bootstrap, String fileName) {
+        return bootstrap instanceof SaltUpload && fileName.equals(ReflectionTestUtils.getField(bootstrap, "fileName"));
+    }
+
+    private void assertMinimumAuthVersionUpload(SaltUpload upload, Set<String> expectedTargets, String expectedContent) {
+        assertEquals(expectedTargets, upload.getOriginalTargets());
+        assertEquals("/etc/salt/master.d", ReflectionTestUtils.getField(upload, "path"));
+        assertEquals(expectedContent, new String((byte[]) ReflectionTestUtils.getField(upload, "content")));
     }
 
     @Test

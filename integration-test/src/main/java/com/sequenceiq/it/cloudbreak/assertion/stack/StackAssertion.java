@@ -116,6 +116,20 @@ public class StackAssertion {
         validateFileNotExists(distroXTestDto.getResponse(), fileName);
     }
 
+    public void validateFileContentExistsOnAllGateways(DistroXTestDto distroXTestDto, String fileName, String fileContent) {
+        String cmd = String.format(VALIDATE_FILE_CONTENT_CMD, fileContent, fileName);
+        assertSshResultOnAllGateways(distroXTestDto.getResponse(), cmd,
+                () -> "Pattern '" + fileContent + "' not found in " + fileName + " on one or more gateways",
+                "Error trying to check file content exists on all gateways");
+    }
+
+    public void validateFileNotExistsOnAllGateways(DistroXTestDto distroXTestDto, String fileName) {
+        String cmd = String.format(VALIDATE_FILE_NOT_EXISTS_CMD, fileName);
+        assertSshResultOnAllGateways(distroXTestDto.getResponse(), cmd,
+                () -> "File " + fileName + " unexpectedly exists on one or more gateways",
+                "Error trying to check file does not exist on all gateways");
+    }
+
     private void validateFileNotExists(StackV4Response stackV4Response, String fileName) {
         assertSshResultOnPrimaryGateways(stackV4Response, String.format(VALIDATE_FILE_NOT_EXISTS_CMD, fileName),
                 () -> "File " + fileName + " unexpectedly exists on one or more gateways",
@@ -126,6 +140,15 @@ public class StackAssertion {
             String testFailureContext) {
         assertSshResult(() -> sshJClientActions.executeSshCommandOnPrimaryGateways(stackV4Response.getInstanceGroups(), cmd, false),
                 cmd, assertionErrorMessage, testFailureContext);
+    }
+
+    private void assertSshResultOnAllGateways(StackV4Response stackV4Response, String cmd, Supplier<String> assertionErrorMessage,
+            String testFailureContext) {
+        List<String> gatewayIps = InstanceIPCollectorUtil.getGatewayIps(stackV4Response.getInstanceGroups(), false);
+        if (gatewayIps.isEmpty()) {
+            throw new TestFailException(testFailureContext + ": no gateway instance found");
+        }
+        assertSshResult(() -> sshJClientActions.executeSshCommandOnHosts(gatewayIps, cmd), cmd, assertionErrorMessage, testFailureContext);
     }
 
     private void assertSshResult(Supplier<SshCommandOutcomes> sshExecutor, String cmd, Supplier<String> assertionErrorMessage, String testFailureContext) {

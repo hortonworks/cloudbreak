@@ -2,23 +2,27 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.utils;
 
 import java.util.Comparator;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 public class GatewayConfigComparator implements Comparator<GatewayConfig> {
 
+    private static final Comparator<GatewayConfig> NEWEST_SALT_VERSION_THEN_PRIMARY_FIRST = Comparator
+            .comparing(GatewayConfigComparator::getSaltVersion, Comparator.nullsLast(new VersionComparator().reversed()))
+            .thenComparing(GatewayConfig::isPrimary, Comparator.reverseOrder());
+
     @Override
     public int compare(GatewayConfig gw1, GatewayConfig gw2) {
-        String saltVersion1 = gw1.getSaltVersion().orElse("");
-        String saltVersion2 = gw2.getSaltVersion().orElse("");
+        return NEWEST_SALT_VERSION_THEN_PRIMARY_FIRST.compare(gw1, gw2);
+    }
 
-        int saltComparison = saltVersion2.compareTo(saltVersion1);
-        if (saltComparison == 0) {
-            // If same salt version, prioritize primary
-            boolean primary1 = gw1.isPrimary();
-            boolean primary2 = gw2.isPrimary();
-            return Boolean.compare(primary2, primary1);
-        }
-        return saltComparison;
-
+    private static Versioned getSaltVersion(GatewayConfig gatewayConfig) {
+        return gatewayConfig.getSaltVersion()
+                .filter(StringUtils::isNotBlank)
+                .<Versioned>map(saltVersion -> () -> saltVersion)
+                .orElse(null);
     }
 }

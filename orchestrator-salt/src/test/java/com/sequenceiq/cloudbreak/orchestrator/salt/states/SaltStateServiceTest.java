@@ -10,6 +10,7 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -39,6 +40,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jakarta.ws.rs.ProcessingException;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +54,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,6 +65,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.Memory;
 import com.sequenceiq.cloudbreak.orchestrator.model.MemoryInfo;
@@ -370,6 +375,55 @@ class SaltStateServiceTest {
         Set<String> minionAddresses = saltAction.getMasters().stream().map(SaltMaster::getAddress).collect(Collectors.toSet());
         assertThat(minionAddresses, containsInAnyOrder("10.0.0.1", "10.0.0.2", "10.0.0.3"));
         assertTrue(saltAction.getMasters().stream().allMatch(master -> master.getAuth().getPassword().equals(password)));
+    }
+
+    @Test
+    void stopMastersToRestartStopsEveryMaster() throws CloudbreakOrchestratorFailedException {
+        when(saltConnector.action(any())).thenReturn(stopResponses(HttpStatus.OK.value()));
+
+        SaltMastersStopResult result = underTest.stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+
+        ArgumentCaptor<SaltAction> saltActionArgumentCaptor = ArgumentCaptor.forClass(SaltAction.class);
+        verify(saltConnector).action(saltActionArgumentCaptor.capture());
+        SaltAction saltAction = saltActionArgumentCaptor.getValue();
+        assertEquals(SaltActionType.STOP, saltAction.getAction());
+        assertThat(saltAction.getMasters().stream().map(SaltMaster::getAddress).toList(), containsInAnyOrder("10.0.0.1", "10.0.0.2"));
+        result.failIfAnyMasterWasNotStopped();
+    }
+
+    @Test
+    void stopMastersToRestartReportsTheMastersThatCouldNotBeStoppedWithoutFailingRightAway() {
+        when(saltConnector.action(any())).thenReturn(stopResponses(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+
+        SaltMastersStopResult result = underTest.stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, result::failIfAnyMasterWasNotStopped);
+        assertEquals("Failed to restart salt master on gateway(s) [10.0.0.2] to load its new configuration, "
+                + "please check the salt-bootstrap service status on them and retry the operation.", exception.getMessage());
+    }
+
+    @Test
+    void stopMastersToRestartTreatsEveryMasterAsNotStoppedWhenTheStopRequestFailsWithoutFailingRightAway() {
+        ProcessingException stopRequestFailure = new ProcessingException("Read timed out");
+        when(saltConnector.action(any())).thenThrow(stopRequestFailure);
+
+        SaltMastersStopResult result = underTest.stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+
+        assertEquals(Set.of("10.0.0.1", "10.0.0.2"), result.mastersNotStopped());
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, result::failIfAnyMasterWasNotStopped);
+        assertSame(stopRequestFailure, exception.getCause());
+    }
+
+    private GenericResponses stopResponses(int secondaryMasterStatusCode) {
+        GenericResponse primaryResponse = new GenericResponse();
+        primaryResponse.setAddress("10.0.0.1");
+        primaryResponse.setStatusCode(HttpStatus.OK.value());
+        GenericResponse secondaryResponse = new GenericResponse();
+        secondaryResponse.setAddress("10.0.0.2");
+        secondaryResponse.setStatusCode(secondaryMasterStatusCode);
+        GenericResponses responses = new GenericResponses();
+        responses.setResponses(List.of(primaryResponse, secondaryResponse));
+        return responses;
     }
 
     @Test
