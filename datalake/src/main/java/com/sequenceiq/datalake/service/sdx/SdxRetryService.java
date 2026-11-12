@@ -19,10 +19,13 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFlowConfig;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFlowConfig;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -45,6 +48,12 @@ public class SdxRetryService {
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
+
+    @Inject
+    private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
+    private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
     @Inject
     private List<? extends RetryableDatalakeFlowConfiguration<? extends FlowEvent>> retryableDatalakeFlowConfigurations;
@@ -78,6 +87,12 @@ public class SdxRetryService {
                 ThreadBasedUserCrnProvider.doAsInternalActor(
                         () -> stackV4Endpoint.retry(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
             } catch (BadRequestException e) {
+                if (FlowState.FAILED == cloudbreakFlowService.getLastKnownFlowState(sdxCluster)) {
+                    String stackRetryErrorMessage = exceptionMessageExtractor.getErrorMessage(e);
+                    LOGGER.warn("Data Lake retry stopped, because the last Cloudbreak flow failed and its retry was rejected: {}", stackRetryErrorMessage, e);
+                    throw new BadRequestException("Data Lake retry cannot be performed, because the last stack operation failed and the stack retry "
+                            + "was rejected. Reason: " + stackRetryErrorMessage, e);
+                }
                 LOGGER.warn("Data Lake retry failed on cloudbreak side, but try to restart the flow. Related exception: ", e);
             }
         }
