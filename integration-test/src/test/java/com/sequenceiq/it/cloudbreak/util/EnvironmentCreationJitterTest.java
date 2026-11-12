@@ -1,21 +1,21 @@
 package com.sequenceiq.it.cloudbreak.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class EnvironmentCreationJitterTest {
 
@@ -25,13 +25,13 @@ public class EnvironmentCreationJitterTest {
 
     private MockedStatic<CloudbreakUtil> cloudbreakUtil;
 
-    @BeforeMethod
+    @BeforeEach
     public void setUp() {
         clock = new MutableClock(Instant.parse("2026-10-16T10:00:00Z"));
         cloudbreakUtil = mockStatic(CloudbreakUtil.class);
     }
 
-    @AfterMethod(alwaysRun = true)
+    @AfterEach
     public void tearDown() {
         cloudbreakUtil.close();
     }
@@ -42,7 +42,7 @@ public class EnvironmentCreationJitterTest {
 
         long delay = jitter.delayIfNeeded(ENVIRONMENT_NAME);
 
-        assertEquals(delay, 0L);
+        assertEquals(0L, delay);
         cloudbreakUtil.verify(() -> CloudbreakUtil.sleep(anyLong()), never());
     }
 
@@ -76,7 +76,7 @@ public class EnvironmentCreationJitterTest {
 
         long delay = jitter.delayIfNeeded(ENVIRONMENT_NAME);
 
-        assertEquals(delay, 0L);
+        assertEquals(0L, delay);
         cloudbreakUtil.verify(() -> CloudbreakUtil.sleep(anyLong()), times(1));
     }
 

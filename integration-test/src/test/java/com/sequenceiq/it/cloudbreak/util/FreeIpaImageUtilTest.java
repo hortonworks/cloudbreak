@@ -11,10 +11,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.common.model.Architecture;
@@ -42,18 +42,18 @@ public class FreeIpaImageUtilTest {
 
     private static final String AZURE_REGION = "West US";
 
-    private HttpServer httpServer;
+    private static HttpServer httpServer;
 
-    private String catalogUrl;
+    private static String catalogUrl;
 
-    private Set<String> publishedImageIds;
+    private static Set<String> publishedImageIds;
 
-    private FreeIpaImageUtil underTest;
+    private static FreeIpaImageUtil underTest;
 
-    @BeforeClass
-    public void setUp() throws IOException {
+    @BeforeAll
+    public static void setUp() throws IOException {
         byte[] catalog;
-        try (InputStream inputStream = getClass().getResourceAsStream(CATALOG_RESOURCE)) {
+        try (InputStream inputStream = FreeIpaImageUtilTest.class.getResourceAsStream(CATALOG_RESOURCE)) {
             catalog = inputStream.readAllBytes();
         }
         publishedImageIds = new ObjectMapper().readValue(catalog, ImageCatalog.class).getVersions().getFreeIpaVersions().stream()
@@ -73,8 +73,8 @@ public class FreeIpaImageUtilTest {
         ReflectionTestUtils.setField(underTest, "imageCatalogDownloader", new ImageCatalogDownloader());
     }
 
-    @AfterClass
-    public void tearDown() {
+    @AfterAll
+    public static void tearDown() {
         if (httpServer != null) {
             httpServer.stop(0);
         }

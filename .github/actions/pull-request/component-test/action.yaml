@@ -14,7 +14,7 @@ runs:
       uses: Kitchen/RE-thirdparty-actions/actions/test-reporter@main
       with:
         name: Component Test Report
-        path: 'flow/build/test-results/test/TEST-*.xml'
+        path: 'flow/build/test-results/test/TEST-*.xml,core/build/test-results/test/TEST-*.xml'
         reporter: java-junit
         list-suites: 'failed'
         list-tests: 'failed'
@@ -29,6 +29,8 @@ runs:
         path: |
           flow/build/test-results/test/**/*
           flow/build/reports/tests/test/**/*
+          core/build/test-results/test/**/*
+          core/build/reports/tests/test/**/*
           flow/build/flowlog.html
           flow/build/flowchainlog.html
           flow/build/flowoperationstats.html

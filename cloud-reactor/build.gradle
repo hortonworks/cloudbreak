@@ -42,14 +42,6 @@ configurations {
     tests
 }
 
-test {
-    if (project.hasProperty("componentTest")) {
-        include "com/sequenceiq/cloudbreak/cloud/**"
-    } else {
-        include "com/sequenceiq/cloudbreak/cloud/**"
-    }
-}
-
 artifacts {
     tests testJar
 }

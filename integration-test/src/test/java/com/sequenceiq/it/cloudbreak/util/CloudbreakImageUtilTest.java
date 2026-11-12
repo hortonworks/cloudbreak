@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
@@ -32,7 +32,7 @@ public class CloudbreakImageUtilTest {
 
     private CloudbreakImageUtil underTest;
 
-    @BeforeMethod
+    @BeforeEach
     public void setUp() {
         imageCatalogDownloader = mock(ImageCatalogDownloader.class);
         underTest = new CloudbreakImageUtil();

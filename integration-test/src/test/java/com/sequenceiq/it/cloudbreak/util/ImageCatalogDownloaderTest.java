@@ -11,10 +11,10 @@ import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
@@ -30,7 +30,7 @@ public class ImageCatalogDownloaderTest {
 
     private final ImageCatalogDownloader underTest = new ImageCatalogDownloader();
 
-    @BeforeMethod
+    @BeforeEach
     public void setUp() {
         Client client = mock(Client.class);
         WebTarget webTarget = mock(WebTarget.class);
@@ -43,7 +43,7 @@ public class ImageCatalogDownloaderTest {
         when(request.get()).thenReturn(response);
     }
 
-    @AfterMethod
+    @AfterEach
     public void tearDown() {
         restClientUtil.close();
     }

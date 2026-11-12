@@ -32,6 +32,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateService;
@@ -191,6 +192,9 @@ class AwsGp2ToGp3PatchServiceComponentTest {
 
     @MockBean
     private StackPatchEntitlementService stackPatchEntitlementService;
+
+    @MockBean
+    private EntitlementService entitlementService;
 
     @MockBean
     private StackPatchUsageReporterService stackPatchUsageReporterService;
