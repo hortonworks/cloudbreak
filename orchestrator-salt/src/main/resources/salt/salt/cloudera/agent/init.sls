@@ -61,6 +61,25 @@ pin_reported_hostname:
     - append_if_not_found: True
     - backup: False
 
+{% if salt['pillar.get']('platform') == 'GCP' %}
+# The guest agent's ExecStartPost (cleanup-hosts.sh) rewrites /etc/hosts non-atomically. An agent starting during the
+# rewrite, while FreeIPA DNS is not answering yet, caches the short hostname and the first local IPv4 (a lo VIP on
+# load balancer backends). The guest agent is active only after its ExecStartPost finished.
+/etc/systemd/system/cloudera-scm-agent.service.d/after-guest-agent.conf:
+  file.managed:
+    - makedirs: True
+    - contents: |
+        [Unit]
+        After=google-guest-agent.service
+    - mode: 644
+
+systemctl-reload-on-cloudera-scm-agent-after-guest-agent-change:
+  cmd.run:
+    - name: systemctl --system daemon-reload
+    - onchanges:
+      - file: /etc/systemd/system/cloudera-scm-agent.service.d/after-guest-agent.conf
+{% endif %}
+
 {% if cloudera_manager.communication.autotls_enabled == True %}
 
 setup_autotls_token:
