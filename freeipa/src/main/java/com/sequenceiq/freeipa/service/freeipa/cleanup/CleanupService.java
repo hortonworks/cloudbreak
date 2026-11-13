@@ -326,7 +326,7 @@ public class CleanupService {
                     retryService.retryWhenRetryableWithoutValue(() -> client.deleteService(service));
                 } catch (FreeIpaClientException e) {
                     if (!FreeIpaClientExceptionUtil.isNotFoundException(e)) {
-                        LOGGER.info("Service delete failed for service: {}", service, e);
+                        LOGGER.warn("Service delete failed for service: {}", service, e);
                     }
                 }
             }
