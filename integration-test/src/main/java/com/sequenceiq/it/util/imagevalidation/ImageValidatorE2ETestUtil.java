@@ -3,6 +3,7 @@ package com.sequenceiq.it.util.imagevalidation;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.testng.xml.XmlTest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.common.model.Architecture;
@@ -51,16 +53,16 @@ import com.sequenceiq.it.util.TestNGUtil;
 @Component
 public class ImageValidatorE2ETestUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageValidatorE2ETestUtil.class);
-
-    private static final Map<String, Class<?>> ALL_TESTS_FOR_FREEIPA = Map.of(
+    @VisibleForTesting
+    static final Map<String, Class<?>> ALL_TESTS_FOR_FREEIPA = Map.of(
             "testAddUsersToEnvironment", BasicEnvironmentVirtualGroupTest.class,
             "testAddGroupsToEnvironment", BasicEnvironmentVirtualGroupTest.class,
             "testHAFreeIpaInstanceUpgrade", FreeIpaUpgradeTests.class,
             "testMonitoringOnEnvironment", MonitoringTests.class
     );
 
-    private static final Map<String, Class<?>> ALL_TESTS_FOR_RUNTIME = Map.of(
+    @VisibleForTesting
+    static final Map<String, Class<?>> ALL_TESTS_FOR_RUNTIME = Map.of(
             "testClusterProvisionWithForcedJavaVersion", ForceJavaVersionE2ETest.class,
             "testSDXUpgrade", SdxUpgradeTests.class,
             "testMonitoringOnFreeIpaSdxDistrox", MonitoringTests.class,
@@ -68,6 +70,12 @@ public class ImageValidatorE2ETestUtil {
             "testJavaVersionsAreCorrect", ImageContentValidatorE2ETest.class,
             "testOsVersionsAreCorrect", ImageContentValidatorE2ETest.class
     );
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageValidatorE2ETestUtil.class);
+
+    private static final String ADD_TESTCASE_SIGN = "+";
+
+    private static final String SKIP_TESTCASE_SIGN = "-";
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
@@ -317,7 +325,7 @@ public class ImageValidatorE2ETestUtil {
                 if (!"none".equalsIgnoreCase(runAdditionalTests)) {
                     XmlTest additionalTests = testNGUtil.createTest(suite, "Additional FreeIPA tests", false);
                     ALL_TESTS_FOR_FREEIPA.forEach((k, v) -> {
-                        addTestCaseIfNotPassedOrSkipped(additionalTests, v, k, runAdditionalTests);
+                        addTestCaseIfRequested(additionalTests, v, k);
                     });
                 }
             }
@@ -326,7 +334,7 @@ public class ImageValidatorE2ETestUtil {
                 if (!"none".equalsIgnoreCase(runAdditionalTests)) {
                     XmlTest additionalTests = testNGUtil.createTest(suite, "Additional Runtime tests", false);
                     ALL_TESTS_FOR_RUNTIME.forEach((k, v) -> {
-                        addTestCaseIfNotPassedOrSkipped(additionalTests, v, k, runAdditionalTests);
+                        addTestCaseIfRequested(additionalTests, v, k);
                     });
                 }
             }
@@ -336,13 +344,24 @@ public class ImageValidatorE2ETestUtil {
     }
 
     private void addTestCase(XmlTest xmlTest) {
-        addTestCaseIfNotPassedOrSkipped(xmlTest, PrewarmImageValidatorE2ETest.class, "testCreateInternalSdxAndDistrox", null);
+        addTestCaseIfRequested(xmlTest, PrewarmImageValidatorE2ETest.class, "testCreateInternalSdxAndDistrox");
     }
 
-    private void addTestCaseIfNotPassedOrSkipped(XmlTest xmlTest, Class<?> testClass, String methodName, String runAdditionalTests) {
-        if (runAdditionalTests != null && (runAdditionalTests.contains("-" + methodName) || "none".equalsIgnoreCase(runAdditionalTests))) {
-            LOGGER.debug("Skipping ignored test case {}::{}", testClass.getSimpleName(), methodName);
-            return;
+    private void addTestCaseIfRequested(XmlTest xmlTest, Class<?> testClass, String methodName) {
+        if (runAdditionalTests != null) {
+            String[] runAdditionalTestsArray = runAdditionalTests.split(",");
+            if (runAdditionalTests.contains(ADD_TESTCASE_SIGN)) {
+                if (Arrays.stream(runAdditionalTestsArray).map(String::trim).anyMatch(s -> s.equals(ADD_TESTCASE_SIGN + methodName))) {
+                    LOGGER.info("Adding test case {}::{}", testClass.getSimpleName(), methodName);
+                    testNGUtil.addTestCase(xmlTest, testClass, methodName);
+                }
+                return;
+            }
+            if (Arrays.stream(runAdditionalTestsArray).map(String::trim).anyMatch(s -> s.equals(SKIP_TESTCASE_SIGN + methodName))
+                    || "none".equalsIgnoreCase(runAdditionalTests)) {
+                LOGGER.debug("Skipping ignored test case {}::{}", testClass.getSimpleName(), methodName);
+                return;
+            }
         }
         if (!PassedTestsReporter.isAlreadyPassedTest(testClass, methodName)) {
             LOGGER.info("Adding test case {}::{}", testClass.getSimpleName(), methodName);
