@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailHandledRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedRequest;
+import com.sequenceiq.cloudbreak.service.diagnostics.CmDiagnosticsCommandHintService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
@@ -52,6 +54,9 @@ class ClusterUpgradeFailedHandlerTest {
 
     @Mock
     private CmSyncImageCollectorService cmSyncImageCollectorService;
+
+    @Mock
+    private CmDiagnosticsCommandHintService cmDiagnosticsCommandHintService;
 
     @Mock
     private Stack stack;
@@ -99,6 +104,7 @@ class ClusterUpgradeFailedHandlerTest {
         assertThat(selectable).isInstanceOf(ClusterUpgradeFailHandledRequest.class);
 
         verify(stackService, times(1)).getByIdWithListsInTransaction(eq(STACK_ID));
+        verify(cmDiagnosticsCommandHintService).fireCmDiagnosticsHint(STACK_ID, List.of());
     }
 
 }

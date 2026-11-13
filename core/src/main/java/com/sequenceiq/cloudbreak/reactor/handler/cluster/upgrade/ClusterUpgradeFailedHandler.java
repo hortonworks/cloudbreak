@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGR
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FAILED;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailHandledRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedRequest;
+import com.sequenceiq.cloudbreak.service.diagnostics.CmDiagnosticsCommandHintService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncImageCollectorService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
@@ -51,6 +53,9 @@ public class ClusterUpgradeFailedHandler extends ExceptionCatcherEventHandler<Cl
     @Inject
     private CmSyncImageCollectorService cmSyncImageCollectorService;
 
+    @Inject
+    private CmDiagnosticsCommandHintService cmDiagnosticsCommandHintService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterUpgradeFailedRequest.class);
@@ -70,6 +75,7 @@ public class ClusterUpgradeFailedHandler extends ExceptionCatcherEventHandler<Cl
             syncFromCmToCb(request);
         }
         runConclusionChecking(request);
+        cmDiagnosticsCommandHintService.fireCmDiagnosticsHint(request.getResourceId(), List.of());
         return new ClusterUpgradeFailHandledRequest(request.getResourceId(), request.getException(), request.getDetailedStatus());
     }
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 import static com.sequenceiq.cloudbreak.core.flow2.generator.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -25,10 +26,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeReachabilityValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 
@@ -125,6 +128,40 @@ class UpscaleFlowEventChainFactoryTest {
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(createTriggerEvent().setRepair());
 
         assertFalse(flowTriggerEventQueue.getQueue().stream().anyMatch(DatalakeReachabilityValidationTriggerEvent.class::isInstance));
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueWhenRepairThenClusterUpscaleTriggerCarriesRepairFlag() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getCluster()).thenReturn(mock(ClusterView.class));
+        when(stackService.getStackProxyById(any())).thenReturn(stackDto);
+        when(skuMigrationService.isUpscaleSkuMigrationEnabled()).thenReturn(Boolean.FALSE);
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(createTriggerEvent().setRepair());
+
+        ClusterScaleTriggerEvent clusterTrigger = findClusterUpscaleTrigger(flowTriggerEventQueue);
+        assertTrue(clusterTrigger.isRepair());
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueWhenNotRepairThenClusterUpscaleTriggerDoesNotCarryRepairFlag() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getCluster()).thenReturn(mock(ClusterView.class));
+        when(stackService.getStackProxyById(any())).thenReturn(stackDto);
+        when(skuMigrationService.isUpscaleSkuMigrationEnabled()).thenReturn(Boolean.FALSE);
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(createTriggerEvent());
+
+        ClusterScaleTriggerEvent clusterTrigger = findClusterUpscaleTrigger(flowTriggerEventQueue);
+        assertFalse(clusterTrigger.isRepair());
+    }
+
+    private ClusterScaleTriggerEvent findClusterUpscaleTrigger(FlowTriggerEventQueue flowTriggerEventQueue) {
+        return flowTriggerEventQueue.getQueue().stream()
+                .filter(selectable -> selectable.getClass().equals(ClusterScaleTriggerEvent.class))
+                .map(ClusterScaleTriggerEvent.class::cast)
+                .findFirst()
+                .orElseThrow();
     }
 
     private StackAndClusterUpscaleTriggerEvent createTriggerEvent() {

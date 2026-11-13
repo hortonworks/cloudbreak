@@ -33,6 +33,8 @@ public class ClusterScaleTriggerEvent extends StackEvent {
 
     private final boolean rollingRestartEnabled;
 
+    private boolean repair;
+
     @JsonCreator
     public ClusterScaleTriggerEvent(
             @JsonProperty("selector") String selector,
@@ -45,7 +47,8 @@ public class ClusterScaleTriggerEvent extends StackEvent {
             @JsonProperty("singleNodeCluster") boolean singleNodeCluster,
             @JsonProperty("restartServices") boolean restartServices,
             @JsonProperty("clusterManagerType") ClusterManagerType clusterManagerType,
-            @JsonProperty("rollingRestartEnabled") boolean rollingRestartEnabled) {
+            @JsonProperty("rollingRestartEnabled") boolean rollingRestartEnabled,
+            @JsonProperty("repair") boolean repair) {
         super(selector, stackId);
         this.hostGroupsWithAdjustment = hostGroupsWithAdjustment == null ? Collections.emptyMap() : hostGroupsWithAdjustment;
         this.hostGroupsWithPrivateIds = hostGroupsWithPrivateIds;
@@ -56,12 +59,13 @@ public class ClusterScaleTriggerEvent extends StackEvent {
         this.restartServices = restartServices;
         this.clusterManagerType = clusterManagerType;
         this.rollingRestartEnabled = rollingRestartEnabled;
+        this.repair = repair;
     }
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment,
         Map<String, Set<Long>> hostGroupsWithPrivateIds, Map<String, Set<String>> hostGroupsWithHostNames) {
         this(selector, stackId, hostGroupsWithAdjustment, hostGroupsWithPrivateIds, hostGroupsWithHostNames, false, false, false, false,
-                ClusterManagerType.CLOUDERA_MANAGER, false);
+                ClusterManagerType.CLOUDERA_MANAGER, false, false);
     }
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment,
@@ -119,6 +123,14 @@ public class ClusterScaleTriggerEvent extends StackEvent {
         return rollingRestartEnabled;
     }
 
+    public boolean isRepair() {
+        return repair;
+    }
+
+    public void setRepair(boolean repair) {
+        this.repair = repair;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", ClusterScaleTriggerEvent.class.getSimpleName() + "[", "]")
@@ -131,6 +143,7 @@ public class ClusterScaleTriggerEvent extends StackEvent {
                 .add("restartServices=" + restartServices)
                 .add("clusterManagerType=" + clusterManagerType)
                 .add("rollingRestartEnabled=" + rollingRestartEnabled)
+                .add("repair=" + repair)
                 .add(super.toString())
                 .toString();
     }

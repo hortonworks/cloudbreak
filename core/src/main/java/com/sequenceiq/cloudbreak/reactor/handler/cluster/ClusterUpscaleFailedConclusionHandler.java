@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_FAILED;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterUpscaleFailedConclusionRequest;
+import com.sequenceiq.cloudbreak.service.diagnostics.CmDiagnosticsCommandHintService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -27,6 +30,9 @@ public class ClusterUpscaleFailedConclusionHandler extends ExceptionCatcherEvent
 
     @Inject
     private ConclusionCheckerService conclusionCheckerService;
+
+    @Inject
+    private CmDiagnosticsCommandHintService cmDiagnosticsCommandHintService;
 
     @Override
     public String selector() {
@@ -44,6 +50,9 @@ public class ClusterUpscaleFailedConclusionHandler extends ExceptionCatcherEvent
         LOGGER.info("Handle ClusterUpscaleFailedConclusionRequest, stackId: {}", request.getResourceId());
         conclusionCheckerService.runConclusionChecker(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, ConclusionCheckerType.DEFAULT,
                 "added to");
+        if (request.isRepair()) {
+            cmDiagnosticsCommandHintService.fireCmDiagnosticsHint(request.getResourceId(), List.of());
+        }
         return new StackEvent(ClusterUpscaleEvent.FAIL_HANDLED_EVENT.event(), request.getResourceId());
     }
 

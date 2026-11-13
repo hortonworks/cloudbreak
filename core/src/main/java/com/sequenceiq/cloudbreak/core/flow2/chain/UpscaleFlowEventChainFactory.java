@@ -138,7 +138,8 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
                             event.isSingleNodeCluster(),
                             event.isRestartServices(),
                             event.getClusterManagerType(),
-                            event.isRollingRestartEnabled()
+                            event.isRollingRestartEnabled(),
+                            event.isRepair()
                     )
             );
         }

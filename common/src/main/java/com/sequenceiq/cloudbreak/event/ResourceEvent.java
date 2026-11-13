@@ -508,6 +508,7 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_START_ROLLING_UPGRADE("cluster.upgrade.start.rolling.upgrade"),
     CLUSTER_UPGRADE_START_POST_UPGRADE("cluster.upgrade.start.post-upgrade"),
     CLUSTER_UPGRADE_FAILED("cluster.upgrade.failed"),
+    CLUSTER_CM_DIAGNOSTICS_COLLECTION_HINT("cluster.cm.diagnostics.collection.hint"),
     CLUSTER_UPGRADE_VALIDATION_STARTED("cluster.upgrade.validation.started"),
     CLUSTER_UPGRADE_VALIDATION_FINISHED("cluster.upgrade.validation.finished"),
     CLUSTER_UPGRADE_VALIDATION_SKIPPED("cluster.upgrade.validation.skipped"),

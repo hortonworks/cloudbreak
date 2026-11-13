@@ -71,6 +71,11 @@ import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class ClusterUpscaleActions {
+
+    // carries the repair flag only so the failure handler can fire the CM diagnostics hint; deliberately separate from the REPAIR variable
+    // that feeds context.isRepair(), whose behaviour is left unchanged
+    private static final String REPAIR_FOR_FAILURE_HINT = "REPAIR_FOR_FAILURE_HINT";
+
     @Inject
     private ClusterUpscaleFlowService clusterUpscaleFlowService;
 
@@ -96,6 +101,7 @@ public class ClusterUpscaleActions {
                 variables.put(RESTART_SERVICES, payload.isRestartServices());
                 variables.put(HOST_NAMES_BY_HOST_GROUP, payload.getHostGroupsWithHostNames());
                 variables.put(ROLLING_RESTART_ENABLED, payload.isRollingRestartEnabled());
+                variables.put(REPAIR_FOR_FAILURE_HINT, payload.isRepair());
                 if (payload.isSinglePrimaryGateway()) {
                     variables.put(HOST_NAME, getMasterHostname(payload));
                 }
@@ -438,10 +444,15 @@ public class ClusterUpscaleActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackId(), payload.getException());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStack(), payload.getException());
-                ClusterUpscaleFailedConclusionRequest request = new ClusterUpscaleFailedConclusionRequest(context.getStackId());
+                ClusterUpscaleFailedConclusionRequest request =
+                        new ClusterUpscaleFailedConclusionRequest(context.getStackId(), isRepairForFailureHint(variables));
                 sendEvent(context, request.selector(), request);
             }
         };
+    }
+
+    private static boolean isRepairForFailureHint(Map<Object, Object> variables) {
+        return Boolean.TRUE.equals(variables.get(REPAIR_FOR_FAILURE_HINT));
     }
 
     private abstract static class AbstractClusterUpscaleAction<P extends Payload>
