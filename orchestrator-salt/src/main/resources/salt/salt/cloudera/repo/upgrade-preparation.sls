@@ -1,5 +1,8 @@
 {% if grains['os_family'] == 'RedHat' %}
 
+include:
+  - pkg-mgr-proxy
+
 {% set cm_repo_file_path = '/etc/yum.repos.d/cloudera-manager-' + salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:version') + '-' + salt['pillar.get']('cloudera-manager-upgrade-prepare:repo:buildNumber') + '.repo' %}
 
 {% if not salt['file.file_exists'](cm_repo_file_path) %}
