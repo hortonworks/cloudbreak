@@ -70,8 +70,8 @@ class SdxResizeOperationServiceTest {
 
     static Object[][] resizeFailureProvider() {
         return new Object[][]{
-                {DatalakeBackupFlowConfig.class, failedOperation("Failed to create backup from old Data Lake cluster.", true, true), true},
-                {SdxStopFlowConfig.class, failedOperation("Failed to stop old Data Lake cluster.", true, true), true},
+                {DatalakeBackupFlowConfig.class, null, true},
+                {SdxStopFlowConfig.class, null, true},
                 {SdxDetachFlowConfig.class, failedOperation("Failed to detach old Data Lake from environment.", true, true), true},
                 {SdxCreateFlowConfig.class, failedOperation("New Data Lake creation failed.", true, true), true},
                 {DatalakeRestoreFlowConfig.class, failedOperation("Failed to restore data from old Data Lake to new Data Lake.", true, true), true},
@@ -157,11 +157,15 @@ class SdxResizeOperationServiceTest {
 
         SdxResizeOperationResponse result = getResizeOperationByStatus();
 
-        assertEquals(expectedResponse.getOperationId(), result.getOperationId());
-        assertEquals(expectedResponse.getActive(), result.getActive());
-        assertEquals(expectedResponse.getFailed(), result.getFailed());
-        assertEquals(expectedResponse.getRetryAllowed(), result.getRetryAllowed());
-        assertEquals(expectedResponse.getRollbackAllowed(), result.getRollbackAllowed());
+        if (expectedResponse == null) {
+            assertNull(result);
+        } else {
+            assertEquals(expectedResponse.getOperationId(), result.getOperationId());
+            assertEquals(expectedResponse.getActive(), result.getActive());
+            assertEquals(expectedResponse.getFailed(), result.getFailed());
+            assertEquals(expectedResponse.getRetryAllowed(), result.getRetryAllowed());
+            assertEquals(expectedResponse.getRollbackAllowed(), result.getRollbackAllowed());
+        }
     }
 
     private SdxResizeOperationResponse getResizeOperationByStatus() {
