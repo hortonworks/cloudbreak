@@ -2,13 +2,26 @@ package com.sequenceiq.cloudbreak.common.anonymizer;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
 public class AnonymizerUtilTest {
 
     private static final String REPLACEMENT = "****";
+
+    @Test
+    public void testGetPatternsAreExposedAndUsable() {
+        List<Pattern> patterns = AnonymizerUtil.getPatterns();
+        assertFalse(patterns.isEmpty());
+        assertTrue(patterns.stream().allMatch(p -> p != null && !p.pattern().isEmpty()));
+        assertTrue(patterns.stream().anyMatch(p -> p.matcher("password=x").find()));
+    }
 
     @Test
     public void testNullInput() {

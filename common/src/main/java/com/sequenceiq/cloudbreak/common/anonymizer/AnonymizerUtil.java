@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.common.anonymizer;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -53,6 +55,10 @@ public class AnonymizerUtil {
         return ret;
     }
 
+    public static List<Pattern> getPatterns() {
+        return Arrays.stream(PATTERNS).map(ReplacePattern::getPattern).toList();
+    }
+
     static class ReplacePattern {
 
         private final Pattern pattern;
@@ -62,6 +68,10 @@ public class AnonymizerUtil {
         ReplacePattern(String regexp, String replacement) {
             pattern = Pattern.compile(regexp);
             this.replacement = replacement;
+        }
+
+        Pattern getPattern() {
+            return pattern;
         }
 
         public String replaceAll(String input) {
