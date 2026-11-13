@@ -3,6 +3,7 @@ package com.sequenceiq.maintenance.service;
 import java.text.ParseException;
 import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -32,13 +33,24 @@ public class MaintenanceOccurrenceCalculator {
      * All occurrences whose start falls in {@code [rangeStartInclusiveMs, rangeEndExclusiveMs)}.
      */
     public List<WindowOccurrence> expandOccurrences(MaintenanceWindowSchedule schedule, long rangeStartInclusiveMs, long rangeEndExclusiveMs) {
+        return expandOccurrences(schedule, rangeStartInclusiveMs, rangeEndExclusiveMs, 0);
+    }
+
+    /**
+     * Same as {@link #expandOccurrences(MaintenanceWindowSchedule, long, long)} but stops once {@code maxOccurrences}
+     * matching starts have been collected. Use {@code maxOccurrences <= 0} for no limit (full horizon walk).
+     */
+    public List<WindowOccurrence> expandOccurrences(
+            MaintenanceWindowSchedule schedule, long rangeStartInclusiveMs, long rangeEndExclusiveMs, int maxOccurrences) {
         ZoneId zone = ZoneId.of(schedule.getTimezone());
         long durationMs = TimeUnit.MINUTES.toMillis(schedule.getDurationMinutes());
         return switch (schedule.getRecurrenceKind()) {
-            case WEEKLY -> expandWeekly(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs);
-            case MONTHLY_NTH_WEEKDAY -> expandMonthlyNthWeekday(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs);
-            case MONTHLY_DAY_OF_MONTH -> expandMonthlyDayOfMonth(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs);
-            case CRON -> expandCron(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs);
+            case WEEKLY -> expandWeekly(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs, maxOccurrences);
+            case MONTHLY_NTH_WEEKDAY ->
+                    expandMonthlyNthWeekday(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs, maxOccurrences);
+            case MONTHLY_DAY_OF_MONTH ->
+                    expandMonthlyDayOfMonth(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs, maxOccurrences);
+            case CRON -> expandCron(schedule, zone, durationMs, rangeStartInclusiveMs, rangeEndExclusiveMs, maxOccurrences);
         };
     }
 
@@ -74,24 +86,37 @@ public class MaintenanceOccurrenceCalculator {
     }
 
     private List<WindowOccurrence> expandWeekly(
-            MaintenanceWindowSchedule schedule, ZoneId zone, long durationMs, long rangeStartInclusiveMs, long rangeEndExclusiveMs) {
+            MaintenanceWindowSchedule schedule,
+            ZoneId zone,
+            long durationMs,
+            long rangeStartInclusiveMs,
+            long rangeEndExclusiveMs,
+            int maxOccurrences) {
         List<WindowOccurrence> occurrences = new ArrayList<>();
         LocalTime startTime = LocalTime.parse(schedule.getStartLocalTime());
         DayOfWeek targetDay = DayOfWeek.valueOf(schedule.getDayOfWeek().name());
         ZonedDateTime cursor = Instant.ofEpochMilli(rangeStartInclusiveMs).atZone(zone);
         ZonedDateTime next = cursor.with(TemporalAdjusters.nextOrSame(targetDay)).with(startTime);
         if (next.toInstant().toEpochMilli() < rangeStartInclusiveMs) {
-            next = next.plusWeeks(1);
+            next = weeklyOccurrenceStart(next.toLocalDate().plusWeeks(1), startTime, zone);
         }
         while (next.toInstant().toEpochMilli() < rangeEndExclusiveMs) {
             addOccurrence(occurrences, next, durationMs);
-            next = next.plusWeeks(1);
+            if (reachedOccurrenceLimit(occurrences, maxOccurrences)) {
+                break;
+            }
+            next = weeklyOccurrenceStart(next.toLocalDate().plusWeeks(1), startTime, zone);
         }
         return occurrences;
     }
 
     private List<WindowOccurrence> expandMonthlyNthWeekday(
-            MaintenanceWindowSchedule schedule, ZoneId zone, long durationMs, long rangeStartInclusiveMs, long rangeEndExclusiveMs) {
+            MaintenanceWindowSchedule schedule,
+            ZoneId zone,
+            long durationMs,
+            long rangeStartInclusiveMs,
+            long rangeEndExclusiveMs,
+            int maxOccurrences) {
         List<WindowOccurrence> occurrences = new ArrayList<>();
         LocalTime startTime = LocalTime.parse(schedule.getStartLocalTime());
         DayOfWeek targetDay = DayOfWeek.valueOf(schedule.getDayOfWeek().name());
@@ -104,6 +129,9 @@ public class MaintenanceOccurrenceCalculator {
                 long startMs = candidate.toInstant().toEpochMilli();
                 if (startMs >= rangeStartInclusiveMs && startMs < rangeEndExclusiveMs) {
                     addOccurrence(occurrences, candidate, durationMs);
+                    if (reachedOccurrenceLimit(occurrences, maxOccurrences)) {
+                        return occurrences;
+                    }
                 }
             }
             monthCursor = monthCursor.plusMonths(1);
@@ -112,7 +140,12 @@ public class MaintenanceOccurrenceCalculator {
     }
 
     private List<WindowOccurrence> expandMonthlyDayOfMonth(
-            MaintenanceWindowSchedule schedule, ZoneId zone, long durationMs, long rangeStartInclusiveMs, long rangeEndExclusiveMs) {
+            MaintenanceWindowSchedule schedule,
+            ZoneId zone,
+            long durationMs,
+            long rangeStartInclusiveMs,
+            long rangeEndExclusiveMs,
+            int maxOccurrences) {
         List<WindowOccurrence> occurrences = new ArrayList<>();
         LocalTime startTime = LocalTime.parse(schedule.getStartLocalTime());
         ZonedDateTime monthCursor = Instant.ofEpochMilli(rangeStartInclusiveMs).atZone(zone).withDayOfMonth(1).with(startTime);
@@ -124,6 +157,9 @@ public class MaintenanceOccurrenceCalculator {
             long startMs = candidate.toInstant().toEpochMilli();
             if (startMs >= rangeStartInclusiveMs && startMs < rangeEndExclusiveMs) {
                 addOccurrence(occurrences, candidate, durationMs);
+                if (reachedOccurrenceLimit(occurrences, maxOccurrences)) {
+                    return occurrences;
+                }
             }
             monthCursor = monthCursor.plusMonths(1);
         }
@@ -131,7 +167,12 @@ public class MaintenanceOccurrenceCalculator {
     }
 
     private List<WindowOccurrence> expandCron(
-            MaintenanceWindowSchedule schedule, ZoneId zone, long durationMs, long rangeStartInclusiveMs, long rangeEndExclusiveMs) {
+            MaintenanceWindowSchedule schedule,
+            ZoneId zone,
+            long durationMs,
+            long rangeStartInclusiveMs,
+            long rangeEndExclusiveMs,
+            int maxOccurrences) {
         List<WindowOccurrence> occurrences = new ArrayList<>();
         try {
             CronExpression cronExpression = new CronExpression(schedule.getCronExpression());
@@ -144,6 +185,9 @@ public class MaintenanceOccurrenceCalculator {
                 }
                 if (next.getTime() >= rangeStartInclusiveMs) {
                     occurrences.add(new WindowOccurrence(next.getTime(), next.getTime() + durationMs));
+                    if (reachedOccurrenceLimit(occurrences, maxOccurrences)) {
+                        break;
+                    }
                 }
                 after = next;
             }
@@ -151,6 +195,14 @@ public class MaintenanceOccurrenceCalculator {
             throw new IllegalArgumentException("Invalid cron expression: " + schedule.getCronExpression(), e);
         }
         return occurrences;
+    }
+
+    private static ZonedDateTime weeklyOccurrenceStart(LocalDate weekLocalDate, LocalTime startTime, ZoneId zone) {
+        return weekLocalDate.atTime(startTime).atZone(zone);
+    }
+
+    private static boolean reachedOccurrenceLimit(List<WindowOccurrence> occurrences, int maxOccurrences) {
+        return maxOccurrences > 0 && occurrences.size() >= maxOccurrences;
     }
 
     private void addOccurrence(List<WindowOccurrence> occurrences, ZonedDateTime start, long durationMs) {

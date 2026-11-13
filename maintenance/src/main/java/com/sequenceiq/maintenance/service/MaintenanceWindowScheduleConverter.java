@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
@@ -12,15 +13,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleFieldsRequest;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowSchedulePreviewRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.UpdateMaintenanceWindowScheduleRequest;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowEffectiveScheduleResponse;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowOccurrencePreviewResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowOccurrenceResponse;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowSchedulePreviewResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowSkipResponse;
 import com.sequenceiq.maintenance.domain.MaintenanceEnumValues;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSkip;
+import com.sequenceiq.maintenance.service.model.EffectiveScheduleResolution;
 import com.sequenceiq.maintenance.service.model.WindowOccurrence;
 
 @Component
@@ -53,6 +60,20 @@ public class MaintenanceWindowScheduleConverter {
     public MaintenanceWindowSchedule toEntity(MaintenanceWindowScheduleRequest request) {
         MaintenanceWindowSchedule schedule = new MaintenanceWindowSchedule();
         applyRequest(schedule, request);
+        return schedule;
+    }
+
+    public MaintenanceWindowSchedule toPreviewEntity(MaintenanceWindowSchedulePreviewRequest request, String accountId) {
+        MaintenanceWindowSchedule schedule = new MaintenanceWindowSchedule();
+        schedule.setAccountId(accountId);
+        if (StringUtils.isNotBlank(request.getScopeType()) && StringUtils.isNotBlank(request.getScopeId())) {
+            schedule.setScopeType(MaintenanceEnumValues.toScopeType(request.getScopeType()));
+            schedule.setScopeId(request.getScopeId());
+        } else {
+            schedule.setScopeType(MaintenanceScopeType.TENANT);
+            schedule.setScopeId(accountId);
+        }
+        applyCreateMutableFields(schedule, request);
         return schedule;
     }
 
@@ -163,6 +184,27 @@ public class MaintenanceWindowScheduleConverter {
                 .limit(UPCOMING_OCCURRENCE_LIMIT)
                 .map(occurrence -> new MaintenanceWindowOccurrenceResponse(occurrence.windowStart(), occurrence.windowEnd()))
                 .toList());
+        return response;
+    }
+
+    public MaintenanceWindowSchedulePreviewResponse toPreviewResponse(
+            MaintenanceWindowSchedule schedule, List<WindowOccurrence> occurrences, Set<Long> skippedWindowStarts) {
+        MaintenanceWindowSchedulePreviewResponse response = new MaintenanceWindowSchedulePreviewResponse();
+        response.setTimezone(schedule.getTimezone());
+        response.setOccurrences(occurrences.stream()
+                .map(occurrence -> new MaintenanceWindowOccurrencePreviewResponse(
+                        occurrence.windowStart(),
+                        occurrence.windowEnd(),
+                        skippedWindowStarts.contains(occurrence.windowStart())))
+                .toList());
+        return response;
+    }
+
+    public MaintenanceWindowEffectiveScheduleResponse toEffectiveResponse(EffectiveScheduleResolution resolution) {
+        MaintenanceWindowEffectiveScheduleResponse response = new MaintenanceWindowEffectiveScheduleResponse();
+        response.setSchedule(toResponse(resolution.schedule()));
+        response.setSourceScopeType(resolution.sourceScopeType().name());
+        response.setSourceScopeId(resolution.sourceScopeId());
         return response;
     }
 

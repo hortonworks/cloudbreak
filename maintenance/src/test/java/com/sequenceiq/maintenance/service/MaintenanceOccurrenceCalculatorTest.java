@@ -157,6 +157,24 @@ class MaintenanceOccurrenceCalculatorTest {
     }
 
     @Test
+    void expandWeeklyOccurrencesAcrossDstSpringForward() {
+        MaintenanceWindowSchedule schedule = new MaintenanceWindowSchedule();
+        schedule.setRecurrenceKind(MaintenanceRecurrenceKind.WEEKLY);
+        schedule.setTimezone("America/New_York");
+        schedule.setDurationMinutes(60);
+        schedule.setStartLocalTime("02:30");
+        schedule.setDayOfWeek(DayOfWeek.SUNDAY);
+
+        long rangeStart = Instant.parse("2025-03-01T00:00:00Z").toEpochMilli();
+        long rangeEnd = Instant.parse("2025-03-31T00:00:00Z").toEpochMilli();
+        List<WindowOccurrence> occurrences = calculator.expandOccurrences(schedule, rangeStart, rangeEnd);
+
+        assertThat(occurrences).hasSize(5);
+        assertThat(occurrences.get(1).windowStart()).isEqualTo(Instant.parse("2025-03-09T07:30:00Z").toEpochMilli());
+        assertThat(occurrences.get(2).windowStart()).isEqualTo(Instant.parse("2025-03-16T06:30:00Z").toEpochMilli());
+    }
+
+    @Test
     void findOccurrenceContainingReturnsActiveHalfOpenInterval() {
         MaintenanceWindowSchedule schedule = new MaintenanceWindowSchedule();
         schedule.setRecurrenceKind(MaintenanceRecurrenceKind.WEEKLY);
@@ -170,5 +188,21 @@ class MaintenanceOccurrenceCalculatorTest {
         assertThat(calculator.findOccurrenceContaining(schedule, start).orElseThrow().windowStart()).isEqualTo(start);
         assertThat(calculator.findOccurrenceContaining(schedule, end - 1).orElseThrow().windowEnd()).isEqualTo(end);
         assertThat(calculator.findOccurrenceContaining(schedule, end)).isEmpty();
+    }
+
+    @Test
+    void expandCronStopsAtMaxOccurrences() {
+        MaintenanceWindowSchedule schedule = new MaintenanceWindowSchedule();
+        schedule.setRecurrenceKind(MaintenanceRecurrenceKind.CRON);
+        schedule.setTimezone("UTC");
+        schedule.setDurationMinutes(60);
+        schedule.setCronExpression("* * * * * ?");
+
+        long rangeStart = Instant.parse("2025-01-01T00:00:00Z").toEpochMilli();
+        long rangeEnd = rangeStart + MaintenanceWindowScheduleValidator.OCCURRENCE_HORIZON_MS;
+        List<WindowOccurrence> occurrences =
+                calculator.expandOccurrences(schedule, rangeStart, rangeEnd, MaintenanceWindowScheduleValidator.MAX_OCCURRENCES_FOR_VALIDATION + 1);
+
+        assertThat(occurrences).hasSize(MaintenanceWindowScheduleValidator.MAX_OCCURRENCES_FOR_VALIDATION + 1);
     }
 }

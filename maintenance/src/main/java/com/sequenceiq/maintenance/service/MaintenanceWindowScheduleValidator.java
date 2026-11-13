@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
-import com.sequenceiq.maintenance.repository.MaintenanceWindowScheduleRepository;
 import com.sequenceiq.maintenance.service.model.WindowOccurrence;
 
 @Component
@@ -27,6 +26,15 @@ public class MaintenanceWindowScheduleValidator {
     public static final long OCCURRENCE_HORIZON_MS = 90L * 24 * 60 * 60 * 1000;
 
     public static final int MIN_DURATION_MINUTES = 60;
+
+    /**
+     * Upper bound on occurrences expanded per schedule within {@link #OCCURRENCE_HORIZON_MS}. Valid schedules allow at
+     * most one window start per 24 hours, so roughly 90 starts fit in the 90-day horizon; 100 is headroom for edge
+     * alignment. Rejects pathological CRON before sorting huge lists.
+     */
+    public static final int MAX_OCCURRENCES_FOR_VALIDATION = 100;
+
+    private static final int VALIDATION_OCCURRENCE_EXPANSION_LIMIT = MAX_OCCURRENCES_FOR_VALIDATION + 1;
 
     private static final long MIN_WINDOW_START_GAP_MS = 24L * 60 * 60 * 1000;
 
@@ -38,29 +46,40 @@ public class MaintenanceWindowScheduleValidator {
 
     private static final int MAX_DAY_OF_MONTH = 31;
 
-    private final MaintenanceWindowScheduleRepository scheduleRepository;
-
     private final MaintenanceOccurrenceCalculator occurrenceCalculator;
 
     private final Clock clock;
 
     @Inject
-    public MaintenanceWindowScheduleValidator(
-            MaintenanceWindowScheduleRepository scheduleRepository,
-            MaintenanceOccurrenceCalculator occurrenceCalculator,
-            Clock clock) {
-        this.scheduleRepository = scheduleRepository;
+    public MaintenanceWindowScheduleValidator(MaintenanceOccurrenceCalculator occurrenceCalculator, Clock clock) {
         this.occurrenceCalculator = occurrenceCalculator;
         this.clock = clock;
     }
 
-    public void validate(MaintenanceWindowSchedule schedule, Long excludeScheduleId) {
+    public void validate(MaintenanceWindowSchedule schedule) {
         validateRequiredFields(schedule);
         validateDuration(schedule.getDurationMinutes());
         validateTimezone(schedule.getTimezone());
         validateRecurrenceFields(schedule);
         validateScope(schedule);
-        validateOccurrences(schedule, excludeScheduleId);
+        validateOccurrences(schedule);
+    }
+
+    /**
+     * Validates an unsaved schedule payload for preview: same recurrence and occurrence rules as
+     * {@link #validate(MaintenanceWindowSchedule)} on the request body (aligned with PATCH, which validates only the
+     * merged schedule fields). When {@code validateScopeFields} is true, {@code schedule} must include scope fields and
+     * {@link #validateScope(MaintenanceWindowSchedule)} runs.
+     */
+    public void validatePreview(MaintenanceWindowSchedule schedule, boolean validateScopeFields) {
+        validateRequiredFields(schedule);
+        validateDuration(schedule.getDurationMinutes());
+        validateTimezone(schedule.getTimezone());
+        validateRecurrenceFields(schedule);
+        if (validateScopeFields) {
+            validateScope(schedule);
+        }
+        validateOccurrences(schedule);
     }
 
     private void validateRequiredFields(MaintenanceWindowSchedule schedule) {
@@ -158,25 +177,39 @@ public class MaintenanceWindowScheduleValidator {
         }
     }
 
-    private void validateOccurrences(MaintenanceWindowSchedule schedule, Long excludeScheduleId) {
+    /** Expands the schedule in the 90-day horizon and enforces gap/overlap rules on those windows. */
+    private void validateOccurrences(MaintenanceWindowSchedule schedule) {
+        validateOccurrenceStartGapAndOverlap(expandDraftOccurrencesInHorizon(schedule));
+    }
+
+    /**
+     * Expands {@code schedule} into concrete windows within {@link #OCCURRENCE_HORIZON_MS}. Fails when none fall in
+     * the horizon or when expansion exceeds {@link #MAX_OCCURRENCES_FOR_VALIDATION}.
+     */
+    private List<WindowOccurrence> expandDraftOccurrencesInHorizon(MaintenanceWindowSchedule schedule) {
         long now = clock.getCurrentTimeMillis();
         long horizonEnd = now + OCCURRENCE_HORIZON_MS;
-        List<WindowOccurrence> candidateOccurrences = occurrenceCalculator.expandOccurrences(schedule, now, horizonEnd);
-        if (candidateOccurrences.isEmpty()) {
+        List<WindowOccurrence> occurrences =
+                occurrenceCalculator.expandOccurrences(schedule, now, horizonEnd, VALIDATION_OCCURRENCE_EXPANSION_LIMIT);
+        if (occurrences.isEmpty()) {
             throw new BadRequestException("Schedule must have at least one occurrence within the next 90 days.");
         }
+        if (occurrences.size() > MAX_OCCURRENCES_FOR_VALIDATION) {
+            throw new BadRequestException(
+                    "Schedule produces too many occurrences within the next 90 days; use a less frequent recurrence.");
+        }
+        return occurrences;
+    }
 
-        List<WindowOccurrence> allOccurrences = new ArrayList<>(candidateOccurrences);
-        scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(
-                        schedule.getAccountId(), schedule.getScopeType(), schedule.getScopeId())
-                .filter(existing -> !Objects.equals(existing.getId(), excludeScheduleId))
-                .ifPresent(existing -> allOccurrences.addAll(
-                        occurrenceCalculator.expandOccurrences(existing, now, horizonEnd)));
-
-        allOccurrences.sort(Comparator.comparingLong(WindowOccurrence::windowStart));
-        for (int i = 1; i < allOccurrences.size(); i++) {
-            WindowOccurrence previous = allOccurrences.get(i - 1);
-            WindowOccurrence current = allOccurrences.get(i);
+    /**
+     * Enforces at most one window start per 24 hours and no overlapping windows on the given list.
+     */
+    private void validateOccurrenceStartGapAndOverlap(List<WindowOccurrence> occurrences) {
+        List<WindowOccurrence> sorted = new ArrayList<>(occurrences);
+        sorted.sort(Comparator.comparingLong(WindowOccurrence::windowStart));
+        for (int i = 1; i < sorted.size(); i++) {
+            WindowOccurrence previous = sorted.get(i - 1);
+            WindowOccurrence current = sorted.get(i);
             if (previous.overlaps(current)) {
                 throw new BadRequestException("Schedule overlaps with another schedule at the same scope.");
             }

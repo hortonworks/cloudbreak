@@ -78,6 +78,12 @@ class MaintenanceWindowScheduleEligibilityServiceTest {
         stubSchedule(tenant);
 
         assertThat(underTest.resolveEffectiveSchedule(identity)).contains(resource);
+        assertThat(underTest.resolveEffectiveScheduleWithSource(identity)).get()
+                .satisfies(resolution -> {
+                    assertThat(resolution.schedule()).isEqualTo(resource);
+                    assertThat(resolution.sourceScopeType()).isEqualTo(MaintenanceScopeType.DATAHUB);
+                    assertThat(resolution.sourceScopeId()).isEqualTo(RESOURCE_CRN);
+                });
     }
 
     @Test

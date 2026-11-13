@@ -16,11 +16,15 @@ import jakarta.ws.rs.core.Response;
 import com.sequenceiq.cloudbreak.util.OneOfEnum;
 import com.sequenceiq.maintenance.api.doc.MaintenanceWindowScheduleOpDescription;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowEffectiveScheduleParams;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleListParams;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowSchedulePreviewRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowSkipRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.UpdateMaintenanceWindowScheduleRequest;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowEffectiveScheduleResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleListResponse;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowSchedulePreviewResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowSkipResponse;
 
@@ -47,6 +51,30 @@ public interface MaintenanceWindowScheduleEndpoint {
             @ApiResponse(responseCode = "400", description = "Invalid scope filter (scopeType and scopeId must both be set or both omitted)")
     })
     MaintenanceWindowScheduleListResponse list(@Valid @BeanParam MaintenanceWindowScheduleListParams params);
+
+    @GET
+    @Path("effective")
+    @Operation(summary = MaintenanceWindowScheduleOpDescription.EFFECTIVE,
+            description = MaintenanceWindowScheduleOpDescription.EFFECTIVE_NOTES,
+            operationId = "getEffectiveMaintenanceWindowScheduleV1")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Effective schedule returned", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid resourceCrn or environmentCrn"),
+            @ApiResponse(responseCode = "403", description = "Insufficient rights on the resource or environment"),
+            @ApiResponse(responseCode = "404", description = "No schedule applies to the resource")
+    })
+    MaintenanceWindowEffectiveScheduleResponse getEffective(@Valid @BeanParam MaintenanceWindowEffectiveScheduleParams params);
+
+    @POST
+    @Path("preview")
+    @Operation(summary = MaintenanceWindowScheduleOpDescription.PREVIEW,
+            description = MaintenanceWindowScheduleOpDescription.PREVIEW_NOTES,
+            operationId = "previewMaintenanceWindowScheduleV1")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Occurrence preview returned", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Invalid schedule payload")
+    })
+    MaintenanceWindowSchedulePreviewResponse preview(@Valid MaintenanceWindowSchedulePreviewRequest request);
 
     @GET
     @Path("scope/{scopeType}/scopeId/{scopeId}")

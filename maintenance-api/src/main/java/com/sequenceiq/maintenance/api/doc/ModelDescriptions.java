@@ -137,6 +137,72 @@ public final class ModelDescriptions {
         }
     }
 
+    public static final class SchedulePreviewRequest {
+
+        public static final String REQUEST = "Full schedule field set used to preview upcoming maintenance window occurrences"
+                + " (same required fields as create; clients must merge persisted values before preview when simulating an update)";
+
+        public static final String SCOPE_TYPE = "Optional scope type; when set with scopeId, scope validation and persisted"
+                + " skip-next markings apply at that scope";
+
+        public static final String SCOPE_ID = "Optional scope identifier; must be provided together with scopeType";
+
+        public static final String LIMIT = "Maximum number of upcoming occurrences to return (default 5, max 20)";
+
+        public static final String INCLUDE_PERSISTED_SKIPS = "When true and scopeType/scopeId refer to a persisted schedule,"
+                + " mark occurrences skipped by skip-next (default true)";
+
+        private SchedulePreviewRequest() {
+        }
+    }
+
+    public static final class SchedulePreviewResponse {
+
+        public static final String RESPONSE = "Computed upcoming maintenance window occurrences for an unsaved schedule payload";
+
+        public static final String OCCURRENCES = "Upcoming occurrences in chronological order";
+
+        private SchedulePreviewResponse() {
+        }
+    }
+
+    public static final class EffectiveScheduleParams {
+
+        public static final String PARAMS = "Query parameters for resolving the effective maintenance schedule for a resource";
+
+        public static final String RESOURCE_CRN = "Resource CRN (for example Data Hub, Data Lake, or FreeIPA)";
+
+        public static final String ENVIRONMENT_CRN = "Optional parent environment CRN; when provided it must match the"
+                + " environment resolved from resourceCrn via the owning service (omit when the resource is unknown there)";
+
+        private EffectiveScheduleParams() {
+        }
+    }
+
+    public static final class EffectiveScheduleResponse {
+
+        public static final String RESPONSE = "Effective maintenance schedule after inheritance resolution";
+
+        public static final String SCHEDULE = "Resolved schedule fields and upcoming occurrences";
+
+        public static final String SOURCE_SCOPE_TYPE = "Scope type where the winning schedule is defined (most specific match)";
+
+        public static final String SOURCE_SCOPE_ID = "Scope identifier where the winning schedule is defined";
+
+        private EffectiveScheduleResponse() {
+        }
+    }
+
+    public static final class OccurrencePreview {
+
+        public static final String RESPONSE = "Preview of a single maintenance window occurrence";
+
+        public static final String SKIPPED = "True when a persisted skip-next rule excludes this occurrence at the requested scope";
+
+        private OccurrencePreview() {
+        }
+    }
+
     public static final class SkipRequest {
 
         public static final String REQUEST = "Optional metadata for skipping the next maintenance window occurrence";

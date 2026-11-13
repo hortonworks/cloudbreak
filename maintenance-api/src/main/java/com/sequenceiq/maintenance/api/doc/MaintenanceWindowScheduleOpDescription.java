@@ -21,6 +21,22 @@ public final class MaintenanceWindowScheduleOpDescription {
 
     public static final String LIST = "List maintenance window schedules";
 
+    public static final String PREVIEW = "Preview upcoming maintenance window occurrences";
+
+    public static final String PREVIEW_NOTES = NOTES
+            + " Computes occurrences server-side from the request body without persisting a schedule."
+            + " The body must include the full schedule field set required for create (recurrenceKind, durationMinutes,"
+            + " and pattern-specific fields); clients simulating an update must merge the persisted schedule with edits"
+            + " before calling preview. Optional scopeType and scopeId validate scope and load persisted skip-next marks;"
+            + " overlap/gap rules apply to the request body only (same as PATCH), not to other windows on the stored schedule.";
+
+    public static final String EFFECTIVE = "Get the effective maintenance window schedule for a resource";
+
+    public static final String EFFECTIVE_NOTES = NOTES
+            + " Resolves inheritance in order: resource scope, then parent environment when the owning service knows the"
+            + " resource, then tenant. Optional environmentCrn must match that resolved parent environment when provided."
+            + " Returns the winning schedule plus sourceScopeType and sourceScopeId indicating where it is defined.";
+
     public static final String GET = "Get a maintenance window schedule";
 
     public static final String CREATE = "Create a maintenance window schedule";

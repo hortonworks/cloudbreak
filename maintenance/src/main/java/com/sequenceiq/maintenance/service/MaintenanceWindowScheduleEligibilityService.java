@@ -16,6 +16,7 @@ import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowScheduleRepository;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowSkipRepository;
+import com.sequenceiq.maintenance.service.model.EffectiveScheduleResolution;
 import com.sequenceiq.maintenance.service.model.MaintenanceWindowResourceIdentity;
 import com.sequenceiq.maintenance.service.model.WindowOccurrence;
 
@@ -49,7 +50,7 @@ public class MaintenanceWindowScheduleEligibilityService {
     }
 
     public MaintenanceWindowScheduleEligibility checkEligibility(MaintenanceWindowResourceIdentity identity, long nowMs) {
-        Optional<MaintenanceWindowSchedule> schedule = resolveEffectiveSchedule(identity);
+        Optional<MaintenanceWindowSchedule> schedule = resolveEffectiveScheduleWithSource(identity).map(EffectiveScheduleResolution::schedule);
         if (schedule.isEmpty()) {
             LOGGER.debug("Maintenance window not dispatchable: no applicable schedule");
             return MaintenanceWindowScheduleEligibility.notDispatchable();
@@ -73,6 +74,10 @@ public class MaintenanceWindowScheduleEligibilityService {
     }
 
     public Optional<MaintenanceWindowSchedule> resolveEffectiveSchedule(MaintenanceWindowResourceIdentity identity) {
+        return resolveEffectiveScheduleWithSource(identity).map(EffectiveScheduleResolution::schedule);
+    }
+
+    public Optional<EffectiveScheduleResolution> resolveEffectiveScheduleWithSource(MaintenanceWindowResourceIdentity identity) {
         if (StringUtils.isBlank(identity.accountId())) {
             LOGGER.debug("Cannot resolve maintenance schedule: blank accountId");
             return Optional.empty();
@@ -82,9 +87,10 @@ public class MaintenanceWindowScheduleEligibilityService {
             Optional<MaintenanceWindowSchedule> schedule = scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(
                     identity.accountId(), candidate.scopeType(), candidate.scopeId());
             if (schedule.isPresent()) {
-                LOGGER.debug("Resolved maintenance schedule id={} scopeType={}",
-                        schedule.get().getId(), schedule.get().getScopeType());
-                return schedule;
+                LOGGER.debug("Resolved maintenance schedule id={} scopeType={} sourceScopeType={}",
+                        schedule.get().getId(), schedule.get().getScopeType(), candidate.scopeType());
+                return Optional.of(new EffectiveScheduleResolution(
+                        schedule.get(), candidate.scopeType(), candidate.scopeId()));
             }
         }
         LOGGER.debug("No maintenance schedule matched among {} scope candidates", candidates.size());

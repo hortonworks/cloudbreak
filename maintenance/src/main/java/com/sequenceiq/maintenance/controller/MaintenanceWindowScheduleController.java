@@ -12,24 +12,33 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.api.v1.schedule.endpoint.MaintenanceWindowScheduleEndpoint;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowEffectiveScheduleParams;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleListParams;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowSchedulePreviewRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowSkipRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.UpdateMaintenanceWindowScheduleRequest;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowEffectiveScheduleResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleListResponse;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowSchedulePreviewResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowSkipResponse;
 import com.sequenceiq.maintenance.authorization.MaintenanceScopeKey;
 import com.sequenceiq.maintenance.authorization.MaintenanceWindowScheduleAuthorizationService;
 import com.sequenceiq.maintenance.authorization.MaintenanceWindowScheduleEntitlementService;
+import com.sequenceiq.maintenance.service.MaintenanceWindowSchedulePreviewService;
 import com.sequenceiq.maintenance.service.MaintenanceWindowScheduleService;
 import com.sequenceiq.maintenance.service.MaintenanceWindowSkipService;
+import com.sequenceiq.maintenance.service.model.EffectiveScheduleLookupContext;
+import com.sequenceiq.maintenance.service.model.EffectiveScheduleResolution;
+import com.sequenceiq.maintenance.service.model.EffectiveScheduleResourceContext;
 
 @Controller
 public class MaintenanceWindowScheduleController implements MaintenanceWindowScheduleEndpoint {
@@ -37,6 +46,8 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
     private final MaintenanceWindowScheduleService scheduleService;
 
     private final MaintenanceWindowSkipService skipService;
+
+    private final MaintenanceWindowSchedulePreviewService previewService;
 
     private final MaintenanceWindowScheduleAuthorizationService scheduleAuthorization;
 
@@ -48,10 +59,12 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
     public MaintenanceWindowScheduleController(
             MaintenanceWindowScheduleService scheduleService,
             MaintenanceWindowSkipService skipService,
+            MaintenanceWindowSchedulePreviewService previewService,
             MaintenanceWindowScheduleAuthorizationService scheduleAuthorization,
             MaintenanceWindowScheduleEntitlementService scheduleEntitlementService) {
         this.scheduleService = scheduleService;
         this.skipService = skipService;
+        this.previewService = previewService;
         this.scheduleAuthorization = scheduleAuthorization;
         this.scheduleEntitlementService = scheduleEntitlementService;
     }
@@ -77,6 +90,36 @@ public class MaintenanceWindowScheduleController implements MaintenanceWindowSch
                         MaintenanceScopeType.valueOf(schedule.getScopeType()), schedule.getScopeId())))
                 .toList());
         return all;
+    }
+
+    @Override
+    @CustomPermissionCheck
+    public MaintenanceWindowEffectiveScheduleResponse getEffective(MaintenanceWindowEffectiveScheduleParams params) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        scheduleEntitlementService.verifyEntitled(accountId);
+        EffectiveScheduleResourceContext resourceContext = scheduleService.validateEffectiveScheduleResource(accountId, params);
+        scheduleAuthorization.authorize(resourceContext.resourceScopeType(), resourceContext.resourceCrn(), READ);
+        EffectiveScheduleLookupContext lookup = scheduleService.completeEffectiveScheduleLookup(resourceContext, params);
+        EffectiveScheduleResolution resolution = scheduleService.resolveEffectiveSchedule(lookup);
+        if (resolution.sourceScopeType() == MaintenanceScopeType.ENVIRONMENT) {
+            scheduleAuthorization.authorize(MaintenanceScopeType.ENVIRONMENT, resolution.sourceScopeId(), READ);
+        }
+        return scheduleService.toEffectiveResponse(resolution);
+    }
+
+    @Override
+    @CustomPermissionCheck
+    public MaintenanceWindowSchedulePreviewResponse preview(MaintenanceWindowSchedulePreviewRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        scheduleEntitlementService.verifyEntitled(accountId);
+        if (StringUtils.isNotBlank(request.getScopeType()) && StringUtils.isNotBlank(request.getScopeId())) {
+            MaintenanceScopeType scope = toScopeType(request.getScopeType());
+            scheduleService.validateScope(scope, request.getScopeId(), accountId);
+            scheduleAuthorization.authorize(scope, request.getScopeId(), READ);
+        } else {
+            scheduleAuthorization.authorize(MaintenanceScopeType.TENANT, accountId, READ);
+        }
+        return previewService.preview(request, accountId);
     }
 
     @Override

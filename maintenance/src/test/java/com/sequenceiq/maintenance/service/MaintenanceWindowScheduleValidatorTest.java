@@ -2,13 +2,7 @@ package com.sequenceiq.maintenance.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
-
-import java.time.DayOfWeek;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +15,6 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
-import com.sequenceiq.maintenance.repository.MaintenanceWindowScheduleRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MaintenanceWindowScheduleValidatorTest {
@@ -30,9 +23,6 @@ class MaintenanceWindowScheduleValidatorTest {
 
     // 2025-01-01T00:00:00Z
     private static final long NOW = 1_735_689_600_000L;
-
-    @Mock
-    private MaintenanceWindowScheduleRepository scheduleRepository;
 
     @Mock
     private Clock clock;
@@ -44,23 +34,21 @@ class MaintenanceWindowScheduleValidatorTest {
     @BeforeEach
     void setUp() {
         occurrenceCalculator = new MaintenanceOccurrenceCalculator();
-        validator = new MaintenanceWindowScheduleValidator(scheduleRepository, occurrenceCalculator, clock);
+        validator = new MaintenanceWindowScheduleValidator(occurrenceCalculator, clock);
         lenient().when(clock.getCurrentTimeMillis()).thenReturn(NOW);
-        lenient().when(scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(any(), any(), any()))
-                .thenReturn(Optional.empty());
     }
 
     @Test
     void validateAcceptsWeeklySchedule() {
         MaintenanceWindowSchedule schedule = weeklySchedule("default");
-        validator.validate(schedule, null);
+        validator.validate(schedule);
     }
 
     @Test
     void validateRejectsDurationBelowMinimum() {
         MaintenanceWindowSchedule schedule = weeklySchedule("default");
         schedule.setDurationMinutes(30);
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(schedule, null));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(schedule));
         assertThat(exception.getMessage()).contains("durationMinutes");
     }
 
@@ -68,7 +56,7 @@ class MaintenanceWindowScheduleValidatorTest {
     void validateRejectsInvalidTimezone() {
         MaintenanceWindowSchedule schedule = weeklySchedule("default");
         schedule.setTimezone("Not/A/Timezone");
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(schedule, null));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(schedule));
         assertThat(exception.getMessage()).contains("timezone");
     }
 
@@ -76,40 +64,20 @@ class MaintenanceWindowScheduleValidatorTest {
     void validateRejectsTenantScopeWithMismatchedScopeId() {
         MaintenanceWindowSchedule schedule = weeklySchedule("default");
         schedule.setScopeId("other-account");
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(schedule, null));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(schedule));
         assertThat(exception.getMessage()).contains("scopeId must equal accountId");
     }
 
     @Test
-    void validateRejectsOverlappingSchedulesAtSameScope() {
-        MaintenanceWindowSchedule existing = weeklySchedule("existing");
-        existing.setId(10L);
-        existing.setStartLocalTime("10:00");
-        when(scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(
-                eq(ACCOUNT_ID), eq(MaintenanceScopeType.TENANT), eq(ACCOUNT_ID))).thenReturn(Optional.of(existing));
+    void validateRejectsOverlyFrequentCronBeforeWalkingFullHorizon() {
+        MaintenanceWindowSchedule schedule = weeklySchedule("default");
+        schedule.setRecurrenceKind(MaintenanceRecurrenceKind.CRON);
+        schedule.setCronExpression("* * * * * ?");
+        schedule.setStartLocalTime(null);
+        schedule.setDayOfWeek(null);
 
-        MaintenanceWindowSchedule candidate = weeklySchedule("candidate");
-        candidate.setStartLocalTime("10:30");
-
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(candidate, null));
-        assertThat(exception.getMessage()).contains("overlap");
-    }
-
-    @Test
-    void validateRejectsSchedulesStartingWithinTwentyFourHours() {
-        MaintenanceWindowSchedule existing = weeklySchedule("existing");
-        existing.setId(10L);
-        existing.setDayOfWeek(DayOfWeek.MONDAY);
-        existing.setStartLocalTime("09:00");
-        when(scheduleRepository.findByAccountIdAndScopeTypeAndScopeIdAndArchivedFalse(
-                eq(ACCOUNT_ID), eq(MaintenanceScopeType.TENANT), eq(ACCOUNT_ID))).thenReturn(Optional.of(existing));
-
-        MaintenanceWindowSchedule candidate = weeklySchedule("candidate");
-        candidate.setDayOfWeek(DayOfWeek.TUESDAY);
-        candidate.setStartLocalTime("08:00");
-
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(candidate, null));
-        assertThat(exception.getMessage()).contains("24 hours");
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(schedule));
+        assertThat(exception.getMessage()).contains("too many occurrences");
     }
 
     @Test
@@ -120,8 +88,41 @@ class MaintenanceWindowScheduleValidatorTest {
         schedule.setStartLocalTime(null);
         schedule.setDayOfWeek(null);
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(schedule, null));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validate(schedule));
         assertThat(exception.getMessage()).contains("90 days");
+    }
+
+    @Test
+    void validatePreviewUnscopedRejectsDraftViolatingTwentyFourHourGap() {
+        MaintenanceWindowSchedule draft = weeklySchedule("draft");
+        draft.setRecurrenceKind(MaintenanceRecurrenceKind.CRON);
+        draft.setCronExpression("0 0 9,21 ? * MON *");
+        draft.setStartLocalTime(null);
+        draft.setDayOfWeek(null);
+        draft.setDurationMinutes(60);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validatePreview(draft, false));
+        assertThat(exception.getMessage()).contains("24 hours");
+    }
+
+    @Test
+    void validatePreviewScopedRunsScopeValidation() {
+        MaintenanceWindowSchedule draft = weeklySchedule("draft");
+        draft.setScopeId("other-account");
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> validator.validatePreview(draft, true));
+        assertThat(exception.getMessage()).contains("scopeId must equal accountId");
+    }
+
+    @Test
+    void validatePreviewScopedValidatesDraftAloneLikePatch() {
+        MaintenanceWindowSchedule draft = weeklySchedule("draft");
+        draft.setScopeType(MaintenanceScopeType.TENANT);
+        draft.setScopeId(ACCOUNT_ID);
+        draft.setStartLocalTime("10:30");
+        draft.setDurationMinutes(120);
+
+        validator.validatePreview(draft, true);
     }
 
     private MaintenanceWindowSchedule weeklySchedule(String name) {
@@ -132,9 +133,9 @@ class MaintenanceWindowScheduleValidatorTest {
         schedule.setScopeId(ACCOUNT_ID);
         schedule.setRecurrenceKind(MaintenanceRecurrenceKind.WEEKLY);
         schedule.setTimezone("UTC");
-        schedule.setDurationMinutes(120);
+        schedule.setDurationMinutes(60);
         schedule.setStartLocalTime("09:00");
-        schedule.setDayOfWeek(DayOfWeek.MONDAY);
+        schedule.setDayOfWeek(java.time.DayOfWeek.MONDAY);
         return schedule;
     }
 }

@@ -15,9 +15,20 @@ IAM uses existing CDP resource rights; there are no dedicated maintenance-window
 | Read (list/get/effective/preview) | Power user **or** environment creator (account) | `describeEnvironment` on `scopeId` | See resource row below |
 | Write (create/update/delete/skip) | Power user (tenant admin) | `editEnvironment` on `scopeId` | See resource row below |
 
-**Preview** (`POST …/preview`): when the body omits `scopeType`/`scopeId`, TENANT read on the account applies; when scope fields are set, the same read rule applies at that scope. Use `updateExisting=true` when previewing a PATCH to the schedule already stored at that scope.
+**Preview** (`POST …/preview`): when the body omits `scopeType`/`scopeId`, TENANT read on the account applies; when scope
+fields are set, the same read rule applies at that scope (persisted skip-next uses the scoped schedule).
 
-**Effective** (`GET …/effective?resourceCrn=…`): read access on the **resource** CRN (derived scope type). When `environmentCrn` is provided, **describeEnvironment** on that CRN is required as well (inheritance may return an environment-scoped schedule).
+**Effective** (`GET …/effective?resourceCrn=…`): read access on the **resource** CRN (derived scope type) is always
+required first. After the effective schedule is resolved, any further check depends on the **winning source**:
+
+- **ENVIRONMENT-sourced** result: **describeEnvironment** on the parent environment CRN is additionally required.
+- **TENANT-sourced** result: **no** additional right — resource read alone is sufficient. A caller with read only on a
+  Data Hub still sees the inherited tenant-scoped schedule and is **not** required to hold tenant read.
+- **Resource-sourced** result (the resource's own scope wins): already covered by the resource read above; no extra check.
+
+If the resource is unknown to the owning service, environment inheritance is skipped and only resource and tenant
+schedules are considered. An optional `environmentCrn` query parameter is rejected when it does not match the resolved
+parent environment, or when a parent environment cannot be resolved.
 
 ### Resource scope UMS rights (`scopeId` = resource CRN unless noted)
 

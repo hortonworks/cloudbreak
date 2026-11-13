@@ -3,7 +3,6 @@ package com.sequenceiq.maintenance.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -21,16 +20,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.maintenance.api.model.MaintenanceRecurrenceKind;
 import com.sequenceiq.maintenance.api.model.MaintenanceScopeType;
+import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowEffectiveScheduleParams;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.MaintenanceWindowScheduleRequest;
 import com.sequenceiq.maintenance.api.v1.schedule.model.request.UpdateMaintenanceWindowScheduleRequest;
+import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowEffectiveScheduleResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleListResponse;
 import com.sequenceiq.maintenance.api.v1.schedule.model.response.MaintenanceWindowScheduleResponse;
 import com.sequenceiq.maintenance.domain.MaintenanceWindowSchedule;
 import com.sequenceiq.maintenance.exception.ConflictException;
 import com.sequenceiq.maintenance.repository.MaintenanceWindowScheduleRepository;
+import com.sequenceiq.maintenance.service.model.EffectiveScheduleLookupContext;
+import com.sequenceiq.maintenance.service.model.EffectiveScheduleResolution;
+import com.sequenceiq.maintenance.service.model.EffectiveScheduleResourceContext;
+import com.sequenceiq.maintenance.service.model.MaintenanceWindowResourceIdentity;
 
 @ExtendWith(MockitoExtension.class)
 class MaintenanceWindowScheduleServiceTest {
@@ -47,11 +53,16 @@ class MaintenanceWindowScheduleServiceTest {
     @Mock
     private MaintenanceWindowScheduleValidator scheduleValidator;
 
-    @Mock
-    private MaintenanceWindowScheduleScopeValidator scopeValidator;
+    private final MaintenanceWindowScheduleScopeValidator scopeValidator = new MaintenanceWindowScheduleScopeValidator();
 
     @Mock
     private Clock clock;
+
+    @Mock
+    private MaintenanceWindowScheduleEligibilityService scheduleEligibilityService;
+
+    @Mock
+    private MaintenanceResourceEnvironmentCrnResolver resourceEnvironmentCrnResolver;
 
     private MaintenanceOccurrenceCalculator occurrenceCalculator;
 
@@ -64,7 +75,8 @@ class MaintenanceWindowScheduleServiceTest {
         occurrenceCalculator = new MaintenanceOccurrenceCalculator();
         scheduleConverter = new MaintenanceWindowScheduleConverter(occurrenceCalculator, clock);
         scheduleService = new MaintenanceWindowScheduleService(
-                scheduleRepository, scheduleValidator, scopeValidator, scheduleConverter, clock);
+                scheduleRepository, scheduleValidator, scopeValidator, scheduleConverter,
+                scheduleEligibilityService, resourceEnvironmentCrnResolver, clock);
     }
 
     @Test
@@ -81,7 +93,7 @@ class MaintenanceWindowScheduleServiceTest {
 
         assertThat(response.getName()).isEqualTo("tenant-default");
         assertThat(response.getNextOccurrenceStart()).isNotNull();
-        verify(scheduleValidator).validate(any(MaintenanceWindowSchedule.class), eq(null));
+        verify(scheduleValidator).validate(any(MaintenanceWindowSchedule.class));
     }
 
     @Test
@@ -141,9 +153,11 @@ class MaintenanceWindowScheduleServiceTest {
     void createRejectsMissingScopeTypeWithoutNpe() {
         MaintenanceWindowScheduleService serviceWithRealValidator = new MaintenanceWindowScheduleService(
                 scheduleRepository,
-                new MaintenanceWindowScheduleValidator(scheduleRepository, occurrenceCalculator, clock),
+                new MaintenanceWindowScheduleValidator(occurrenceCalculator, clock),
                 new MaintenanceWindowScheduleScopeValidator(),
                 scheduleConverter,
+                scheduleEligibilityService,
+                resourceEnvironmentCrnResolver,
                 clock);
         MaintenanceWindowScheduleRequest request = request("tenant-default");
         request.setScopeType(null);
@@ -193,7 +207,7 @@ class MaintenanceWindowScheduleServiceTest {
         assertThat(response.getScopeId()).isEqualTo(ACCOUNT_ID);
         assertThat(schedule.getUpdatedAt()).isEqualTo(NOW);
         assertThat(schedule.getUpdatedBy()).isEqualTo(USER_CRN);
-        verify(scheduleValidator).validate(schedule, 1L);
+        verify(scheduleValidator).validate(schedule);
     }
 
     @Test
@@ -229,6 +243,122 @@ class MaintenanceWindowScheduleServiceTest {
         assertThat(schedule.getUpdatedBy()).isEqualTo(USER_CRN);
         verify(scheduleRepository, never()).delete(any());
         verify(scheduleRepository).save(schedule);
+    }
+
+    @Test
+    void resolveEffectiveScheduleReturnsResolvedScheduleWithSource() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:acc-1:cluster:dh-1";
+        String environmentCrn = "crn:cdp:environments:us-west-1:acc-1:environment:env-1";
+        EffectiveScheduleLookupContext lookup = new EffectiveScheduleLookupContext(
+                ACCOUNT_ID, MaintenanceScopeType.DATAHUB, resourceCrn, environmentCrn);
+
+        MaintenanceWindowSchedule schedule = entityFromRequest(request("resource-default"));
+        schedule.setScopeType(MaintenanceScopeType.DATAHUB);
+        schedule.setScopeId(resourceCrn);
+        EffectiveScheduleResolution resolution = new EffectiveScheduleResolution(
+                schedule, MaintenanceScopeType.DATAHUB, resourceCrn);
+
+        when(clock.getCurrentTimeMillis()).thenReturn(NOW);
+        when(scheduleEligibilityService.resolveEffectiveScheduleWithSource(any())).thenReturn(Optional.of(resolution));
+
+        MaintenanceWindowEffectiveScheduleResponse response =
+                scheduleService.toEffectiveResponse(scheduleService.resolveEffectiveSchedule(lookup));
+
+        assertThat(response.getSourceScopeType()).isEqualTo(MaintenanceScopeType.DATAHUB.name());
+        assertThat(response.getSourceScopeId()).isEqualTo(resourceCrn);
+        assertThat(response.getSchedule().getScopeId()).isEqualTo(resourceCrn);
+        verify(scheduleEligibilityService).resolveEffectiveScheduleWithSource(
+                new MaintenanceWindowResourceIdentity(ACCOUNT_ID, environmentCrn, resourceCrn, MaintenanceScopeType.DATAHUB));
+    }
+
+    @Test
+    void validateEffectiveScheduleResourceRejectsForeignAccountResourceCrn() {
+        MaintenanceWindowEffectiveScheduleParams params = new MaintenanceWindowEffectiveScheduleParams();
+        params.setResourceCrn("crn:cdp:datahub:us-west-1:other-acc:cluster:dh-1");
+
+        BadRequestException error = assertThrows(BadRequestException.class,
+                () -> scheduleService.validateEffectiveScheduleResource(ACCOUNT_ID, params));
+
+        assertThat(error.getMessage()).contains("scopeId must belong to the same account");
+    }
+
+    @Test
+    void validateEffectiveScheduleResourceRejectsNonEnvironmentEnvironmentCrn() {
+        String datahubCrn = "crn:cdp:datahub:us-west-1:acc-1:cluster:dh-1";
+        MaintenanceWindowEffectiveScheduleParams params = new MaintenanceWindowEffectiveScheduleParams();
+        params.setResourceCrn(datahubCrn);
+        params.setEnvironmentCrn(datahubCrn);
+
+        BadRequestException error = assertThrows(BadRequestException.class,
+                () -> scheduleService.validateEffectiveScheduleResource(ACCOUNT_ID, params));
+
+        assertThat(error.getMessage()).isEqualTo("environmentCrn must reference an environment resource.");
+    }
+
+    @Test
+    void resolveEffectiveScheduleThrowsNotFoundWhenNoScheduleApplies() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:acc-1:cluster:dh-1";
+        EffectiveScheduleLookupContext lookup = new EffectiveScheduleLookupContext(
+                ACCOUNT_ID, MaintenanceScopeType.DATAHUB, resourceCrn, null);
+        when(scheduleEligibilityService.resolveEffectiveScheduleWithSource(any())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> scheduleService.resolveEffectiveSchedule(lookup));
+    }
+
+    @Test
+    void completeEffectiveScheduleLookupUsesDerivedEnvironmentWhenQueryParamOmitted() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:acc-1:cluster:dh-1";
+        String environmentCrn = "crn:cdp:environments:us-west-1:acc-1:environment:env-1";
+        MaintenanceWindowEffectiveScheduleParams params = new MaintenanceWindowEffectiveScheduleParams();
+        params.setResourceCrn(resourceCrn);
+        EffectiveScheduleResourceContext resourceContext = scheduleService.validateEffectiveScheduleResource(ACCOUNT_ID, params);
+        when(resourceEnvironmentCrnResolver.resolveOptional(ACCOUNT_ID, resourceCrn, MaintenanceScopeType.DATAHUB))
+                .thenReturn(Optional.of(environmentCrn));
+
+        EffectiveScheduleLookupContext lookup = scheduleService.completeEffectiveScheduleLookup(resourceContext, params);
+
+        assertThat(lookup.environmentCrn()).isEqualTo(environmentCrn);
+        assertThat(lookup.resourceCrn()).isEqualTo(resourceCrn);
+    }
+
+    @Test
+    void completeEffectiveScheduleLookupSkipsEnvironmentWhenOwnerDoesNotKnowResource() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:acc-1:cluster:dh-1";
+        MaintenanceWindowEffectiveScheduleParams params = new MaintenanceWindowEffectiveScheduleParams();
+        params.setResourceCrn(resourceCrn);
+        EffectiveScheduleResourceContext resourceContext = scheduleService.validateEffectiveScheduleResource(ACCOUNT_ID, params);
+        when(resourceEnvironmentCrnResolver.resolveOptional(ACCOUNT_ID, resourceCrn, MaintenanceScopeType.DATAHUB))
+                .thenReturn(Optional.empty());
+
+        EffectiveScheduleLookupContext lookup = scheduleService.completeEffectiveScheduleLookup(resourceContext, params);
+
+        assertThat(lookup.environmentCrn()).isNull();
+    }
+
+    @Test
+    void completeEffectiveScheduleLookupRejectsMismatchedEnvironmentCrn() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:acc-1:cluster:dh-1";
+        MaintenanceWindowEffectiveScheduleParams params = new MaintenanceWindowEffectiveScheduleParams();
+        params.setResourceCrn(resourceCrn);
+        params.setEnvironmentCrn("crn:cdp:environments:us-west-1:acc-1:environment:other-env");
+        EffectiveScheduleResourceContext resourceContext = scheduleService.validateEffectiveScheduleResource(ACCOUNT_ID, params);
+        when(resourceEnvironmentCrnResolver.resolveOptional(ACCOUNT_ID, resourceCrn, MaintenanceScopeType.DATAHUB))
+                .thenReturn(Optional.of("crn:cdp:environments:us-west-1:acc-1:environment:env-1"));
+
+        assertThrows(BadRequestException.class, () -> scheduleService.completeEffectiveScheduleLookup(resourceContext, params));
+    }
+
+    @Test
+    void completeEffectiveScheduleLookupRejectsQueryEnvironmentWhenOwnerDoesNotKnowResource() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:acc-1:cluster:dh-1";
+        MaintenanceWindowEffectiveScheduleParams params = new MaintenanceWindowEffectiveScheduleParams();
+        params.setResourceCrn(resourceCrn);
+        params.setEnvironmentCrn("crn:cdp:environments:us-west-1:acc-1:environment:env-1");
+        EffectiveScheduleResourceContext resourceContext = scheduleService.validateEffectiveScheduleResource(ACCOUNT_ID, params);
+        when(resourceEnvironmentCrnResolver.resolveOptional(ACCOUNT_ID, resourceCrn, MaintenanceScopeType.DATAHUB))
+                .thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () -> scheduleService.completeEffectiveScheduleLookup(resourceContext, params));
     }
 
     private UpdateMaintenanceWindowScheduleRequest updateRequest(String name, int durationMinutes) {
