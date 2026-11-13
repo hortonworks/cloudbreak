@@ -91,6 +91,7 @@ allprojects {
   ext['jackson-bom.version'] = jacksonVersion
   ext['snakeyaml.version'] = snakeYamlVersion
   ext['spring-framework.version'] = springFrameworkVersion
+  ext['reactor-bom.version'] = reactorBomVersion
   ext['jersey.version'] = jerseyCoreVersion
   ext['logback.version'] = logbackVersion
   ext['mockito.version'] = mockitoVersion
