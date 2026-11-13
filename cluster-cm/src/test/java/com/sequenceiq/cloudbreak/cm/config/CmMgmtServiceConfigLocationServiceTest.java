@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -16,6 +18,9 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -42,6 +47,15 @@ public class CmMgmtServiceConfigLocationServiceTest {
 
     @Spy
     private CmMgmtVolumePathBuilder volumePathBuilder;
+
+    @Mock
+    private BlueprintUtils blueprintUtils;
+
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Mock
+    private CmTemplateProcessor cmTemplateProcessor;
 
     @InjectMocks
     private CmMgmtServiceConfigLocationService underTest;
@@ -71,6 +85,34 @@ public class CmMgmtServiceConfigLocationServiceTest {
         assertEquals(VOLUME_PREFIX + "cloudera-scm-headlamp", getApiConfig(REPORTSMANAGER, "headlamp_scratch_dir", apiRoleList).getValue());
         assertEquals(VOLUME_PREFIX + "cloudera-service-monitor", getApiConfig(SERVICEMONITOR, "firehose_storage_dir", apiRoleList).getValue());
         assertEquals(TEST_CONFIG_VALUE, getApiConfig(TEST_ROLE, TEST_CONFIG_NAME, apiRoleList).getValue());
+    }
+
+    @Test
+    public void testSetConfigLocationsShouldUseSecondVolumeForEnterpriseDatalakeWithoutMasterHostGroup() {
+        Stack stack = createStack();
+        ApiRoleList apiRoleList = createApiRoleListWithoutConfig();
+        when(blueprintUtils.isEnterpriseDatalake(stack)).thenReturn(true);
+        when(cmTemplateProcessorFactory.get(stack.getBlueprintJsonText())).thenReturn(cmTemplateProcessor);
+        when(cmTemplateProcessor.getHostTemplateNames()).thenReturn(List.of("gateway", "auxiliary", "idbroker"));
+
+        underTest.setConfigs(stack, apiRoleList);
+
+        assertEquals("/hadoopfs/fs2/cloudera-scm-eventserver", getApiConfig(EVENTSERVER, "eventserver_index_dir", apiRoleList).getValue());
+        assertEquals("/hadoopfs/fs2/cloudera-host-monitor", getApiConfig(HOSTMONITOR, "firehose_storage_dir", apiRoleList).getValue());
+        assertEquals("/hadoopfs/fs2/cloudera-service-monitor", getApiConfig(SERVICEMONITOR, "firehose_storage_dir", apiRoleList).getValue());
+    }
+
+    @Test
+    public void testSetConfigLocationsShouldUseFirstVolumeForEnterpriseDatalakeWithMasterHostGroup() {
+        Stack stack = createStack();
+        ApiRoleList apiRoleList = createApiRoleListWithoutConfig();
+        when(blueprintUtils.isEnterpriseDatalake(stack)).thenReturn(true);
+        when(cmTemplateProcessorFactory.get(stack.getBlueprintJsonText())).thenReturn(cmTemplateProcessor);
+        when(cmTemplateProcessor.getHostTemplateNames()).thenReturn(List.of("master", "gateway", "core", "auxiliary", "idbroker"));
+
+        underTest.setConfigs(stack, apiRoleList);
+
+        assertEquals(VOLUME_PREFIX + "cloudera-service-monitor", getApiConfig(SERVICEMONITOR, "firehose_storage_dir", apiRoleList).getValue());
     }
 
     private ApiConfig getApiConfig(String roleName, String configName, ApiRoleList apiRoleList) {

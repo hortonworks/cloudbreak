@@ -84,6 +84,23 @@ public class BlueprintUtilsTest {
     }
 
     @Test
+    public void isEnterpriseDatalakeTestWithStackDtoDelegate() throws IOException {
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+        assertFalse(underTest.isEnterpriseDatalake(stack));
+
+        stack.setCluster(createSdxCluster("ENTERPRISE"));
+        assertTrue(underTest.isEnterpriseDatalake(stack));
+
+        stack.setCluster(createSdxCluster("MEDIUM_DUTY_HA"));
+        assertFalse(underTest.isEnterpriseDatalake(stack));
+
+        stack.setType(StackType.WORKLOAD);
+        stack.setCluster(createSdxCluster("ENTERPRISE"));
+        assertFalse(underTest.isEnterpriseDatalake(stack));
+    }
+
+    @Test
     public void isEnterpriseDatalakeTestwithShape() throws IOException {
         Stack stack = new Stack();
         stack.setType(StackType.DATALAKE);

@@ -22,7 +22,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -95,6 +94,7 @@ import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -602,11 +602,12 @@ class ClouderaManagerSetupServiceTest {
         assertEquals(ClouderaManagerOperationFailedException.class, actual.getClass());
     }
 
-    @Test
-    void testUpdateConfigDisablesFasterFirstRunWhenRazEnabledDatalakeWithoutHdfs() throws Exception {
+    @ParameterizedTest(name = "rangerRazEnabled={0}")
+    @ValueSource(booleans = {true, false})
+    void testUpdateConfigDisablesFasterFirstRunWhenDatalakeWithoutHdfs(boolean rangerRazEnabled) throws Exception {
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString())).thenReturn(new ApiConfigList());
         Cluster cluster = ((Stack) ReflectionTestUtils.getField(underTest, "stack")).getCluster();
-        cluster.setRangerRazEnabled(true);
+        cluster.setRangerRazEnabled(rangerRazEnabled);
         cluster.setExtendedBlueprintText("{\"services\":[]}");
         CmTemplateProcessor processor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(processor);
@@ -621,10 +622,9 @@ class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    void testUpdateConfigDoesNotDisableFasterFirstRunWhenRazDisabled() throws Exception {
+    void testUpdateConfigDoesNotDisableFasterFirstRunWhenNotDatalake() throws Exception {
         when(clouderaManagerResourceApi.updateConfig(any(ApiConfigList.class), anyString())).thenReturn(new ApiConfigList());
-        Cluster cluster = ((Stack) ReflectionTestUtils.getField(underTest, "stack")).getCluster();
-        cluster.setRangerRazEnabled(false);
+        ((Stack) ReflectionTestUtils.getField(underTest, "stack")).setType(StackType.WORKLOAD);
 
         underTest.updateConfig();
 
@@ -1064,69 +1064,106 @@ class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    void getCMHosFromMGMTWithEnterpiseDL() throws ApiException, IOException {
-        ClouderaManagerSetupService spy = spy(underTest);
-        ApiHostList realApiHostList = getApiHostList();
+    void getCMHostFromMGMTWithEnterpriseDLUsesAuxiliaryHost() throws ApiException {
         BlueprintView blueprintView = mock(BlueprintView.class);
-
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(blueprintView.getVersion()).thenReturn("7.2.17");
         when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
-        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(realApiHostList);
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("master")));
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(getApiHostList());
 
-        spy.configureManagementServices(templatePreparationObject, null, null, null, null, null);
+        underTest.configureManagementServices(templatePreparationObject, null, null, null, null, null);
 
-        verify(spy, times(1)).getAuxiliaryHost(any(), any());
+        assertEquals("auxiliary", captureMgmtHostRef().getHostname());
+        verify(hostsResourceApi, times(1)).readHosts(null, null, DataView.SUMMARY.name());
     }
 
     @Test
-    void getCMHosFromMGMTWithEnterpiseDLHostNotFound() throws ApiException, IOException {
-        ClouderaManagerSetupService spy = spy(underTest);
-        ApiHostList realApiHostList = getApiHostList();
-        realApiHostList.getItems().clear();
+    void getCMHostFromMGMTWithEnterpriseDLSkipsMgmtWhenNoHostFound() throws ApiException {
+        ApiHostList emptyApiHostList = getApiHostList();
+        emptyApiHostList.getItems().clear();
         BlueprintView blueprintView = mock(BlueprintView.class);
-
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(blueprintView.getVersion()).thenReturn("7.2.17");
-        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(realApiHostList);
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(emptyApiHostList);
         when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("master")));
 
-        spy.configureManagementServices(templatePreparationObject, null, null, null, null, null);
+        underTest.configureManagementServices(templatePreparationObject, null, null, null, null, null);
 
-        verify(spy, times(1)).getAuxiliaryHost(any(), any());
         verifySetupMgmtServicesCalled(never());
+        verify(hostsResourceApi, times(1)).readHosts(null, null, DataView.SUMMARY.name());
     }
 
     @Test
-    void getCMHosFromMGMTWithEnterpiseDH() throws ApiException {
-        ClouderaManagerSetupService spy = spy(underTest);
-        ApiHostList realApiHostList = getApiHostList();
-
-        when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
+    void getCMHostFromMGMTWithEnterpriseDLWithoutMasterUsesNonPrimaryGateway() throws ApiException {
+        ApiHostList realApiHostList = new ApiHostList();
+        realApiHostList.addItemsItem(apiHost("auxiliary"));
+        realApiHostList.addItemsItem(apiHost(FQDN));
+        realApiHostList.addItemsItem(apiHost("gateway1"));
+        BlueprintView blueprintView = mock(BlueprintView.class);
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+        when(blueprintView.getVersion()).thenReturn("7.3.2");
+        when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("gateway"), new HostgroupView("auxiliary")));
+        when(generalClusterConfigs.getOtherGatewayInstancesDiscoveryFQDN()).thenReturn(Set.of("gateway1"));
         when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(realApiHostList);
 
-        spy.configureManagementServices(templatePreparationObject, null, null, null, null, null);
+        underTest.configureManagementServices(templatePreparationObject, null, null, null, null, null);
 
-        verify(spy, times(0)).getAuxiliaryHost(any(), any());
+        assertEquals("gateway1", captureMgmtHostRef().getHostname());
     }
 
     @Test
-    void getCMHosFromMGMTWithEnterpiseOldVersonDL() throws ApiException, IOException {
-        ClouderaManagerSetupService spy = spy(underTest);
-        ApiHostList realApiHostList = getApiHostList();
+    void getCMHostFromMGMTWithEnterpriseDLWithoutMasterFallsBackToCmHostFromTheSameHostList() throws ApiException {
+        ApiHostList realApiHostList = new ApiHostList();
+        realApiHostList.addItemsItem(apiHost(FQDN));
         BlueprintView blueprintView = mock(BlueprintView.class);
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
+        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+        when(blueprintView.getVersion()).thenReturn("7.3.2");
+        when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(true);
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("gateway")));
+        when(generalClusterConfigs.getOtherGatewayInstancesDiscoveryFQDN()).thenReturn(Set.of());
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(realApiHostList);
 
+        underTest.configureManagementServices(templatePreparationObject, null, null, null, null, null);
+
+        assertEquals(FQDN, captureMgmtHostRef().getHostname());
+        verify(hostsResourceApi, times(1)).readHosts(null, null, DataView.SUMMARY.name());
+    }
+
+    @Test
+    void getCMHostFromMGMTWithDatahubUsesCmHost() throws ApiException {
+        when(templatePreparationObject.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(getApiHostList());
+
+        underTest.configureManagementServices(templatePreparationObject, null, null, null, null, null);
+
+        assertEquals(FQDN, captureMgmtHostRef().getHostname());
+    }
+
+    @Test
+    void getCMHostFromMGMTWithNonEnterpriseDLUsesCmHost() throws ApiException {
+        BlueprintView blueprintView = mock(BlueprintView.class);
         when(templatePreparationObject.getStackType()).thenReturn(StackType.DATALAKE);
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(blueprintView.getVersion()).thenReturn("7.2.17");
-        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(realApiHostList);
+        when(hostsResourceApi.readHosts(eq((String) null), eq((String) null), eq(DataView.SUMMARY.name()))).thenReturn(getApiHostList());
         when(blueprintUtils.isEnterpriseDatalake(any(TemplatePreparationObject.class))).thenReturn(false);
 
-        spy.configureManagementServices(templatePreparationObject, null, null, null, null, null);
+        underTest.configureManagementServices(templatePreparationObject, null, null, null, null, null);
 
-        verify(spy, times(0)).getAuxiliaryHost(any(), any());
+        assertEquals(FQDN, captureMgmtHostRef().getHostname());
+    }
+
+    private ApiHostRef captureMgmtHostRef() throws ApiException {
+        ArgumentCaptor<ApiHostRef> hostRefCaptor = ArgumentCaptor.forClass(ApiHostRef.class);
+        verify(mgmtSetupService).setupMgmtServices(any(), any(), hostRefCaptor.capture(), any(), any(), any(), any());
+        return hostRefCaptor.getValue();
     }
 
     private void verifySetupMgmtServicesCalledOnce() throws ApiException {

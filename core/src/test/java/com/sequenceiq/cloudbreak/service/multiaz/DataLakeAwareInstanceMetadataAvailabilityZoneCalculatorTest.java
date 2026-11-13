@@ -293,6 +293,39 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                 .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
+    @Test
+    void testPopulateShouldDistributeGatewayAndAuxiliaryNodesAcrossZonesWhenThereIsNoMasterGroup() {
+        String subnetId = "aSubnetId";
+        Set<String> environmentAvailabilityZones = Set.of("1", "2", "3");
+        Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
+        stack.setNetwork(TestUtil.networkWithSubnetId(subnetId));
+        stack.setMultiAz(Boolean.TRUE);
+        stack.setType(StackType.DATALAKE);
+        stack.getInstanceGroups()
+                .forEach(ig -> {
+                    ig.setInstanceMetaData(TestUtil.generateInstanceMetaDatas(environmentAvailabilityZones.size(), ig.getId(), ig));
+                    ig.setAvailabilityZones(getAvailabilityZoneSet(environmentAvailabilityZones, ig));
+                });
+        stack.getInstanceGroups().add(getInstanceGroup(environmentAvailabilityZones, 4L, InstanceGroupName.GATEWAY, stack, 2));
+        stack.getInstanceGroups().add(getInstanceGroup(environmentAvailabilityZones, 5L, InstanceGroupName.AUXILIARY, stack, 1));
+        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
+        when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
+        when(blueprintUtils.isEnterpriseDatalake(stack)).thenReturn(Boolean.TRUE);
+
+        underTest.populate(1L);
+
+        verify(underTest, times(1)).updateInstancesMetaData(stack.getNotTerminatedInstanceMetaDataSet());
+        for (String expectedZone : environmentAvailabilityZones) {
+            long actualCount = stack.getInstanceGroups().stream()
+                    .filter(ig -> InstanceGroupName.GATEWAY.getName().equals(ig.getGroupName())
+                            || InstanceGroupName.AUXILIARY.getName().equals(ig.getGroupName()))
+                    .flatMap(ig -> ig.getNotTerminatedInstanceMetaDataSet().stream())
+                    .filter(im -> expectedZone.equals(im.getAvailabilityZone()))
+                    .count();
+            assertEquals(1L, actualCount);
+        }
+    }
+
     @ParameterizedTest(name = "testPopulateShouldDistributeNodesAcrossInstancesOfTheMasterAndAuxiliaryGroups settings " +
             "when {0} master instances and {1} auxiliary instances and {2} expected zones for groups should result in {3} instance count by availability zone")
     @MethodSource("testAvailabilityZoneDistributionForWholeInstanceGroupData")

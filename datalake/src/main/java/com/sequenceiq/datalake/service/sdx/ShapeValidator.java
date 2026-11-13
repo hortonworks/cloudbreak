@@ -39,11 +39,11 @@ public class ShapeValidator {
     private static final Set<SdxClusterShape> SHAPES_WITHOUT_HBASE_AND_HDFS = Set.of(SdxClusterShape.LIGHT_DUTY_PRO,
             SdxClusterShape.ENTERPRISE_PRO);
 
-    // Host group that carries the volume-pinned services (ZooKeeper+KRaft, Kafka, Solr) and the minimum
-    // number of attached volumes it must have so the blueprint's fs1/fs2/fs3 data-dir mounts exist.
-    private static final Map<SdxClusterShape, Map.Entry<String, Integer>> MIN_VOLUMES_PER_SHAPE = Map.of(
-            SdxClusterShape.ENTERPRISE_PRO, Map.entry("core", 3),
-            SdxClusterShape.LIGHT_DUTY_PRO, Map.entry("master", 3));
+    // Host groups that carry the volume-pinned services (ZooKeeper+KRaft, Kafka, Solr) and the minimum
+    // number of attached volumes each must have so the blueprint's fs1/fs2/fs3 data-dir mounts exist.
+    private static final Map<SdxClusterShape, Map<String, Integer>> MIN_VOLUMES_PER_SHAPE = Map.of(
+            SdxClusterShape.ENTERPRISE_PRO, Map.of("gateway", 3, "auxiliary", 2),
+            SdxClusterShape.LIGHT_DUTY_PRO, Map.of("master", 3));
 
     @Inject
     private EntitlementService entitlementService;
@@ -76,10 +76,7 @@ public class ShapeValidator {
 
     public void validateVolumeCount(SdxClusterShape shape, StackV4Request stackRequest) {
         if (MIN_VOLUMES_PER_SHAPE.containsKey(shape) && stackRequest != null && stackRequest.getInstanceGroups() != null) {
-            Map.Entry<String, Integer> requirement = MIN_VOLUMES_PER_SHAPE.get(shape);
-            String groupName = requirement.getKey();
-            int minVolumes = requirement.getValue();
-            stackRequest.getInstanceGroups().stream()
+            MIN_VOLUMES_PER_SHAPE.get(shape).forEach((groupName, minVolumes) -> stackRequest.getInstanceGroups().stream()
                     .filter(instanceGroup -> groupName.equals(instanceGroup.getName()))
                     .findFirst()
                     .ifPresent(instanceGroup -> {
@@ -90,7 +87,7 @@ public class ShapeValidator {
                                             "(ZooKeeper+KRaft, Kafka and Solr data-dir isolation); the cluster template provides %d.",
                                     shape.name(), groupName, minVolumes, volumeCount));
                         }
-                    });
+                    }));
         }
     }
 

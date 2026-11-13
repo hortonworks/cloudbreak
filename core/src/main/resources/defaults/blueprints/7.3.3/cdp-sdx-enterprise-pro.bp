@@ -13,22 +13,14 @@
           "hive-GATEWAY-BASE",
           "hive-HIVEMETASTORE-BASE",
           "kafka-GATEWAY-BASE",
-          "knox-KNOX_GATEWAY-BASE",
-          "ranger-RANGER_TAGSYNC-BASE",
-          "ranger-RANGER_USERSYNC-BASE",
-          "solr-GATEWAY-BASE"
-        ]
-      },
-      {
-        "cardinality": 3,
-        "refName": "core",
-        "roleConfigGroupsRefNames": [
-          "kafka-GATEWAY-BASE",
           "kafka-KAFKA_BROKER-BASE",
           "kafka-KAFKA_KRAFT-BASE",
+          "knox-KNOX_GATEWAY-BASE",
           "ranger-RANGER_ADMIN-BASE",
-          "solr-SOLR_SERVER-BASE",
+          "ranger-RANGER_TAGSYNC-BASE",
+          "ranger-RANGER_USERSYNC-BASE",
           "solr-GATEWAY-BASE",
+          "solr-SOLR_SERVER-BASE",
           "zookeeper-SERVER-BASE"
         ]
       },
@@ -36,7 +28,11 @@
         "cardinality": 1,
         "refName": "auxiliary",
         "roleConfigGroupsRefNames": [
-          "cruise_control-CRUISE_CONTROL_SERVER-BASE"
+          "cruise_control-CRUISE_CONTROL_SERVER-BASE",
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "kafka-KAFKA_KRAFT-BASE",
+          "zookeeper-SERVER-BASE"
         ]
       },
       {
@@ -195,12 +191,16 @@
                 "value": "true"
               },
               {
+                "name": "atlas_max_heap_size",
+                "value": 8192
+              },
+              {
                 "name": "atlas_authentication_method_file",
                 "value": "false"
               },
               {
                 "name": "atlas_solr_shards",
-                "value": "3"
+                "value": "2"
               },
               {
                 "name": "atlas_solr_replication_factor",
@@ -223,7 +223,7 @@
               },
               {
                 "name": "atlas_solr_shards",
-                "value": "3"
+                "value": "2"
               },
               {
                 "name": "atlas_solr_replication_factor",
@@ -232,6 +232,10 @@
               {
                 "name": "atlas_ssl_exclude_protocols",
                 "value": "TLSv1,TLSv1.1"
+              },
+              {
+                "name": "atlas_max_heap_size",
+                "value": 11776
               }
             ],
             "refName": "atlas-ATLAS_SERVER-EXTERNAL",
@@ -290,6 +294,14 @@
               {
                 "name": "solr_java_opts",
                 "value": "{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
+              },
+              {
+                "name": "solr_java_heapsize",
+                "value": 12348030976
+              },
+              {
+                "name": "solr_java_direct_memory_size",
+                "value": 1073741824
               }
             ],
             "refName": "solr-SOLR_SERVER-EXTERNAL",
@@ -369,6 +381,10 @@
               {
                 "name": "ssl_client_truststore_password",
                 "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "broker_max_heap_size",
+                "value": 3072
               }
             ],
             "refName": "kafka-KAFKA_BROKER-EXTERNAL",
@@ -386,6 +402,18 @@
           },
           {
             "name": "min.insync.replicas",
+            "value": "2"
+          },
+          {
+            "name": "offsets.topic.replication.factor",
+            "value": "3"
+          },
+          {
+            "name": "transaction.state.log.replication.factor",
+            "value": "3"
+          },
+          {
+            "name": "transaction.state.log.min.isr",
             "value": "2"
           }
         ],
@@ -418,13 +446,27 @@
           },
           {
             "base": true,
-            "configs": [],
+            "configs": [
+              {
+                "name": "hive_metastore_java_heapsize",
+                "value": 8589934592
+              }
+            ],
             "refName": "hive-HIVEMETASTORE-BASE",
             "roleType": "HIVEMETASTORE"
           },
           {
             "base": false,
-            "configs": [],
+            "configs": [
+              {
+                "name": "hive_metastore_java_heapsize",
+                "value": 12348030976
+              },
+              {
+                "name": "hive_metastore_server_max_message_size",
+                "value": 1234803097
+              }
+            ],
             "refName": "hive-HIVEMETASTORE-EXTERNAL",
             "roleType": "HIVEMETASTORE"
           }

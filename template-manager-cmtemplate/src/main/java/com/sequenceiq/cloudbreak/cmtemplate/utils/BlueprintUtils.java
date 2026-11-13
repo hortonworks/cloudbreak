@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -154,9 +154,9 @@ public class BlueprintUtils {
                 .orElse(BlueprintHybridOption.NONE);
     }
 
-    public boolean isEnterpriseDatalake(Stack stack) {
-        return (stack.isDatalake() &&
-                containsIgnoreCase(stack.getCluster().getBlueprint().getDescription(), SDX_ENTERPRISE_DATALAKE_TEXT));
+    public boolean isEnterpriseDatalake(StackDtoDelegate stack) {
+        return stack.getStack().isDatalake() && stack.getCluster() != null && stack.getBlueprint() != null
+                && containsIgnoreCase(stack.getBlueprint().getDescription(), SDX_ENTERPRISE_DATALAKE_TEXT);
     }
 
     public boolean isEnterpriseDatalake(TemplatePreparationObject templatePreparationObject) {

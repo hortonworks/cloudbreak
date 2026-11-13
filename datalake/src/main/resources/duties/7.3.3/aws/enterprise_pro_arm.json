@@ -12,11 +12,21 @@
     {
       "name": "gateway",
       "template": {
-        "instanceType": "m7g.2xlarge",
+        "instanceType": "m7g.4xlarge",
         "attachedVolumes": [
           {
             "count": 1,
             "size": 128,
+            "type": "gp3"
+          },
+          {
+            "count": 1,
+            "size": 256,
+            "type": "gp3"
+          },
+          {
+            "count": 1,
+            "size": 256,
             "type": "gp3"
           }
         ]
@@ -27,40 +37,18 @@
       "recipeNames": []
     },
     {
-      "name": "core",
-      "template": {
-        "instanceType": "m7g.2xlarge",
-        "attachedVolumes": [
-          {
-            "count": 1,
-            "size": 128,
-            "type": "gp3"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "gp3"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "gp3"
-          }
-        ]
-      },
-      "nodeCount": 3,
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
-      "recipeNames": []
-    },
-    {
       "name": "auxiliary",
       "template": {
-        "instanceType": "m7g.large",
+        "instanceType": "m7g.xlarge",
         "attachedVolumes": [
           {
             "count": 1,
             "size": 128,
+            "type": "gp3"
+          },
+          {
+            "count": 1,
+            "size": 256,
             "type": "gp3"
           }
         ]

@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.service.upgrade;
 
 import static com.sequenceiq.common.api.type.InstanceGroupName.AUXILIARY;
-import static com.sequenceiq.common.api.type.InstanceGroupName.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupName.GATEWAY;
 import static com.sequenceiq.common.api.type.InstanceGroupName.IDBROKER;
 
@@ -37,18 +36,15 @@ public class EnterpriseWithoutHdfsHbaseOrderedOSUpgrade extends AbstractOrderedO
             instanceIdsByInstanceGroup.get(GATEWAY.getName()).remove(primaryGatewayInstanceId.get());
             osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(primaryGatewayInstanceId.get())));
         }
+        // ZooKeeper, KRaft and the Kafka brokers run on both gateways and on the auxiliary node,
+        // so every set may take down at most one of these three nodes
         osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
                 pollInstanceId(instanceIdsByInstanceGroup, GATEWAY),
-                pollInstanceId(instanceIdsByInstanceGroup, CORE),
                 pollInstanceId(instanceIdsByInstanceGroup, IDBROKER)
         )));
         osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
-                pollInstanceId(instanceIdsByInstanceGroup, CORE),
+                pollInstanceId(instanceIdsByInstanceGroup, AUXILIARY),
                 pollInstanceId(instanceIdsByInstanceGroup, IDBROKER)
-        )));
-        osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
-                pollInstanceId(instanceIdsByInstanceGroup, CORE),
-                pollInstanceId(instanceIdsByInstanceGroup, AUXILIARY)
         )));
 
         addServiceHostGroupsToOrderedOSUpgradeSet(instanceIdsByInstanceGroup, order, osUpgradeByUpgradeSets);

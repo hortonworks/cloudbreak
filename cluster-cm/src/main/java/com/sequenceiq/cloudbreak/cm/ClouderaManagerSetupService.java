@@ -13,6 +13,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -92,6 +93,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.InstanceGroupName;
 
 import okhttp3.OkHttpClient;
 
@@ -438,8 +440,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     .addItemsItem(setHeader(stackType))
                     .addItemsItem(disableGoogleAnalytics());
             if (shouldDisableFasterFirstRun()) {
-                LOGGER.info("RAZ-enabled Data Lake without HDFS/HBase: disabling Faster First Run "
-                        + "(enable_faster_bootstrap=false) so ZooKeeper starts before RANGER_RAZ. See CB-33827, OPSAPS-79103.");
+                LOGGER.info("Data Lake without HDFS/HBase: disabling Faster First Run (enable_faster_bootstrap=false) so the STUB_DFS "
+                        + "create-dir commands run after ZooKeeper, RANGER_RAZ and Knox IDBroker are started. See CB-33827, CB-35692, OPSAPS-79103.");
                 apiConfigList.addItemsItem(new ApiConfig().name(ENABLE_FASTER_BOOTSTRAP).value("false"));
             }
             clouderaManagerResourceApi.updateConfig(apiConfigList, "Updated configurations.");
@@ -452,13 +454,13 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     /**
-     * The lean Enterprise SDX shape (Datalake with RAZ, no HDFS/HBASE) uses STUB_DFS as the DFS provider. Because
-     * STUB_DFS is daemonless, Faster First Run drops the create-dir -> DFS-start ordering edge and starts RANGER_RAZ
-     * before ZooKeeper; RAZ never gets its ZooKeeper session, so the create-dir first-run commands fail. Disabling
-     * Faster First Run restores dependency-tier ordering (ZooKeeper starts before RANGER_RAZ). See CB-33827, OPSAPS-79103.
+     * Data Lakes without HDFS/HBase use STUB_DFS as the DFS provider. Because STUB_DFS is daemonless, Faster First Run drops
+     * the create-dir -> DFS-start ordering edge: the cloud storage create-dir first-run commands run before their dependencies
+     * are ready - RANGER_RAZ starts before ZooKeeper (CB-33827), and with or without RAZ the commands race the Knox IDBroker
+     * start and exceed CM's command timeout (CB-35692). Disabling Faster First Run restores dependency-tier ordering. See OPSAPS-79103.
      */
     private boolean shouldDisableFasterFirstRun() {
-        if (StackType.DATALAKE != stack.getType() || !stack.getCluster().isRangerRazEnabled()) {
+        if (StackType.DATALAKE != stack.getType()) {
             return false;
         }
         String blueprintText = stack.getBlueprintJsonText();
@@ -668,8 +670,18 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 && templatePreparationObject.getStackType().equals(StackType.DATALAKE)
                 && isVersionNewerOrEqualThanLimited(templatePreparationObject.getBlueprintView().getVersion(), CLOUDERA_STACK_VERSION_7_2_17)
                 && blueprintUtils.isEnterpriseDatalake(templatePreparationObject)) {
-            LOGGER.info("CM MGMT services are started on Auxiliary host group");
-            optionalCmHost = getAuxiliaryHost(templatePreparationObject, apiClient);
+            List<ApiHost> cmHosts = readCmHosts(apiClient);
+            if (hasHostGroup(templatePreparationObject, InstanceGroupName.MASTER)) {
+                LOGGER.info("CM MGMT services are started on Auxiliary host group");
+                optionalCmHost = findAuxiliaryHost(cmHosts);
+            } else {
+                LOGGER.info("CM MGMT services are started on the non-primary gateway host of the Enterprise Data Lake without master host group");
+                optionalCmHost = findNonPrimaryGatewayHost(templatePreparationObject, cmHosts);
+            }
+            if (optionalCmHost.isEmpty()) {
+                LOGGER.warn("Dedicated host for CM MGMT services is not found, falling back to the Cloudera Manager host");
+                optionalCmHost = findPrimaryGatewayHost(templatePreparationObject, cmHosts);
+            }
         } else {
             LOGGER.info("CM MGMT services are started on Gateway host group");
             optionalCmHost = getCmHost(templatePreparationObject, apiClient);
@@ -705,25 +717,42 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     private Optional<ApiHost> getCmHost(TemplatePreparationObject templatePreparationObject, ApiClient apiClient) throws ApiException {
+        return findPrimaryGatewayHost(templatePreparationObject, readCmHosts(apiClient));
+    }
+
+    private List<ApiHost> readCmHosts(ApiClient apiClient) throws ApiException {
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
-        return hostsResourceApi.readHosts(null, null, DataView.SUMMARY.name())
-                .getItems()
-                .stream()
-                .filter(host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
+        return hostsResourceApi.readHosts(null, null, DataView.SUMMARY.name()).getItems();
+    }
+
+    private Optional<ApiHost> findPrimaryGatewayHost(TemplatePreparationObject templatePreparationObject, List<ApiHost> cmHosts) {
+        String primaryGatewayFqdn = templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get();
+        return cmHosts.stream()
+                .filter(host -> host.getHostname().equals(primaryGatewayFqdn))
                 .findFirst();
     }
 
-    public Optional<ApiHost> getAuxiliaryHost(TemplatePreparationObject templatePreparationObject, ApiClient apiClient) throws ApiException {
-        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
-        Optional<ApiHost> auxiliaryHost = hostsResourceApi.readHosts(null, null, DataView.SUMMARY.name())
-                .getItems()
-                .stream()
+    private Optional<ApiHost> findAuxiliaryHost(List<ApiHost> cmHosts) {
+        Optional<ApiHost> auxiliaryHost = cmHosts.stream()
                 .filter(host -> (host.getHostname().toUpperCase(Locale.ROOT).contains("AUXILIARY")))
                 .findFirst();
-        if (auxiliaryHost.isPresent()) {
-            LOGGER.info("Get Auxiliary host for CM MGMT services. Host: {}", auxiliaryHost.get());
-        }
+        auxiliaryHost.ifPresent(host -> LOGGER.info("Get Auxiliary host for CM MGMT services. Host: {}", host));
         return auxiliaryHost;
+    }
+
+    private Optional<ApiHost> findNonPrimaryGatewayHost(TemplatePreparationObject templatePreparationObject, List<ApiHost> cmHosts) {
+        Set<String> otherGatewayFqdns = Optional.ofNullable(templatePreparationObject.getGeneralClusterConfigs().getOtherGatewayInstancesDiscoveryFQDN())
+                .orElse(Set.of());
+        Optional<ApiHost> nonPrimaryGatewayHost = cmHosts.stream()
+                .filter(host -> otherGatewayFqdns.contains(host.getHostname()))
+                .min(Comparator.comparing(ApiHost::getHostname));
+        nonPrimaryGatewayHost.ifPresent(host -> LOGGER.info("Get non-primary gateway host for CM MGMT services. Host: {}", host));
+        return nonPrimaryGatewayHost;
+    }
+
+    private boolean hasHostGroup(TemplatePreparationObject templatePreparationObject, InstanceGroupName instanceGroupName) {
+        return templatePreparationObject.getHostgroupViews().stream()
+                .anyMatch(hostgroupView -> instanceGroupName.getName().equals(hostgroupView.getName()));
     }
 
     private boolean calculateAddRepositories(ApiClusterTemplate apiClusterTemplate, boolean prewarmed) {

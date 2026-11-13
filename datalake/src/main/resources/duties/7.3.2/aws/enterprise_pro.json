@@ -11,15 +11,25 @@
     {
       "name": "gateway",
       "template": {
-        "instanceType": "m5.2xlarge",
+        "instanceType": "m5.4xlarge",
         "fallbackInstanceTypes": [
-          "m5a.2xlarge",
-          "m6i.2xlarge"
+          "m5a.4xlarge",
+          "m6i.4xlarge"
         ],
         "attachedVolumes": [
           {
             "count": 1,
             "size": 128,
+            "type": "gp3"
+          },
+          {
+            "count": 1,
+            "size": 256,
+            "type": "gp3"
+          },
+          {
+            "count": 1,
+            "size": 256,
             "type": "gp3"
           }
         ]
@@ -30,48 +40,22 @@
       "recipeNames": []
     },
     {
-      "name": "core",
-      "template": {
-        "instanceType": "m5.2xlarge",
-        "fallbackInstanceTypes": [
-          "m5a.2xlarge",
-          "m6i.2xlarge"
-        ],
-        "attachedVolumes": [
-          {
-            "count": 1,
-            "size": 128,
-            "type": "gp3"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "gp3"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "gp3"
-          }
-        ]
-      },
-      "nodeCount": 3,
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
-      "recipeNames": []
-    },
-    {
       "name": "auxiliary",
       "template": {
-        "instanceType": "t3.large",
+        "instanceType": "m5.xlarge",
         "fallbackInstanceTypes": [
-          "t3a.large",
-          "t2.large"
+          "m5a.xlarge",
+          "m6i.xlarge"
         ],
         "attachedVolumes": [
           {
             "count": 1,
             "size": 128,
+            "type": "gp3"
+          },
+          {
+            "count": 1,
+            "size": 256,
             "type": "gp3"
           }
         ]

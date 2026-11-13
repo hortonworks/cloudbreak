@@ -2,7 +2,6 @@ package com.sequenceiq.datalake.service.upgrade;
 
 import static com.sequenceiq.common.api.type.InstanceGroupName.ATLAS_SCALE_OUT;
 import static com.sequenceiq.common.api.type.InstanceGroupName.AUXILIARY;
-import static com.sequenceiq.common.api.type.InstanceGroupName.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupName.GATEWAY;
 import static com.sequenceiq.common.api.type.InstanceGroupName.HMS_SCALE_OUT;
 import static com.sequenceiq.common.api.type.InstanceGroupName.IDBROKER;
@@ -45,11 +44,6 @@ class EnterpriseWithoutHdfsHbaseOrderedOSUpgradeTest {
                 createInstanceMetadata(GATEWAY, 1)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(
-                createInstanceMetadata(CORE, 0),
-                createInstanceMetadata(CORE, 1),
-                createInstanceMetadata(CORE, 2)
-        )));
-        instanceGroups.add(createInstanceGroup(Set.of(
                 createInstanceMetadata(IDBROKER, 0),
                 createInstanceMetadata(IDBROKER, 1)
         )));
@@ -73,28 +67,26 @@ class EnterpriseWithoutHdfsHbaseOrderedOSUpgradeTest {
         List<OrderedOSUpgradeSet> actual = underTest.createDatalakeOrderedOSUpgrade(
                 createStackV4Response(instanceGroups), TARGET_IMAGE_ID);
 
+        assertEquals(6, actual.size());
         assertEquals(0, actual.get(0).getOrder());
         assertEquals(1, actual.get(1).getOrder());
         assertEquals(2, actual.get(2).getOrder());
         assertEquals(3, actual.get(3).getOrder());
         assertEquals(4, actual.get(4).getOrder());
         assertEquals(5, actual.get(5).getOrder());
-        assertEquals(6, actual.get(6).getOrder());
 
         assertThat(actual.get(0).getInstanceIds(),
                 containsInAnyOrder(Set.of("i-gateway0").toArray()));
         assertThat(actual.get(1).getInstanceIds(),
-                containsInAnyOrder(Set.of("i-gateway1", "i-core0", "i-idbroker0").toArray()));
+                containsInAnyOrder(Set.of("i-gateway1", "i-idbroker0").toArray()));
         assertThat(actual.get(2).getInstanceIds(),
-                containsInAnyOrder(Set.of("i-core1", "i-idbroker1").toArray()));
+                containsInAnyOrder(Set.of("i-auxiliary0", "i-idbroker1").toArray()));
         assertThat(actual.get(3).getInstanceIds(),
-                containsInAnyOrder(Set.of("i-core2", "i-auxiliary0").toArray()));
-        assertThat(actual.get(4).getInstanceIds(),
                 containsInAnyOrder(Set.of("i-solr_scale_out3", "i-kafka_scale_out3", "i-raz_scale_out3", "i-atlas_scale_out3",
                         "i-hms_scale_out3").toArray()));
-        assertThat(actual.get(5).getInstanceIds(),
+        assertThat(actual.get(4).getInstanceIds(),
                 containsInAnyOrder(Set.of("i-kafka_scale_out4", "i-raz_scale_out4", "i-atlas_scale_out4").toArray()));
-        assertThat(actual.get(6).getInstanceIds(),
+        assertThat(actual.get(5).getInstanceIds(),
                 containsInAnyOrder(Set.of("i-raz_scale_out5").toArray()));
     }
 

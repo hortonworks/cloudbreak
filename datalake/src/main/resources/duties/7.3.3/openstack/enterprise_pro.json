@@ -11,44 +11,27 @@
     {
       "name": "gateway",
       "template": {
-        "instanceType": "r1.xlarge",
+        "instanceType": "r2.xlarge",
         "attachedVolumes": [
           {
             "count": 1,
             "size": 128,
+            "type": "PURE-ISCSI"
+          },
+          {
+            "count": 1,
+            "size": 256,
+            "type": "PURE-ISCSI"
+          },
+          {
+            "count": 1,
+            "size": 256,
             "type": "PURE-ISCSI"
           }
         ]
       },
       "nodeCount": 2,
       "type": "GATEWAY",
-      "recoveryMode": "MANUAL",
-      "recipeNames": []
-    },
-    {
-      "name": "core",
-      "template": {
-        "instanceType": "r1.xlarge",
-        "attachedVolumes": [
-          {
-            "count": 1,
-            "size": 128,
-            "type": "PURE-ISCSI"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "PURE-ISCSI"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "PURE-ISCSI"
-          }
-        ]
-      },
-      "nodeCount": 3,
-      "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": []
     },
@@ -60,6 +43,11 @@
           {
             "count": 1,
             "size": 128,
+            "type": "PURE-ISCSI"
+          },
+          {
+            "count": 1,
+            "size": 256,
             "type": "PURE-ISCSI"
           }
         ]

@@ -97,39 +97,46 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
         LOGGER.info("Populating availability zones for Enterprise Data Lake");
         Set<InstanceMetaData> updatedInstancesMetaData = new HashSet<>();
         String stackSubnetId = getStackSubnetIdIfExists(stack);
+        InstanceGroupName pairedGroupName = getQuorumGroupNamePairedWithAuxiliary(stack);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (notMasterAndNotAuxiliaryGroup(instanceGroup)) {
+            if (notPairedAndNotAuxiliaryGroup(instanceGroup, pairedGroupName)) {
                 updatedInstancesMetaData.addAll(populateAvailabilityZonesOnGroup(instanceGroup, stackSubnetId, stack.getNetwork()));
             }
         }
-        Optional<InstanceGroup> masterInstanceGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.MASTER);
+        Optional<InstanceGroup> pairedInstanceGroup = getInstanceGroupByInstanceGroupName(stack, pairedGroupName);
         Optional<InstanceGroup> auxiliaryInstanceGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.AUXILIARY);
-        if (masterInstanceGroup.isPresent() || auxiliaryInstanceGroup.isPresent()) {
+        if (pairedInstanceGroup.isPresent() || auxiliaryInstanceGroup.isPresent()) {
             Set<InstanceMetaData> mergedInstanceMetaData = new HashSet<>();
-            masterInstanceGroup.ifPresent(ig -> mergedInstanceMetaData.addAll(ig.getNotTerminatedInstanceMetaDataSet()));
+            pairedInstanceGroup.ifPresent(ig -> mergedInstanceMetaData.addAll(ig.getNotTerminatedInstanceMetaDataSet()));
             auxiliaryInstanceGroup.ifPresent(ig -> mergedInstanceMetaData.addAll(ig.getNotTerminatedInstanceMetaDataSet()));
-            LOGGER.info("Auxiliary/Master instance group's meta data: {}", mergedInstanceMetaData);
-            Set<String> availabilityZones = masterInstanceGroup.or(() -> auxiliaryInstanceGroup).get().getAvailabilityZones();
+            LOGGER.info("Auxiliary/{} instance group's meta data: {}", pairedGroupName.getName(), mergedInstanceMetaData);
+            Set<String> availabilityZones = pairedInstanceGroup.or(() -> auxiliaryInstanceGroup).get().getAvailabilityZones();
             updatedInstancesMetaData.addAll(
                     populateAvailabilityZoneOfInstances(
                             availabilityZones,
                             mergedInstanceMetaData,
-                            masterInstanceGroup.orElseGet(auxiliaryInstanceGroup::get),
+                            pairedInstanceGroup.orElseGet(auxiliaryInstanceGroup::get),
                             stackSubnetId,
                             stack.getNetwork()
                     )
             );
             updateInstancesMetaData(updatedInstancesMetaData);
         } else {
-            LOGGER.info("{} and {} instance groups are not present, nothing to do", InstanceGroupName.MASTER.getName(),
+            LOGGER.info("{} and {} instance groups are not present, nothing to do", pairedGroupName.getName(),
                     InstanceGroupName.AUXILIARY.getName());
         }
     }
 
-    private static boolean notMasterAndNotAuxiliaryGroup(InstanceGroup instanceGroup) {
+    private InstanceGroupName getQuorumGroupNamePairedWithAuxiliary(Stack stack) {
+        return getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.MASTER).isPresent()
+                ? InstanceGroupName.MASTER
+                : InstanceGroupName.GATEWAY;
+    }
+
+    private static boolean notPairedAndNotAuxiliaryGroup(InstanceGroup instanceGroup, InstanceGroupName pairedGroupName) {
         String instanceGroupName = instanceGroup.getGroupName();
         return !InstanceGroupName.AUXILIARY.getName().equals(instanceGroupName)
-                && !InstanceGroupName.MASTER.getName().equals(instanceGroupName);
+                && !pairedGroupName.getName().equals(instanceGroupName);
     }
 
     private Optional<InstanceGroup> getInstanceGroupByInstanceGroupName(Stack stack, InstanceGroupName groupName) {

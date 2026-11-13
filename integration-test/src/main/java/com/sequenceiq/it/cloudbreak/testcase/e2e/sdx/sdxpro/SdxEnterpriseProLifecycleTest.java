@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.it.cloudbreak.client.RestartTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -23,7 +24,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxEnterpriseProLifecycleTest extends PreconditionSdxE2ETest {
 
-    private static final String INSTANCE_GROUP = "core";
+    private static final String INSTANCE_GROUP = InstanceGroupName.AUXILIARY.getName();
 
     @Inject
     private SdxTestClient sdxTestClient;

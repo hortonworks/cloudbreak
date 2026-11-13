@@ -11,11 +11,21 @@
     {
       "name": "gateway",
       "template": {
-        "instanceType": "Standard_D8s_v5",
+        "instanceType": "Standard_D16s_v5",
         "attachedVolumes": [
           {
             "count": 1,
             "size": 128,
+            "type": "StandardSSD_LRS"
+          },
+          {
+            "count": 1,
+            "size": 256,
+            "type": "StandardSSD_LRS"
+          },
+          {
+            "count": 1,
+            "size": 256,
             "type": "StandardSSD_LRS"
           }
         ]
@@ -26,40 +36,18 @@
       "recipeNames": []
     },
     {
-      "name": "core",
-      "template": {
-        "instanceType": "Standard_D8s_v5",
-        "attachedVolumes": [
-          {
-            "count": 1,
-            "size": 128,
-            "type": "StandardSSD_LRS"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "StandardSSD_LRS"
-          },
-          {
-            "count": 1,
-            "size": 256,
-            "type": "StandardSSD_LRS"
-          }
-        ]
-      },
-      "nodeCount": 3,
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
-      "recipeNames": []
-    },
-    {
       "name": "auxiliary",
       "template": {
-        "instanceType": "Standard_D2s_v5",
+        "instanceType": "Standard_D4s_v5",
         "attachedVolumes": [
           {
             "count": 1,
             "size": 128,
+            "type": "StandardSSD_LRS"
+          },
+          {
+            "count": 1,
+            "size": 256,
             "type": "StandardSSD_LRS"
           }
         ]

@@ -171,16 +171,25 @@ class ShapeValidatorTest {
     }
 
     @Test
-    void validateVolumeCountPassesWhenEnterpriseWithoutHbaseCoreHasThreeVolumes() {
-        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_PRO, stackWithGroup("core", 3)));
+    void validateVolumeCountPassesWhenEnterpriseWithoutHbaseGatewayAndAuxiliaryHaveEnoughVolumes() {
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_PRO,
+                stackWithGroups(instanceGroup("gateway", 3), instanceGroup("auxiliary", 2))));
     }
 
     @Test
-    void validateVolumeCountFailsWhenEnterpriseWithoutHbaseCoreHasTwoVolumes() {
+    void validateVolumeCountFailsWhenEnterpriseWithoutHbaseGatewayHasTwoVolumes() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateVolumeCount(ENTERPRISE_PRO, stackWithGroup("core", 2)));
-        assertTrue(exception.getMessage().contains("core"));
+                () -> underTest.validateVolumeCount(ENTERPRISE_PRO, stackWithGroups(instanceGroup("gateway", 2), instanceGroup("auxiliary", 2))));
+        assertTrue(exception.getMessage().contains("gateway"));
         assertTrue(exception.getMessage().contains("at least 3"));
+    }
+
+    @Test
+    void validateVolumeCountFailsWhenEnterpriseWithoutHbaseAuxiliaryHasOneVolume() {
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateVolumeCount(ENTERPRISE_PRO, stackWithGroups(instanceGroup("gateway", 3), instanceGroup("auxiliary", 1))));
+        assertTrue(exception.getMessage().contains("auxiliary"));
+        assertTrue(exception.getMessage().contains("at least 2"));
     }
 
     @Test
@@ -203,10 +212,20 @@ class ShapeValidatorTest {
 
     @Test
     void validateVolumeCountIgnoresWhenTargetGroupIsAbsent() {
-        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_PRO, stackWithGroup("gateway", 1)));
+        assertDoesNotThrow(() -> underTest.validateVolumeCount(ENTERPRISE_PRO, stackWithGroup("idbroker", 1)));
     }
 
     private StackV4Request stackWithGroup(String groupName, int volumeCount) {
+        return stackWithGroups(instanceGroup(groupName, volumeCount));
+    }
+
+    private StackV4Request stackWithGroups(InstanceGroupV4Request... instanceGroups) {
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setInstanceGroups(List.of(instanceGroups));
+        return stackRequest;
+    }
+
+    private InstanceGroupV4Request instanceGroup(String groupName, int volumeCount) {
         VolumeV4Request volume = new VolumeV4Request();
         volume.setCount(volumeCount);
         volume.setSize(256);
@@ -216,8 +235,6 @@ class ShapeValidatorTest {
         InstanceGroupV4Request instanceGroup = new InstanceGroupV4Request();
         instanceGroup.setName(groupName);
         instanceGroup.setTemplate(template);
-        StackV4Request stackRequest = new StackV4Request();
-        stackRequest.setInstanceGroups(List.of(instanceGroup));
-        return stackRequest;
+        return instanceGroup;
     }
 }
