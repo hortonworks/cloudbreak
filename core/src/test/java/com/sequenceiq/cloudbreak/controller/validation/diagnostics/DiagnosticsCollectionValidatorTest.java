@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -119,6 +122,78 @@ class DiagnosticsCollectionValidatorTest {
         telemetry.setFeatures(features);
 
         assertThrows(BadRequestException.class, () -> underTest.validate(request, createStack(), telemetry));
+    }
+
+    @Test
+    void testValidateCmRequestWithStartAfterEndThrows() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setStartTime(new Date(2_000L));
+        request.setEndTime(new Date(1_000L));
+        Telemetry telemetry = new Telemetry();
+
+        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, createStack(), telemetry));
+
+        assertTrue(thrown.getMessage().contains("Start time must not be after end time."));
+    }
+
+    @Test
+    void testValidateCmRequestWithStartInFutureAndNoEndThrows() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setStartTime(new Date(System.currentTimeMillis() + 3_600_000L));
+        Telemetry telemetry = new Telemetry();
+
+        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, createStack(), telemetry));
+
+        assertTrue(thrown.getMessage().contains("Start time must not be in the future."));
+    }
+
+    @Test
+    void testValidateCmRequestWithValidRange() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setTicket("1234");
+        request.setStartTime(new Date(1_000L));
+        request.setEndTime(new Date(2_000L));
+        Telemetry telemetry = new Telemetry();
+
+        underTest.validate(request, createStack(), telemetry);
+    }
+
+    @Test
+    void testValidateCmRequestWithStartOnlyInPast() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setTicket("1234");
+        request.setStartTime(new Date(System.currentTimeMillis() - 3_600_000L));
+        Telemetry telemetry = new Telemetry();
+
+        underTest.validate(request, createStack(), telemetry);
+    }
+
+    @Test
+    void testValidateCmRequestWithBothTimesNull() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setTicket("1234");
+        Telemetry telemetry = new Telemetry();
+
+        underTest.validate(request, createStack(), telemetry);
+    }
+
+    @Test
+    void testValidateNonCmRequestNotAffectedByTimeRange() {
+        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.CLOUD_STORAGE);
+        request.setStartTime(new Date(2_000L));
+        request.setEndTime(new Date(1_000L));
+        Telemetry telemetry = new Telemetry();
+        Logging logging = new Logging();
+        logging.setS3(new S3CloudStorageV1Parameters());
+        telemetry.setLogging(logging);
+
+        underTest.validate(request, createStack(), telemetry);
     }
 
     private Stack createStack() {

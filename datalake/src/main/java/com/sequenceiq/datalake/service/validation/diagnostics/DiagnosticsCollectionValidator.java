@@ -28,6 +28,7 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     }
 
     public void validate(BaseCmDiagnosticsCollectionRequest request, StackV4Response stackV4Response) {
+        validateTimeRange(request.getStartTime(), request.getEndTime());
         validate(request.getDestination(), stackV4Response, true, Optional.ofNullable(request.getTicket()));
     }
 

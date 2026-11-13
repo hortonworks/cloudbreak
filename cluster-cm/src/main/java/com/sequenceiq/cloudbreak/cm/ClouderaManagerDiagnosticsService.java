@@ -79,18 +79,35 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
             ApiConfigList configList = resourceApi.getConfig(null);
             Boolean globalPhoneHomeConfig = getPhoneHomeConfig(configList);
             preUpdatePhoneHomeConfig(parameters.getDestination(), resourceApi, globalPhoneHomeConfig);
-            ApiCommand collectDiagnostics = resourceApi.collectDiagnosticDataCommand(convertToCollectDiagnosticDataArguments(parameters));
-            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
-                    .startPollingCollectDiagnostics(stack, client, collectDiagnostics.getId());
-            if (pollingResult.isExited()) {
-                throw new CancellationException("Cluster was terminated while waiting for command API to be available for diagnostics collections");
-            } else if (pollingResult.isTimeout()) {
-                throw new CloudbreakException("Timeout during waiting for command API to be available (diagnostics collections).");
+            boolean completed = false;
+            try {
+                ApiCommand collectDiagnostics = resourceApi.collectDiagnosticDataCommand(convertToCollectDiagnosticDataArguments(parameters));
+                ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
+                        .startPollingCollectDiagnostics(stack, client, collectDiagnostics.getId());
+                if (pollingResult.isExited()) {
+                    throw new CancellationException("Cluster was terminated while waiting for command API to be available for diagnostics collections");
+                } else if (pollingResult.isTimeout()) {
+                    throw new CloudbreakException("Timeout during waiting for command API to be available (diagnostics collections).");
+                }
+                completed = true;
+                postUpdatePhoneHomeConfig(parameters.getDestination(), resourceApi, globalPhoneHomeConfig);
+            } finally {
+                if (!completed) {
+                    restorePhoneHomeConfigBestEffort(parameters.getDestination(), resourceApi, globalPhoneHomeConfig);
+                }
             }
-            postUpdatePhoneHomeConfig(parameters.getDestination(), resourceApi, globalPhoneHomeConfig);
         } catch (ApiException e) {
             LOGGER.error("Error during CM based diagnostics collection", e);
             throw new ClouderaManagerOperationFailedException("Collect diagnostics failed", e);
+        }
+    }
+
+    private void restorePhoneHomeConfigBestEffort(DiagnosticsDestination destination, ClouderaManagerResourceApi resourceApi,
+            Boolean globalPhoneHomeConfig) {
+        try {
+            postUpdatePhoneHomeConfig(destination, resourceApi, globalPhoneHomeConfig);
+        } catch (ApiException | RuntimeException e) {
+            LOGGER.warn("Failed to restore PHONE_HOME config after diagnostics collection failure, leaving it as is.", e);
         }
     }
 
@@ -135,7 +152,9 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
     private ApiCollectDiagnosticDataArguments convertToCollectDiagnosticDataArguments(CmDiagnosticsParameters parameters) {
         ApiCollectDiagnosticDataArguments args = new ApiCollectDiagnosticDataArguments();
         args.setClusterName(parameters.getClusterName());
-        args.setEndTime(parameters.getStartTime() == null ? new DateTime().toString() : new DateTime(parameters.getStartTime()).toString());
+        if (parameters.getStartTime() != null) {
+            args.setStartTime(new DateTime(parameters.getStartTime()).toString());
+        }
         args.setEndTime(parameters.getEndTime() == null ? new DateTime().toString() : new DateTime(parameters.getEndTime()).toString());
         args.setComments(parameters.getComments());
         args.setTicketNumber(parameters.getTicketNumber());

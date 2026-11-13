@@ -32,6 +32,7 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     }
 
     public void validate(BaseCmDiagnosticsCollectionRequest request, Stack stack, Telemetry telemetry) {
+        validateTimeRange(request.getStartTime(), request.getEndTime());
         validate(request.getDestination(), stack, telemetry, true, Optional.ofNullable(request.getTicket()));
     }
 

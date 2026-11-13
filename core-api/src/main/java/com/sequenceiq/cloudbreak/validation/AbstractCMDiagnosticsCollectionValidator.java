@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.validation;
 
+import java.util.Date;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
@@ -24,5 +26,17 @@ public abstract class AbstractCMDiagnosticsCollectionValidator<T>
     @Override
     protected ImageDateChecker getImageDateChecker() {
         return null;
+    }
+
+    protected void validateTimeRange(Date startTime, Date endTime) {
+        if (startTime != null) {
+            if (endTime != null) {
+                if (startTime.after(endTime)) {
+                    throw new BadRequestException("Start time must not be after end time.");
+                }
+            } else if (startTime.after(new Date())) {
+                throw new BadRequestException("Start time must not be in the future.");
+            }
+        }
     }
 }

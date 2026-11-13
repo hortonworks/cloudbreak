@@ -2,9 +2,10 @@ package com.sequenceiq.datalake.service.validation.diagnostics;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+
+import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -41,7 +43,7 @@ class DiagnosticsCollectionValidatorTest {
     public void setUp() {
         underTest = new DiagnosticsCollectionValidator(supportBundleConfiguration, entitlementService);
         lenient().when(supportBundleConfiguration.isEnabled()).thenReturn(Boolean.FALSE);
-        given(entitlementService.isDiagnosticsEnabled("acc1")).willReturn(true);
+        lenient().when(entitlementService.isDiagnosticsEnabled("acc1")).thenReturn(true);
     }
 
     @Test
@@ -140,5 +142,88 @@ class DiagnosticsCollectionValidatorTest {
         stackV4Response.setTelemetry(telemetry);
 
         underTest.validate(request, stackV4Response);
+    }
+
+    @Test
+    void testValidateCmRequestWithStartAfterEndThrows() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setStartTime(new Date(2_000L));
+        request.setEndTime(new Date(1_000L));
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
+        stackV4Response.setTelemetry(new TelemetryResponse());
+
+        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
+
+        assertTrue(thrown.getMessage().contains("Start time must not be after end time."));
+    }
+
+    @Test
+    void testValidateCmRequestWithStartInFutureAndNoEndThrows() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setStartTime(new Date(System.currentTimeMillis() + 3_600_000L));
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
+        stackV4Response.setTelemetry(new TelemetryResponse());
+
+        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
+
+        assertTrue(thrown.getMessage().contains("Start time must not be in the future."));
+    }
+
+    @Test
+    void testValidateCmRequestWithValidRange() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setTicket("1234");
+        request.setStartTime(new Date(1_000L));
+        request.setEndTime(new Date(2_000L));
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
+        stackV4Response.setTelemetry(new TelemetryResponse());
+
+        underTest.validate(request, stackV4Response);
+    }
+
+    @Test
+    void testValidateCmRequestWithStartOnlyInPast() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setTicket("1234");
+        request.setStartTime(new Date(System.currentTimeMillis() - 3_600_000L));
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
+        stackV4Response.setTelemetry(new TelemetryResponse());
+
+        underTest.validate(request, stackV4Response);
+    }
+
+    @Test
+    void testValidateCmRequestWithBothTimesNull() {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.SUPPORT);
+        request.setTicket("1234");
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
+        stackV4Response.setTelemetry(new TelemetryResponse());
+
+        underTest.validate(request, stackV4Response);
+    }
+
+    @Test
+    void testValidateNonCmRequestNotAffectedByTimeRange() {
+        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.CLOUD_STORAGE);
+        request.setStartTime(new Date(2_000L));
+        request.setEndTime(new Date(1_000L));
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCrn(DATALAKE_CRN);
+        stackV4Response.setTelemetry(new TelemetryResponse());
+
+        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
+
+        assertTrue(thrown.getMessage().contains("Cloud storage logging is disabled for Data Lake"));
     }
 }
