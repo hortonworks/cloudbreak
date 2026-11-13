@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskModificationRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
@@ -684,17 +683,16 @@ public class StackOperationService {
         }
         rejectUnknownGroup(stack, group);
         String diskType = updateRequest.getDiskType() == null ? null : updateRequest.getDiskType().name();
-        if (DiskType.DATABASE_DISK.name().equalsIgnoreCase(diskType) && !diskUpdateService.hasDatabaseVolume(stack, group)) {
-            LOGGER.warn("Rejecting database-disk update for group {}: the group has no database volume.", group);
-            throw new BadRequestException(String.format("No database disk found for instance group '%s'.", group));
-        }
         List<VolumeSetAttributes.Volume> attachedVolumesToUpdate = diskUpdateService.getAttachedVolumesToUpdate(stack, group,
                 updateRequest.getSize(), updateRequest.getVolumeType(), diskType);
         diskUpdateService.validateDiskDownsize(updateRequest, attachedVolumesToUpdate);
         List<Volume> volumesToBeUpdated = diskUpdateService.toUpdatableVolumes(attachedVolumesToUpdate);
         if (volumesToBeUpdated.isEmpty()) {
-            LOGGER.warn("Rejecting disk update for group {}: requested size {}GB resolves to no volume to update.", group, updateRequest.getSize());
-            throw new BadRequestException(String.format("Requested disk size for %s group is less than current size", group));
+            String reason = diskUpdateService.explainNoVolumesToUpdate(stack, group, updateRequest.getSize(),
+                    updateRequest.getVolumeType(), diskType);
+            LOGGER.warn("Rejecting disk update for group {}: requested size {}GB resolves to no volume to update: {}",
+                    group, updateRequest.getSize(), reason);
+            throw new BadRequestException(reason);
         }
         Stack stackEntity = stackService.getByIdWithLists(stack.getId());
         ValidationResult validationResult = verticalScalingValidatorService.validateAddVolumesRequest(stackEntity, volumesToBeUpdated,

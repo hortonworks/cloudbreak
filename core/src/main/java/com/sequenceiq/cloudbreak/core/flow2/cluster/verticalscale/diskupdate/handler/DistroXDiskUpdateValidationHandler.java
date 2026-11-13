@@ -64,7 +64,8 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
             boolean diskTypeChangeSupported = diskUpdateService.isDiskTypeChangeSupported(cloudPlatform);
             if (volumesToBeUpdated.isEmpty() || !diskTypeChangeSupported) {
                 String exceptionMessage = !diskTypeChangeSupported ? String.format("Disk Type Change / Resize not supported for the %s platform",
-                        cloudPlatform) : String.format("Requested disk size for %s group is less than current size", payload.getGroup());
+                        cloudPlatform) : diskUpdateService.explainNoVolumesToUpdate(stackDto, payload.getGroup(), payload.getSize(),
+                        payload.getVolumeType(), payload.getDiskType());
                 throw new CloudbreakException("Validation Failed: " + exceptionMessage);
             } else {
                 return DistroXDiskUpdateEvent.builder()

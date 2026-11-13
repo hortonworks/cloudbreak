@@ -912,13 +912,17 @@ class StackOperationServiceTest {
         when(diskUpdateService.isDiskTypeChangeSupported("AWS")).thenReturn(true);
         when(diskUpdateService.getAttachedVolumesToUpdate(eq(stack), eq("TEST"), anyInt(), any(), any())).thenReturn(List.of());
         when(diskUpdateService.toUpdatableVolumes(anyList())).thenReturn(List.of());
+        when(diskUpdateService.explainNoVolumesToUpdate(stack, "TEST", 50, "gp3", null))
+                .thenReturn("Disk downsizing is not supported. Requested: 50GB, Current: 100GB.");
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup("TEST");
+        updateRequest.setSize(50);
+        updateRequest.setVolumeType("gp3");
 
         BadRequestException thrown = assertThrows(BadRequestException.class,
                 () -> underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST"));
-        assertEquals("Requested disk size for TEST group is less than current size", thrown.getMessage());
+        assertEquals("Disk downsizing is not supported. Requested: 50GB, Current: 100GB.", thrown.getMessage());
         verify(verticalScalingValidatorService, never()).validateAddVolumesRequest(any(), anyList(), any(), any(), any(), anyInt());
         verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
@@ -940,7 +944,8 @@ class StackOperationServiceTest {
         BadRequestException thrown = assertThrows(BadRequestException.class,
                 () -> underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST"));
         assertEquals("Unknown Instance Group: Instance Group provided in the request is not present on Stack.", thrown.getMessage());
-        verify(diskUpdateService, never()).hasDatabaseVolume(any(), any());
+        verify(diskUpdateService, never()).getAttachedVolumesToUpdate(any(), any(), anyInt(), any(), any());
+        verify(diskUpdateService, never()).explainNoVolumesToUpdate(any(), any(), anyInt(), any(), any());
         verify(verticalScalingValidatorService, never()).validateAddVolumesRequest(any(), anyList(), any(), any(), any(), anyInt());
         verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
@@ -952,16 +957,20 @@ class StackOperationServiceTest {
         when(stack.getCloudPlatform()).thenReturn("AWS");
         when(stack.getInstanceGroupByInstanceGroupName("TEST")).thenReturn(mock(InstanceGroupDto.class));
         when(diskUpdateService.isDiskTypeChangeSupported("AWS")).thenReturn(true);
-        when(diskUpdateService.hasDatabaseVolume(stack, "TEST")).thenReturn(false);
+        when(diskUpdateService.getAttachedVolumesToUpdate(stack, "TEST", 300, null, DiskType.DATABASE_DISK.name())).thenReturn(List.of());
+        when(diskUpdateService.toUpdatableVolumes(anyList())).thenReturn(List.of());
+        when(diskUpdateService.explainNoVolumesToUpdate(stack, "TEST", 300, null, DiskType.DATABASE_DISK.name()))
+                .thenReturn("No database disk found for instance group 'TEST'.");
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup("TEST");
+        updateRequest.setSize(300);
         updateRequest.setDiskType(DiskType.DATABASE_DISK);
 
         BadRequestException thrown = assertThrows(BadRequestException.class,
                 () -> underTest.validateStackDiskUpdate(nameOrCrn, updateRequest, "TEST"));
         assertEquals("No database disk found for instance group 'TEST'.", thrown.getMessage());
-        verify(diskUpdateService, never()).getAttachedVolumesToUpdate(any(), any(), anyInt(), any(), any());
+        verify(verticalScalingValidatorService, never()).validateAddVolumesRequest(any(), anyList(), any(), any(), any(), anyInt());
         verify(flowManager, never()).triggerStackUpdateDisks(any(), any(), anyBoolean());
     }
 

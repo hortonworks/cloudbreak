@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -63,6 +65,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupEphemeralVolumeChecker;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
@@ -118,6 +121,9 @@ public class DiskUpdateService {
     @Inject
     private StackToCloudStackConverter stackToCloudStackConverter;
 
+    @Inject
+    private InstanceGroupEphemeralVolumeChecker instanceGroupEphemeralVolumeChecker;
+
     public boolean isDiskTypeChangeSupported(String platform) {
         return cloudParameterCache.isDiskTypeChangeSupported(platform);
     }
@@ -140,9 +146,83 @@ public class DiskUpdateService {
                 .toList();
     }
 
-    public boolean hasDatabaseVolume(StackDto stack, String group) {
-        return groupVolumes(stack, group)
-                .anyMatch(volume -> volume.getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE);
+    public String explainNoVolumesToUpdate(StackDto stack, String group, int size, String volumeType, String diskType) {
+        boolean databaseDisk = isDataBaseDisk(diskType);
+        List<VolumeSetAttributes.Volume> volumesOfRequestedKind = groupVolumes(stack, group)
+                .filter(volume -> databaseDisk == (CloudVolumeUsageType.DATABASE == volume.getCloudVolumeUsageType()))
+                .toList();
+        if (volumesOfRequestedKind.isEmpty()) {
+            return explainNoVolumesOfRequestedKind(stack, group, databaseDisk);
+        }
+        if (volumesOfRequestedKind.stream().allMatch(volume -> EphemeralVolumeUtil.volumeIsEphemeral(volume.getType()))) {
+            return ephemeralOnlyMessage(group);
+        }
+        int currentSize = largestNonEphemeralSize(volumesOfRequestedKind);
+        if (size > 0 && size < currentSize) {
+            return downsizeNotSupportedMessage(size, currentSize);
+        }
+        // The database-disk selection only looks at the size, so a volume type change alone selects nothing.
+        Optional<String> currentDatabaseVolumeType = volumesOfRequestedKind.stream()
+                .filter(volume -> databaseDisk && volumeTypeChangeRequested(volumeType, volume))
+                .map(VolumeSetAttributes.Volume::getType)
+                .findFirst();
+        if (currentDatabaseVolumeType.isPresent()) {
+            return String.format("Changing the database disk volume type is only supported together with a size increase for instance group '%s'. "
+                    + "Requested type: %s, current: %s.", group, volumeType, currentDatabaseVolumeType.get());
+        }
+        return String.format("Nothing to update for instance group '%s': requested size and volume type match the current disks.", group);
+    }
+
+    private String explainNoVolumesOfRequestedKind(StackDto stack, String group, boolean databaseDisk) {
+        // AWS keeps instance storage out of the volume set, so only the template tells an instance-storage-only group apart from a group without disks.
+        if (!databaseDisk && hasOnlyInstanceStorageForData(stack, group)) {
+            return ephemeralOnlyMessage(group);
+        }
+        return hasNoInstances(stack, group)
+                ? String.format("Instance group '%s' has no instances.", group)
+                : String.format("No %s disk found for instance group '%s'.", databaseDisk ? "database" : "data", group);
+    }
+
+    private String ephemeralOnlyMessage(String group) {
+        return String.format("Instance group '%s' has only instance storage (ephemeral) volumes, which cannot be resized or have their type changed.",
+                group);
+    }
+
+    // EPHEMERAL_VOLUMES_ONLY is set at creation for groups with only ephemeral data (plus database) volumes, and by the delete-volumes flow,
+    // which keeps the deleted volume templates with a zero count. Delete-volumes does not require instance storage, hence the extra check.
+    private boolean hasOnlyInstanceStorageForData(StackDto stack, String group) {
+        Optional<InstanceGroupView> instanceGroup = Optional.ofNullable(stack.getInstanceGroupByInstanceGroupName(group))
+                .map(InstanceGroupDto::getInstanceGroup)
+                .filter(groupView -> groupView.getTemplate() != null);
+        if (instanceGroup.isEmpty()) {
+            return false;
+        }
+        Template template = instanceGroup.get().getTemplate();
+        boolean hasEphemeralVolumeTemplate = template.getVolumeTemplates() != null
+                && instanceGroupEphemeralVolumeChecker.instanceGroupContainsEphemeralVolumes(instanceGroup.get());
+        if (TemporaryStorage.EPHEMERAL_VOLUMES_ONLY == template.getTemporaryStorage()) {
+            return hasEphemeralVolumeTemplate || Optional.ofNullable(template.getInstanceStorageCount()).orElse(0) > 0;
+        }
+        return hasEphemeralVolumeTemplate && instanceGroupEphemeralVolumeChecker.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(instanceGroup.get());
+    }
+
+    private boolean hasNoInstances(StackDto stack, String group) {
+        InstanceGroupDto instanceGroup = stack.getInstanceGroupByInstanceGroupName(group);
+        return instanceGroup == null || instanceGroup.getNotDeletedInstanceMetaData().isEmpty();
+    }
+
+    private int largestNonEphemeralSize(List<VolumeSetAttributes.Volume> volumes) {
+        return volumes.stream()
+                .filter(volume -> !EphemeralVolumeUtil.volumeIsEphemeral(volume.getType()))
+                .map(VolumeSetAttributes.Volume::getSize)
+                .filter(Objects::nonNull)
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+    }
+
+    private String downsizeNotSupportedMessage(int size, int currentSize) {
+        return String.format("Disk downsizing is not supported. Requested: %dGB, Current: %dGB.", size, currentSize);
     }
 
     private Volume convertToVolume(VolumeSetAttributes.Volume volSetAttrVol) {
@@ -159,17 +239,11 @@ public class DiskUpdateService {
         if (size <= 0) {
             return;
         }
-        int currentSize = volumesToUpdate.stream()
-                .filter(volume -> !EphemeralVolumeUtil.volumeIsEphemeral(volume.getType()))
-                .map(VolumeSetAttributes.Volume::getSize)
-                .filter(Objects::nonNull)
-                .mapToInt(Integer::intValue)
-                .max()
-                .orElse(0);
+        int currentSize = largestNonEphemeralSize(volumesToUpdate);
         if (currentSize > 0 && size < currentSize) {
             LOGGER.warn("Rejecting disk downsize for group {}: requested {}GB is below the largest volume to update {}GB ({} volume(s) matched).",
                     updateRequest.getGroup(), size, currentSize, volumesToUpdate.size());
-            throw new BadRequestException(String.format("Disk downsizing is not supported. Requested: %dGB, Current: %dGB.", size, currentSize));
+            throw new BadRequestException(downsizeNotSupportedMessage(size, currentSize));
         }
     }
 

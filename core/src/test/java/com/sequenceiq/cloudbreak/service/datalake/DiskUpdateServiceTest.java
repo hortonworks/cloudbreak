@@ -18,6 +18,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
@@ -51,13 +53,16 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -66,12 +71,14 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupEphemeralVolumeChecker;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -126,6 +133,9 @@ class DiskUpdateServiceTest {
 
     @Mock
     private StackToCloudStackConverter stackToCloudStackConverter;
+
+    @Spy
+    private InstanceGroupEphemeralVolumeChecker instanceGroupEphemeralVolumeChecker;
 
     @InjectMocks
     private DiskUpdateService underTest;
@@ -578,27 +588,178 @@ class DiskUpdateServiceTest {
     }
 
     @Test
-    void testHasDatabaseVolumeReturnsTrueWhenGroupHasDatabaseVolume() {
-        StackDto stack = mock(StackDto.class);
-        doReturn("AWS").when(stack).getCloudPlatform();
-        Resource resource = volumeSetResource(GROUP,
-                volume("db-vol", 50, "gp2", CloudVolumeUsageType.DATABASE),
-                volume("data-vol", 50, "gp2", CloudVolumeUsageType.GENERAL));
-        doReturn(Set.of(resource)).when(stack).getResources();
-        doCallRealMethod().when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
+    void testExplainNoVolumesToUpdateWhenDatabaseDiskRequestedButGroupHasNoDatabaseVolume() {
+        StackDto stack = stackWithVolumes(volume("data-vol", 500, "gp2", CloudVolumeUsageType.GENERAL));
+        stubGroupInstances(stack, List.of(mock(InstanceMetadataView.class)));
 
-        assertTrue(underTest.hasDatabaseVolume(stack, GROUP));
+        assertEquals("No database disk found for instance group 'compute'.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, DiskType.DATABASE_DISK.name()));
     }
 
     @Test
-    void testHasDatabaseVolumeReturnsFalseWhenGroupHasNoDatabaseVolume() {
-        StackDto stack = mock(StackDto.class);
-        doReturn("AWS").when(stack).getCloudPlatform();
-        Resource resource = volumeSetResource(GROUP, volume("data-vol", 50, "gp2", CloudVolumeUsageType.GENERAL));
-        doReturn(Set.of(resource)).when(stack).getResources();
-        doCallRealMethod().when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
+    void testExplainNoVolumesToUpdateWhenDataDiskRequestedButGroupHasOnlyDatabaseVolume() {
+        StackDto stack = stackWithVolumes(volume("db-vol", 100, "gp2", CloudVolumeUsageType.DATABASE));
+        stubGroupInstances(stack, List.of(mock(InstanceMetadataView.class)));
 
-        assertFalse(underTest.hasDatabaseVolume(stack, GROUP));
+        assertEquals("No data disk found for instance group 'compute'.", underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenGroupHasNoVolumeSetResource() {
+        StackDto stack = mock(StackDto.class);
+        doReturn(Set.of()).when(stack).getResources();
+        stubGroupInstances(stack, List.of(mock(InstanceMetadataView.class)));
+
+        assertEquals("No data disk found for instance group 'compute'.", underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenGroupHasNoInstances() {
+        StackDto stack = mock(StackDto.class);
+        doReturn(Set.of()).when(stack).getResources();
+        stubGroupInstances(stack, List.of());
+
+        assertEquals("Instance group 'compute' has no instances.", underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenGroupDoesNotExist() {
+        StackDto stack = mock(StackDto.class);
+        doReturn(Set.of()).when(stack).getResources();
+
+        assertEquals("Instance group 'compute' has no instances.", underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    // A volume set holding only ephemeral volumes exists on GCP, where local SSDs are provisioned as part of the volume set.
+    @Test
+    void testExplainNoVolumesToUpdateWhenGroupHasOnlyEphemeralVolumes() {
+        StackDto stack = stackWithVolumes(volume("vol-eph", 150, "ephemeral", CloudVolumeUsageType.GENERAL));
+
+        assertEquals("Instance group 'compute' has only instance storage (ephemeral) volumes, which cannot be resized or have their type changed.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenAwsGroupHasOnlyEphemeralVolumeTemplatesAndNoVolumeSet() {
+        StackDto stack = mock(StackDto.class);
+        doReturn(Set.of()).when(stack).getResources();
+        // AWS creates no volume set for an ephemeral-only group.
+        stubGroupVolumeTemplates(stack, "ephemeral");
+
+        assertEquals("Instance group 'compute' has only instance storage (ephemeral) volumes, which cannot be resized or have their type changed.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenDatabaseDiskRequestedOnGroupWithoutVolumeSet() {
+        StackDto stack = mock(StackDto.class);
+        doReturn(Set.of()).when(stack).getResources();
+        InstanceGroupDto instanceGroup = mock(InstanceGroupDto.class);
+        doReturn(List.of(mock(InstanceMetadataView.class))).when(instanceGroup).getNotDeletedInstanceMetaData();
+        doReturn(instanceGroup).when(stack).getInstanceGroupByInstanceGroupName(GROUP);
+
+        assertEquals("No database disk found for instance group 'compute'.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, DiskType.DATABASE_DISK.name()));
+        verify(instanceGroup, never()).getInstanceGroup();
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenGroupWithoutVolumeSetHasMixedVolumeTemplates() {
+        StackDto stack = mock(StackDto.class);
+        doReturn(Set.of()).when(stack).getResources();
+        InstanceGroupDto instanceGroup = stubGroupVolumeTemplates(stack, "ephemeral", "gp3");
+        doReturn(List.of(mock(InstanceMetadataView.class))).when(instanceGroup).getNotDeletedInstanceMetaData();
+
+        assertEquals("No data disk found for instance group 'compute'.", underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    // AWS leaves the ephemeral data volumes out of the volume set, so it only holds the database disk.
+    @Test
+    void testExplainNoVolumesToUpdateWhenAwsGroupHasEphemeralDataAndDatabaseDisk() {
+        StackDto stack = stackWithVolumes(volume("db-vol", 100, "gp3", CloudVolumeUsageType.DATABASE));
+        stubGroupTemplate(stack, TemporaryStorage.EPHEMERAL_VOLUMES_ONLY, 2,
+                volumeTemplate("ephemeral", VolumeUsageType.GENERAL, 2), volumeTemplate("gp3", VolumeUsageType.DATABASE, 1));
+
+        assertEquals("Instance group 'compute' has only instance storage (ephemeral) volumes, which cannot be resized or have their type changed.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenEphemeralDataAndDatabaseDiskTemplateHasNoTemporaryStorageMarker() {
+        StackDto stack = stackWithVolumes(volume("db-vol", 100, "gp3", CloudVolumeUsageType.DATABASE));
+        stubGroupTemplate(stack, TemporaryStorage.ATTACHED_VOLUMES, null,
+                volumeTemplate("ephemeral", VolumeUsageType.GENERAL, 2), volumeTemplate("gp3", VolumeUsageType.DATABASE, 1));
+
+        assertEquals("Instance group 'compute' has only instance storage (ephemeral) volumes, which cannot be resized or have their type changed.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    // The delete-volumes flow removes the volume sets and keeps the EBS templates with a zero count.
+    @Test
+    void testExplainNoVolumesToUpdateWhenAttachedDataVolumesWereDeleted() {
+        StackDto stack = mock(StackDto.class);
+        doReturn(Set.of()).when(stack).getResources();
+        stubGroupTemplate(stack, TemporaryStorage.EPHEMERAL_VOLUMES_ONLY, 2, volumeTemplate("gp3", VolumeUsageType.GENERAL, 0));
+
+        assertEquals("Instance group 'compute' has only instance storage (ephemeral) volumes, which cannot be resized or have their type changed.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenVolumesWereDeletedFromGroupWithoutInstanceStorage() {
+        StackDto stack = mock(StackDto.class);
+        doReturn(Set.of()).when(stack).getResources();
+        InstanceGroupDto instanceGroup = stubGroupTemplate(stack, TemporaryStorage.EPHEMERAL_VOLUMES_ONLY, 0,
+                volumeTemplate("gp3", VolumeUsageType.GENERAL, 0));
+        doReturn(List.of(mock(InstanceMetadataView.class))).when(instanceGroup).getNotDeletedInstanceMetaData();
+
+        assertEquals("No data disk found for instance group 'compute'.", underTest.explainNoVolumesToUpdate(stack, GROUP, 300, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenDataDiskShrinkRequested() {
+        StackDto stack = stackWithVolumes(
+                volume("vol-1", 100, "gp2", CloudVolumeUsageType.GENERAL),
+                volume("vol-2", 200, "gp2", CloudVolumeUsageType.GENERAL),
+                volume("vol-eph", 1000, "ephemeral", CloudVolumeUsageType.GENERAL));
+
+        assertEquals("Disk downsizing is not supported. Requested: 50GB, Current: 200GB.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 50, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenDatabaseDiskShrinkRequestedIgnoresDataDiskSizes() {
+        StackDto stack = stackWithVolumes(
+                volume("db-vol", 200, "gp2", CloudVolumeUsageType.DATABASE),
+                volume("data-vol", 500, "gp2", CloudVolumeUsageType.GENERAL));
+
+        assertEquals("Disk downsizing is not supported. Requested: 100GB, Current: 200GB.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 100, null, DiskType.DATABASE_DISK.name()));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenRequestedSizeEqualsCurrent() {
+        StackDto stack = stackWithVolumes(volume("vol-1", 100, "gp2", CloudVolumeUsageType.GENERAL));
+
+        assertEquals("Nothing to update for instance group 'compute': requested size and volume type match the current disks.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 100, null, null));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenOnlyVolumeTypeChangeRequestedForDatabaseDisk() {
+        StackDto stack = stackWithVolumes(volume("db-vol", 100, "gp2", CloudVolumeUsageType.DATABASE));
+
+        assertEquals("Changing the database disk volume type is only supported together with a size increase for instance group 'compute'. "
+                + "Requested type: gp3, current: gp2.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 100, "gp3", DiskType.DATABASE_DISK.name()));
+    }
+
+    @Test
+    void testExplainNoVolumesToUpdateWhenDatabaseDiskTypeAlreadyMatches() {
+        StackDto stack = stackWithVolumes(volume("db-vol", 100, "gp3", CloudVolumeUsageType.DATABASE));
+
+        assertEquals("Nothing to update for instance group 'compute': requested size and volume type match the current disks.",
+                underTest.explainNoVolumesToUpdate(stack, GROUP, 100, "GP3", DiskType.DATABASE_DISK.name()));
     }
 
     @Test
@@ -768,6 +929,48 @@ class DiskUpdateServiceTest {
         request.setVolumeType(volumeType);
         request.setDiskType(diskType);
         return request;
+    }
+
+    private void stubGroupInstances(StackDto stack, List<InstanceMetadataView> notDeletedInstances) {
+        InstanceGroupDto instanceGroup = mock(InstanceGroupDto.class);
+        doReturn(notDeletedInstances).when(instanceGroup).getNotDeletedInstanceMetaData();
+        doReturn(instanceGroup).when(stack).getInstanceGroupByInstanceGroupName(GROUP);
+    }
+
+    private InstanceGroupDto stubGroupVolumeTemplates(StackDto stack, String... volumeTypes) {
+        return stubGroupTemplate(stack, TemporaryStorage.ATTACHED_VOLUMES, null, Arrays.stream(volumeTypes)
+                .map(volumeType -> volumeTemplate(volumeType, VolumeUsageType.GENERAL, 1))
+                .toArray(VolumeTemplate[]::new));
+    }
+
+    private InstanceGroupDto stubGroupTemplate(StackDto stack, TemporaryStorage temporaryStorage, Integer instanceStorageCount,
+            VolumeTemplate... volumeTemplates) {
+        Template template = new Template();
+        template.setVolumeTemplates(Set.of(volumeTemplates));
+        template.setTemporaryStorage(temporaryStorage);
+        template.setInstanceStorageCount(instanceStorageCount);
+        InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
+        doReturn(template).when(instanceGroupView).getTemplate();
+        InstanceGroupDto instanceGroup = mock(InstanceGroupDto.class);
+        doReturn(instanceGroupView).when(instanceGroup).getInstanceGroup();
+        doReturn(instanceGroup).when(stack).getInstanceGroupByInstanceGroupName(GROUP);
+        return instanceGroup;
+    }
+
+    private VolumeTemplate volumeTemplate(String volumeType, VolumeUsageType usageType, int volumeCount) {
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType(volumeType);
+        volumeTemplate.setUsageType(usageType);
+        volumeTemplate.setVolumeCount(volumeCount);
+        return volumeTemplate;
+    }
+
+    private StackDto stackWithVolumes(VolumeSetAttributes.Volume... volumes) {
+        StackDto stack = mock(StackDto.class);
+        doReturn("AWS").when(stack).getCloudPlatform();
+        doReturn(Set.of(volumeSetResource(GROUP, volumes))).when(stack).getResources();
+        doCallRealMethod().when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
+        return stack;
     }
 
     private Resource volumeSetResource(String group, VolumeSetAttributes.Volume... volumes) {

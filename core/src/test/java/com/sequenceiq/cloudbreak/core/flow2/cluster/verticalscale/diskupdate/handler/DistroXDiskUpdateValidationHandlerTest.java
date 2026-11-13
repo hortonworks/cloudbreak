@@ -10,6 +10,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateFailedEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
@@ -104,8 +107,38 @@ class DistroXDiskUpdateValidationHandlerTest {
                 .thenReturn(List.of());
         doReturn(true).when(diskUpdateService).isDiskTypeChangeSupported(any());
         doReturn(stackDto).when(stackDtoService).getById(anyLong());
+        when(diskUpdateService.explainNoVolumesToUpdate(stackDto, "compute", 100, "gp2", null))
+                .thenReturn("No data disk found for instance group 'compute'.");
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
         assertEquals(FAILED_DATAHUB_DISK_UPDATE_EVENT.selector(), selectable.getSelector());
+        assertEquals("Validation Failed: No data disk found for instance group 'compute'.",
+                ((DistroXDiskUpdateFailedEvent) selectable).getException().getMessage());
+    }
+
+    @Test
+    void testFailureDiskUpdateValidationActionWhenPlatformNotSupported() {
+        DistroXDiskUpdateEvent event = DistroXDiskUpdateEvent.builder()
+                .withClusterName(TEST_CLUSTER)
+                .withAccountId(ACCOUNT_ID)
+                .withGroup("compute")
+                .withSize(100)
+                .withSelector(DATAHUB_DISK_UPDATE_VALIDATION_HANDLER_EVENT.event())
+                .withStackId(STACK_ID)
+                .withResourceId(STACK_ID)
+                .build();
+        StackDto stackDto = mock(StackDto.class);
+        doReturn("MOCK").when(stackDto).getCloudPlatform();
+        when(diskUpdateService.getVolumesToUpdate(eq(stackDto), eq("compute"), anyInt(), any(), any()))
+                .thenReturn(List.of(volume("vol-1", CloudVolumeUsageType.GENERAL)));
+        doReturn(false).when(diskUpdateService).isDiskTypeChangeSupported("MOCK");
+        doReturn(stackDto).when(stackDtoService).getById(anyLong());
+
+        Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
+
+        assertEquals(FAILED_DATAHUB_DISK_UPDATE_EVENT.selector(), selectable.getSelector());
+        assertEquals("Validation Failed: Disk Type Change / Resize not supported for the MOCK platform",
+                ((DistroXDiskUpdateFailedEvent) selectable).getException().getMessage());
+        verify(diskUpdateService, never()).explainNoVolumesToUpdate(any(), any(), anyInt(), any(), any());
     }
 
     @Test
