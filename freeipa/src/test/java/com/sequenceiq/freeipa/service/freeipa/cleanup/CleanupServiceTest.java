@@ -34,6 +34,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.util.Pair;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
@@ -387,6 +389,63 @@ public class CleanupServiceTest {
         assertEquals(0, result.getFirst().size());
         assertEquals(1, result.getSecond().size());
         assertEquals("Cannot connect to FreeIPA", result.getSecond().get("CN=test-wl-1-master2"));
+    }
+
+    @Test
+    public void testRevokeCertsWhenCertIsAlreadyRevoked() throws FreeIpaClientException {
+        Set<String> hosts = Set.of(
+                "test-wl-1-worker0.env.xyz.wl.cloudera.site",
+                "test-wl-1-master2.env.xyz.wl.cloudera.site"
+        );
+        Set<Cert> certs = Set.of(
+                createCert("CN=test-wl-1-master2", 2, false),
+                createCert("CN=test-wl-1-worker0", 5, false),
+                createCert("CN=ipaserver0.env.xyz.wl.cloudera.site,O=ENV.XYZ.WL.CLOUDERA.SITE", 50, false)
+        );
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        when(freeIpaClient.findAllCert()).thenReturn(certs);
+        doThrow(certificateOperationException("Unable to communicate with CMS (certificate 0x2 has already been revoked)"))
+                .when(freeIpaClient).revokeCert(2);
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
+
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
+
+        verify(freeIpaClient).revokeCert(2);
+        verify(freeIpaClient).revokeCert(5);
+        verifyRevokeNotInvoked(freeIpaClient, 50);
+        assertEquals(Set.of("CN=test-wl-1-master2", "CN=test-wl-1-worker0"), result.getFirst());
+        assertTrue(result.getSecond().isEmpty());
+    }
+
+    @Test
+    public void testRevokeCertsWhenCertificateOperationErrorIsNotAlreadyRevoked() throws FreeIpaClientException {
+        Set<String> hosts = Set.of(
+                "test-wl-1-worker0.env.xyz.wl.cloudera.site",
+                "test-wl-1-master2.env.xyz.wl.cloudera.site"
+        );
+        Set<Cert> certs = Set.of(
+                createCert("CN=test-wl-1-master2", 2, false),
+                createCert("CN=test-wl-1-worker0", 5, false)
+        );
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        when(freeIpaClient.findAllCert()).thenReturn(certs);
+        doThrow(certificateOperationException("Unable to communicate with CMS (certificate 0x2 has already been revoked)"))
+                .when(freeIpaClient).revokeCert(2);
+        FreeIpaClientException otherCertError = certificateOperationException("Unable to communicate with CMS (Internal Server Error)");
+        doThrow(otherCertError).when(freeIpaClient).revokeCert(5);
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
+
+        Pair<Set<String>, Map<String, String>> result = underTest.revokeCerts(STACK_ID, hosts);
+
+        assertEquals(Set.of("CN=test-wl-1-master2"), result.getFirst());
+        assertEquals(Map.of("CN=test-wl-1-worker0", otherCertError.getMessage()), result.getSecond());
+    }
+
+    private FreeIpaClientException certificateOperationException(String error) {
+        ObjectNode data = new ObjectMapper().createObjectNode().put("error", error);
+        return new FreeIpaClientException("Invoke FreeIPA failed: Certificate operation cannot be completed: " + error,
+                new JsonRpcClientException(FreeIpaErrorCodes.CERTIFICATE_OPERATION_ERROR.getValue(),
+                        "Certificate operation cannot be completed: " + error, data));
     }
 
     @Test

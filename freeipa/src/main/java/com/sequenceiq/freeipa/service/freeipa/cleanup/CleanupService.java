@@ -171,8 +171,12 @@ public class CleanupService {
                         retryService.retryWhenRetryableWithoutValue(() -> client.revokeCert(cert.getSerialNumber()));
                         certCleanupSuccess.add(cert.getSubject());
                     } catch (FreeIpaClientException e) {
-                        LOGGER.error("Couldn't revoke certificate: {}", cert, e);
-                        certCleanupFailed.put(cert.getSubject(), e.getMessage());
+                        if (FreeIpaClientExceptionUtil.isAlreadyRevokedException(e)) {
+                            certCleanupSuccess.add(cert.getSubject());
+                        } else {
+                            LOGGER.error("Couldn't revoke certificate: {}", cert, e);
+                            certCleanupFailed.put(cert.getSubject(), e.getMessage());
+                        }
                     }
                 });
         return Pair.of(certCleanupSuccess, certCleanupFailed);

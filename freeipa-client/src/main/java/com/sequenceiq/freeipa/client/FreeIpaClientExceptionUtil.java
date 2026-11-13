@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.client;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
@@ -115,6 +117,23 @@ public class FreeIpaClientExceptionUtil {
                 .map(FreeIpaClientExceptionUtil::findFreeIpaErrorCodeByCode)
                 .peek(code -> LOGGER.debug("Error code: [{}]", code))
                 .anyMatch(c -> isFreeIpaErrorCodeInSet(errorCodes, c));
+    }
+
+    public static boolean isAlreadyRevokedException(FreeIpaClientException e) {
+        if (isExceptionWithErrorCode(e, Set.of(FreeIpaErrorCodes.CERTIFICATE_OPERATION_ERROR))) {
+            return Stream.of(getAncestorCauseBeforeFreeIpaClientExceptions(e))
+                    .filter(JsonRpcClientException.class::isInstance)
+                    .map(JsonRpcClientException.class::cast)
+                    .map(JsonRpcClientException::getData)
+                    .filter(Objects::nonNull)
+                    .map(node -> node.get("error"))
+                    .filter(Objects::nonNull)
+                    .filter(JsonNode::isTextual)
+                    .map(JsonNode::asText)
+                    .anyMatch(errorMessage -> errorMessage.contains("has already been revoked"));
+        } else {
+            return false;
+        }
     }
 
     @VisibleForTesting
