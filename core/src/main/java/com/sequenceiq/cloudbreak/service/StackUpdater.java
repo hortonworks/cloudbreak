@@ -139,7 +139,7 @@ public class StackUpdater {
             }
             stack = stackService.save(stack);
             saveDeprecatedClusterStatus(statusReason, stack, newStatus);
-            stackNotificationAssembler.notify(stack);
+            notifyIfNotificationChanged(stack, actualStackStatus.getStatus(), newStatus);
             usageLoggingUtil.logClusterStatusChangeUsageEvent(actualStackStatus.getStatus(), newStatus, cluster);
         } else {
             LOGGER.info("Stack is in DELETE_COMPLETED status, cannot update status.");
@@ -155,6 +155,15 @@ public class StackUpdater {
             stackService.save(stack);
         } else {
             LOGGER.info("The variant was already set to {}", variant);
+        }
+    }
+
+    private void notifyIfNotificationChanged(Stack stack, Status previousStatus, Status newStatus) {
+        if (newStatus.shouldTriggerNotification() && newStatus.hasSameNotificationAs(previousStatus)) {
+            LOGGER.info("Skip notification for stack {}, status changed from {} to {} but notification type {} and severity {} are the same.",
+                    stack.getId(), previousStatus, newStatus, newStatus.getNotificationType(), newStatus.getNotificationSeverity());
+        } else {
+            stackNotificationAssembler.notify(stack);
         }
     }
 

@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.constant.GcpConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.model.Architecture;
@@ -48,11 +49,51 @@ class StackRequestHandlerTest {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(stackV4Request);
 
         StackV4Request response = underTest.getStackRequest(SdxClusterShape.LIGHT_DUTY, stackV4Request, CloudPlatform.AWS,
-                "7.2.7", imageSettingsV4Request, Architecture.X86_64);
+                "7.2.7", imageSettingsV4Request, Architecture.X86_64, null);
 
         assertNotNull(response.getImage());
         assertEquals("cdp-default", response.getImage().getCatalog());
         assertEquals("imageId_1", response.getImage().getId());
+    }
+
+    @Test
+    void getStackRequestCopiesNotificationStateOntoTemplateForNonCustomShape() throws IOException {
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.7/aws/light_duty.json");
+        StackV4Request template = JsonUtil.readValue(lightDutyJson, StackV4Request.class);
+        template.setNotificationState(null);
+
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(template);
+
+        StackV4Request response = underTest.getStackRequest(SdxClusterShape.LIGHT_DUTY, null, CloudPlatform.AWS,
+                "7.2.7", null, Architecture.X86_64, NotificationState.ENABLED);
+
+        assertEquals(NotificationState.ENABLED, response.getNotificationState());
+    }
+
+    @Test
+    void getStackRequestLeavesNotificationStateNullWhenPreferenceIsNull() throws IOException {
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.7/aws/light_duty.json");
+        StackV4Request template = JsonUtil.readValue(lightDutyJson, StackV4Request.class);
+        template.setNotificationState(null);
+
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(template);
+
+        StackV4Request response = underTest.getStackRequest(SdxClusterShape.LIGHT_DUTY, null, CloudPlatform.AWS,
+                "7.2.7", null, Architecture.X86_64, null);
+
+        assertNull(response.getNotificationState());
+    }
+
+    @Test
+    void getStackRequestForCustomShapeKeepsInternalRequestUntouched() {
+        StackV4Request internalStackV4Request = new StackV4Request();
+        internalStackV4Request.setNotificationState(NotificationState.ENABLED);
+
+        StackV4Request response = underTest.getStackRequest(SdxClusterShape.CUSTOM, internalStackV4Request, CloudPlatform.AWS,
+                "7.2.7", null, Architecture.X86_64, NotificationState.DISABLED);
+
+        assertEquals(internalStackV4Request, response);
+        assertEquals(NotificationState.ENABLED, response.getNotificationState());
     }
 
     @Test

@@ -218,7 +218,7 @@ public class DistributionListManagementService {
                     targetResourceCrn,
                     targetResourceName,
                     existingDistributionList,
-                    getEmailList(accountId, getUserWithResourceRoles(accountId, targetResourceCrn)),
+                    getEmailList(accountId, getResourceOwners(accountId, targetResourceCrn)),
                     channelPreferenceConverter.convert(eventChannelPreferences)
             );
             return Optional.ofNullable(distributionList);
@@ -241,7 +241,7 @@ public class DistributionListManagementService {
     private Optional<DistributionList> createDistributionList(String accountId, String parentResourceCrn,
             String resourceCrnAsString, String resourceName, List<EventChannelPreference> eventChannelPreferences) {
         // This is a security requirement of Notification Service
-        Set<String> emailList = getEmailList(accountId, getUserWithResourceRoles(accountId, resourceCrnAsString));
+        Set<String> emailList = getEmailList(accountId, getResourceOwners(accountId, resourceCrnAsString));
         createAccountMetadataForResource(
                 resourceCrnAsString,
                 emailList);
@@ -263,12 +263,10 @@ public class DistributionListManagementService {
         return DistributionListManagementType.USER_MANAGED.equals(existingDistributionList.getType());
     }
 
-    private List<UserWithResourceRole> getUserWithResourceRoles(String accountId, String resourceCrnAsString) {
+    private List<UserWithResourceRole> getResourceOwners(String accountId, String resourceCrnAsString) {
+        // The Owner resource role is assigned to the creator of the resource, so only the creator is notified
         return grpcUmsClient.listUsersWithResourceRoles(
-                Set.of(
-                        roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(accountId),
-                        roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(accountId)
-                ),
+                Set.of(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(accountId)),
                 resourceCrnAsString);
     }
 

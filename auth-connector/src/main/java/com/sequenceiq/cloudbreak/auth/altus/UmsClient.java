@@ -563,14 +563,15 @@ public class UmsClient {
      * @return list of assignee CRNs that have resource role assignments on the specified resource
      */
     public List<UserManagementProto.ResourceAssignee> listResourceAssignees(String resourceCrn) {
+        UserManagementProto.ListResourceAssigneesRequest.Builder requestBuilder = UserManagementProto.ListResourceAssigneesRequest.newBuilder()
+                .setAccountId(Crn.fromString(resourceCrn).getAccountId())
+                .setResourceCrn(resourceCrn);
         UserManagementProto.ListResourceAssigneesResponse response;
         List<UserManagementProto.ResourceAssignee> resourceAssignees = new ArrayList<>();
         do {
-            response = newStub().listResourceAssignees(UserManagementProto.ListResourceAssigneesRequest.newBuilder()
-                .setAccountId(Crn.fromString(resourceCrn).getAccountId())
-                .setResourceCrn(resourceCrn)
-                .build());
+            response = newStub().listResourceAssignees(requestBuilder.build());
             resourceAssignees.addAll(response.getResourceAssigneeList());
+            requestBuilder.setPageToken(response.getNextPageToken());
         } while (response.hasNextPageToken());
         return resourceAssignees;
     }

@@ -136,6 +136,21 @@ public enum Status {
         return notificationTypeOptional.orElse(null);
     }
 
+    public NotificationSeverity getNotificationSeverity() {
+        return severityOptional.orElse(null);
+    }
+
+    /**
+     * Compares only the notification identity (type and severity) of two statuses. Two statuses that both trigger no
+     * notification are considered the same. Callers that only care about statuses actually producing a notification
+     * should combine this with {@link #shouldTriggerNotification()}.
+     */
+    public boolean hasSameNotificationAs(Status other) {
+        return other != null
+                && notificationTypeOptional.equals(other.notificationTypeOptional)
+                && severityOptional.equals(other.severityOptional);
+    }
+
     public static Set<Status> getAvailableStatuses() {
         return Sets.immutableEnumSet(AVAILABLE, MAINTENANCE_MODE_ENABLED);
     }

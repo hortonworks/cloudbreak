@@ -458,7 +458,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 cloudPlatform,
                 runtimeVersion,
                 imageSettingsV4Request,
-                architecture
+                architecture,
+                sdxCluster.getNotificationState()
         );
         shapeValidator.validateVolumeCount(sdxClusterRequest.getClusterShape(), stackRequest);
         if (sdxClusterRequest.getVariant() != null) {
@@ -528,7 +529,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private void setNotificationState(StackV4Request internalStackV4Request, SdxCluster sdxCluster, NotificationState notificationState) {
+    @VisibleForTesting
+    void setNotificationState(StackV4Request internalStackV4Request, SdxCluster sdxCluster, NotificationState notificationState) {
         sdxCluster.setNotificationState(notificationState);
         if (internalStackV4Request != null) {
             if (internalStackV4Request.getNotificationState() == null) {
@@ -541,8 +543,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private NotificationState getNotificationState(SdxClusterRequest sdxClusterRequest) {
-        return Optional.ofNullable(sdxClusterRequest.getNotificationState()).orElse(null);
+    @VisibleForTesting
+    NotificationState getNotificationState(SdxClusterRequest sdxClusterRequest) {
+        return Optional.ofNullable(sdxClusterRequest.getNotificationState()).orElse(NotificationState.DISABLED);
     }
 
     @VisibleForTesting

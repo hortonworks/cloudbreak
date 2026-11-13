@@ -12,12 +12,15 @@ public enum NotificationState {
         return fromString(notificationState, true);
     }
 
+    /**
+     * Resolves the notification state to persist for a new resource. Notifications are disabled by default: an
+     * explicitly requested state is only honoured when notification sending is enabled for the account.
+     */
     public static NotificationState fromStateWithDisableIfNull(NotificationState notificationState, boolean notificationSendingEnabled) {
-        if (notificationSendingEnabled) {
-            return notificationState == null ? NotificationState.ENABLED : notificationState;
-        } else {
-            return NotificationState.DISABLED;
+        if (notificationSendingEnabled && notificationState != null) {
+            return notificationState;
         }
+        return DISABLED;
     }
 
     private static NotificationState fromString(String notificationState, boolean disableIfNull) {

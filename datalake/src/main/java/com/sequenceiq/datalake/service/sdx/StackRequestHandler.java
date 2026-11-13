@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -30,7 +31,7 @@ public class StackRequestHandler {
 
     public StackV4Request getStackRequest(SdxClusterShape shape, StackV4Request internalStackV4Request,
             CloudPlatform cloudPlatform, String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request,
-            Architecture architecture) {
+            Architecture architecture, NotificationState notificationState) {
         StackV4Request stackV4Request = internalStackV4Request;
 
         if (!SdxClusterShape.CUSTOM.equals(shape)) {
@@ -50,6 +51,9 @@ public class StackRequestHandler {
                     .orElse(null);
             if (clouderaManagerV4Request != null) {
                 stackV4Request.getCluster().setCm(clouderaManagerV4Request);
+            }
+            if (notificationState != null) {
+                stackV4Request.setNotificationState(notificationState);
             }
         }
 

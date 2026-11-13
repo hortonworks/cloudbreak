@@ -190,7 +190,8 @@ public class SdxResizeService {
         newSdxCluster.setSdxDatabase(DatabaseParameterInitUtil.setupDatabaseInitParams(sdxCluster.getDatabaseAvailabilityType(),
                 sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
         StackV4Request stackRequest = stackRequestHandler.getStackRequest(shape, null, cloudPlatform,
-                sdxCluster.getRuntime(), null, Optional.ofNullable(sdxCluster.getArchitecture()).orElse(Architecture.X86_64));
+                sdxCluster.getRuntime(), null, Optional.ofNullable(sdxCluster.getArchitecture()).orElse(Architecture.X86_64),
+                newSdxCluster.getNotificationState());
         shapeValidator.validateVolumeCount(shape, stackRequest);
         stackRequestHandler.setStackRequestParams(stackRequest, stackV4Response, stackV4Response.getJavaVersion(), sdxCluster.isRangerRazEnabled(),
                 sdxCluster.isRangerRmsEnabled(), stackV4Response.getCluster().getEncryptionProfileCrn());

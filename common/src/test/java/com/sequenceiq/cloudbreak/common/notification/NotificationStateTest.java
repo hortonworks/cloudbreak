@@ -19,10 +19,10 @@ class NotificationStateTest {
 
     @Test
     void testFromStateWithFallback() {
-        // notificationSendingEnabled = true: returns the state as-is, or ENABLED if null
+        // notificationSendingEnabled = true: returns the explicitly requested state, or DISABLED if none was requested
         assertEquals(NotificationState.ENABLED, NotificationState.fromStateWithDisableIfNull(NotificationState.ENABLED, true));
         assertEquals(NotificationState.DISABLED, NotificationState.fromStateWithDisableIfNull(NotificationState.DISABLED, true));
-        assertEquals(NotificationState.ENABLED, NotificationState.fromStateWithDisableIfNull(null, true));
+        assertEquals(NotificationState.DISABLED, NotificationState.fromStateWithDisableIfNull(null, true));
 
         // notificationSendingEnabled = false: always returns DISABLED regardless of input state
         assertEquals(NotificationState.DISABLED, NotificationState.fromStateWithDisableIfNull(NotificationState.ENABLED, false));

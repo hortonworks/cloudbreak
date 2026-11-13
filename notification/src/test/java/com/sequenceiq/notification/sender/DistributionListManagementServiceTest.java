@@ -3,7 +3,6 @@ package com.sequenceiq.notification.sender;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -122,9 +121,8 @@ class DistributionListManagementServiceTest {
     @Test
     void createOrUpdateListWhenExistingNonUserManagedUpdatesAndReturnsDistributionList() {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
-        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsersWithResourceRoles(eq(Set.of("ownerRoleCrn")), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         DistributionListDetailsDto existingDto = new DistributionListDetailsDto(
@@ -159,9 +157,8 @@ class DistributionListManagementServiceTest {
     @Test
     void createOrUpdateListWhenExistingUserManagedWithRegistrationUpdates() {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
-        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsersWithResourceRoles(eq(Set.of("ownerRoleCrn")), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         DistributionListDetailsDto existingDto = new DistributionListDetailsDto(
@@ -194,9 +191,8 @@ class DistributionListManagementServiceTest {
     @Test
     void createOrUpdateListWhenNoExistingCreatesAndReturnsDistributionList() {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
-        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com"),
+        when(grpcUmsClient.listUsersWithResourceRoles(eq(Set.of("ownerRoleCrn")), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com"),
                 userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(any(List.class))).thenReturn(List.of(samplePreferenceDto));
@@ -225,7 +221,7 @@ class DistributionListManagementServiceTest {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
                 .thenReturn(new ListDistributionListsResponseDto(List.of()));
-        doThrow(new RuntimeException("boom")).when(roleCrnGenerator).getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID);
+        doThrow(new RuntimeException("boom")).when(roleCrnGenerator).getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID);
         CreateDistributionListRequest request = new CreateDistributionListRequest.Builder()
                 .withParentResourceCrn(RESOURCE_CRN)
                 .withTargetResourceCrn(RESOURCE_CRN)
@@ -239,9 +235,8 @@ class DistributionListManagementServiceTest {
     @Test
     void createOrUpdateListUpdateResponseEmptyReturnsNull() {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
-        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsersWithResourceRoles(eq(Set.of("ownerRoleCrn")), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         DistributionListDetailsDto existingDto = new DistributionListDetailsDto(
@@ -271,9 +266,8 @@ class DistributionListManagementServiceTest {
     @Test
     void createOrUpdateListCreateResponseEmptyReturnsNull() {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
-        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsersWithResourceRoles(eq(Set.of("ownerRoleCrn")), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
@@ -294,9 +288,8 @@ class DistributionListManagementServiceTest {
     @Test
     void createOrUpdateListUpdateResponseNullReturnsNull() {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
-        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsersWithResourceRoles(eq(Set.of("ownerRoleCrn")), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         DistributionListDetailsDto existingDto = new DistributionListDetailsDto(
@@ -326,9 +319,8 @@ class DistributionListManagementServiceTest {
     @Test
     void createOrUpdateListCreateResponseNullListReturnsNull() {
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
-        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsersWithResourceRoles(eq(Set.of("ownerRoleCrn")), eq(RESOURCE_CRN))).thenReturn(List.of(userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         when(grpcNotificationClient.listDistributionLists(any(ListDistributionListsRequestDto.class)))
@@ -352,9 +344,8 @@ class DistributionListManagementServiceTest {
         // Two parent==target requests with distinct env CRNs: CRN_A yields a present environment list,
         // CRN_B's parent create returns nothing so its result is absent and must be filtered out.
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
-        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), any())).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsersWithResourceRoles(eq(Set.of("ownerRoleCrn")), any())).thenReturn(List.of(userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(any(List.class))).thenReturn(List.of(samplePreferenceDto));
         // All list calls return empty (no existing distribution lists)
@@ -423,9 +414,8 @@ class DistributionListManagementServiceTest {
     void createOrUpdateListWhenParentDiffersFromTargetRunsTargetUpsert() {
         // Distinct parent and target CRNs: the parent list already exists, so the target upsert path runs.
         when(notificationConfig.isEnabled(any(Crn.class))).thenReturn(true);
-        when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(ACCOUNT_ID)).thenReturn("adminRoleCrn");
         when(roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(ACCOUNT_ID)).thenReturn("ownerRoleCrn");
-        when(grpcUmsClient.listUsersWithResourceRoles(anySet(), eq(RESOURCE_CRN_B))).thenReturn(List.of(userWithEmail("user1@example.com")));
+        when(grpcUmsClient.listUsersWithResourceRoles(eq(Set.of("ownerRoleCrn")), eq(RESOURCE_CRN_B))).thenReturn(List.of(userWithEmail("user1@example.com")));
         when(grpcUmsClient.listUsers(eq(ACCOUNT_ID), any())).thenReturn(List.of(userProtoWithEmail("user1@example.com")));
         when(channelPreferenceConverter.convert(List.of(samplePreference))).thenReturn(List.of(samplePreferenceDto));
         DistributionListDetailsDto parentDto = new DistributionListDetailsDto(

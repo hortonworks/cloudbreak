@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateProperties;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateTypeMetadata;
@@ -98,6 +99,35 @@ public class StackUpdaterTest {
         assertEquals(newStatusReason, newStack.getStatusReason());
         verify(stackService, times(1)).save(eq(stack));
         verify(clusterService, times(1)).save(eq(stack.getCluster()));
+    }
+
+    @Test
+    void skipNotificationWhenStatusChangesWithinSameNotificationTypeAndSeverity() {
+        Stack stack = TestUtil.stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+        when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
+        when(stackService.save(any(Stack.class))).thenReturn(stack);
+        when(statusToPollGroupConverter.convert(any())).thenReturn(PollGroup.POLLABLE);
+
+        Stack modifiedStack = underTest.updateStackStatus(1L, DetailedStackStatus.PROVIDER_NOT_RESPONDING, "provider not responding");
+
+        assertEquals(Status.UNREACHABLE, modifiedStack.getStatus());
+        verify(stackService, times(1)).save(eq(stack));
+        verify(stackNotificationAssembler, never()).notify(any(Stack.class));
+    }
+
+    @Test
+    void notifyWhenStatusChangesToDifferentNotification() {
+        Stack stack = TestUtil.stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
+        when(stackService.save(any(Stack.class))).thenReturn(stack);
+        when(statusToPollGroupConverter.convert(any())).thenReturn(PollGroup.POLLABLE);
+
+        Stack modifiedStack = underTest.updateStackStatus(1L, DetailedStackStatus.NODE_FAILURE, "node failure");
+
+        assertEquals(Status.NODE_FAILURE, modifiedStack.getStatus());
+        verify(stackNotificationAssembler, times(1)).notify(eq(stack));
     }
 
     @Test

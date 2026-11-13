@@ -231,7 +231,7 @@ class SdxResizeServiceTest {
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -321,7 +321,7 @@ class SdxResizeServiceTest {
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.15/gcp/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
@@ -450,7 +450,7 @@ class SdxResizeServiceTest {
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -513,7 +513,7 @@ class SdxResizeServiceTest {
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -581,7 +581,7 @@ class SdxResizeServiceTest {
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -771,7 +771,7 @@ class SdxResizeServiceTest {
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -839,7 +839,7 @@ class SdxResizeServiceTest {
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -891,7 +891,7 @@ class SdxResizeServiceTest {
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -951,7 +951,7 @@ class SdxResizeServiceTest {
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
         StackV4Request lightDutyRequest = JsonUtil.readValue(lightDutyJson, StackV4Request.class);
         when(cdpConfigService.getConfigForKey(eq(cdpConfigKeyLightDuty))).thenReturn(lightDutyRequest);
-        when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseJson, StackV4Request.class));
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
@@ -1012,7 +1012,7 @@ class SdxResizeServiceTest {
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
         CDPConfigKey cdpConfigKeyEnterprise = new CDPConfigKey(AWS, ENTERPRISE, "7.2.18");
         when(cdpConfigService.getConfigForKey(eq(cdpConfigKeyLightDuty))).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseJson, StackV4Request.class));
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
@@ -1054,7 +1054,7 @@ class SdxResizeServiceTest {
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
         mockEnvironmentCall(resizeRequest, AWS);
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setCluster(new ClusterV4Response());
@@ -1122,7 +1122,7 @@ class SdxResizeServiceTest {
                 .thenReturn(detailedEnvironmentResponse);
         when(stackService.getDetail(eq(CLUSTER_NAME), anySet(), eq(accountId)))
                 .thenReturn(stackV4Response);
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(accountId);
 
@@ -1219,7 +1219,7 @@ class SdxResizeServiceTest {
                 .thenReturn(detailedEnvironmentResponse);
         when(stackService.getDetail(eq(CLUSTER_NAME), anySet(), eq(accountId)))
                 .thenReturn(stackV4Response);
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(accountId);
 
@@ -1311,7 +1311,7 @@ class SdxResizeServiceTest {
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
@@ -1381,7 +1381,7 @@ class SdxResizeServiceTest {
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
-        when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
@@ -1436,7 +1436,7 @@ class SdxResizeServiceTest {
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
-        when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
 
         StackV4Response stackV4Response = new StackV4Response();

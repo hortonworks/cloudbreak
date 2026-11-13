@@ -557,7 +557,7 @@ class SdxServiceTest {
         when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
         StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
         SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
@@ -565,7 +565,7 @@ class SdxServiceTest {
         verify(javaVersionPolicy, times(1)).validateSupported(any(), eq(11));
         verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
         verify(environmentService, times(2)).validateAndGetEnvironment(anyString());
-        verify(stackRequestHandler, times(1)).getStackRequest(any(), any(), any(), any(), any(), any());
+        verify(stackRequestHandler, times(1)).getStackRequest(any(), any(), any(), any(), any(), any(), any());
         verify(externalDatabaseConfigurer, times(1)).configure(any(), anyString(), any(), any(), any());
         verify(sdxReactorFlowManager, times(1)).triggerSdxCreation(any());
         verify(transactionService, times(1)).required(any(Supplier.class));
@@ -682,7 +682,7 @@ class SdxServiceTest {
         stackV4Request.setCluster(clusterV4Request);
 
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
@@ -700,7 +700,7 @@ class SdxServiceTest {
         sdxClusterRequest.setAzure(azureRequest);
 
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AZURE, null);
 
@@ -720,7 +720,7 @@ class SdxServiceTest {
         stackV4Request.setCluster(clusterV4Request);
 
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AZURE, null);
 
@@ -738,7 +738,7 @@ class SdxServiceTest {
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         when(sdxClusterRepository.save(sdxClusterArgumentCaptor.capture())).thenReturn(mock(SdxCluster.class));
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
         mockTransactionServiceRequired();
@@ -759,7 +759,7 @@ class SdxServiceTest {
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         when(sdxClusterRepository.save(sdxClusterArgumentCaptor.capture())).thenReturn(mock(SdxCluster.class));
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
         mockTransactionServiceRequired();
@@ -783,7 +783,7 @@ class SdxServiceTest {
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         when(sdxClusterRepository.save(sdxClusterArgumentCaptor.capture())).thenReturn(mock(SdxCluster.class));
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
         mockTransactionServiceRequired();
@@ -831,7 +831,7 @@ class SdxServiceTest {
         });
         when(externalDatabaseConfigurer.configure(any(), any(), any(), any(), any())).thenReturn(new SdxDatabase());
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
         mockEnvironmentCall(sdxClusterRequest, AZURE, null);
         when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
@@ -879,7 +879,8 @@ class SdxServiceTest {
             throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
         String lightDutyJson = readLightDutyTestTemplate();
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         withCloudStorage(sdxClusterRequest);
         long id = 10L;
@@ -901,7 +902,8 @@ class SdxServiceTest {
     void testCreateSdxClusterWithSpotStackRequestContainsRequiredAttributes() throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
         String lightDutyJson = readLightDutyTestTemplate();
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         setSpot(sdxClusterRequest);
         withCloudStorage(sdxClusterRequest);
@@ -927,7 +929,8 @@ class SdxServiceTest {
     void testCreateSdxClusterWithJavaVersionStackRequestContainsRequiredAttributes() throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
         String lightDutyJson = readLightDutyTestTemplate();
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         doNothing().when(javaVersionPolicy).validateSupported(any(), eq(11));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         sdxClusterRequest.setJavaVersion(11);
@@ -953,7 +956,8 @@ class SdxServiceTest {
             throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
         String lightDutyJson = readLightDutyTestTemplate();
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         withCloudStorage(sdxClusterRequest);
         long id = 10L;
@@ -977,7 +981,8 @@ class SdxServiceTest {
             throws IOException, TransactionExecutionException {
         mockTransactionServiceRequired();
         String lightDutyJson = readLightDutyTestTemplate();
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", MEDIUM_DUTY_HA);
         withCloudStorage(sdxClusterRequest);
@@ -1123,7 +1128,8 @@ class SdxServiceTest {
         final String runtime = "7.2.12";
         mockTransactionServiceRequired();
         String microDutyJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/micro_duty.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(microDutyJson, StackV4Request.class));
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(JsonUtil.readValue(microDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MICRO_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
@@ -1158,7 +1164,8 @@ class SdxServiceTest {
         final String runtime = "7.2.12";
         mockTransactionServiceRequired();
         String microDutyJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/micro_duty.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(microDutyJson, StackV4Request.class));
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(JsonUtil.readValue(microDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MICRO_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
@@ -1182,7 +1189,7 @@ class SdxServiceTest {
         final String runtime = "7.2.7";
         mockTransactionServiceRequired();
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/medium_duty_ha.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
@@ -1214,7 +1221,7 @@ class SdxServiceTest {
         final String runtime = "7.2.17";
         mockTransactionServiceRequired();
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/enterprise.json");
-        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
+        when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, ENTERPRISE);
