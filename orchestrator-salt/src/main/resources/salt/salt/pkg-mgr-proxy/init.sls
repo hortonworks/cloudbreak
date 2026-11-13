@@ -8,7 +8,7 @@ configure_yum_proxy:
     - source: salt://pkg-mgr-proxy/template/yum_proxy.j2
     - unless: grep "proxy=" /etc/yum.conf
 
-{% if grains['osmajorrelease'] | int == 8 %}
+{% if grains['osmajorrelease'] | int >= 8 %}
 configure_dnf_proxy:
   file.append:
     - name: /etc/dnf/dnf.conf
