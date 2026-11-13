@@ -18,11 +18,9 @@ import com.sequenceiq.datalake.flow.chain.DatalakeResizeRecoveryFlowEventChainFa
 import com.sequenceiq.datalake.flow.create.SdxCreateFlowConfig;
 import com.sequenceiq.datalake.flow.delete.SdxDeleteFlowConfig;
 import com.sequenceiq.datalake.flow.detach.SdxDetachFlowConfig;
-import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFlowConfig;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFlowConfig;
 import com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSFlowConfig;
 import com.sequenceiq.datalake.flow.refresh.DatahubRefreshFlowConfig;
-import com.sequenceiq.datalake.flow.stop.SdxStopFlowConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.core.chain.init.config.FlowChainInitFlowConfig;
@@ -131,10 +129,6 @@ public class SdxResizeOperationService {
             return failedWithRetryAndRollbackAllowed(flowChainId, "New Data Lake creation failed.");
         } else if (classEquals(SdxDetachFlowConfig.class, flowType)) {
             return failedWithRetryAndRollbackAllowed(flowChainId, "Failed to detach old Data Lake from environment.");
-        } else if (classEquals(SdxStopFlowConfig.class, flowType)) {
-            return failedWithRetryAndRollbackAllowed(flowChainId, "Failed to stop old Data Lake cluster.");
-        } else if (classEquals(DatalakeBackupFlowConfig.class, flowType)) {
-            return failedWithRetryAndRollbackAllowed(flowChainId, "Failed to create backup from old Data Lake cluster.");
         } else {
             return noResizeOperation();
         }
