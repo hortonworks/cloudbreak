@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.validate.disk;
 
-import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -13,7 +12,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.DiskValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
@@ -28,6 +26,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ValidateDiskRequest;
 import com.sequenceiq.cloudbreak.service.stack.DiskValidationService;
+import com.sequenceiq.cloudbreak.service.stack.DiskValidationService.DiskValidationVolumes;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.Flow;
@@ -52,10 +51,11 @@ public class DiskValidationActions {
         return new AbstractDiskValidationAction<>(DiskValidationTriggerEvent.class) {
             @Override
             protected void doExecute(StackContext context, DiskValidationTriggerEvent payload, Map<Object, Object> variables) throws Exception {
-                StackView stack = context.getStack().getStack();
-                List<CloudResource> disksToCheck = diskValidationService.getVolumesForValidation(stack, payload.getRepairableGroupsWithHostNames());
-                ValidateDiskRequest<Selectable> request =
-                        new ValidateDiskRequest<>(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), disksToCheck);
+                DiskValidationVolumes disksToCheck = diskValidationService.getVolumesForValidation(context.getStack(),
+                        payload.getRepairableGroupsWithHostNames());
+                ValidateDiskRequest<Selectable> request = new ValidateDiskRequest<>(context.getCloudContext(), context.getCloudCredential(),
+                        context.getCloudStack(), disksToCheck.volumes(), disksToCheck.embeddedDatabaseVolumes(),
+                        disksToCheck.clusterManagerServerWithEmbeddedDbInstanceIds());
                 sendEvent(context, request);
             }
         };

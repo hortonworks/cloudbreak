@@ -99,6 +99,9 @@ public class ClusterRepairService {
     private ClusterDBValidationService clusterDBValidationService;
 
     @Inject
+    private EmbeddedDatabaseService embeddedDatabaseService;
+
+    @Inject
     private RedbeamsClientService redbeamsClientService;
 
     @Inject
@@ -380,6 +383,14 @@ public class ClusterRepairService {
             if (stackStopRestrictionService.isInfrastructureStoppable(stack) != StopRestrictionReason.NONE) {
                 validationResult.add("Reattach not supported for this disk type.");
             }
+        } else if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack)) {
+            instances.stream()
+                    .filter(instanceMetaData -> Boolean.TRUE.equals(instanceMetaData.getClusterManagerServer()))
+                    .forEach(instanceMetaData -> validationResult.add(String.format("The 'Delete volumes' option is not supported for the Cloudera " +
+                            "Manager server node %s, because the embedded Cloudera Manager database is stored on an attached disk of this node. " +
+                            "'Delete volumes' would delete that disk and Cloudera Manager would start with a new, empty database. Please repair " +
+                            "the node without the 'Delete volumes' option.",
+                            instanceMetaData.getInstanceId())));
         }
         return validationResult;
     }

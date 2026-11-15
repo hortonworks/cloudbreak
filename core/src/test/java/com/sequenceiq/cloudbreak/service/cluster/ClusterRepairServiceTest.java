@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,6 +32,8 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -153,6 +156,9 @@ class ClusterRepairServiceTest {
 
     @Mock
     private ClusterDBValidationService clusterDBValidationService;
+
+    @Mock
+    private EmbeddedDatabaseService embeddedDatabaseService;
 
     @Mock
     private RedbeamsClientService redbeamsClientService;
@@ -440,6 +446,54 @@ class ClusterRepairServiceTest {
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(RepairType.ALL_AT_ONCE),
                 eq(false), any(), eq(false));
         verify(stackUpgradeService, times(1)).calculateUpgradeVariant(any(), eq(USER_CRN), eq(false), any());
+    }
+
+    @Test
+    void testValidateRepairWithDeleteVolumesRejectedForCmServerWithEmbeddedDatabaseOnAttachedDisk() {
+        when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)).thenReturn(true);
+        setupNodeIdRepairOfSingleInstance(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.NODE_ID, STACK_ID, Set.of("instanceId1"), true);
+            assertEquals(List.of("The 'Delete volumes' option is not supported for the Cloudera Manager server node instanceId1, because the " +
+                    "embedded Cloudera Manager database is stored on an attached disk of this node. 'Delete volumes' would delete that disk and " +
+                    "Cloudera Manager would start with a new, empty database. Please repair the node without the 'Delete volumes' option."),
+                    actual.getError().getValidationErrors());
+        });
+        verify(stackUpdater, never()).updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS);
+    }
+
+    @ParameterizedTest(name = "attachedDiskForEmbeddedDatabaseCreated={0}, clusterManagerServer={1}")
+    @CsvSource({"false,true", "true,false"})
+    void testValidateRepairWithDeleteVolumesAllowed(boolean attachedDiskForEmbeddedDatabaseCreated, boolean clusterManagerServer) {
+        lenient().when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)).thenReturn(attachedDiskForEmbeddedDatabaseCreated);
+        setupNodeIdRepairOfSingleInstance(clusterManagerServer);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.NODE_ID, STACK_ID, Set.of("instanceId1"), true);
+            assertTrue(actual.isSuccess());
+        });
+    }
+
+    private void setupNodeIdRepairOfSingleInstance(boolean clusterManagerServer) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("hostGroup1");
+        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
+        hostGroup1.setInstanceGroup(instanceGroup);
+        InstanceMetaData instance1md = new InstanceMetaData();
+        instance1md.setInstanceId("instanceId1");
+        instance1md.setDiscoveryFQDN("host1Name.healthy");
+        instance1md.setInstanceGroup(instanceGroup);
+        instance1md.setClusterManagerServer(clusterManagerServer);
+        instanceGroup.setInstanceMetaData(Collections.singleton(instance1md));
+        when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
     }
 
     @Test

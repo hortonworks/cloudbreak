@@ -54,12 +54,28 @@ public class ValidateDiskHandler extends ExceptionCatcherEventHandler<ValidateDi
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
 
-            List<CloudResourceStatus> cloudResourceStates = connector.resources().checkForSyncer(ac, request.getCloudResources());
-
-            List<CloudResourceStatus> deletedResources = cloudResourceStates.stream()
-                    .filter(CloudResourceStatus::isDeleted)
+            List<CloudResourceStatus> deletedResources = getDeletedResources(connector, ac, request.getCloudResources());
+            // Separate call, because a syncer may return copies of the resources, so the statuses of the DB-only copies can't be picked out of a shared result
+            List<CloudResourceStatus> deletedEmbeddedDatabaseResources = request.getEmbeddedDatabaseVolumes().isEmpty() ? List.of()
+                    : getDeletedResources(connector, ac, request.getEmbeddedDatabaseVolumes());
+            List<CloudResourceStatus> deletedClusterManagerServerWithEmbeddedDbResources = deletedResources.stream()
+                    .filter(status -> request.getClusterManagerServerWithEmbeddedDbInstanceIds().contains(status.getCloudResource().getInstanceId()))
                     .toList();
-            if (deletedResources.isEmpty()) {
+            if (!deletedEmbeddedDatabaseResources.isEmpty()) {
+                result = errorCase(event, new CloudbreakRuntimeException(
+                        format("Cannot repair the nodes because the embedded Cloudera Manager database disk is missing from the Cloudera Manager " +
+                                        "server node(s): %s, so the Cloudera Manager database is lost. Repair cannot restore it, not even with " +
+                                        "the 'Delete volumes' option, which would start Cloudera Manager with a new, empty database. The cluster can " +
+                                        "only be restored from a volume snapshot of the missing disk or recreated.",
+                                getAllInstanceIdSafely(deletedEmbeddedDatabaseResources))));
+            } else if (!deletedClusterManagerServerWithEmbeddedDbResources.isEmpty()) {
+                result = errorCase(event, new CloudbreakRuntimeException(
+                        format("Cannot repair the nodes because one or more disks are missing from the Cloudera Manager server node(s): %s. " +
+                                        "The embedded Cloudera Manager database is stored on an attached disk of this node, so the 'Delete volumes' " +
+                                        "option cannot be used for it, because it would delete the database disk too. Please restore the missing " +
+                                        "disks from a volume snapshot or recreate the cluster.",
+                                getAllInstanceIdSafely(deletedClusterManagerServerWithEmbeddedDbResources))));
+            } else if (deletedResources.isEmpty()) {
                 result = validCase(event);
             } else {
                 result = errorCase(event, new CloudbreakRuntimeException(
@@ -74,6 +90,12 @@ public class ValidateDiskHandler extends ExceptionCatcherEventHandler<ValidateDi
             result = validCase(event);
         }
         return result;
+    }
+
+    private List<CloudResourceStatus> getDeletedResources(CloudConnector connector, AuthenticatedContext ac, List<CloudResource> cloudResources) {
+        return connector.resources().checkForSyncer(ac, cloudResources).stream()
+                .filter(CloudResourceStatus::isDeleted)
+                .toList();
     }
 
     private String getAllInstanceIdSafely(List<CloudResourceStatus> cloudResourceStatuses) {
