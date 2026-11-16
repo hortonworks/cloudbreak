@@ -9,7 +9,7 @@ public class RecoveryModeConverterTest extends DefaultEnumConverterBaseTest<Reco
 
     @Override
     public RecoveryMode getDefaultValue() {
-        return RecoveryMode.AUTO;
+        return RecoveryMode.MANUAL;
     }
 
     @Override

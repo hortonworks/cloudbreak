@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -350,7 +349,6 @@ public class ClusterRepairService {
             StackView stack) {
         return hostGroupService.getByCluster(stack.getClusterId())
                 .stream()
-                .filter(hostGroup -> RecoveryMode.MANUAL.equals(hostGroup.getRecoveryMode()))
                 .filter(instanceSelectors.getLeft())
                 .map(hostGroup -> Map.entry(hostGroupName(hostGroup.getName()), hostGroup
                         .getInstanceGroup()

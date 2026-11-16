@@ -7,6 +7,6 @@ public class RecoveryModeConverter extends DefaultEnumConverter<RecoveryMode> {
 
     @Override
     public RecoveryMode getDefault() {
-        return RecoveryMode.AUTO;
+        return RecoveryMode.MANUAL;
     }
 }

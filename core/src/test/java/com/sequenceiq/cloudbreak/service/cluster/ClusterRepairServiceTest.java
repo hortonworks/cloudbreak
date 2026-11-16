@@ -238,6 +238,27 @@ class ClusterRepairServiceTest {
     }
 
     @Test
+    void testRepairByHostGroupsWhenRecoveryModeIsAuto() {
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("hostGroup1");
+        hostGroup1.setRecoveryMode(RecoveryMode.AUTO);
+        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.CORE);
+        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
+
+        when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
+        when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(freeipaService.checkFreeipaRunning(stackDto.getEnvironmentCrn(), STACK_NAME)).thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
+
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(RepairType.ALL_AT_ONCE), eq(false), any(),
+                eq(false));
+    }
+
+    @Test
     void testCMNodeRepairSelectedAndAllStoppedNodesNotSelected() {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");

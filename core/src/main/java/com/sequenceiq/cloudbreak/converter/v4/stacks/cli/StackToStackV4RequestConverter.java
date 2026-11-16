@@ -160,7 +160,6 @@ public class StackToStackV4RequestConverter {
                     .ifPresent(hostGroup -> {
                         Set<String> recipeNames = hostGroup.getRecipes().stream().map(Recipe::getName).collect(Collectors.toSet());
                         instanceGroupV4Request.setRecipeNames(recipeNames);
-                        instanceGroupV4Request.setRecoveryMode(hostGroup.getRecoveryMode());
                         if (instanceGroup.getInstanceGroupNetwork() != null) {
                             instanceGroupV4Request.setNetwork(instanceGroupNetworkToInstanceGroupNetworkV4RequestConverter
                                     .convert(instanceGroup.getInstanceGroupNetwork()));

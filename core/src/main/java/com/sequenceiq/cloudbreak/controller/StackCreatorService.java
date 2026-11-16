@@ -43,7 +43,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.BaseSecurityV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -245,6 +247,7 @@ public class StackCreatorService {
         measure(() -> ensureStackDoesNotExists(stackName),
                 LOGGER,
                 "Stack does not exist check took {} ms");
+        validateRecoveryMode(stackRequest);
 
         DetailedEnvironmentResponse environment = measure(
                 () -> ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -462,6 +465,17 @@ public class StackCreatorService {
                             Architecture.ARM64.getName(), runtimeVersion.get()));
                 }
             }
+        }
+    }
+
+    private void validateRecoveryMode(StackV4Request stackRequest) {
+        List<String> instanceGroupsWithAutoRecovery = stackRequest.getInstanceGroups().stream()
+                .filter(instanceGroup -> RecoveryMode.AUTO == instanceGroup.getRecoveryMode())
+                .map(InstanceGroupV4Base::getName)
+                .toList();
+        if (!instanceGroupsWithAutoRecovery.isEmpty()) {
+            throw new BadRequestException(String.format("Recovery mode AUTO is not supported, use MANUAL for the following instance groups: %s",
+                    instanceGroupsWithAutoRecovery));
         }
     }
 

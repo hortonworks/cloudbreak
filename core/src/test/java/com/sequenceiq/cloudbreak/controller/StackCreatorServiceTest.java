@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,6 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -259,6 +261,22 @@ class StackCreatorServiceTest {
         assertEquals("Cluster already exists: STACK_NAME", e.getMessage());
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
+    }
+
+    @Test
+    void shouldThrowBadRequestWhenRecoveryModeIsAuto() {
+        User user = new User();
+        Workspace workspace = getWorkspace();
+        StackV4Request stackRequest = getStackV4Request();
+        stackRequest.getInstanceGroups().getFirst().setRecoveryMode(RecoveryMode.AUTO);
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
+        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
+
+        BadRequestException e = assertThrows(BadRequestException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)));
+
+        assertEquals("Recovery mode AUTO is not supported, use MANUAL for the following instance groups: [" + INSTANCE_GROUP + "]", e.getMessage());
+        verify(environmentClientService, never()).getByCrn(any());
     }
 
     @Test

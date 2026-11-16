@@ -1,28 +1,21 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED_CLUSTER_EVENT;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY_REQUESTED_HOST_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -65,7 +58,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -75,7 +67,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -197,42 +188,22 @@ class ClusterOperationServiceTest {
     }
 
     @Test
-    void shouldTriggerRecoveryInAutoRecoveryHostsAndUpdateHostMetaData() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText("{ \"Blueprints\": { \"blueprint_name\": \"MyBlueprint\" } }");
-        cluster.setBlueprint(blueprint);
-
+    void shouldMarkFailedNodesUnhealthyInEveryRecoveryMode() {
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
-
-        when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("auto recovery").thenReturn("failed node");
-
+        when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("failed node");
         InstanceMetaData host1 = getHost("host1", "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
         InstanceMetaData host2 = getHost("host2", "group2", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
-
-        HostGroup hostGroup = getHostGroup(host1, RecoveryMode.AUTO);
         when(instanceMetaDataService.getAllInstanceMetadataByStackId(eq(stack.getId()))).thenReturn(Set.of(host1, host2));
         when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(eq(stack.getId()))).thenReturn(Set.of(host1, host2));
-        when(hostGroupService.findHostGroupsInCluster(stack.getCluster().getId())).thenReturn(Set.of(hostGroup, getHostGroup(host2, RecoveryMode.MANUAL)));
+        when(hostGroupService.findHostGroupsInCluster(stack.getCluster().getId()))
+                .thenReturn(Set.of(getHostGroup(host1, RecoveryMode.AUTO), getHostGroup(host2, RecoveryMode.MANUAL)));
 
         underTest.reportHealthChange(STACK_CRN, Map.of("host1", Optional.empty(), "host2", Optional.empty()), Set.of());
 
-        Map<String, List<String>> autoRecoveredNodes = Map.of("master", List.of("host1"));
-        verify(flowManager).triggerClusterRepairFlow(STACK_ID, autoRecoveredNodes, false);
-
-        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_AUTORECOVERY_REQUESTED_HOST_EVENT.getMessage()),
-                any());
-        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_AUTORECOVERY_REQUESTED_CLUSTER_EVENT.getMessage()),
-                any());
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY",
-                CLUSTER_AUTORECOVERY_REQUESTED_CLUSTER_EVENT, List.of("host1"));
-
-        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT.getMessage()),
-                any());
-        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT.getMessage()),
-                any());
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(STACK_ID, "RECOVERY",
-                CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT, List.of("host2"));
-        verify(updateHostsValidator, times(1)).validateComponentsCategory(stack, hostGroup.getName());
+        assertEquals(InstanceStatus.SERVICES_UNHEALTHY, host1.getInstanceStatus());
+        assertEquals(InstanceStatus.SERVICES_UNHEALTHY, host2.getInstanceStatus());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(eq(STACK_ID), eq("RECOVERY"), eq(CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT), any());
+        verifyNoInteractions(flowManager);
     }
 
     @Test
@@ -248,28 +219,6 @@ class ClusterOperationServiceTest {
         underTest.reportHealthChange(STACK_CRN, Map.of(hostFQDN, Optional.empty()), Set.of());
 
         verify(flowManager, times(0)).triggerStackSync(eq(stack.getId()));
-    }
-
-    @Test
-    void shouldNotUpdateHostMetaDataWhenRecoveryTriggerFails() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText("{ \"Blueprints\": { \"blueprint_name\": \"MyBlueprint\" } }");
-        cluster.setBlueprint(blueprint);
-
-        when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
-        InstanceMetaData host1 = getHost("host1", "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
-        when(instanceMetaDataService.getAllInstanceMetadataByStackId(eq(stack.getId()))).thenReturn(Set.of(host1));
-        when(hostGroupService.findHostGroupsInCluster(stack.getCluster().getId()))
-                .thenReturn(Set.of(getHostGroup(host1, RecoveryMode.AUTO)));
-
-        doThrow(new FlowsAlreadyRunningException("Flow in action")).when(flowManager).triggerClusterRepairFlow(anyLong(), anyMap(), anyBoolean());
-
-        assertThrows(FlowsAlreadyRunningException.class, () -> {
-            underTest.reportHealthChange(STACK_CRN, Map.of("host1", Optional.empty()), Set.of());
-        });
-
-        verifyNoMoreInteractions(cloudbreakMessagesService);
-        verifyNoMoreInteractions(cloudbreakEventService);
     }
 
     @Test

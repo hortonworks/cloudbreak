@@ -471,7 +471,7 @@ public class ModelDescriptions {
         public static final String CONSTRAINT_NAME = "name of a constraint template that defines the resource constraints for the hostgroup";
         public static final String HOST_COUNT = "number of hosts in the hostgroup";
         public static final String METADATA = "metadata of hosts";
-        public static final String RECOVERY_MODE = "recovery mode of the hostgroup's nodes";
+        public static final String RECOVERY_MODE = "recovery mode of the hostgroup's nodes, only MANUAL is supported";
     }
 
     public static class UserNamePasswordModelDescription {

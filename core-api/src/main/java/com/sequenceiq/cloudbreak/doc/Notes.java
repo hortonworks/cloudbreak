@@ -63,11 +63,9 @@ public class Notes {
     public static final String CONNECTOR_NOTES = "Each cloud provider has it's own specific resources like instance types and disk types."
             + " These endpoints are collecting them.";
     public static final String SETTINGS_NOTES = "Collecting Cloudbreak specific resource settings.";
-    public static final String FAILURE_REPORT_NOTES = "Endpoint to report the failed nodes in the given cluster. If recovery mode for the node's hostgroup "
-            + "is AUTO then autorecovery would be started. If recovery mode for the node's hostgroup is MANUAL, the nodes will be marked as unhealthy.";
-    public static final String CHANGED_NODES_REPORT_NOTES = "Endpoint to report the new failed and healthy nodes in the given cluster. If recovery mode "
-            + "for the node's hostgroup is AUTO then autorecovery would be started. If recovery mode for the node's hostgroup is MANUAL, the nodes will be "
-            + "marked as unhealthy.";
+    public static final String FAILURE_REPORT_NOTES = "Endpoint to report the failed nodes in the given cluster. The nodes will be marked as unhealthy.";
+    public static final String CHANGED_NODES_REPORT_NOTES = "Endpoint to report the new failed and healthy nodes in the given cluster. "
+            + "The failed nodes will be marked as unhealthy.";
     public static final String CLUSTER_REPAIR_NOTES = "Removing the failed nodes and starting new nodes to substitute them.";
     public static final String CLUSTER_UPGRADE_NOTES = "Removing all nodes and starting new nodes with the latest image. If the cluster already uses the " +
             "the latest image then no remove/restart will happen.";

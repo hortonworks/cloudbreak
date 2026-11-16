@@ -1137,11 +1137,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public Map<String, String> getComponentsByCategory(String blueprintName, String hostGroupName) {
-        return null;
-    }
-
-    @Override
     public String getStackRepositoryJson(StackRepoDetails repoDetails, String stackRepoId) {
         return null;
     }

@@ -1,48 +1,29 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
-import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Component
 public class UpdateHostsValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateHostsValidator.class);
-
-    private static final String MASTER_CATEGORY = "MASTER";
-
-    @Inject
-    private ClusterApiConnectors clusterApiConnectors;
-
     @Inject
     private HostGroupService hostGroupService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private BlueprintUtils blueprintUtils;
 
     public boolean validateRequest(Stack stack, HostGroupAdjustmentV4Request hostGroupAdjustment) {
         HostGroup hostGroup = getHostGroup(stack, hostGroupAdjustment);
@@ -104,25 +85,5 @@ public class UpdateHostsValidator {
                     stack.getCluster().getName(), hostGroupAdjustment.getHostGroup()));
         }
         return hostGroup.get();
-    }
-
-    public void validateComponentsCategory(Stack stack, String hostGroup) {
-        Blueprint blueprint = stack.getCluster().getBlueprint();
-        String blueprintText = blueprint.getBlueprintJsonText();
-        try {
-            JsonNode root = JsonUtil.readTree(blueprintText);
-            String blueprintName = root.path("Blueprints").path("blueprint_name").asText();
-            Map<String, String> categories =
-                    clusterApiConnectors.getConnector(stack).clusterModificationService().getComponentsByCategory(blueprintName, hostGroup);
-            for (Map.Entry<String, String> entry : categories.entrySet()) {
-                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY) && !blueprintUtils.isSharedServiceReadyBlueprint(blueprint)) {
-                    throw new BadRequestException(
-                            String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
-                                    entry.getKey()));
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Cannot check the host components category", e);
-        }
     }
 }

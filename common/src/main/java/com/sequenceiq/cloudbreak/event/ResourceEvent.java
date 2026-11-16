@@ -417,8 +417,6 @@ public enum ResourceEvent {
     CLUSTER_HOST_STATUS_UPDATED("cluster.host.status.updated"),
     CLUSTER_HOSTS_STATES_UPDATED("cluster.hosts.states.updated"),
     CLUSTER_START_REQUESTED("cluster.start.requested"),
-    CLUSTER_AUTORECOVERY_REQUESTED_CLUSTER_EVENT("cluster.autorecovery.requested.cluster"),
-    CLUSTER_AUTORECOVERY_REQUESTED_HOST_EVENT("cluster.autorecovery.requested.host"),
     CLUSTER_KRAFT_MIGRATION_STARTED_EVENT("cluster.kraft.migration.started"),
     CLUSTER_KRAFT_MIGRATION_FAILED_EVENT("cluster.kraft.migration.failed"),
     CLUSTER_KRAFT_MIGRATION_COMMAND_IN_PROGRESS_EVENT("cluster.kraft.migration.command.inprogress"),

@@ -47,8 +47,6 @@ public interface ClusterModificationService {
 
     void reconfigureCMMemory() throws CloudbreakException;
 
-    Map<String, String> getComponentsByCategory(String blueprintName, String hostGroupName);
-
     String getStackRepositoryJson(StackRepoDetails repoDetails, String stackRepoId);
 
     void upgradeClusterRuntime(Set<ClouderaManagerProduct> products, boolean cdhPatchUpgrade, Optional<String> remoteDataContext, boolean rollingUpgradeEnabled)
