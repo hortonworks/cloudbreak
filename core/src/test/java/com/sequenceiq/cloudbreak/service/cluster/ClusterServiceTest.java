@@ -352,6 +352,19 @@ class ClusterServiceTest {
     }
 
     @Test
+    void testGetAllClusterNamesUsingEncryptionProfileForwardsCrnAndAccountId() {
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:acc1:encryptionprofile:ep1";
+        String accountId = "acc1";
+        when(repository.findAllClusterNamesByEncryptionProfileCrn(eq(encryptionProfileCrn), eq(accountId)))
+                .thenReturn(List.of("cluster1", "cluster2"));
+
+        List<String> result = underTest.getAllClusterNamesUsingEncryptionProfile(encryptionProfileCrn, accountId);
+
+        assertEquals(List.of("cluster1", "cluster2"), result);
+        verify(repository).findAllClusterNamesByEncryptionProfileCrn(encryptionProfileCrn, accountId);
+    }
+
+    @Test
     void testRemoveEncryptionProfileCrn() {
         underTest.disableEncryptionProfile(CLUSTER_ID);
 

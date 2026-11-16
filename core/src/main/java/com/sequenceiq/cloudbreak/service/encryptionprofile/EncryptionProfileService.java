@@ -170,17 +170,4 @@ public class EncryptionProfileService {
 
         return getEncryptionProfileByCrnOrDefault(crn);
     }
-
-    private boolean inheritEncryptionProfileFromEnvironment(DetailedEnvironmentResponse environment, Cluster cluster) {
-        return StringUtils.isBlank(cluster.getEncryptionProfileCrn())
-                && StringUtils.isNotBlank(environment.getEncryptionProfileCrn());
-    }
-
-    private boolean govCloudAnd732AndProfileShouldApplied(DetailedEnvironmentResponse environment, Cluster cluster, Optional<String> runtimeVersion) {
-        return StringUtils.isBlank(cluster.getEncryptionProfileCrn())
-                && StringUtils.isNotBlank(environment.getEncryptionProfileCrn())
-                && environment.getCredential().getGovCloud()
-                && runtimeVersion.isPresent()
-                && isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_3_2);
-    }
 }
