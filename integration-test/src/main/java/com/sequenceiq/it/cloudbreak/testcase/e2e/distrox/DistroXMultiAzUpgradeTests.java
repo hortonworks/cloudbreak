@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashMap;
@@ -13,8 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -29,12 +32,13 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2EWithReusableResourcesTest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class DistroXMultiAzUpgradeTests extends PreconditionSdxE2ETest {
+public class DistroXMultiAzUpgradeTests extends AbstractE2EWithReusableResourcesTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXMultiAzUpgradeTests.class);
 
@@ -50,6 +54,25 @@ public class DistroXMultiAzUpgradeTests extends PreconditionSdxE2ETest {
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
 
+    @Inject
+    private DistroxUtil distroxUtil;
+
+    @Override
+    protected void setupClass(TestContext testContext) {
+        String currentVersion = commonClusterManagerProperties.getRuntimeVersion();
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        initializeAzureMarketplaceTermsPolicy(testContext);
+        createEnvironmentWithFreeIpa(testContext);
+        testContext.given(SdxTestDto.class)
+                .withCloudStorage()
+                .withRuntimeVersion(currentVersion)
+                .when(sdxTestClient.create())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances();
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
@@ -57,15 +80,9 @@ public class DistroXMultiAzUpgradeTests extends PreconditionSdxE2ETest {
             when = "upgrade called on DistroX cluster",
             then = "Upgrade should be successful,the clusters should be up and running and nodes should be distributed across multiple AZs")
     public void testDistroXMultiAzUpgrade(TestContext testContext) {
-        String currentVersion = commonClusterManagerProperties.getRuntimeVersion();
         String runTimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(false);
         String dataHubKey = "multiAzDistroxUpgrade";
-        testContext.given(SdxTestDto.class)
-                .withCloudStorage()
-                .withRuntimeVersion(currentVersion)
-                .when(sdxTestClient.create())
-                .await(SdxClusterStatusResponse.RUNNING)
-                .awaitForHealthyInstances()
+        testContext.given(DistroXTestDto.class)
                 .given(dataHubKey, DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(runTimeVersion))
                 .withEnableMultiAz(true)
@@ -96,6 +113,95 @@ public class DistroXMultiAzUpgradeTests extends PreconditionSdxE2ETest {
                 })
                 .validate();
 
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
+            when = " valid MultiAz Datahub is provisioned, scaled up and scaled down",
+            then = "the MultiAz Datahub should be available and nodes should be distributed correctly across multiple AZs after each operation")
+    public void testDistroXMultiAzProvisionAndRepair(TestContext testContext, ITestContext iTestContext) {
+        String datahubKey = "multiAzDistroxRepair";
+
+        testContext.given(DistroXTestDto.class)
+                .given(datahubKey, DistroXTestDto.class)
+                .withEnableMultiAz(true)
+                .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
+                        .defaultHostGroup()
+                        .withStorageOptimizedInstancetype()
+                        .build())
+                .when(distroXTestClient.create(), key(datahubKey))
+                .await(STACK_AVAILABLE, key(datahubKey))
+                .awaitForHealthyInstances()
+                .useAlternativeServiceEndpointIfConfigured()
+                .given(datahubKey, DistroXTestDto.class)
+                .when(distroXTestClient.get(), key(datahubKey))
+                .then((tc, testDto, client) -> {
+                    CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
+                    Map<String, String> instancesToDelete = distroxUtil.getInstancesWithAz(testDto, client, MASTER.getName());
+                    cloudFunctionality.deleteInstances(testDto.getName(), instancesToDelete);
+                    return testDto;
+                })
+                .awaitForHostGroup(MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
+                .when(distroXTestClient.repair(MASTER))
+                .await(STACK_AVAILABLE, key(datahubKey))
+                .awaitForHealthyInstances()
+                .given(datahubKey, DistroXTestDto.class)
+                .when(distroXTestClient.get(), key(datahubKey))
+                .then((tc, testDto, client) -> {
+                    validateStackForMultiAz(testDto, tc, "repair");
+                    return testDto;
+                })
+                .when(distroXTestClient.delete(), key(datahubKey))
+                .await(STACK_DELETED, key(datahubKey))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is a running Cloudbreak, and a Data Lake cluster in available state",
+            when = " valid MultiAz Datahub is provisioned, scaled up and scaled down",
+            then = "the MultiAz Datahub should be available and nodes should be distributed correctly across multiple AZs after each operation")
+    public void testDistroXMultiAzProvisionAndScale(TestContext testContext, ITestContext iTestContext) {
+        String datahubKey = "multiAzDistroxScale";
+        DistroXScaleTestParameters params = new DistroXScaleTestParameters(iTestContext.getCurrentXmlTest().getAllParameters());
+
+        testContext.given(DistroXTestDto.class)
+                .given(datahubKey, DistroXTestDto.class)
+                .withEnableMultiAz(true)
+                .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
+                        .defaultHostGroup()
+                        .withStorageOptimizedInstancetype()
+                        .build())
+                .when(distroXTestClient.create(), key(datahubKey))
+                .await(STACK_AVAILABLE, key(datahubKey))
+                .awaitForHealthyInstances()
+                .given(datahubKey, DistroXTestDto.class)
+                .when(distroXTestClient.get(), key(datahubKey))
+                .useAlternativeServiceEndpointIfConfigured()
+                .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleUpTarget()))
+                .await(STACK_AVAILABLE, key(datahubKey))
+                .awaitForHealthyInstances()
+                .given(datahubKey, DistroXTestDto.class)
+                .when(distroXTestClient.get(), key(datahubKey))
+                .then((tc, testDto, client) -> {
+                    validateStackForMultiAz(testDto, tc, "Upscale");
+                    return testDto;
+                })
+                .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
+                .await(STACK_AVAILABLE, key(datahubKey))
+                .awaitForHealthyInstances()
+                .given(datahubKey, DistroXTestDto.class)
+                .when(distroXTestClient.get(), key(datahubKey))
+                .then((tc, testDto, client) -> {
+                    validateStackForMultiAz(testDto, tc, "Downscale");
+                    return testDto;
+                })
+                .when(distroXTestClient.delete(), key(datahubKey))
+                .await(STACK_DELETED, key(datahubKey))
+                .validate();
     }
 
     private void validateStackForMultiAz(DistroXTestDto distroXTestDto, TestContext tc, String operation) {
