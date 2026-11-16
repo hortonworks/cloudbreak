@@ -8,16 +8,13 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.it.cloudbreak.client.RestartTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.restart.RestartInstancesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -36,9 +33,6 @@ public class SdxLightDutyProLifecycleTest extends PreconditionSdxE2ETest {
 
     @Inject
     private SdxUtil sdxUtil;
-
-    @Inject
-    private UmsTestClient umsTestClient;
 
     private String runtimeVersion;
 
@@ -69,9 +63,6 @@ public class SdxLightDutyProLifecycleTest extends PreconditionSdxE2ETest {
         List<String> dataLakeInstancesToRestart = new ArrayList<>();
 
         testContext
-                .given(UmsTestDto.class)
-                .when(umsTestClient.grantEntitlement(testContext.getActingUserCrn().getAccountId(),
-                        Entitlement.CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS.name()))
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs()
