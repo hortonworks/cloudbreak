@@ -72,7 +72,7 @@ public class AzureDatabaseFallbackDeploymentService {
             String template = azureDatabaseTemplateBuilder.build(cloudContext, stackForAttempt);
 
             try {
-                submitDeploymentWithConflictRetry(stackName, resourceGroupName, template, client);
+                submitDeploymentWithTransientFailureRetry(stackName, resourceGroupName, template, client);
                 if (attempt > 0) {
                     LOGGER.info("DB ARM deployment {}/{} succeeded on fallback attempt {} with SKU {}.",
                             resourceGroupName, stackName, attempt, skuForAttempt);
@@ -104,7 +104,7 @@ public class AzureDatabaseFallbackDeploymentService {
                     simulatedCapacityFailureReason(sku), null);
         }
         String template = azureDatabaseTemplateBuilder.build(cloudContext, databaseStack);
-        submitDeploymentWithConflictRetry(stackName, resourceGroupName, template, client);
+        submitDeploymentWithTransientFailureRetry(stackName, resourceGroupName, template, client);
     }
 
     private String deploymentDescription(String resourceGroupName, String stackName) {
@@ -120,6 +120,26 @@ public class AzureDatabaseFallbackDeploymentService {
                 .withFlavor(flavor)
                 .build();
         return new DatabaseStack(original.getNetwork(), dbServer, original.getTags(), original.getTemplate());
+    }
+
+    private void submitDeploymentWithTransientFailureRetry(String stackName, String resourceGroupName, String template, AzureClient client) {
+        try {
+            submitDeploymentWithConflictRetry(stackName, resourceGroupName, template, client);
+        } catch (ManagementException e) {
+            if (!azureExceptionHandler.isTransientProvisioningFailure(e)) {
+                throw e;
+            }
+            LOGGER.warn("DB ARM deployment {}/{} failed with a transient Azure provisioning error, redeploying once.", resourceGroupName, stackName, e);
+            try {
+                submitDeploymentWithConflictRetry(stackName, resourceGroupName, template, client);
+            } catch (ManagementException redeployFailure) {
+                if (redeployFailure != e) {
+                    redeployFailure.addSuppressed(e);
+                }
+                throw redeployFailure;
+            }
+            LOGGER.info("DB ARM deployment {}/{} succeeded on redeploy after a transient Azure provisioning error.", resourceGroupName, stackName);
+        }
     }
 
     private void submitDeploymentWithConflictRetry(String stackName, String resourceGroupName, String template, AzureClient client) {

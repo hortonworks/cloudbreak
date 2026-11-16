@@ -1,13 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,6 +34,12 @@ public class AzureExceptionHandler {
     private static final String CONCURRENT_WRITE_ERROR_CODE = "ConflictingConcurrentWriteNotAllowed";
 
     private static final String CONFLICTING_USER_INPUT_ERROR_CODE = "ConflictingUserInput";
+
+    private static final String DEPLOYMENT_FAILED_ERROR_CODE = "DeploymentFailed";
+
+    private static final String INTERNAL_SERVER_ERROR_CODE = "InternalServerError";
+
+    private static final String UNEXPECTED_ERROR_MESSAGE_FRAGMENT = "unexpected error";
 
     private static final String ALREADY_ATTACHED_ERROR_MESSAGE = "cannot be attached as the disk is already owned by VM";
 
@@ -171,31 +180,60 @@ public class AzureExceptionHandler {
     }
 
     public boolean isCapacityError(ManagementException e) {
-        ManagementError rootError = e.getValue();
-        if (rootError == null) {
-            return false;
+        return flattenErrors(e.getValue()).stream().anyMatch(this::isCapacityError);
+    }
+
+    private boolean isCapacityError(ManagementError error) {
+        if (AzureDeploymentCapacityError.isCapacityErrorCode(error.getCode())) {
+            return true;
         }
-        Deque<ManagementError> stack = new ArrayDeque<>();
-        stack.push(rootError);
-        while (!stack.isEmpty()) {
-            ManagementError current = stack.pop();
-            if (AzureDeploymentCapacityError.isCapacityErrorCode(current.getCode())) {
-                return true;
-            }
-            if (current.getAdditionalInfo() != null) {
-                for (AdditionalInfo info : current.getAdditionalInfo()) {
-                    if (AzureDeploymentCapacityError.isCapacityErrorCode(info.getType())) {
-                        return true;
-                    }
-                }
-            }
-            if (current.getDetails() != null) {
-                for (ManagementError detail : current.getDetails()) {
-                    stack.push(detail);
+        if (error.getAdditionalInfo() != null) {
+            for (AdditionalInfo info : error.getAdditionalInfo()) {
+                if (AzureDeploymentCapacityError.isCapacityErrorCode(info.getType())) {
+                    return true;
                 }
             }
         }
         return false;
+    }
+
+    public boolean isTransientProvisioningFailure(ManagementException e) {
+        if (e == null || e.getValue() == null || !DEPLOYMENT_FAILED_ERROR_CODE.equalsIgnoreCase(e.getValue().getCode())) {
+            return false;
+        }
+        boolean internalServerError = false;
+        for (ManagementError error : flattenErrors(e.getValue())) {
+            if (isCapacityError(error)) {
+                return false;
+            }
+            internalServerError |= isInternalServerError(error);
+        }
+        return internalServerError;
+    }
+
+    private boolean isInternalServerError(ManagementError error) {
+        return INTERNAL_SERVER_ERROR_CODE.equalsIgnoreCase(error.getCode())
+                || StringUtils.containsIgnoreCase(error.getMessage(), UNEXPECTED_ERROR_MESSAGE_FRAGMENT);
+    }
+
+    private List<ManagementError> flattenErrors(ManagementError root) {
+        if (root == null) {
+            return List.of();
+        }
+        List<ManagementError> errors = new ArrayList<>();
+        Deque<ManagementError> stack = new ArrayDeque<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            ManagementError current = stack.pop();
+            errors.add(current);
+            List<? extends ManagementError> details = current.getDetails();
+            if (details != null) {
+                for (ManagementError detail : details) {
+                    stack.push(detail);
+                }
+            }
+        }
+        return errors;
     }
 
     public AzureCapacityErrorMessageProvider capacityErrorMessageProvider() {

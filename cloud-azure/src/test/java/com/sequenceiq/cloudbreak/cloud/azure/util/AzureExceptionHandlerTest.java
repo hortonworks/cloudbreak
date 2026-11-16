@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -22,10 +23,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import com.azure.core.http.HttpResponse;
+import com.azure.core.management.exception.AdditionalInfo;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.ApiError;
@@ -290,5 +293,107 @@ public class AzureExceptionHandlerTest {
                 + "details: The resource write operation failed to complete successfully. (details: The requested SKU is not available.)",
                 result.getMessage());
         assertSame(managementException, result.getCause());
+    }
+
+    @Test
+    void isTransientProvisioningFailureWhenDeploymentFailedWithNestedInternalServerErrorThenTrue() {
+        ManagementException managementException = deploymentFailed("InternalServerError",
+                "An unexpected error occured while processing the request. Tracking ID: 'abc'");
+
+        assertTrue(underTest.isTransientProvisioningFailure(managementException));
+    }
+
+    @Test
+    void isTransientProvisioningFailureWhenOnlyInternalServerErrorCodeMatchesThenTrue() {
+        ManagementException managementException = deploymentFailed("InternalServerError", "The service failed.");
+
+        assertTrue(underTest.isTransientProvisioningFailure(managementException));
+    }
+
+    @Test
+    void isTransientProvisioningFailureWhenOnlyUnexpectedErrorMessageMatchesThenTrue() {
+        ManagementException managementException = deploymentFailed("SomeOtherCode", "An unexpected error occured while processing the request.");
+
+        assertTrue(underTest.isTransientProvisioningFailure(managementException));
+    }
+
+    @Test
+    void isTransientProvisioningFailureWhenDeploymentFailedWithoutInternalServerErrorThenFalse() {
+        ManagementException managementException = deploymentFailed("ServerNameAlreadyExists", "The server name is already taken.");
+
+        assertFalse(underTest.isTransientProvisioningFailure(managementException));
+    }
+
+    @Test
+    void isTransientProvisioningFailureWhenOtherTopLevelCodeThenFalse() {
+        ManagementError other = AzureTestUtils.managementError("InvalidTemplateDeployment", "An unexpected error occured while processing the request.");
+
+        assertFalse(underTest.isTransientProvisioningFailure(new ManagementException("failed", null, other)));
+    }
+
+    @Test
+    void isTransientProvisioningFailureWhenCapacityErrorThenFalse() {
+        ManagementError unexpected = AzureTestUtils.managementError("SkuNotAvailable", "An unexpected error occured while processing the request.");
+        ManagementError deploymentFailed = AzureTestUtils.managementError("DeploymentFailed", "At least one resource deployment operation failed.");
+        AzureTestUtils.setDetails(deploymentFailed, List.of(unexpected));
+
+        assertFalse(underTest.isTransientProvisioningFailure(new ManagementException("failed", null, deploymentFailed)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void isTransientProvisioningFailureWhenCapacityAndInternalErrorsAreSiblingsThenFalse(boolean capacityFirst) {
+        ManagementError capacity = AzureTestUtils.managementError("SkuNotAvailable", "The requested SKU is not available.");
+        ManagementError internal = AzureTestUtils.managementError("InternalServerError", "The service failed.");
+        ManagementError root = AzureTestUtils.managementError("DeploymentFailed", "Deployment failed.");
+        AzureTestUtils.setDetails(root, capacityFirst ? List.of(capacity, internal) : List.of(internal, capacity));
+
+        assertFalse(underTest.isTransientProvisioningFailure(new ManagementException("failed", null, root)));
+    }
+
+    @Test
+    void isTransientProvisioningFailureWhenAdditionalInfoContainsCapacityErrorThenFalse() {
+        ManagementError internal = AzureTestUtils.managementError("InternalServerError", "The service failed.");
+        AdditionalInfo additionalInfo = mock(AdditionalInfo.class);
+        when(additionalInfo.getType()).thenReturn("SkuNotAvailable");
+        AzureTestUtils.setField(internal, "additionalInfo", List.of(additionalInfo));
+        ManagementError root = AzureTestUtils.managementError("DeploymentFailed", "Deployment failed.");
+        AzureTestUtils.setDetails(root, List.of(internal));
+        ManagementException exception = new ManagementException("failed", null, root);
+
+        assertTrue(underTest.isCapacityError(exception));
+        assertFalse(underTest.isTransientProvisioningFailure(exception));
+    }
+
+    @Test
+    void isTransientProvisioningFailureTraversesErrorDetailsOnlyOnce() {
+        ManagementError internal = AzureTestUtils.managementError("InternalServerError", "The service failed.");
+        ManagementError root = mock(ManagementError.class);
+        when(root.getCode()).thenReturn("DeploymentFailed");
+        when(root.getDetails()).thenAnswer(invocation -> List.of(internal));
+
+        assertTrue(underTest.isTransientProvisioningFailure(new ManagementException("failed", null, root)));
+        verify(root).getDetails();
+    }
+
+    @Test
+    void isCapacityErrorWhenNoErrorValueThenFalse() {
+        assertFalse(underTest.isCapacityError(new ManagementException("failed", null)));
+    }
+
+    @Test
+    void isTransientProvisioningFailureWhenNoErrorValueThenFalse() {
+        assertFalse(underTest.isTransientProvisioningFailure(new ManagementException("failed", mock(HttpResponse.class))));
+        assertFalse(underTest.isTransientProvisioningFailure(null));
+    }
+
+    private ManagementException deploymentFailed(String innermostCode, String innermostMessage) {
+        ManagementError innermost = AzureTestUtils.managementError(innermostCode, innermostMessage);
+        ManagementError resourceFailure = AzureTestUtils.managementError("ResourceDeploymentFailure",
+                "The resource write operation failed to complete successfully, because it reached terminal provisioning state 'Failed'.");
+        AzureTestUtils.setDetails(resourceFailure, List.of(innermost));
+        ManagementError deploymentFailed = AzureTestUtils.managementError("DeploymentFailed", "At least one resource deployment operation failed.");
+        AzureTestUtils.setDetails(deploymentFailed, List.of(resourceFailure));
+        return new ManagementException("Long running operation is Failed or Cancelled.", null, deploymentFailed);
     }
 }

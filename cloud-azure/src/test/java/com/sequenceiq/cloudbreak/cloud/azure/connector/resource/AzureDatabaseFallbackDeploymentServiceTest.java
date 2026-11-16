@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.core.management.exception.ManagementError;
@@ -38,6 +40,11 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.service.retry.Retry;
 import com.sequenceiq.common.model.AzureDatabaseType;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 @ExtendWith(MockitoExtension.class)
 class AzureDatabaseFallbackDeploymentServiceTest {
@@ -72,9 +79,26 @@ class AzureDatabaseFallbackDeploymentServiceTest {
     @InjectMocks
     private AzureDatabaseFallbackDeploymentService underTest;
 
+    private final ListAppender<ILoggingEvent> logAppender = new ListAppender<>();
+
+    private Level originalLogLevel;
+
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(underTest, "retryService", retryService);
+        Logger logger = (Logger) LoggerFactory.getLogger(AzureDatabaseFallbackDeploymentService.class);
+        originalLogLevel = logger.getLevel();
+        logger.setLevel(Level.INFO);
+        logAppender.start();
+        logger.addAppender(logAppender);
+    }
+
+    @AfterEach
+    void tearDown() {
+        Logger logger = (Logger) LoggerFactory.getLogger(AzureDatabaseFallbackDeploymentService.class);
+        logger.detachAppender(logAppender);
+        logger.setLevel(originalLogLevel);
+        logAppender.stop();
     }
 
     @Test
@@ -146,6 +170,107 @@ class AzureDatabaseFallbackDeploymentServiceTest {
 
         assertEquals(nonCapacityException, thrown);
         verify(client, times(1)).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString());
+    }
+
+    @Test
+    void deployWithFallbackTransientProvisioningFailureRedeploysOnce() {
+        DatabaseStack databaseStack = createDatabaseStack(PRIMARY_SKU, List.of());
+        ManagementException transientException = createManagementException("DeploymentFailed");
+
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(azureExceptionHandler.isTransientProvisioningFailure(transientException)).thenReturn(true);
+        mockRetryThrowsThenSucceeds(transientException);
+
+        String result = underTest.deployWithFallback(STACK_NAME, RESOURCE_GROUP, client, cloudContext, databaseStack);
+
+        assertNull(result);
+        verify(client, times(2)).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString());
+    }
+
+    @Test
+    void deployWithFallbackTransientProvisioningFailureWithFallbackSkusKeepsPrimarySkuOnRedeploy() {
+        DatabaseStack databaseStack = createDatabaseStack(PRIMARY_SKU, List.of(FALLBACK_SKU_1));
+        ManagementException transientException = createManagementException("DeploymentFailed");
+
+        when(azureDatabaseTemplateBuilder.build(eq(cloudContext), any(DatabaseStack.class))).thenReturn(TEMPLATE);
+        when(azureExceptionHandler.isTransientProvisioningFailure(transientException)).thenReturn(true);
+        mockRetryThrowsThenSucceeds(transientException);
+
+        String result = underTest.deployWithFallback(STACK_NAME, RESOURCE_GROUP, client, cloudContext, databaseStack);
+
+        assertNull(result);
+        verify(azureDatabaseTemplateBuilder, times(1)).build(eq(cloudContext), any(DatabaseStack.class));
+        verify(client, times(2)).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString());
+        assertThat(logAppender.list)
+                .anySatisfy(event -> {
+                    assertThat(event.getLevel()).isEqualTo(Level.INFO);
+                    assertThat(event.getFormattedMessage()).isEqualTo("DB ARM deployment test-rg/test-stack succeeded on redeploy "
+                            + "after a transient Azure provisioning error.");
+                });
+    }
+
+    @Test
+    void deployWithFallbackTransientFailureThenCapacityErrorFallsBackToNextSku() {
+        DatabaseStack databaseStack = createDatabaseStack(PRIMARY_SKU, List.of(FALLBACK_SKU_1, FALLBACK_SKU_2));
+        ManagementException transientException = createManagementException("DeploymentFailed");
+        ManagementException capacityException = createManagementException("SkuNotAvailable");
+        String fallbackTemplate = "{\"template\":\"fallback\"}";
+
+        when(azureDatabaseTemplateBuilder.build(eq(cloudContext), any(DatabaseStack.class))).thenReturn(TEMPLATE, fallbackTemplate);
+        when(azureExceptionHandler.isTransientProvisioningFailure(transientException)).thenReturn(true);
+        when(azureExceptionHandler.isCapacityError(capacityException)).thenReturn(true);
+        mockRetryRunsAction();
+        when(client.createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString()))
+                .thenThrow(transientException, capacityException);
+
+        String result = underTest.deployWithFallback(STACK_NAME, RESOURCE_GROUP, client, cloudContext, databaseStack);
+
+        assertEquals(FALLBACK_SKU_1, result);
+        assertThat(capacityException.getSuppressed()).containsExactly(transientException);
+        ArgumentCaptor<DatabaseStack> stackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
+        verify(azureDatabaseTemplateBuilder, times(2)).build(eq(cloudContext), stackCaptor.capture());
+        assertThat(stackCaptor.getAllValues()).extracting(stack -> stack.getDatabaseServer().getFlavor())
+                .containsExactly(PRIMARY_SKU, FALLBACK_SKU_1);
+        verify(client, times(2)).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString());
+        verify(client).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(fallbackTemplate), anyString());
+    }
+
+    @Test
+    void deployWithFallbackTransientProvisioningFailureTwiceThrowsSecondErrorAfterSingleRedeploy() {
+        DatabaseStack databaseStack = createDatabaseStack(PRIMARY_SKU, List.of());
+        ManagementException firstException = createManagementException("DeploymentFailed");
+        ManagementException secondException = createManagementException("DeploymentFailed");
+
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(azureExceptionHandler.isTransientProvisioningFailure(firstException)).thenReturn(true);
+        mockRetryRunsAction();
+        when(client.createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString()))
+                .thenThrow(firstException, secondException);
+
+        ManagementException thrown = assertThrows(ManagementException.class,
+                () -> underTest.deployWithFallback(STACK_NAME, RESOURCE_GROUP, client, cloudContext, databaseStack));
+
+        assertSame(secondException, thrown);
+        assertThat(thrown.getSuppressed()).containsExactly(firstException);
+        verify(client, times(2)).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString());
+        assertThat(logAppender.list).noneMatch(event -> event.getFormattedMessage().contains("succeeded on redeploy"));
+    }
+
+    @Test
+    void deployWithFallbackSameTransientExceptionTwiceDoesNotSuppressItself() {
+        DatabaseStack databaseStack = createDatabaseStack(PRIMARY_SKU, List.of());
+        ManagementException transientException = createManagementException("DeploymentFailed");
+
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(azureExceptionHandler.isTransientProvisioningFailure(transientException)).thenReturn(true);
+        mockRetryAlwaysThrows(transientException);
+
+        ManagementException thrown = assertThrows(ManagementException.class,
+                () -> underTest.deployWithFallback(STACK_NAME, RESOURCE_GROUP, client, cloudContext, databaseStack));
+
+        assertSame(transientException, thrown);
+        assertThat(thrown.getSuppressed()).isEmpty();
+        verify(client, times(2)).createTemplateDeployment(eq(RESOURCE_GROUP), eq(STACK_NAME), eq(TEMPLATE), anyString());
     }
 
     @Test
@@ -255,11 +380,7 @@ class AzureDatabaseFallbackDeploymentServiceTest {
     }
 
     private ManagementException createManagementException(String code) {
-        ManagementError error = mock(ManagementError.class);
-        lenient().when(error.getCode()).thenReturn(code);
-        ManagementException exception = mock(ManagementException.class);
-        lenient().when(exception.getValue()).thenReturn(error);
-        return exception;
+        return new ManagementException("Deployment failed: " + code, null, new ManagementError(code, "Deployment failed."));
     }
 
     private void mockRetryRunsAction() {
