@@ -3,8 +3,8 @@ apply plugin: 'com.google.protobuf'
 
 buildscript {
   repositories {
-    mavenCentral()
     maven { url = "$repoUrl" }
+    mavenCentral()
     maven { url = "$springRepoUrl" }
   }
   dependencies {

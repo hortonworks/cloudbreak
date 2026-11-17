@@ -3,9 +3,9 @@ apply plugin: 'com.google.protobuf'
 
 buildscript {
   repositories {
-    mavenCentral()
     maven { url = "$repoUrl" }
-    maven { url '= "$springRepoUrl"' }
+    mavenCentral()
+    maven { url = "$springRepoUrl" }
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
