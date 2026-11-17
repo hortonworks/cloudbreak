@@ -6,6 +6,7 @@ import static com.sequenceiq.environment.environment.flow.verticalscale.freeipa.
 import static com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleStateSelectors.HANDLED_FAILED_VERTICAL_SCALING_FREEIPA_EVENT;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleEvent;
@@ -26,6 +28,7 @@ import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 @Configuration
 public class EnvironmentVerticalScaleActions {
@@ -33,6 +36,8 @@ public class EnvironmentVerticalScaleActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentVerticalScaleActions.class);
 
     private static final String GROUP_BEING_SCALED = "GROUP_BEING_SCALED";
+
+    private static final String IS_ROLLING_SCALE = "IS_ROLLING_SCALE";
 
     private static final String PREVIOUS_INSTANCE_TYPE = "PREVIOUS_INSTANCE_TYPE";
 
@@ -56,10 +61,20 @@ public class EnvironmentVerticalScaleActions {
         return new AbstractEnvironmentVerticalScaleAction<>(EnvironmentVerticalScaleEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvironmentVerticalScaleEvent payload, Map<Object, Object> variables) {
-                environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.VERTICAL_SCALE_VALIDATION_IN_PROGRESS,
-                                ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED,
-                                EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_VALIDATION_STATE);
+                boolean rolling = isRollingVerticalScale(payload.getFreeIPAVerticalScaleRequest());
+                variables.put(IS_ROLLING_SCALE, rolling);
+                LOGGER.info("FreeIPA vertical scale is rolling: {}, environment status changes {}be skipped during the flow",
+                        rolling, rolling ? "will " : "will not ");
+                if (rolling) {
+                    environmentStatusUpdateService.notifyOnly(context, payload,
+                            ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED,
+                            EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_VALIDATION_STATE);
+                } else {
+                    environmentStatusUpdateService
+                            .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.VERTICAL_SCALE_VALIDATION_IN_PROGRESS,
+                                    ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED,
+                                    EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_VALIDATION_STATE);
+                }
                 sendEvent(context, VERTICAL_SCALING_FREEIPA_VALIDATION_HANDLER.selector(), payload);
             }
         };
@@ -82,11 +97,19 @@ public class EnvironmentVerticalScaleActions {
                 String groupBeingScaled = (String) variables.getOrDefault(GROUP_BEING_SCALED, "unknown");
                 String previousInstanceType = (String) variables.getOrDefault(PREVIOUS_INSTANCE_TYPE, "unknown");
                 String targetInstanceType = (String) variables.getOrDefault(TARGET_INSTANCE_TYPE, "unknown");
-                environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS,
-                                ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_ON_FREEIPA_STARTED,
-                                List.of(groupBeingScaled, previousInstanceType, targetInstanceType),
-                                EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_STATE);
+                boolean rolling = (boolean) variables.getOrDefault(IS_ROLLING_SCALE, false);
+                if (rolling) {
+                    environmentStatusUpdateService.notifyOnly(context, payload,
+                            ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_ON_FREEIPA_STARTED,
+                            List.of(groupBeingScaled, previousInstanceType, targetInstanceType),
+                            EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_STATE);
+                } else {
+                    environmentStatusUpdateService
+                            .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS,
+                                    ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_ON_FREEIPA_STARTED,
+                                    List.of(groupBeingScaled, previousInstanceType, targetInstanceType),
+                                    EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_STATE);
+                }
                 sendEvent(context, VERTICAL_SCALING_FREEIPA_HANDLER.selector(), payload);
             }
 
@@ -113,11 +136,20 @@ public class EnvironmentVerticalScaleActions {
                 String groupBeingScaled = (String) variables.getOrDefault(GROUP_BEING_SCALED, "unknown");
                 String previousInstanceType = (String) variables.getOrDefault(PREVIOUS_INSTANCE_TYPE, "unknown");
                 String targetInstanceType = (String) variables.getOrDefault(TARGET_INSTANCE_TYPE, "unknown");
-                EnvironmentDto environmentDto = environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.ENV_STOPPED,
-                                ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_FINISHED,
-                                List.of(groupBeingScaled, previousInstanceType, targetInstanceType),
-                                EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FINISHED_STATE);
+                boolean rolling = (boolean) variables.getOrDefault(IS_ROLLING_SCALE, false);
+                EnvironmentDto environmentDto;
+                if (rolling) {
+                    environmentDto = environmentStatusUpdateService.notifyOnly(context, payload,
+                            ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_FINISHED,
+                            List.of(groupBeingScaled, previousInstanceType, targetInstanceType),
+                            EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FINISHED_STATE);
+                } else {
+                    environmentDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
+                            EnvironmentStatus.ENV_STOPPED,
+                            ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_FINISHED,
+                            List.of(groupBeingScaled, previousInstanceType, targetInstanceType),
+                            EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FINISHED_STATE);
+                }
                 metricService.incrementMetricCounter(MetricType.ENV_VERTICAL_SCALE_FINISHED, environmentDto);
                 sendEvent(context, FINALIZE_VERTICAL_SCALING_FREEIPA_EVENT.event(), payload);
             }
@@ -135,13 +167,21 @@ public class EnvironmentVerticalScaleActions {
                 String groupBeingScaled = (String) variables.getOrDefault(GROUP_BEING_SCALED, "unknown");
                 String previousInstanceType = (String) variables.getOrDefault(PREVIOUS_INSTANCE_TYPE, "unknown");
                 String targetInstanceType = (String) variables.getOrDefault(TARGET_INSTANCE_TYPE, "unknown");
-                EnvironmentDto environmentDto = environmentStatusUpdateService
-                        .updateFailedEnvironmentStatusAndNotify(context,
-                                payload,
-                                payload.getEnvironmentStatus(),
-                                convertStatus(payload.getEnvironmentStatus()),
-                                List.of(groupBeingScaled, previousInstanceType, targetInstanceType, payload.getException().getMessage()),
-                                EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FAILED_STATE);
+                boolean rolling = (boolean) variables.getOrDefault(IS_ROLLING_SCALE, false);
+                EnvironmentDto environmentDto;
+                if (rolling) {
+                    environmentDto = environmentStatusUpdateService.notifyOnly(
+                            context, payload.getVerticalScaleFreeIPAEvent(),
+                            convertStatus(payload.getEnvironmentStatus()),
+                            List.of(groupBeingScaled, previousInstanceType, targetInstanceType, payload.getException().getMessage()),
+                            EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FAILED_STATE);
+                } else {
+                    environmentDto = environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(
+                            context, payload, payload.getEnvironmentStatus(),
+                            convertStatus(payload.getEnvironmentStatus()),
+                            List.of(groupBeingScaled, previousInstanceType, targetInstanceType, payload.getException().getMessage()),
+                            EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FAILED_STATE);
+                }
                 metricService.incrementMetricCounter(MetricType.ENV_VERTICAL_SCALE_FAILED, environmentDto, payload.getException());
                 sendEvent(context, HANDLED_FAILED_VERTICAL_SCALING_FREEIPA_EVENT.event(), payload);
             }
@@ -157,6 +197,10 @@ public class EnvironmentVerticalScaleActions {
                 }
             }
         };
+    }
+
+    private boolean isRollingVerticalScale(VerticalScaleRequest request) {
+        return OrchestratorType.ONE_BY_ONE == OrchestratorType.valueOf(request.getOrchestratorType().toUpperCase(Locale.ROOT));
     }
 
 }

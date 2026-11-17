@@ -52,6 +52,24 @@ public class EnvironmentStatusUpdateService {
                 ));
     }
 
+    public EnvironmentDto notifyOnly(CommonContext context, Payload payload, ResourceEvent resourceEvent, Enum<?> envState) {
+        return notifyOnly(context, payload, resourceEvent, Set.of(), envState);
+    }
+
+    public EnvironmentDto notifyOnly(CommonContext context, Payload payload, ResourceEvent resourceEvent,
+            Collection<?> messageArgs, Enum<?> envState) {
+        LOGGER.info("Flow entered into {}", envState.name());
+        return environmentService
+                .findEnvironmentById(payload.getResourceId())
+                .map(environment -> {
+                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent, messageArgs);
+                    return environmentDto;
+                }).orElseThrow(() -> new IllegalStateException(
+                        String.format("Cannot notify about environment, because it does not exist: %s. ", payload.getResourceId())
+                ));
+    }
+
     public EnvironmentDto updateFailedEnvironmentStatusAndNotify(CommonContext context, BaseFailedFlowEvent failedFlowEvent,
             EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, Enum<?> envState) {
         return updateFailedEnvironmentStatusAndNotify(context, failedFlowEvent, environmentStatus, resourceEvent, Set.of(), envState);

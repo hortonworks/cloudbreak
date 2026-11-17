@@ -1,10 +1,13 @@
 package com.sequenceiq.environment.environment.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,9 +55,9 @@ public class EnvironmentStatusUpdateServiceTest {
         environmentDto = EnvironmentDto.builder().withId(1L).withEnvironmentStatus(EnvironmentStatus.STOP_DATAHUB_FAILED).build();
 
         environment = new Environment();
-        when(environmentService.updateEnvironmentStatus(eq(environment), any(), nullable(String.class))).thenReturn(environment);
-        when(environmentService.findEnvironmentById(environmentDto.getResourceId())).thenReturn(Optional.of(environment));
-        when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
+        lenient().when(environmentService.updateEnvironmentStatus(eq(environment), any(), nullable(String.class))).thenReturn(environment);
+        lenient().when(environmentService.findEnvironmentById(environmentDto.getResourceId())).thenReturn(Optional.of(environment));
+        lenient().when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
     }
 
     @Test
@@ -75,6 +78,25 @@ public class EnvironmentStatusUpdateServiceTest {
         assertEquals(EnvironmentStatus.STOP_DATAHUB_FAILED, actual.getStatus());
         verify(eventSenderService).sendEventAndNotification(environmentDto, "userCrn", ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of("message"));
         verify(environmentService).updateEnvironmentStatus(eq(environment), eq(EnvironmentStatus.STOP_DATAHUB_FAILED), nullable(String.class));
+    }
+
+    @Test
+    public void testNotifyOnlySendsEventWithoutStatusUpdate() {
+        EnvironmentDto actual = underTest.notifyOnly(commonContext, environmentDto,
+                ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of("message"), EnvStartState.ENV_START_FINISHED_STATE);
+
+        assertEquals(environmentDto, actual);
+        verify(eventSenderService).sendEventAndNotification(environmentDto, "userCrn", ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of("message"));
+        verify(environmentService, never()).updateEnvironmentStatus(any(), any(), nullable(String.class));
+    }
+
+    @Test
+    public void testNotifyOnlyThrowsWhenEnvironmentNotFound() {
+        when(environmentService.findEnvironmentById(environmentDto.getResourceId())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalStateException.class, () ->
+                underTest.notifyOnly(commonContext, environmentDto,
+                        ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, EnvStartState.ENV_START_FINISHED_STATE));
     }
 
     @Test
