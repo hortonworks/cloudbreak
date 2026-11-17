@@ -1,8 +1,10 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.database;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SIMULATE_DATABASE_CAPACITY_FAILURE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.redbeams.api.model.common.SimulatedDatabaseCapacityFailureTag.ALL_ATTEMPTS;
 import static com.sequenceiq.redbeams.api.model.common.SimulatedDatabaseCapacityFailureTag.KEY;
+import static java.lang.String.format;
 
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,7 @@ import java.util.UUID;
 
 import jakarta.inject.Inject;
 
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.TestCrnGenerator;
@@ -18,9 +21,9 @@ import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.EntitlementUtil;
 import com.sequenceiq.redbeams.api.model.common.SimulatedDatabaseCapacityFailureTag;
 import com.sequenceiq.redbeams.api.model.common.Status;
 
@@ -28,6 +31,7 @@ import com.sequenceiq.redbeams.api.model.common.Status;
  * Exercises the database instance type fallback against a real cloud provider. Real capacity errors cannot be forced, so the
  * CDP_SIMULATE_DATABASE_CAPACITY_FAILURE entitlement together with the {@link SimulatedDatabaseCapacityFailureTag} database server tag makes the
  * provider layer report a capacity error for the first N instance types before it really deploys the next one.
+ * The test is skipped when the acting account does not have the entitlement, as is the case on real UMS lanes where it is not granted.
  */
 public class RedbeamsDatabaseInstanceTypeFallbackE2ETest extends AbstractE2ETest {
 
@@ -39,10 +43,11 @@ public class RedbeamsDatabaseInstanceTypeFallbackE2ETest extends AbstractE2ETest
     @Override
     protected void setupTest(TestContext testContext) {
         initializeTest(testContext);
-        testContext
-                .given(EnvironmentTestDto.class)
-                .then(RedbeamsDatabaseTestAssertion.simulatedDatabaseCapacityFailureEntitled())
-                .validate();
+        if (!EntitlementUtil.isEntitled(testContext, CDP_SIMULATE_DATABASE_CAPACITY_FAILURE)) {
+            throw new SkipException(format("The '%s' entitlement is not granted for account '%s', so database capacity failures cannot be "
+                    + "simulated and the instance type fallback cannot be exercised.", CDP_SIMULATE_DATABASE_CAPACITY_FAILURE.name(),
+                    testContext.getActingUserCrn().getAccountId()));
+        }
         createEnvironment(testContext, Boolean.FALSE, testContext.getCloudProvider().getFreeIpaDefaultNodeCount());
     }
 

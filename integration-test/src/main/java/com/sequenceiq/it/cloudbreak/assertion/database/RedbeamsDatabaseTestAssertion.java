@@ -20,9 +20,9 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
+import com.sequenceiq.it.cloudbreak.util.EntitlementUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
 
@@ -68,12 +68,7 @@ public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDepende
             String actualInstanceType = databaseServer.getInstanceType();
             boolean customInstanceTypeEntitled;
             try {
-                CloudbreakClient cloudbreakClient = getClient(testContext, testContext.getActingUser(), CloudbreakClient.class);
-                customInstanceTypeEntitled = cloudbreakClient.getDefaultClient(testContext)
-                        .userProfileV4Endpoint()
-                        .get()
-                        .getEntitlements()
-                        .contains(Entitlement.CDP_CUSTOM_DATABASE_INSTANCETYPE.name());
+                customInstanceTypeEntitled = EntitlementUtil.isEntitled(testContext, Entitlement.CDP_CUSTOM_DATABASE_INSTANCETYPE);
             } catch (Exception e) {
                 LOGGER.warn("Failed to retrieve entitlements from user profile, falling back to simple instance type assertion.", e);
                 if (!customInstanceType.equalsIgnoreCase(actualInstanceType)) {
@@ -96,16 +91,6 @@ public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDepende
                 }
                 LOGGER.info("Custom database instance type entitlement is not granted; requested '{}' was correctly ignored, database server "
                         + "'{}' uses the default instance type '{}'.", customInstanceType, databaseServerCrn, actualInstanceType);
-            }
-            return entity;
-        };
-    }
-
-    public static <T extends CloudbreakTestDto, U extends MicroserviceClient> Assertion<T, U> simulatedDatabaseCapacityFailureEntitled() {
-        return (testContext, entity, client) -> {
-            if (!isEntitled(testContext, Entitlement.CDP_SIMULATE_DATABASE_CAPACITY_FAILURE)) {
-                throw new TestFailException(format("The '%s' entitlement is not granted for the acting user's account, the database instance type "
-                        + "fallback cannot be exercised!", Entitlement.CDP_SIMULATE_DATABASE_CAPACITY_FAILURE.name()));
             }
             return entity;
         };
@@ -157,7 +142,7 @@ public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDepende
                 throw new TestFailException(format("Expected database server '%s' to be provisioned with its primary instance type but it is "
                         + "provisioned with fallback instance type '%s' (fallbacks %s)!", databaseServer.getCrn(), instanceType, fallbackInstanceTypes));
             }
-            boolean fallbackEntitled = isEntitled(testContext, Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE);
+            boolean fallbackEntitled = EntitlementUtil.isEntitled(testContext, Entitlement.CDP_FALLBACK_DATABASE_INSTANCETYPE);
             CloudPlatform cloudPlatform = testContext.getCloudPlatform();
             boolean fallbackExpected = fallbackEntitled && PLATFORMS_WITH_DATABASE_INSTANCE_TYPE_FALLBACK.contains(cloudPlatform);
             String region = testContext.getCloudProvider().region();
@@ -185,14 +170,5 @@ public class RedbeamsDatabaseTestAssertion extends BaseMicroserviceClientDepende
         return redbeamsClient.getDefaultClient(testContext)
                 .databaseServerV4Endpoint()
                 .getByCrn(databaseServerCrn);
-    }
-
-    private static boolean isEntitled(TestContext testContext, Entitlement entitlement) {
-        CloudbreakClient cloudbreakClient = getClient(testContext, testContext.getActingUser(), CloudbreakClient.class);
-        return cloudbreakClient.getDefaultClient(testContext)
-                .userProfileV4Endpoint()
-                .get()
-                .getEntitlements()
-                .contains(entitlement.name());
     }
 }
