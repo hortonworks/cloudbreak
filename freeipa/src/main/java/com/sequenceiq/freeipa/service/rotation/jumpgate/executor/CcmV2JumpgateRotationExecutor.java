@@ -157,9 +157,6 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         if (!stack.getTunnel().useCcmV2Jumpgate()) {
             throw new SecretRotationException("Tunnel type is not CCM V2 Jumpgate, rotation is not possible!");
         }
-        if (!stack.isAvailable()) {
-            throw new SecretRotationException("FreeIpa is not in AVAILABLE status, rotation is not possible!");
-        }
     }
 
     @Override

@@ -253,14 +253,12 @@ class CcmV2JumpgateRotationExecutorTest {
     }
 
     @Test
-    void preValidateShouldThrowExceptionWhenStatusNotAvailable() {
+    void preValidateShouldSucceedWhenSaltUpdateOfTheRotationChainLeftStackInProgress() {
         Stack stack = new Stack();
         stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
-        stack.setStackStatus(new StackStatus(stack, null, DetailedStackStatus.UNREACHABLE));
+        stack.setStackStatus(new StackStatus(stack, null, DetailedStackStatus.SALT_STATE_UPDATE_IN_PROGRESS));
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(ENVIRONMENT_CRN), anyString())).thenReturn(stack);
-        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
-                () -> underTest.preValidate(new RotationContext(ENVIRONMENT_CRN)));
-        assertEquals("FreeIpa is not in AVAILABLE status, rotation is not possible!", secretRotationException.getMessage());
+        assertDoesNotThrow(() -> underTest.preValidate(new RotationContext(ENVIRONMENT_CRN)));
     }
 
     @Test
