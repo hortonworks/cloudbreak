@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_PARCEL_CLEANUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,6 +19,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,6 +35,8 @@ import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDatalakeReachabilityValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
@@ -125,6 +131,15 @@ class ClusterUpgradeValidationFlowRestartTest {
                         START_CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_EVENT,
                         new ClusterUpgradeFreeIpaStatusValidationFinishedEvent(STACK_ID, imageId, properties),
                         CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_STATE),
+                Arguments.of("parcel cleanup finished with the required free space", CLUSTER_UPGRADE_PARCEL_CLEANUP_STATE,
+                        START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT,
+                        new ClusterUpgradeImageValidationFinishedEvent(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.event(), STACK_ID, imageId,
+                                properties, 19464135L, Set.of("warning")),
+                        CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE),
+                Arguments.of("parcel cleanup finished with a legacy payload", CLUSTER_UPGRADE_PARCEL_CLEANUP_STATE,
+                        START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT,
+                        new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.event(), STACK_ID, imageId, properties),
+                        CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE),
                 Arguments.of("Data Lake reachability validation finished", CLUSTER_UPGRADE_DATALAKE_REACHABILITY_VALIDATION_STATE,
                         START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT,
                         new ClusterUpgradeDatalakeReachabilityValidationFinishedEvent(STACK_ID, imageId, properties),

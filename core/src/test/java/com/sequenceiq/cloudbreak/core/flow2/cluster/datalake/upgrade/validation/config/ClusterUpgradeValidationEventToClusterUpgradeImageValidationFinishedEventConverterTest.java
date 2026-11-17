@@ -2,17 +2,18 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
@@ -29,14 +30,17 @@ public class ClusterUpgradeValidationEventToClusterUpgradeImageValidationFinishe
     @InjectMocks
     private ClusterUpgradeValidationEventToClusterUpgradeImageValidationFinishedEventConverter underTest;
 
-    @BeforeEach
-    void setUp() {
-        when(clusterUpgradePropertiesResolver.resolve(any(ClusterUpgradeValidationEvent.class))).thenAnswer(invocation ->
-                ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
+    @Test
+    public void testCanConvertShouldMatchTheLegacyPayloadClassOnly() {
+        assertTrue(underTest.canConvert(ClusterUpgradeValidationEvent.class));
+        assertFalse(underTest.canConvert(ClusterUpgradeDiskSpaceValidationEvent.class));
+        assertFalse(underTest.canConvert(ClusterUpgradeImageValidationFinishedEvent.class));
     }
 
     @Test
     public void testConvertShouldCreateAClusterUpgradeDiskSpaceValidationEvent() {
+        when(clusterUpgradePropertiesResolver.resolve(any(ClusterUpgradeValidationEvent.class))).thenAnswer(invocation ->
+                ((ClusterUpgradeValidationEvent) invocation.getArgument(0)).getClusterUpgradeProperties());
         ClusterUpgradeProperties clusterUpgradeProperties = ClusterUpgradePropertiesTestUtils.withRuntimeVersion("7.2.18");
         ClusterUpgradeValidationEvent sourceEvent = new ClusterUpgradeValidationEvent(VALIDATE_DISK_SPACE_EVENT.event(), RESOURCE_ID,
                 clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);

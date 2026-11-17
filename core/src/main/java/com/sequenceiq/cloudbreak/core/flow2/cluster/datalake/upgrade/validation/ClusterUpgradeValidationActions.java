@@ -177,8 +177,9 @@ public class ClusterUpgradeValidationActions {
             protected void doExecute(StackContext context, ClusterUpgradeImageValidationFinishedEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Starting parcel cleanup as part of cluster upgrade validation.");
                 ClusterUpgradeProperties clusterUpgradeProperties = resolveUpgradeProperties(payload);
-                ClusterUpgradeValidationEvent event = new ClusterUpgradeValidationEvent(PARCEL_CLEANUP_EVENT.event(),
-                        payload.getResourceId(), clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
+                ClusterUpgradeImageValidationFinishedEvent event = new ClusterUpgradeImageValidationFinishedEvent(PARCEL_CLEANUP_EVENT.event(),
+                        payload.getResourceId(), clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties,
+                        payload.getRequiredFreeSpace(), payload.getWarningMessages());
                 sendEvent(context, event.selector(), event);
             }
 

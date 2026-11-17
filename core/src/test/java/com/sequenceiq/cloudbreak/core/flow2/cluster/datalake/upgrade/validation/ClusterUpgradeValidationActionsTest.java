@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.PARCEL_CLEANUP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.RESOLVE_CLUSTER_UPGRADE_PROPERTIES_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -29,7 +30,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDatalakeReachabilityValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDatalakeReachabilityValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
@@ -59,6 +62,10 @@ class ClusterUpgradeValidationActionsTest {
     private static final String IMAGE_ID = "target-image-uuid";
 
     private static final String TARGET_RUNTIME_VERSION = "7.3.1";
+
+    private static final long REQUIRED_FREE_SPACE = 19464135L;
+
+    private static final String WARNING_MESSAGE = "cloud provider validation warning";
 
     @Mock
     private FlowRegister runningFlows;
@@ -209,6 +216,52 @@ class ClusterUpgradeValidationActionsTest {
             assertThat(result.getResourceId()).isEqualTo(STACK_ID);
             assertThat(result.getClusterUpgradeProperties()).isSameAs(properties);
         });
+    }
+
+    @Test
+    void parcelCleanupActionPreservesTheRequiredFreeSpaceAndTheWarningMessages() throws Exception {
+        AbstractClusterUpgradeValidationAction<ClusterUpgradeImageValidationFinishedEvent> action =
+                (AbstractClusterUpgradeValidationAction<ClusterUpgradeImageValidationFinishedEvent>) underTest.clusterUpgradeParcelCleanup();
+        initActionPrivateFields(action);
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                TARGET_RUNTIME_VERSION, "base-image", OsType.RHEL8, "x86_64", null, Set.of(), null);
+        ClusterUpgradeImageValidationFinishedEvent payload = new ClusterUpgradeImageValidationFinishedEvent("selector", STACK_ID,
+                properties.getTargetImageId(), properties, REQUIRED_FREE_SPACE, Set.of(WARNING_MESSAGE));
+        when(clusterUpgradePropertiesResolver.resolve(payload)).thenReturn(properties);
+        ArgumentCaptor<Object> emittedPayload = ArgumentCaptor.forClass(Object.class);
+        when(reactorEventFactory.createEvent(anyMap(), emittedPayload.capture())).thenReturn(mock(Event.class));
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, new HashMap<>());
+
+        assertThat(emittedPayload.getValue()).isInstanceOfSatisfying(ClusterUpgradeImageValidationFinishedEvent.class, result -> {
+            assertThat(result.selector()).isEqualTo(PARCEL_CLEANUP_EVENT.event());
+            assertThat(result.getResourceId()).isEqualTo(STACK_ID);
+            assertThat(result.getClusterUpgradeProperties()).isSameAs(properties);
+            assertThat(result.getRequiredFreeSpace()).isEqualTo(REQUIRED_FREE_SPACE);
+            assertThat(result.getWarningMessages()).containsExactly(WARNING_MESSAGE);
+        });
+    }
+
+    @Test
+    void diskSpaceValidationActionUsesTheRequiredFreeSpaceAndFiresTheValidationWarnings() throws Exception {
+        AbstractClusterUpgradeValidationAction<ClusterUpgradeImageValidationFinishedEvent> action =
+                (AbstractClusterUpgradeValidationAction<ClusterUpgradeImageValidationFinishedEvent>) underTest.clusterUpgradeDiskSpaceValidation();
+        initActionPrivateFields(action);
+        ReflectionTestUtils.setField(underTest, "eventService", cloudbreakEventService);
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withTargetProducts(
+                TARGET_RUNTIME_VERSION, "base-image", OsType.RHEL8, "x86_64", null, Set.of(), null);
+        ClusterUpgradeImageValidationFinishedEvent payload = new ClusterUpgradeImageValidationFinishedEvent("selector", STACK_ID,
+                properties.getTargetImageId(), properties, REQUIRED_FREE_SPACE, Set.of(WARNING_MESSAGE));
+        when(clusterUpgradePropertiesResolver.resolve(payload)).thenReturn(properties);
+        ArgumentCaptor<ClusterUpgradeDiskSpaceValidationEvent> emittedPayload = ArgumentCaptor.forClass(ClusterUpgradeDiskSpaceValidationEvent.class);
+        when(reactorEventFactory.createEvent(anyMap(), emittedPayload.capture())).thenReturn(mock(Event.class));
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, new HashMap<>());
+
+        assertThat(emittedPayload.getValue().getRequiredFreeSpace()).isEqualTo(REQUIRED_FREE_SPACE);
+        assertThat(emittedPayload.getValue().getClusterUpgradeProperties()).isSameAs(properties);
+        verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLOUD_PROVIDER_VALIDATION_WARNING,
+                Set.of(WARNING_MESSAGE));
     }
 
     @Test
