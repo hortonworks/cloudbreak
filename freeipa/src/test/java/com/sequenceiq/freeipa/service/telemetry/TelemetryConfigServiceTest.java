@@ -22,12 +22,16 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -64,6 +68,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
+import com.sequenceiq.freeipa.service.image.ImageCatalogException;
+import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -280,6 +286,77 @@ public class TelemetryConfigServiceTest {
     }
 
     @Test
+    public void testCreateTelemetryContextPrefersMinifiLoggingWhenEntitledAndImageSupportsIt() {
+        // GIVEN
+        Stack stack = createStack(cloudStorageLoggingTelemetry());
+        mockTelemetryContextDependencies();
+        Map<String, String> packageVersions = Map.of("cem-agents", "1.25.09-b39", "cdp-telemetry", "1.3.14_b2");
+        Image image = mock(Image.class);
+        given(image.getPackageVersions()).willReturn(packageVersions);
+        given(entitlementService.isPreferMinifiLogging("accountId")).willReturn(true);
+        given(imageService.getImageForStack(stack)).willReturn(image);
+        given(telemetryFeatureService.isMinifiLoggingSupported(packageVersions)).willReturn(true);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(stack);
+        // THEN
+        assertTrue(result.getLogShipperContext().isEnabled());
+        assertTrue(result.getLogShipperContext().isPreferMinifiLogging());
+    }
+
+    @Test
+    public void testCreateTelemetryContextDoesNotPreferMinifiLoggingWhenImageDoesNotSupportIt() {
+        // GIVEN
+        Stack stack = createStack(cloudStorageLoggingTelemetry());
+        mockTelemetryContextDependencies();
+        Image image = mock(Image.class);
+        given(entitlementService.isPreferMinifiLogging("accountId")).willReturn(true);
+        given(imageService.getImageForStack(stack)).willReturn(image);
+        given(telemetryFeatureService.isMinifiLoggingSupported(any())).willReturn(false);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(stack);
+        // THEN
+        assertTrue(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isPreferMinifiLogging());
+    }
+
+    @Test
+    public void testCreateTelemetryContextDoesNotPreferMinifiLoggingWhenNotEntitled() {
+        // GIVEN
+        Stack stack = createStack(cloudStorageLoggingTelemetry());
+        mockTelemetryContextDependencies();
+        given(entitlementService.isPreferMinifiLogging("accountId")).willReturn(false);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(stack);
+        // THEN
+        assertTrue(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isPreferMinifiLogging());
+        verify(imageService, never()).getImageForStack(any());
+        verify(telemetryFeatureService, never()).isMinifiLoggingSupported(any());
+    }
+
+    @ParameterizedTest
+    @MethodSource("imageLookupFailures")
+    public void testCreateTelemetryContextDoesNotPreferMinifiLoggingWhenImageLookupFails(RuntimeException imageLookupFailure) {
+        // GIVEN
+        Stack stack = createStack(cloudStorageLoggingTelemetry());
+        mockTelemetryContextDependencies();
+        given(entitlementService.isPreferMinifiLogging("accountId")).willReturn(true);
+        given(imageService.getImageForStack(stack)).willThrow(imageLookupFailure);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(stack);
+        // THEN
+        assertTrue(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isPreferMinifiLogging());
+        verify(telemetryFeatureService, never()).isMinifiLoggingSupported(any());
+    }
+
+    static Stream<RuntimeException> imageLookupFailures() {
+        return Stream.of(
+                new ImageNotFoundException("Image not found"),
+                new ImageCatalogException("Image catalog is not available"));
+    }
+
+    @Test
     public void testGetGovAndCdpAccessKeyButNotGov() {
         Stack stack = mock(Stack.class);
         when(stack.getPlatformvariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
@@ -342,6 +419,21 @@ public class TelemetryConfigServiceTest {
                 "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
                 "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
                 "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
+    }
+
+    private void mockTelemetryContextDependencies() {
+        UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
+                .setClouderaManagerLicenseKey("myLicense")
+                .build();
+        given(umsClient.getAccountDetails(anyString())).willReturn(account);
+        given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
+        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
+    }
+
+    private Telemetry cloudStorageLoggingTelemetry() {
+        Telemetry telemetry = telemetry(true, false);
+        telemetry.getFeatures().addCloudStorageLogging(true);
+        return telemetry;
     }
 
     private Stack createStack() {

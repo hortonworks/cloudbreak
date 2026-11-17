@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryContextProvider;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.DatabusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
@@ -84,6 +85,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private final ClusterComponentConfigProvider clusterComponentConfigProvider;
 
+    private final TelemetryFeatureService telemetryFeatureService;
+
     private final EncryptionProfileProvider encryptionProfileProvider;
 
     public TelemetryDecorator(AltusMachineUserService altusMachineUserService,
@@ -96,7 +99,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             EncryptionProfileProvider encryptionProfileProvider,
             @Value("${info.app.version:}") String version,
             EnvironmentService environmentService,
-            EncryptionProfileService encryptionProfileService) {
+            EncryptionProfileService encryptionProfileService,
+            TelemetryFeatureService telemetryFeatureService) {
         this.altusMachineUserService = altusMachineUserService;
         this.vmLogsService = vmLogsService;
         this.entitlementService = entitlementService;
@@ -105,6 +109,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         this.componentConfigProviderService = componentConfigProviderService;
         this.clusterComponentConfigProvider = clusterComponentConfigProvider;
         this.version = version;
+        this.telemetryFeatureService = telemetryFeatureService;
         this.encryptionProfileProvider = encryptionProfileProvider;
     }
 
@@ -138,7 +143,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             telemetryContext.setClusterDetails(createTelemetryClusterDetails(stack, telemetry, databusContext));
             NodeStatusContext nodeStatusContext = createNodeStatusContext(cluster, accountId);
             telemetryContext.setNodeStatusContext(nodeStatusContext);
-            telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry, accountId));
+            telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry, image, accountId));
             telemetryContext.setMonitoringContext(createMonitoringContext(stack, cluster, telemetryContext, accountId, monitoringCredential, cdpAccessKeyType));
         }
 
@@ -237,7 +242,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         }
     }
 
-    private LogShipperContext createLogShipperContext(StackView stack, Telemetry telemetry, String accountId) {
+    private LogShipperContext createLogShipperContext(StackView stack, Telemetry telemetry, Image image, String accountId) {
         LogShipperContext.Builder builder = LogShipperContext.builder();
         List<VmLog> vmLogList = vmLogsService.getVmLogs();
         Logging logging = telemetry.getLogging();
@@ -247,7 +252,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             if (CollectionUtils.emptyIfNull(logging.getEnabledSensitiveStorageLogs()).contains(SensitiveLoggingComponent.SALT)) {
                 builder.includeSaltLogsInCloudStorageLogs();
             }
-            if (entitlementService.isPreferMinifiLogging(accountId)) {
+            if (isPreferMinifiLogging(image, accountId)) {
                 builder.preferMinifiLogging();
             }
         }
@@ -376,4 +381,10 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         return null;
     }
 
+    private boolean isPreferMinifiLogging(Image image, String accountId) {
+        if (image != null && entitlementService.isPreferMinifiLogging(accountId)) {
+            return telemetryFeatureService.isMinifiLoggingSupported(image.getPackageVersions());
+        }
+        return false;
+    }
 }
