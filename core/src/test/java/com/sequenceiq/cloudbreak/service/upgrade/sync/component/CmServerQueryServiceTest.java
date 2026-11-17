@@ -9,6 +9,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -19,8 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +44,9 @@ public class CmServerQueryServiceTest {
     private ClusterApiConnectors apiConnectors;
 
     @Mock
+    private CmVersionQueryService cmVersionQueryService;
+
+    @Mock
     private ClusterApi clusterApi;
 
     @Mock
@@ -46,6 +54,34 @@ public class CmServerQueryServiceTest {
 
     @Mock
     private StackDto stackDto;
+
+    @Test
+    void readsTheServerPackageOnThePrimaryGatewayEvenWhenAgentsAndOtherHostsReportANewerBuild() throws Exception {
+        PackageInfo agent = new PackageInfo("cloudera-manager-agent", "7.13.2", "200");
+        PackageInfo server = new PackageInfo("cloudera-manager-server", "7.13.2", "100");
+        when(stackDto.getPrimaryGatewayFQDN()).thenReturn(Optional.of("master"));
+        when(cmVersionQueryService.queryCmPackageInfo(stackDto)).thenReturn(Map.of(
+                "master", List.of(agent, server), "worker", List.of(agent, new PackageInfo(server.getName(), "7.13.2", "200"))));
+
+        assertEquals(Optional.of("7.13.2-100"), underTest.queryCmServerVersion(stackDto));
+    }
+
+    @Test
+    void matchingAgentAndWorkerPackagesCannotStandInForAnUnreportedServer() throws Exception {
+        when(stackDto.getPrimaryGatewayFQDN()).thenReturn(Optional.of("master"));
+        when(cmVersionQueryService.queryCmPackageInfo(stackDto)).thenReturn(Map.of(
+                "master", List.of(new PackageInfo("cloudera-manager-agent", "7.13.2", "200")),
+                "worker", List.of(new PackageInfo("cloudera-manager-server", "7.13.2", "200"))));
+
+        assertEquals(Optional.empty(), underTest.queryCmServerVersion(stackDto));
+    }
+
+    @Test
+    void cannotConfirmServerBuildWhenSaltIsUnavailable() throws Exception {
+        when(cmVersionQueryService.queryCmPackageInfo(stackDto)).thenThrow(new CloudbreakOrchestratorFailedException("No response"));
+
+        assertEquals(Optional.empty(), underTest.queryCmServerVersion(stackDto));
+    }
 
     @Test
     void testGetActiveParcelsWhenParcelReturned() {

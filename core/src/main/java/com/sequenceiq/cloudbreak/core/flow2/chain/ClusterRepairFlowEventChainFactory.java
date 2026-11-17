@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.RepairBatchSizeService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.AwsRepairSecurityGroupValidationTriggerService;
@@ -108,6 +109,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ClusterRepairService clusterRepairService;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -159,6 +163,10 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         StackDto stackDto = stackDtoService.getById(event.getStackId());
         RepairConfig repairConfig = createRepairConfig(event, stackDto.getCluster());
         Queue<Selectable> flowTriggers = createFlowTriggers(event, repairConfig, stackDto);
+        if (!event.getInstancesToRetainVolumes().isEmpty()) {
+            clusterRepairService.markVolumesToNonDeletable(stackDto.getStack(),
+                    instanceMetaDataService.findAllViewByStackIdAndInstanceId(event.getStackId(), event.getInstancesToRetainVolumes()));
+        }
         return new FlowTriggerEventQueue(getName(), event, flowTriggers);
     }
 

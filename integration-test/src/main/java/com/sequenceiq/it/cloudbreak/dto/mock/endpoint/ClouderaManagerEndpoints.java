@@ -94,6 +94,11 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
         return testDto;
     }
 
+    public ApiParcelList readParcels(String clusterName) {
+        String path = API_ROOT.replace("{mockUuid}", testDto.getCrn()) + "/clusters/" + clusterName + "/parcels";
+        return mockedTestContext.getExecuteQueryToMockInfrastructure().execute(path, response -> response.readEntity(ApiParcelList.class));
+    }
+
     public T setCmVersion(String cmVersion) {
         Objects.requireNonNull(cmVersion);
         mockedTestContext.getExecuteQueryToMockInfrastructure()

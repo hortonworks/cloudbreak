@@ -12,11 +12,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.LockedComponentsValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.LockedComponentsValidator;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidationRequest;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -31,6 +36,12 @@ public class ClusterUpgradePropertiesResolveHandler extends ExceptionCatcherEven
     @Inject
     private UpgradePermissionProvider upgradePermissionProvider;
 
+    @Inject
+    private LockedComponentsValidator lockedComponentsValidator;
+
+    @Inject
+    private StackDtoService stackDtoService;
+
     @Override
     public String selector() {
         return RESOLVE_CLUSTER_UPGRADE_PROPERTIES_EVENT.event();
@@ -43,6 +54,11 @@ public class ClusterUpgradePropertiesResolveHandler extends ExceptionCatcherEven
         ClusterUpgradeProperties properties = clusterUpgradePropertiesResolver.resolve(request);
         if (request.getImageChangeDto() != null && request.getImageChangeDto().getComponents() != null) {
             upgradePermissionProvider.validateRequestedComponentVersions(properties);
+        }
+        if (request instanceof LockedComponentsValidationTriggerEvent) {
+            ServiceUpgradeValidationRequest validation = new ServiceUpgradeValidationRequest(stackDtoService.getById(request.getResourceId()), properties);
+            lockedComponentsValidator.validateOrderedOsUpgrade(validation);
+            return new ClusterUpgradeValidationFinishedEvent(request.getResourceId(), properties.getTargetImageId(), properties);
         }
         return new ClusterUpgradeValidationEvent(CLUSTER_UPGRADE_PROPERTIES_RESOLVED_EVENT.event(), request.getResourceId(),
                 properties.targetImage().imageId(), properties);

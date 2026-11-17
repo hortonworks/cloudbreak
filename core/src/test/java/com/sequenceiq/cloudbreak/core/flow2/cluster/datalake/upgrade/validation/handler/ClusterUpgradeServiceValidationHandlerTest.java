@@ -3,10 +3,12 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -21,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
@@ -32,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.LockedComponentsValidator;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidationRequest;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidator;
 
@@ -46,6 +50,9 @@ class ClusterUpgradeServiceValidationHandlerTest {
 
     @Mock
     private StackDto stack;
+
+    @Mock
+    private LockedComponentsValidator lockedComponentsValidator;
 
     @Mock
     private ServiceUpgradeValidator validator;
@@ -76,6 +83,40 @@ class ClusterUpgradeServiceValidationHandlerTest {
         verify(eventBus).notify(eq(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event()), emitted.capture());
         assertThat(emitted.getValue().getData().getException()).isSameAs(failure);
         verify(resolver).resolve(request);
+    }
+
+    @Test
+    void unconfirmedLockedComponentsFailFlowBeforeBestEffortServiceChecks() {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withFlags(true, false, true);
+        ClusterUpgradeServiceValidationEvent request = new ClusterUpgradeServiceValidationEvent(1L, properties.targetImageId(), properties);
+        when(resolver.resolve(request)).thenReturn(properties);
+        when(stackDtoService.getById(1L)).thenReturn(stack);
+        UpgradeValidationFailedException failure = new UpgradeValidationFailedException("Recorded parcel is not active in CM");
+        doThrow(failure).when(lockedComponentsValidator).validate(any());
+
+        underTest.accept(new Event<>(request));
+
+        ArgumentCaptor<Event<ClusterUpgradeValidationFailureEvent>> emitted = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(eq(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event()), emitted.capture());
+        assertThat(emitted.getValue().getData().getException()).isSameAs(failure);
+        verifyNoInteractions(validator);
+    }
+
+    @Test
+    void unexpectedLockedComponentValidationErrorStillFailsFlow() {
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withFlags(true, false, true);
+        ClusterUpgradeServiceValidationEvent request = new ClusterUpgradeServiceValidationEvent(1L, properties.targetImageId(), properties);
+        when(resolver.resolve(request)).thenReturn(properties);
+        when(stackDtoService.getById(1L)).thenReturn(stack);
+        IllegalStateException failure = new IllegalStateException("Could not confirm installed components");
+        doThrow(failure).when(lockedComponentsValidator).validate(any());
+
+        underTest.accept(new Event<>(request));
+
+        ArgumentCaptor<Event<ClusterUpgradeValidationFailureEvent>> emitted = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(eq(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event()), emitted.capture());
+        assertThat(emitted.getValue().getData().getException()).isSameAs(failure);
+        verifyNoInteractions(validator);
     }
 
     @Test

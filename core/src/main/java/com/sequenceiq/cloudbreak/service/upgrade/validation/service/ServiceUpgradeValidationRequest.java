@@ -14,6 +14,10 @@ public record ServiceUpgradeValidationRequest(
         ClusterUpgradeProperties clusterUpgradeProperties,
         boolean replaceVms) {
 
+    public ServiceUpgradeValidationRequest(StackDto stack, ClusterUpgradeProperties properties) {
+        this(stack, properties.isLockComponents(), properties.isRollingUpgradeEnabled(), null, properties, properties.isReplaceVms());
+    }
+
     public static Builder builder() {
         return new Builder();
     }

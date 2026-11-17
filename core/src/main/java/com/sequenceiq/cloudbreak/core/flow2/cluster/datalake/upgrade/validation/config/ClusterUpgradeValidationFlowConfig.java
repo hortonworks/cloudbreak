@@ -51,6 +51,10 @@ public class ClusterUpgradeValidationFlowConfig
                     .event(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT)
                     .defaultFailureEvent()
 
+                    .from(CLUSTER_UPGRADE_VALIDATION_INIT_STATE).to(CLUSTER_UPGRADE_VALIDATION_FINISHED_STATE)
+                    .event(FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT)
+                    .defaultFailureEvent()
+
                     .from(CLUSTER_UPGRADE_VALIDATION_INIT_STATE).to(CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE)
                     .event(CLUSTER_UPGRADE_PROPERTIES_RESOLVED_EVENT)
                     .defaultFailureEvent()

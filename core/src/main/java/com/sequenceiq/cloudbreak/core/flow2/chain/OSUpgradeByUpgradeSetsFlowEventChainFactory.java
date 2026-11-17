@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
-import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT;
 import static java.util.stream.Collectors.groupingBy;
 
 import java.util.Comparator;
@@ -19,12 +18,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.LockedComponentsValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OSUpgradeByUpgradeSetsTriggerEvent;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OrderedOsUpgradeRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -42,9 +40,6 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactory implements FlowEventCha
 
     @Inject
     private StackDtoService stackDtoService;
-
-    @Inject
-    private ClusterRepairService clusterRepairService;
 
     @Override
     public String initEvent() {
@@ -64,6 +59,9 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactory implements FlowEventCha
     private Queue<Selectable> createFlowTriggerList(OSUpgradeByUpgradeSetsTriggerEvent event, List<OrderedOSUpgradeSet> upgradeSets) {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         StackView stackView = stackDtoService.getStackViewById(event.getResourceId());
+        if (stackView.isDatahub()) {
+            flowTriggers.add(new LockedComponentsValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto()));
+        }
         LOGGER.info("Add stack image update trigger event with image DTO: {}", event.getImageChangeDto());
         flowTriggers.add(new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), event.getResourceId(), event.accepted(),
                 event.getImageChangeDto().getImageId(), event.getImageChangeDto().getImageCatalogName(), event.getImageChangeDto().getImageCatalogUrl()));
@@ -75,10 +73,8 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactory implements FlowEventCha
             Map<String, List<String>> discoveryFQDNsByGroups = instancesToUpgradeAtOnce.stream().collect(groupingBy(InstanceMetadataView::getInstanceGroupName,
                     Collectors.mapping(InstanceMetadataView::getDiscoveryFQDN, Collectors.toList())));
             LOGGER.debug("Triggering upgrade sets with FQDNs by group names: {}", discoveryFQDNsByGroups);
-            clusterRepairService.markVolumesToNonDeletable(stackView, instancesToUpgradeAtOnce);
-
-            flowTriggers.add(new ClusterRepairTriggerEvent(CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(), RepairType.ALL_AT_ONCE,
-                    discoveryFQDNsByGroups, false, event.getPlatformVariant(), true));
+            flowTriggers.add(new OrderedOsUpgradeRepairTriggerEvent(event.getResourceId(), discoveryFQDNsByGroups,
+                    event.getPlatformVariant(), instanceIdsToUpgradeAtOnce));
         });
         return flowTriggers;
     }
