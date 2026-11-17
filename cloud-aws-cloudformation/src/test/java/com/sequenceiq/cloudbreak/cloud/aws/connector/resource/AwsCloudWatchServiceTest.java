@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -329,5 +330,25 @@ class AwsCloudWatchServiceTest {
         Optional<Double> result = underTest.getLatestAverageMetricValue(credentialView, REGION, "AWS/RDS", "FreeStorageSpace", dimension, 60, 300);
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void testGetSystemFailureAlarmsForInstancesBatchesByAlarmName() {
+        List<String> instanceIds = IntStream.rangeClosed(1, 101).mapToObj(i -> "i-" + i).toList();
+        AmazonCloudWatchClient cloudWatchClient = mock(AmazonCloudWatchClient.class);
+        when(cloudWatchClient.describeAlarms(any(DescribeAlarmsRequest.class))).thenAnswer(invocation -> {
+            DescribeAlarmsRequest request = invocation.getArgument(0);
+            return DescribeAlarmsResponse.builder()
+                    .metricAlarms(request.alarmNames().stream().map(name -> MetricAlarm.builder().alarmName(name).build()).toList())
+                    .build();
+        });
+
+        List<MetricAlarm> result = underTest.getSystemFailureAlarmsForInstances(cloudWatchClient, instanceIds);
+
+        ArgumentCaptor<DescribeAlarmsRequest> captorDescribe = ArgumentCaptor.forClass(DescribeAlarmsRequest.class);
+        verify(cloudWatchClient, times(2)).describeAlarms(captorDescribe.capture());
+        assertEquals(100, captorDescribe.getAllValues().get(0).alarmNames().size());
+        assertEquals(List.of("i-101" + ALARM_SUFFIX), captorDescribe.getAllValues().get(1).alarmNames());
+        assertEquals(101, result.size());
     }
 }

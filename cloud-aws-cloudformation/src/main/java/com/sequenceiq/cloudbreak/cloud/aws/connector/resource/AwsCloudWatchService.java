@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
@@ -127,6 +128,19 @@ public class AwsCloudWatchService {
                         instance.getStringParameter(INSTANCE_TYPE), acwe.getLocalizedMessage());
             }
         });
+    }
+
+    public List<MetricAlarm> getSystemFailureAlarmsForInstances(AmazonCloudWatchClient cloudWatchClient, List<String> instanceIds) {
+        List<String> alarmNames = instanceIds.stream()
+                .map(instanceId -> instanceId + alarmSuffix)
+                .toList();
+        return Lists.partition(alarmNames, maxBatchsize).stream()
+                .flatMap(batch -> cloudWatchClient.describeAlarms(DescribeAlarmsRequest.builder()
+                                .alarmNames(batch)
+                                .maxRecords(maxBatchsize)
+                                .build())
+                        .metricAlarms().stream())
+                .toList();
     }
 
     public void deleteAllCloudWatchAlarmsForSystemFailures(CloudStack stack, String regionName, AwsCredentialView credentialView) {

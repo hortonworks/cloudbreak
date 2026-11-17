@@ -5,8 +5,10 @@ import static com.sequenceiq.common.api.type.ResourceType.AWS_LAUNCHCONFIGURATIO
 import static com.sequenceiq.common.api.type.ResourceType.AWS_ROOT_DISK;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_VOLUMESET;
 import static com.sequenceiq.common.api.type.ResourceType.CLOUDFORMATION_STACK;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -20,6 +22,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -102,7 +105,22 @@ class AwsResourceTagUpdaterServiceTest {
         doThrow(new RuntimeException("AWS error")).when(ec2Strategy)
                 .updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS));
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
+                () -> underTest.updateTags(authenticatedContext, List.of(cloudResource), USER_DEFINED_TAGS));
+
+        assertThat(exception.getMessage()).contains("Reason: AWS error");
+    }
+
+    @Test
+    void testUpdateTagsDispatchesInStrategyOrderRegardlessOfResourceOrder() throws IOException {
+        CloudResource cloudFormationResource = buildResource(CLOUDFORMATION_STACK, null, RESOURCE_REFERENCE);
+        CloudResource ec2Resource = buildResource(AWS_ROOT_DISK, INSTANCE_ID, null);
+
+        underTest.updateTags(authenticatedContext, List.of(cloudFormationResource, ec2Resource), USER_DEFINED_TAGS);
+
+        InOrder inOrder = inOrder(ec2Strategy, cloudFormationStrategy);
+        inOrder.verify(ec2Strategy).updateTags(authenticatedContext, ec2Resource, USER_DEFINED_TAGS);
+        inOrder.verify(cloudFormationStrategy).updateTags(authenticatedContext, cloudFormationResource, USER_DEFINED_TAGS);
     }
 
     @Test
@@ -151,7 +169,10 @@ class AwsResourceTagUpdaterServiceTest {
         doThrow(new RuntimeException("AWS error")).when(ec2Strategy)
                 .batchDeleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS);
 
-        assertThrows(CloudConnectorException.class, () -> underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS));
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
+                () -> underTest.deleteTags(authenticatedContext, List.of(cloudResource), TAG_KEYS));
+
+        assertThat(exception.getMessage()).contains("Reason: AWS error");
     }
 
     private CloudResource buildResource(ResourceType type, String instanceId, String reference) {

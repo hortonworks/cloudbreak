@@ -17,11 +17,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -47,6 +49,12 @@ class AwsEc2TagUpdateStrategyTest {
 
     private static final String EXISTING_TAG_VALUE = "existingTagValue";
 
+    private static final String NEXT_PAGE_TOKEN = "nextPage";
+
+    private static final int DESCRIBE_TAGS_PAGE_SIZE = 1000;
+
+    private static final int DESCRIBE_VOLUMES_PAGE_SIZE = 500;
+
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
     private static final Map<String, String> EXISTING_TAGS = Map.of(EXISTING_TAG_KEY, EXISTING_TAG_VALUE);
@@ -62,6 +70,9 @@ class AwsEc2TagUpdateStrategyTest {
 
     @Mock
     private AwsTaggingService awsTaggingService;
+
+    @Spy
+    private AwsPageCollector awsPageCollector;
 
     @InjectMocks
     private AwsEc2TagUpdateStrategy underTest;
@@ -104,6 +115,55 @@ class AwsEc2TagUpdateStrategyTest {
                 .resources(List.of(volumeId))
                 .tags(List.of(Tag.builder().key(EXISTING_TAG_KEY).build()))
                 .build());
+    }
+
+    @Test
+    void testDeleteTagsFollowsDescribeTagsPagination() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeTags(any(DescribeTagsRequest.class))).thenAnswer(invocation -> {
+            DescribeTagsRequest request = invocation.getArgument(0);
+            return request.nextToken() == null
+                    ? DescribeTagsResponse.builder().nextToken(NEXT_PAGE_TOKEN).build()
+                    : DescribeTagsResponse.builder()
+                            .tags(TagDescription.builder().resourceId(INSTANCE_ID).key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build())
+                            .build();
+        });
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        ArgumentCaptor<DescribeTagsRequest> requestCaptor = ArgumentCaptor.forClass(DescribeTagsRequest.class);
+        verify(ec2Client, times(2)).describeTags(requestCaptor.capture());
+        assertThat(requestCaptor.getAllValues()).extracting(DescribeTagsRequest::maxResults)
+                .containsExactly(DESCRIBE_TAGS_PAGE_SIZE, DESCRIBE_TAGS_PAGE_SIZE);
+        assertThat(requestCaptor.getAllValues()).extracting(DescribeTagsRequest::nextToken).containsExactly(null, NEXT_PAGE_TOKEN);
+        verify(ec2Client).deleteTags(deleteTagsRequestWithResources(List.of(INSTANCE_ID), Set.of(EXISTING_TAG_KEY)));
+    }
+
+    @Test
+    void testDeleteTagsFollowsDescribeVolumesPagination() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_ROOT_DISK, INSTANCE_ID, null);
+        when(commonAwsClient.createEc2Client(authenticatedContext)).thenReturn(ec2Client);
+        when(ec2Client.describeVolumes(any(DescribeVolumesRequest.class))).thenAnswer(invocation -> {
+            DescribeVolumesRequest request = invocation.getArgument(0);
+            String volumeId = request.nextToken() == null ? "volume1" : "volume2";
+            return DescribeVolumesResponse.builder()
+                    .volumes(Volume.builder()
+                            .volumeId(volumeId)
+                            .tags(Tag.builder().key(EXISTING_TAG_KEY).value(EXISTING_TAG_VALUE).build())
+                            .build())
+                    .nextToken(request.nextToken() == null ? NEXT_PAGE_TOKEN : null)
+                    .build();
+        });
+
+        underTest.deleteTags(authenticatedContext, cloudResource, Set.of(EXISTING_TAG_KEY));
+
+        ArgumentCaptor<DescribeVolumesRequest> requestCaptor = ArgumentCaptor.forClass(DescribeVolumesRequest.class);
+        verify(ec2Client, times(2)).describeVolumes(requestCaptor.capture());
+        assertThat(requestCaptor.getAllValues()).extracting(DescribeVolumesRequest::maxResults)
+                .containsExactly(DESCRIBE_VOLUMES_PAGE_SIZE, DESCRIBE_VOLUMES_PAGE_SIZE);
+        assertThat(requestCaptor.getAllValues()).extracting(DescribeVolumesRequest::nextToken).containsExactly(null, NEXT_PAGE_TOKEN);
+        verify(ec2Client).deleteTags(deleteTagsRequestWithResources(List.of("volume1", "volume2"), Set.of(EXISTING_TAG_KEY)));
     }
 
     @Test

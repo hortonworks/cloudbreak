@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -17,10 +18,13 @@ import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.AttachVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.CreateVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DeleteVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeNetworkInterfacesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
 import software.amazon.awssdk.services.ec2.model.DetachVolumeRequest;
@@ -228,5 +232,66 @@ class AmazonEc2ClientTest {
         ActionFailedException result = assertThrows(ActionFailedException.class, () ->
                 underTest.modifyInstanceMetadataOptions(modifyInstanceMetadataOptionsRequest));
         assertInstanceOf(AwsServiceException.class, result.getCause());
+    }
+
+    @ParameterizedTest(name = "When AWS execption code is {0} should throw ActionFailedException")
+    @ValueSource(strings = {"RequestExpired", "IncorrectInstanceState", "IncorrectState", "IncorrectStateException",
+            "InvalidHostState", "InvalidState", "VolumeInUse", "ServerInternal", "InternalFailure", "ServiceUnavailable", "InternalError", "Unavailable"})
+    void testCreateTagsRetriableErrorCodes(String errorCode) {
+        CreateTagsRequest createTagsRequest = mock(CreateTagsRequest.class);
+        AwsServiceException exception = awsServiceException(errorCode);
+
+        when(ec2Client.createTags(createTagsRequest)).thenThrow(exception);
+
+        ActionFailedException result = assertThrows(ActionFailedException.class, () -> underTest.createTags(createTagsRequest));
+        assertInstanceOf(AwsServiceException.class, result.getCause());
+    }
+
+    @ParameterizedTest(name = "When AWS execption code is {0} should throw ActionFailedException")
+    @ValueSource(strings = {"RequestExpired", "IncorrectInstanceState", "IncorrectState", "IncorrectStateException",
+            "InvalidHostState", "InvalidState", "VolumeInUse", "ServerInternal", "InternalFailure", "ServiceUnavailable", "InternalError", "Unavailable"})
+    void testDeleteTagsRetriableErrorCodes(String errorCode) {
+        DeleteTagsRequest deleteTagsRequest = mock(DeleteTagsRequest.class);
+        AwsServiceException exception = awsServiceException(errorCode);
+
+        when(ec2Client.deleteTags(deleteTagsRequest)).thenThrow(exception);
+
+        ActionFailedException result = assertThrows(ActionFailedException.class, () -> underTest.deleteTags(deleteTagsRequest));
+        assertInstanceOf(AwsServiceException.class, result.getCause());
+    }
+
+    @ParameterizedTest(name = "When AWS execption code is {0} should throw ActionFailedException")
+    @ValueSource(strings = {"RequestExpired", "IncorrectInstanceState", "IncorrectState", "IncorrectStateException",
+            "InvalidHostState", "InvalidState", "VolumeInUse", "ServerInternal", "InternalFailure", "ServiceUnavailable", "InternalError", "Unavailable"})
+    void testDescribeTagsRetriableErrorCodes(String errorCode) {
+        DescribeTagsRequest describeTagsRequest = mock(DescribeTagsRequest.class);
+        AwsServiceException exception = awsServiceException(errorCode);
+
+        when(ec2Client.describeTags(describeTagsRequest)).thenThrow(exception);
+
+        ActionFailedException result = assertThrows(ActionFailedException.class, () -> underTest.describeTags(describeTagsRequest));
+        assertInstanceOf(AwsServiceException.class, result.getCause());
+    }
+
+    @ParameterizedTest(name = "When AWS execption code is {0} the tag operation should fail without retry")
+    @ValueSource(strings = {"AccessDenied", "UnauthorizedOperation", "InvalidID.NotFound"})
+    void testTagOperationsDoNotRetryPermanentErrorCodes(String errorCode) {
+        CreateTagsRequest createTagsRequest = mock(CreateTagsRequest.class);
+        DeleteTagsRequest deleteTagsRequest = mock(DeleteTagsRequest.class);
+        AwsServiceException exception = awsServiceException(errorCode);
+
+        when(ec2Client.createTags(createTagsRequest)).thenThrow(exception);
+        when(ec2Client.deleteTags(deleteTagsRequest)).thenThrow(exception);
+
+        assertSame(exception, assertThrows(AwsServiceException.class, () -> underTest.createTags(createTagsRequest)));
+        assertSame(exception, assertThrows(AwsServiceException.class, () -> underTest.deleteTags(deleteTagsRequest)));
+    }
+
+    private AwsServiceException awsServiceException(String errorCode) {
+        AwsServiceException exception = mock(AwsServiceException.class);
+        AwsErrorDetails awsErrorDetails = mock(AwsErrorDetails.class);
+        when(exception.awsErrorDetails()).thenReturn(awsErrorDetails);
+        when(awsErrorDetails.errorCode()).thenReturn(errorCode);
+        return exception;
     }
 }

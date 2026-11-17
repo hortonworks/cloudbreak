@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.TagUpdateStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -54,11 +55,18 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
 
     private static final int DESCRIBE_BATCH_SIZE = 200;
 
+    private static final int DESCRIBE_TAGS_PAGE_SIZE = 1000;
+
+    private static final int DESCRIBE_VOLUMES_PAGE_SIZE = 500;
+
     @Inject
     private CommonAwsClient commonAwsClient;
 
     @Inject
     private AwsTaggingService awsTaggingService;
+
+    @Inject
+    private AwsPageCollector awsPageCollector;
 
     @Override
     public Set<ResourceType> supportedTypes() {
@@ -200,14 +208,18 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
     private List<String> volumeIdsMatching(AmazonEc2Client ec2Client, List<String> instanceIds, Predicate<Map<String, String>> tagPredicate) {
         return Lists.partition(instanceIds, DESCRIBE_BATCH_SIZE).stream()
                 .flatMap(batch -> {
-                    DescribeVolumesResponse response = ec2Client.describeVolumes(
+                    List<Volume> volumes = awsPageCollector.collectPages(ec2Client::describeVolumes,
                             DescribeVolumesRequest.builder()
                                     .filters(Filter.builder()
                                             .name("attachment.instance-id")
                                             .values(batch)
                                             .build())
-                                    .build());
-                    return response.volumes().stream()
+                                    .maxResults(DESCRIBE_VOLUMES_PAGE_SIZE)
+                                    .build(),
+                            DescribeVolumesResponse::volumes,
+                            DescribeVolumesResponse::nextToken,
+                            (request, token) -> request.toBuilder().nextToken(token).build());
+                    return volumes.stream()
                             .filter(volume -> tagPredicate.test(toTagMap(volume.tags())))
                             .map(Volume::volumeId);
                 })
@@ -217,15 +229,19 @@ public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
     private List<String> resourceIdsMatching(AmazonEc2Client ec2Client, List<String> resourceIds, Predicate<Map<String, String>> tagPredicate) {
         return Lists.partition(resourceIds, DESCRIBE_BATCH_SIZE).stream()
                 .flatMap(batch -> {
-                    DescribeTagsResponse response = ec2Client.describeTags(
+                    List<TagDescription> tags = awsPageCollector.collectPages(ec2Client::describeTags,
                             DescribeTagsRequest.builder()
-                                .filters(Filter.builder()
-                                    .name("resource-id")
-                                    .values(batch)
-                                    .build())
-                                .build());
+                                    .filters(Filter.builder()
+                                            .name("resource-id")
+                                            .values(batch)
+                                            .build())
+                                    .maxResults(DESCRIBE_TAGS_PAGE_SIZE)
+                                    .build(),
+                            DescribeTagsResponse::tags,
+                            DescribeTagsResponse::nextToken,
+                            (request, token) -> request.toBuilder().nextToken(token).build());
 
-                    Map<String, Map<String, String>> existingTagsByResource = response.tags().stream()
+                    Map<String, Map<String, String>> existingTagsByResource = tags.stream()
                             .collect(Collectors.groupingBy(
                                 TagDescription::resourceId,
                                 Collectors.toMap(TagDescription::key, TagDescription::value)

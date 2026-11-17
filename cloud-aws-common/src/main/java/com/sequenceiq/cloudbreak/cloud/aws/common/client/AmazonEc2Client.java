@@ -288,15 +288,33 @@ public class AmazonEc2Client extends AmazonClient {
     }
 
     public CreateTagsResponse createTags(CreateTagsRequest createTagsRequest) {
-        return client.createTags(createTagsRequest);
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.createTags(createTagsRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DeleteTagsResponse deleteTags(DeleteTagsRequest deleteTagsRequest) {
-        return client.deleteTags(deleteTagsRequest);
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.deleteTags(deleteTagsRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeTagsResponse describeTags(DescribeTagsRequest describeTagsRequest) {
-        return client.describeTags(describeTagsRequest);
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return client.describeTags(describeTagsRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
     }
 
     public DescribeVpcEndpointServicesResponse describeVpcEndpointServices() {

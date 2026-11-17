@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -20,10 +21,13 @@ public abstract class AbstractResourceTagUpdaterService {
 
     private final Map<ResourceType, TagUpdateStrategy> tagUpdateStrategyMap;
 
+    private final List<TagUpdateStrategy> orderedTagUpdateStrategies;
+
     protected AbstractResourceTagUpdaterService(List<TagUpdateStrategy> tagUpdateStrategies) {
         this.tagUpdateStrategyMap = tagUpdateStrategies.stream()
                 .flatMap(strategy -> strategy.supportedTypes().stream().map(type -> Map.entry(type, strategy)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        this.orderedTagUpdateStrategies = List.copyOf(tagUpdateStrategies);
     }
 
     public void updateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
@@ -85,18 +89,22 @@ public abstract class AbstractResourceTagUpdaterService {
         strategyExistenceMap.getOrDefault(false, List.of())
                 .forEach(r -> LOGGER.warn("Resource type {} is taggable but no tag update strategy is implemented.", r.getType()));
 
-        return strategyExistenceMap.getOrDefault(true, List.of()).stream()
-                .collect(Collectors.groupingBy(
-                        r -> tagUpdateStrategyMap.get(r.getType()),
-                        LinkedHashMap::new,
-                        Collectors.toList()));
+        Map<TagUpdateStrategy, List<CloudResource>> resourcesByStrategy = strategyExistenceMap.getOrDefault(true, List.of()).stream()
+                .collect(Collectors.groupingBy(r -> tagUpdateStrategyMap.get(r.getType())));
+
+        // Dispatched in strategy bean order instead of resource order, so that a partially failed run always leaves the same resources untagged
+        return orderedTagUpdateStrategies.stream()
+                .filter(resourcesByStrategy::containsKey)
+                .collect(Collectors.toMap(Function.identity(), resourcesByStrategy::get, (first, second) -> first, LinkedHashMap::new));
     }
 
     protected RuntimeException handleFailure(TagUpdateStrategy strategy, Exception e) {
-        return new CloudConnectorException(String.format("Failed to update tags for strategy: %s", strategy.getClass().getSimpleName()), e);
+        return new CloudConnectorException(String.format("Failed to update tags for strategy: %s. Reason: %s",
+                strategy.getClass().getSimpleName(), e.getMessage()), e);
     }
 
     protected RuntimeException handleDeleteFailure(TagUpdateStrategy strategy, Exception e) {
-        return new CloudConnectorException(String.format("Failed to delete tags for strategy: %s", strategy.getClass().getSimpleName()), e);
+        return new CloudConnectorException(String.format("Failed to delete tags for strategy: %s. Reason: %s",
+                strategy.getClass().getSimpleName(), e.getMessage()), e);
     }
 }
