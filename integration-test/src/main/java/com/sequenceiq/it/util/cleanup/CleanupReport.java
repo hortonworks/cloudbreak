@@ -18,14 +18,33 @@ import java.util.TreeMap;
  * "environmentName"). {@code TreeMap} keeps the end-of-run summary alphabetical by type;
  * {@code LinkedHashMap} inside {@code deleteErrors} preserves the order in which delete failures
  * were reported for a single type.
+ * <p>
+ * It also carries the {@link RunDeadline}: every wait in the run stops at the latest at this point, so the
+ * sequential per-resource waits cannot add up beyond the CI stage timeout. A wait marks the deadline only when the run
+ * deadline itself ended it (a TIMEOUT with the RUN_DEADLINE stop reason, see {@code CleanupWaitUtil#poll}); a wait that ended
+ * by its own limits (maxRetry, maxWaitMinutes, error limit) does not. The end-of-run summary reports exactly that.
  */
 class CleanupReport {
+
+    private final RunDeadline runDeadline;
 
     private final Map<String, List<String>> deletedByType = new TreeMap<>();
 
     private final Map<String, List<String>> leftoversByType = new TreeMap<>();
 
     private final Map<String, Map<String, String>> deleteErrorsByType = new TreeMap<>();
+
+    CleanupReport(RunDeadline runDeadline) {
+        this.runDeadline = runDeadline;
+    }
+
+    RunDeadline getRunDeadline() {
+        return runDeadline;
+    }
+
+    boolean wasRunDeadlineCutShort() {
+        return runDeadline.wasCutShort();
+    }
 
     void recordDeleted(String resourceType, Collection<String> names) {
         if (names == null || names.isEmpty()) {

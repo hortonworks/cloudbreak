@@ -52,6 +52,8 @@ class CleanupUtilTest {
     @TempDir
     Path outputDir;
 
+    private final RunDeadline runDeadline = RunDeadline.none();
+
     @Mock
     private EnvironmentClient environmentClient;
 
@@ -77,6 +79,7 @@ class CleanupUtilTest {
     void setUp() {
         ReflectionTestUtils.setField(underTest, "outputDirectory", outputDir.toString());
         ReflectionTestUtils.setField(underTest, "cleanupAfterAbort", false);
+        ReflectionTestUtils.setField(underTest, "maxTotalMinutes", 240L);
 
         lenient().when(environmentClient.environmentV1Endpoint()).thenReturn(environmentEndpoint);
         lenient().when(environmentClient.credentialV1Endpoint()).thenReturn(credentialEndpoint);
@@ -91,11 +94,11 @@ class CleanupUtilTest {
     void deleteResourcesAllDeletesSucceedNoException() throws Exception {
         writeResourceFile("resource_names_1.json", "{\"distroxName\": [\"distroA\"]}");
 
-        when(waitUtil.waitForDistroxCleanup(cloudbreakClient, "distroA")).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForDistroxCleanup(cloudbreakClient, "distroA", runDeadline)).thenReturn(WaitResult.SUCCESSFUL);
         // Re-list: no environments → getDistroxes() sees no distroxes → no leftovers.
         when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
 
-        CleanupReport report = new CleanupReport();
+        CleanupReport report = new CleanupReport(runDeadline);
         assertThatCode(() -> invokeDeleteResources(List.of("distroA"), "distroxName", report))
                 .doesNotThrowAnyException();
         verify(distroXEndpoint, times(1)).deleteByName("distroA", true);
@@ -113,7 +116,7 @@ class CleanupUtilTest {
 
         when(credentialEndpoint.list()).thenReturn(emptyCredResponses());
 
-        assertThatCode(() -> invokeDeleteResources(List.of("credA"), "credentialName", new CleanupReport()))
+        assertThatCode(() -> invokeDeleteResources(List.of("credA"), "credentialName", new CleanupReport(runDeadline)))
                 .doesNotThrowAnyException();
         verify(credentialEndpoint, times(1)).deleteByName("credA");
     }
@@ -130,7 +133,7 @@ class CleanupUtilTest {
         creds.setResponses(List.of(credentialResponse("credA")));
         when(credentialEndpoint.list()).thenReturn(creds);
 
-        assertThatThrownBy(() -> invokeDeleteResources(List.of("credA"), "credentialName", new CleanupReport()))
+        assertThatThrownBy(() -> invokeDeleteResources(List.of("credA"), "credentialName", new CleanupReport(runDeadline)))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("still present: 1")
                 .hasMessageContaining("delete errors: 0");
@@ -147,11 +150,11 @@ class CleanupUtilTest {
         // First delete blows up → deleteDistrox rewraps as RuntimeException.
         doThrow(new RuntimeException("boom")).when(distroXEndpoint).deleteByName(eq("distroA"), anyBoolean());
         // Second delete succeeds. Wait returns SUCCESSFUL.
-        when(waitUtil.waitForDistroxCleanup(cloudbreakClient, "distroB")).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForDistroxCleanup(cloudbreakClient, "distroB", runDeadline)).thenReturn(WaitResult.SUCCESSFUL);
         // Re-list: no environments so no leftovers found.
         when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
 
-        assertThatThrownBy(() -> invokeDeleteResources(List.of("distroA", "distroB"), "distroxName", new CleanupReport()))
+        assertThatThrownBy(() -> invokeDeleteResources(List.of("distroA", "distroB"), "distroxName", new CleanupReport(runDeadline)))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("delete errors: 1");
         verify(distroXEndpoint).deleteByName("distroA", true);
@@ -168,7 +171,7 @@ class CleanupUtilTest {
 
         when(credentialEndpoint.list()).thenReturn(emptyCredResponses());
 
-        assertThatCode(() -> invokeDeleteResources(List.of("credA"), "credentialName", new CleanupReport()))
+        assertThatCode(() -> invokeDeleteResources(List.of("credA"), "credentialName", new CleanupReport(runDeadline)))
                 .doesNotThrowAnyException();
         verify(credentialEndpoint, times(1)).deleteByName("credA");
         verify(credentialEndpoint, never()).deleteByName("credB");
@@ -185,7 +188,7 @@ class CleanupUtilTest {
         doThrow(new NotFoundException("gone")).when(credentialEndpoint).deleteByName("credA");
         when(credentialEndpoint.list()).thenReturn(emptyCredResponses());
 
-        assertThatCode(() -> invokeDeleteResources(List.of("credA"), "credentialName", new CleanupReport()))
+        assertThatCode(() -> invokeDeleteResources(List.of("credA"), "credentialName", new CleanupReport(runDeadline)))
                 .doesNotThrowAnyException();
     }
 
@@ -242,7 +245,7 @@ class CleanupUtilTest {
         writeResourceFile("resource_names_1.json", "{\"credentialName\": [\"credA\"]}");
         when(credentialEndpoint.list()).thenReturn(emptyCredResponses());
 
-        CleanupReport report = new CleanupReport();
+        CleanupReport report = new CleanupReport(runDeadline);
         invokeDeleteResources(List.of("credA"), "credentialName", report);
 
         assertThat(report.getDeletedByType()).containsEntry("credentialName", List.of("credA"));
@@ -259,7 +262,7 @@ class CleanupUtilTest {
         creds.setResponses(List.of(credentialResponse("credA")));
         when(credentialEndpoint.list()).thenReturn(creds);
 
-        CleanupReport report = new CleanupReport();
+        CleanupReport report = new CleanupReport(runDeadline);
         assertThatThrownBy(() -> invokeDeleteResources(List.of("credA"), "credentialName", report))
                 .isInstanceOf(RuntimeException.class);
 
@@ -276,7 +279,7 @@ class CleanupUtilTest {
         doThrow(new RuntimeException("boom")).when(distroXEndpoint).deleteByName(eq("distroA"), anyBoolean());
         when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
 
-        CleanupReport report = new CleanupReport();
+        CleanupReport report = new CleanupReport(runDeadline);
         assertThatThrownBy(() -> invokeDeleteResources(List.of("distroA"), "distroxName", report))
                 .isInstanceOf(RuntimeException.class);
 
@@ -300,20 +303,20 @@ class CleanupUtilTest {
         deleteResponse.setResponses(Collections.emptyList());
         when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false)).thenReturn(deleteResponse);
 
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA")).thenReturn(WaitResult.SUCCESSFUL);
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB")).thenReturn(WaitResult.FAILED);
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envC")).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA", runDeadline)).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB", runDeadline)).thenReturn(WaitResult.FAILED);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envC", runDeadline)).thenReturn(WaitResult.SUCCESSFUL);
         // Re-list post-delete: nothing left — envB just failed the wait but was archived from the list.
         when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
 
-        CleanupReport report = new CleanupReport();
+        CleanupReport report = new CleanupReport(runDeadline);
         assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, report))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("delete errors: 1")
                 .hasMessageContaining("still present: 0");
 
         // envC must have been waited on despite envB's FAILED — that is the regression.
-        verify(waitUtil).waitForEnvironmentCleanup(environmentClient, "envC");
+        verify(waitUtil).waitForEnvironmentCleanup(environmentClient, "envC", runDeadline);
         assertThat(report.getDeletedByType()).containsEntry("environmentName", List.of("envA", "envC"));
         assertThat(report.getDeleteErrorsByType()).containsKey("environmentName");
         assertThat(report.getDeleteErrorsByType().get("environmentName")).containsKey("envB");
@@ -331,15 +334,15 @@ class CleanupUtilTest {
         deleteResponse.setResponses(Collections.emptyList());
         when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false)).thenReturn(deleteResponse);
 
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA")).thenReturn(WaitResult.FAILED);
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB")).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA", runDeadline)).thenReturn(WaitResult.FAILED);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB", runDeadline)).thenReturn(WaitResult.SUCCESSFUL);
 
         // Re-list still returns envB — an actual leftover.
         SimpleEnvironmentResponses relist = new SimpleEnvironmentResponses();
         relist.setResponses(List.of(environmentResponse("envB")));
         when(environmentEndpoint.list(null)).thenReturn(relist);
 
-        CleanupReport report = new CleanupReport();
+        CleanupReport report = new CleanupReport(runDeadline);
         assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, report))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("delete errors: 1")
@@ -366,14 +369,14 @@ class CleanupUtilTest {
         when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false)).thenReturn(deleteResponse);
 
         // Every env's wait fails, AND the re-list still shows all three — the exact bug shape.
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA")).thenReturn(WaitResult.FAILED);
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB")).thenReturn(WaitResult.FAILED);
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envC")).thenReturn(WaitResult.FAILED);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA", runDeadline)).thenReturn(WaitResult.FAILED);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB", runDeadline)).thenReturn(WaitResult.FAILED);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envC", runDeadline)).thenReturn(WaitResult.FAILED);
         SimpleEnvironmentResponses relist = new SimpleEnvironmentResponses();
         relist.setResponses(List.of(environmentResponse("envA"), environmentResponse("envB"), environmentResponse("envC")));
         when(environmentEndpoint.list(null)).thenReturn(relist);
 
-        assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, new CleanupReport()))
+        assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, new CleanupReport(runDeadline)))
                 .isInstanceOf(RuntimeException.class)
                 // Union = 3, NOT sum = 6.
                 .hasMessageContaining("3 resource(s) could not be cleaned up")
@@ -394,14 +397,14 @@ class CleanupUtilTest {
                 .thenThrow(new RuntimeException("network is down"));
         when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
 
-        CleanupReport report = new CleanupReport();
+        CleanupReport report = new CleanupReport(runDeadline);
         assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, report))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("delete errors: 2");
 
         assertThat(report.getDeleteErrorsByType().get("environmentName")).containsKeys("envA", "envB");
         // Waits must NOT have been attempted after the batch API call blew up.
-        verify(waitUtil, never()).waitForEnvironmentCleanup(any(), any());
+        verify(waitUtil, never()).waitForEnvironmentCleanup(any(), any(), any(RunDeadline.class));
     }
 
     /**
@@ -414,16 +417,65 @@ class CleanupUtilTest {
         SimpleEnvironmentResponses deleteResponse = new SimpleEnvironmentResponses();
         deleteResponse.setResponses(Collections.emptyList());
         when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false)).thenReturn(deleteResponse);
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA")).thenReturn(WaitResult.SUCCESSFUL);
-        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB")).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envA", runDeadline)).thenReturn(WaitResult.SUCCESSFUL);
+        when(waitUtil.waitForEnvironmentCleanup(environmentClient, "envB", runDeadline)).thenReturn(WaitResult.SUCCESSFUL);
         when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
 
-        CleanupReport report = new CleanupReport();
+        CleanupReport report = new CleanupReport(runDeadline);
         assertThatCode(() -> invokeDeleteEnvironments(envNames, report)).doesNotThrowAnyException();
 
         assertThat(report.getDeletedByType()).containsEntry("environmentName", envNames);
         assertThat(report.getDeleteErrorsByType()).doesNotContainKey("environmentName");
         assertThat(report.getLeftoversByType()).doesNotContainKey("environmentName");
+    }
+
+    /**
+     * The sequential waits of one run must share the run deadline of the report, otherwise every wait gets its own
+     * full budget and their sum can exceed the CI stage timeout.
+     */
+    @Test
+    void deleteEnvironmentsEveryWaitGetsTheRunDeadlineOfTheReport() throws Exception {
+        List<String> envNames = List.of("envA", "envB");
+        RunDeadline reportDeadline = new RunDeadline(12345L);
+        SimpleEnvironmentResponses deleteResponse = new SimpleEnvironmentResponses();
+        deleteResponse.setResponses(Collections.emptyList());
+        when(environmentEndpoint.deleteMultipleByNames(new HashSet<>(envNames), true, false)).thenReturn(deleteResponse);
+        when(waitUtil.waitForEnvironmentCleanup(eq(environmentClient), any(), any(RunDeadline.class))).thenReturn(WaitResult.TIMEOUT);
+        when(environmentEndpoint.list(null)).thenReturn(emptyEnvResponses());
+
+        CleanupReport report = new CleanupReport(reportDeadline);
+        assertThatThrownBy(() -> invokeDeleteEnvironments(envNames, report)).isInstanceOf(RuntimeException.class);
+
+        verify(waitUtil).waitForEnvironmentCleanup(environmentClient, "envA", reportDeadline);
+        verify(waitUtil).waitForEnvironmentCleanup(environmentClient, "envB", reportDeadline);
+        assertThat(report.getRunDeadline()).isSameAs(reportDeadline);
+    }
+
+    /**
+     * A run whose waits all finished must not be reported as cut short just because the clock has passed the run
+     * deadline by the time the summary is printed (for example after the credentials stage).
+     */
+    @Test
+    void runDeadlinePassedButNoWaitCutShortIsNotReportedAsCutShort() {
+        CleanupReport report = new CleanupReport(new RunDeadline(System.currentTimeMillis() - 1));
+
+        assertThat(report.wasRunDeadlineCutShort()).isFalse();
+    }
+
+    @Test
+    void runDeadlineMarkedCutShortIsReportedAsCutShort() {
+        RunDeadline reportDeadline = new RunDeadline(System.currentTimeMillis() - 1);
+        CleanupReport report = new CleanupReport(reportDeadline);
+
+        reportDeadline.markCutShort();
+
+        assertThat(report.wasRunDeadlineCutShort()).isTrue();
+    }
+
+    @Test
+    void freshRunDeadlineWithoutLimitIsNotCutShort() {
+        assertThat(new CleanupReport(RunDeadline.none()).wasRunDeadlineCutShort()).isFalse();
+        assertThat(RunDeadline.none()).isNotSameAs(RunDeadline.none());
     }
 
     // ---------- helpers ----------

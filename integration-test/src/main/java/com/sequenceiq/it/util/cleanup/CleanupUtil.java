@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -59,11 +60,14 @@ public class CleanupUtil extends CleanupClientUtil {
     @Value("${integrationtest.cleanup.afterAbort:false}")
     private boolean cleanupAfterAbort;
 
+    @Value("${integrationtest.cleanup.maxTotalMinutes:240}")
+    private long maxTotalMinutes;
+
     @Inject
     private CleanupWaitUtil waitUtil;
 
     public void cleanupAllResources() {
-        CleanupReport report = new CleanupReport();
+        CleanupReport report = newReport();
         try {
             if (resourceFilesArePresent() && !cleanupAfterAbort) {
                 cleanupDistroxes(report);
@@ -100,7 +104,7 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public void cleanupDistroxes() {
-        cleanupDistroxes(new CleanupReport());
+        cleanupDistroxes(newReport());
     }
 
     private void cleanupDistroxes(CleanupReport report) {
@@ -119,7 +123,7 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public void cleanupSdxes() {
-        cleanupSdxes(new CleanupReport());
+        cleanupSdxes(newReport());
     }
 
     private void cleanupSdxes(CleanupReport report) {
@@ -138,7 +142,7 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public void cleanupEnvironments() {
-        cleanupEnvironments(new CleanupReport());
+        cleanupEnvironments(newReport());
     }
 
     private void cleanupEnvironments(CleanupReport report) {
@@ -160,7 +164,7 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public void cleanupCredentials() {
-        cleanupCredentials(new CleanupReport());
+        cleanupCredentials(newReport());
     }
 
     private void cleanupCredentials(CleanupReport report) {
@@ -296,16 +300,16 @@ public class CleanupUtil extends CleanupClientUtil {
                     switch (resourceNameType) {
                         case TYPE_DISTROX:
                         case TYPE_STACK:
-                            deleteDistrox(getCloudbreakClient(), resourceName);
+                            deleteDistrox(getCloudbreakClient(), resourceName, report.getRunDeadline());
                             break;
                         case TYPE_SDX:
-                            deleteSdx(getSdxClient(), resourceName);
+                            deleteSdx(getSdxClient(), resourceName, report.getRunDeadline());
                             break;
                         case TYPE_CREDENTIAL:
                             deleteCredential(getEnvironmentClient(), resourceName);
                             break;
                         default:
-                            deleteEnvironment(getEnvironmentClient(), resourceName);
+                            deleteEnvironment(getEnvironmentClient(), resourceName, report.getRunDeadline());
                             break;
                     }
                 } catch (RuntimeException ex) {
@@ -394,7 +398,7 @@ public class CleanupUtil extends CleanupClientUtil {
         // the report never learns about envs #N+1..end and the final summary silently under-counts.
         for (String environmentName : environmentNames) {
             try {
-                WaitResult waitResult = waitUtil.waitForEnvironmentCleanup(environmentClient, environmentName);
+                WaitResult waitResult = waitUtil.waitForEnvironmentCleanup(environmentClient, environmentName, report.getRunDeadline());
                 if (waitResult == WaitResult.FAILED) {
                     deleteFailures.put(environmentName,
                             String.format("Failed: Deleting %s environment has been failed!", environmentName));
@@ -421,10 +425,10 @@ public class CleanupUtil extends CleanupClientUtil {
         validateE2ECleanup(TYPE_ENVIRONMENT, environmentNames, deleteFailures, leftoverResources);
     }
 
-    private void deleteEnvironment(EnvironmentClient environmentClient, String environmentName) {
+    private void deleteEnvironment(EnvironmentClient environmentClient, String environmentName, RunDeadline runDeadline) {
         try {
             environmentClient.environmentV1Endpoint().deleteByName(environmentName, true, false);
-            WaitResult waitResult = waitUtil.waitForEnvironmentCleanup(environmentClient, environmentName);
+            WaitResult waitResult = waitUtil.waitForEnvironmentCleanup(environmentClient, environmentName, runDeadline);
             if (waitResult == WaitResult.FAILED) {
                 throw new RuntimeException(String.format("Failed: Deleting %s environment has been failed!", environmentName));
             }
@@ -440,11 +444,11 @@ public class CleanupUtil extends CleanupClientUtil {
     }
 
     public void deleteCredentials(EnvironmentClient environmentClient, List<String> credentialNames) {
-        deleteCredentials(environmentClient, credentialNames, new CleanupReport());
+        deleteCredentials(environmentClient, credentialNames, newReport());
     }
 
     private void deleteCredentials(EnvironmentClient environmentClient, List<String> credentialNames, CleanupReport report) {
-        waitUtil.waitForEnvironmentsCleanup(environmentClient);
+        waitUtil.waitForEnvironmentsCleanup(environmentClient, report.getRunDeadline());
         try {
             credentialNames.forEach(credentialName -> LOG.info("Credential with name: {} will be deleted!", credentialName));
             environmentClient.credentialV1Endpoint().deleteMultiple(new HashSet<>(credentialNames));
@@ -479,10 +483,10 @@ public class CleanupUtil extends CleanupClientUtil {
         }
     }
 
-    private void deleteSdx(SdxClient sdxClient, String sdxName) {
+    private void deleteSdx(SdxClient sdxClient, String sdxName, RunDeadline runDeadline) {
         try {
             sdxClient.sdxEndpoint().delete(sdxName, true);
-            WaitResult waitResult = waitUtil.waitForSdxCleanup(sdxClient, sdxName);
+            WaitResult waitResult = waitUtil.waitForSdxCleanup(sdxClient, sdxName, runDeadline);
             if (waitResult == WaitResult.FAILED) {
                 throw new RuntimeException(String.format("Failed: Deleting %s Data Lake has been failed!", sdxName));
             }
@@ -497,10 +501,10 @@ public class CleanupUtil extends CleanupClientUtil {
         }
     }
 
-    private void deleteDistrox(CloudbreakClient cloudbreakClient, String distroxName) {
+    private void deleteDistrox(CloudbreakClient cloudbreakClient, String distroxName, RunDeadline runDeadline) {
         try {
             cloudbreakClient.distroXV1Endpoint().deleteByName(distroxName, true);
-            WaitResult waitResult = waitUtil.waitForDistroxCleanup(cloudbreakClient, distroxName);
+            WaitResult waitResult = waitUtil.waitForDistroxCleanup(cloudbreakClient, distroxName, runDeadline);
             if (waitResult == WaitResult.FAILED) {
                 throw new RuntimeException(String.format("Failed: Deleting %s data hub (distrox) has been failed!", distroxName));
             }
@@ -561,6 +565,10 @@ public class CleanupUtil extends CleanupClientUtil {
         sb.append(String.format("Deleted: %d | Still present: %d | Delete errors: %d",
                         report.deletedCount(), report.leftoverCount(), report.errorCount()))
                 .append(System.lineSeparator());
+        if (report.wasRunDeadlineCutShort()) {
+            sb.append(String.format("Cleanup run deadline of %d minutes (integrationtest.cleanup.maxTotalMinutes) exceeded, "
+                    + "at least one wait was cut short.", maxTotalMinutes)).append(System.lineSeparator());
+        }
 
         if (report.isEmpty()) {
             sb.append("Nothing to clean up.").append(System.lineSeparator());
@@ -592,6 +600,15 @@ public class CleanupUtil extends CleanupClientUtil {
         } else {
             LOG.info(summary);
         }
+    }
+
+    /**
+     * Starts a new cleanup run: the returned report carries the run deadline that bounds all the waits of the run,
+     * so the sequential per-resource waits cannot add up to more than "integrationtest.cleanup.maxTotalMinutes".
+     */
+    private CleanupReport newReport() {
+        LOG.info("Cleanup run deadline: {} minutes from now", maxTotalMinutes);
+        return new CleanupReport(new RunDeadline(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(maxTotalMinutes)));
     }
 
     private boolean resourceFilesArePresent() {
