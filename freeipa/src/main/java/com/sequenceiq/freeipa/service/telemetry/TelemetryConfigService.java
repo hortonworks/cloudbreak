@@ -58,6 +58,8 @@ import com.sequenceiq.common.api.telemetry.model.VmLog;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
+import com.sequenceiq.freeipa.service.image.ImageCatalogException;
+import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -213,7 +215,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             if (CollectionUtils.emptyIfNull(logging.getEnabledSensitiveStorageLogs()).contains(SensitiveLoggingComponent.SALT)) {
                 builder.includeSaltLogsInCloudStorageLogs();
             }
-            if (entitlementService.isPreferMinifiLogging(stack.getAccountId())) {
+            if (isPreferMinifiLogging(stack)) {
                 builder.preferMinifiLogging();
             }
         }
@@ -303,4 +305,16 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         }
     }
 
+    private boolean isPreferMinifiLogging(Stack stack) {
+        if (entitlementService.isPreferMinifiLogging(stack.getAccountId())) {
+            try {
+                Image image = imageService.getImageForStack(stack);
+                return telemetryFeatureService.isMinifiLoggingSupported(image.getPackageVersions());
+            } catch (ImageNotFoundException | ImageCatalogException e) {
+                LOGGER.warn("Could not get the image of the stack from the image catalog, minifi logging will not be preferred.", e);
+                return false;
+            }
+        }
+        return false;
+    }
 }

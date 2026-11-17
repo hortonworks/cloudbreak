@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
@@ -97,6 +98,9 @@ class TelemetryDecoratorTest {
     @Mock
     private EncryptionProfileService encryptionProfileService;
 
+    @Mock
+    private TelemetryFeatureService telemetryFeatureService;
+
     @Spy
     private Monitoring monitoring;
 
@@ -118,7 +122,8 @@ class TelemetryDecoratorTest {
                 encryptionProfileProvider,
                 "1.0.0",
                 environmentService,
-                encryptionProfileService);
+                encryptionProfileService,
+                telemetryFeatureService);
     }
 
     @Test
@@ -303,6 +308,58 @@ class TelemetryDecoratorTest {
     }
 
     @Test
+    void testCreateTelemetryContextPrefersMinifiLoggingWhenEntitledAndImageSupportsIt() {
+        // GIVEN
+        mockCloudStorageLogging();
+        when(entitlementService.isPreferMinifiLogging("someone")).thenReturn(true);
+        when(telemetryFeatureService.isMinifiLoggingSupported(any())).thenReturn(true);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack());
+        // THEN
+        assertTrue(result.getLogShipperContext().isEnabled());
+        assertTrue(result.getLogShipperContext().isPreferMinifiLogging());
+    }
+
+    @Test
+    void testCreateTelemetryContextDoesNotPreferMinifiLoggingWhenImageDoesNotSupportIt() {
+        // GIVEN
+        mockCloudStorageLogging();
+        when(entitlementService.isPreferMinifiLogging("someone")).thenReturn(true);
+        when(telemetryFeatureService.isMinifiLoggingSupported(any())).thenReturn(false);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack());
+        // THEN
+        assertTrue(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isPreferMinifiLogging());
+    }
+
+    @Test
+    void testCreateTelemetryContextDoesNotPreferMinifiLoggingWhenNotEntitled() {
+        // GIVEN
+        mockCloudStorageLogging();
+        when(entitlementService.isPreferMinifiLogging("someone")).thenReturn(false);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack());
+        // THEN
+        assertTrue(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isPreferMinifiLogging());
+        verify(telemetryFeatureService, never()).isMinifiLoggingSupported(any());
+    }
+
+    @Test
+    void testCreateTelemetryContextDoesNotPreferMinifiLoggingWhenImageIsMissing() throws CloudbreakImageNotFoundException {
+        // GIVEN
+        mockCloudStorageLogging();
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(null);
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack());
+        // THEN
+        assertTrue(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isPreferMinifiLogging());
+        verify(telemetryFeatureService, never()).isMinifiLoggingSupported(any());
+    }
+
+    @Test
     void testCreateTelemetryContextWithDefaults() {
         // GIVEN
 
@@ -362,6 +419,12 @@ class TelemetryDecoratorTest {
                 "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
                 "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
                 "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
+    }
+
+    private void mockCloudStorageLogging() {
+        when(telemetry.getLogging()).thenReturn(logging);
+        when(telemetry.isCloudStorageLoggingEnabled()).thenReturn(true);
+        when(logging.getS3()).thenReturn(new S3CloudStorageV1Parameters());
     }
 
     private StackDto createStack() {
