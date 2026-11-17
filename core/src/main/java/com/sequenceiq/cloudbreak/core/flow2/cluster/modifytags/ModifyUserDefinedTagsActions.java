@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsStateSelectors.HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_USER_DEFINED_TAGS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_USER_DEFINED_TAGS_COMPLETE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_USER_DEFINED_TAGS_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPDATE_USER_DEFINED_TAGS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPDATE_USER_DEFINED_TAGS_COMPLETE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPDATE_USER_DEFINED_TAGS_FAILED;
@@ -25,11 +29,13 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserD
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 
 /**
- * Updates the user-defined tags of the Data Lake and Data Hub stacks on an environment, both on the cloud resources
- * and in the database.
+ * Updates or deletes the user-defined tags of the Data Lake and Data Hub stacks on an environment, both on the cloud resources
+ * and in the database. Deletion is selected by a non-empty {@code tagsToRemove}; it is kept in the flow variables so
+ * the later states and the failure state report delete-specific events.
  *
  * <p>Cloud resources are updated first. If that step fails, the database is left
  * unchanged and the exception is propagated to the caller, failing the flow.
@@ -45,6 +51,8 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 public class ModifyUserDefinedTagsActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyUserDefinedTagsActions.class);
 
+    private static final String TAGS_DELETION = "TAGS_DELETION";
+
     @Inject
     private StackUpdater stackUpdater;
 
@@ -56,13 +64,13 @@ public class ModifyUserDefinedTagsActions {
         return new AbstractModifyUserDefinedTagsAction<>(ModifyUserDefinedTagsEvent.class) {
             @Override
             protected void doExecute(StackContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Update user defined tags for cloud resources of stack {}", payload);
+                LOGGER.debug("Modify user defined tags for cloud resources of stack {}", payload);
                 StackDtoDelegate stack = context.getStack();
+                boolean deletion = !payload.getTagsToRemove().isEmpty();
+                variables.put(TAGS_DELETION, deletion);
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.USER_DEFINED_TAGS_UPDATE_IN_PROGRESS);
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
-                        STACK_UPDATE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES.name(),
-                        STACK_UPDATE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES,
-                        String.valueOf(stack.getName()));
+                fireEvent(payload.getResourceId(), stack,
+                        deletion ? STACK_DELETE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES : STACK_UPDATE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES);
                 ModifyUserDefinedTagsCloudResourcesHandlerEvent modifyUserDefinedTagsCloudResourcesEvent =
                         new ModifyUserDefinedTagsCloudResourcesHandlerEvent(payload.getResourceId(),
                                 payload.getUserDefinedTags(), payload.getTagsToRemove());
@@ -76,12 +84,10 @@ public class ModifyUserDefinedTagsActions {
         return new AbstractModifyUserDefinedTagsAction<>(ModifyUserDefinedTagsEvent.class) {
             @Override
             protected void doExecute(StackContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Update user defined tags for stack {}", payload);
+                LOGGER.debug("Modify user defined tags for stack {}", payload);
                 StackDtoDelegate stack = context.getStack();
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
-                        STACK_UPDATE_USER_DEFINED_TAGS.name(),
-                        STACK_UPDATE_USER_DEFINED_TAGS,
-                        String.valueOf(stack.getName()));
+                fireEvent(payload.getResourceId(), stack,
+                        isDeletion(variables) ? STACK_DELETE_USER_DEFINED_TAGS : STACK_UPDATE_USER_DEFINED_TAGS);
                 ModifyUserDefinedTagsStackHandlerEvent modifyUserDefinedTagsStackEvent =
                         new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(),
                                 payload.getUserDefinedTags(), payload.getTagsToRemove());
@@ -95,13 +101,11 @@ public class ModifyUserDefinedTagsActions {
         return new AbstractModifyUserDefinedTagsAction<>(ModifyUserDefinedTagsEvent.class) {
             @Override
             protected void doExecute(StackContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Update user defined tags for stack finished successfully {}", payload);
+                LOGGER.debug("Modify user defined tags for stack finished successfully {}", payload);
                 StackDtoDelegate stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.USER_DEFINED_TAGS_UPDATE_COMPLETE);
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
-                        STACK_UPDATE_USER_DEFINED_TAGS_COMPLETE.name(),
-                        STACK_UPDATE_USER_DEFINED_TAGS_COMPLETE,
-                        String.valueOf(stack.getName()));
+                fireEvent(payload.getResourceId(), stack,
+                        isDeletion(variables) ? STACK_DELETE_USER_DEFINED_TAGS_COMPLETE : STACK_UPDATE_USER_DEFINED_TAGS_COMPLETE);
                 String selector = ModifyUserDefinedTagsStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT.event();
                 ModifyUserDefinedTagsEvent finalizeEvent =
                         new ModifyUserDefinedTagsEvent(selector, payload.getResourceId(), payload.getUserDefinedTags(), payload.getTagsToRemove());
@@ -116,15 +120,23 @@ public class ModifyUserDefinedTagsActions {
 
             @Override
             protected void doExecute(StackContext context, ModifyUserDefinedTagsFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Update user defined tags for stack failed {}", payload);
+                LOGGER.error("Modify user defined tags for stack failed {}", payload);
                 StackDtoDelegate stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.USER_DEFINED_TAGS_UPDATE_FAILED, payload.getException().getMessage());
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
-                        STACK_UPDATE_USER_DEFINED_TAGS_FAILED.name(),
-                        STACK_UPDATE_USER_DEFINED_TAGS_FAILED,
-                        String.valueOf(stack.getName()));
+                boolean deletion = isDeletion(variables);
+                String operation = deletion ? "Deleting" : "Updating";
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.USER_DEFINED_TAGS_UPDATE_FAILED,
+                        operation + " user defined tags failed: " + payload.getException().getMessage());
+                fireEvent(payload.getResourceId(), stack, deletion ? STACK_DELETE_USER_DEFINED_TAGS_FAILED : STACK_UPDATE_USER_DEFINED_TAGS_FAILED);
                 sendEvent(context, HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT.event(), payload);
             }
         };
+    }
+
+    private void fireEvent(Long stackId, StackDtoDelegate stack, ResourceEvent event) {
+        flowMessageService.fireEventAndLog(stackId, event.name(), event, String.valueOf(stack.getName()));
+    }
+
+    private static boolean isDeletion(Map<Object, Object> variables) {
+        return Boolean.TRUE.equals(variables.get(TAGS_DELETION));
     }
 }

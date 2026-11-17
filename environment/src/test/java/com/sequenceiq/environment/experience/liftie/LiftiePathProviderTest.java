@@ -20,7 +20,9 @@ class LiftiePathProviderTest {
 
     private static final String LIFTIE_POLICY_ENDPOINT = "/prerequisites?cloudPlatform={cloudProvider}";
 
-    private static final String LIFTIE_ENVIRONMENT_TAGS_PATH = "/environment/tags";
+    private static final String LIFTIE_ENVIRONMENT_TAGS_PATH = "/environment/{environmentCrn}/tags";
+
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:account:environment:envId";
 
     private LiftiePathProvider underTest;
 
@@ -52,11 +54,11 @@ class LiftiePathProviderTest {
     }
 
     @Test
-    @DisplayName("When the environment tags endpoint is requested, then the Liftie base path and tags path are concatenated")
-    void testWhenEnvironmentTagsEndpointPathIsRequestedThenBasePathAndEnvironmentTagsPathAreConcatenated() {
-        String expected = LIFTIE_API + LIFTIE_PATH_INFIX + LIFTIE_ENVIRONMENT_TAGS_PATH;
+    @DisplayName("When the environment tags endpoint is requested, then the tags path is appended to the Liftie base path with the environment CRN filled in")
+    void testWhenEnvironmentTagsEndpointPathIsRequestedThenEnvironmentCrnIsSubstituted() {
+        String expected = LIFTIE_API + LIFTIE_PATH_INFIX + "/environment/" + ENV_CRN + "/tags";
 
-        String result = underTest.getPathToEnvironmentTagsEndpoint();
+        String result = underTest.getPathToEnvironmentTagsEndpoint(ENV_CRN);
 
         assertEquals(expected, result);
     }

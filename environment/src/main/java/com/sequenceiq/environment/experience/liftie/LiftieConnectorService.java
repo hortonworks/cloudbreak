@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.experience.liftie;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
+import static jakarta.ws.rs.core.Response.Status.Family.SUCCESSFUL;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
@@ -142,14 +143,18 @@ public class LiftieConnectorService implements LiftieApi {
     private void modifyEnvironmentTags(String environmentCrn, String operation, Function<WebTarget, WebTarget> webTargetModifier,
             Function<Invocation.Builder, Response> call) {
         LOGGER.debug("About to {} for environment [crn: {}]", operation, environmentCrn);
-        WebTarget webTarget = webTargetModifier.apply(client.target(liftiePathProvider.getPathToEnvironmentTagsEndpoint()));
+        WebTarget webTarget = webTargetModifier.apply(client.target(liftiePathProvider.getPathToEnvironmentTagsEndpoint(environmentCrn)));
         Invocation.Builder invocationBuilder = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
+        String failureMessage = "Failed to " + operation + ".";
         try (Response result = executeCall(webTarget.getUri(), () -> call.apply(invocationBuilder))) {
-            responseReader.read(webTarget.getUri().toString(), result, Void.class)
-                    .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
+            if (!SUCCESSFUL.equals(result.getStatusInfo().getFamily())) {
+                LOGGER.info("Failed to {} for environment [crn: {}], the response status was: {}", operation, environmentCrn,
+                        result.getStatusInfo().getReasonPhrase());
+                throw new ExperienceOperationFailedException(failureMessage);
+            }
         } catch (RuntimeException e) {
             LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
-            throw new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
+            throw new ExperienceOperationFailedException(failureMessage, e);
         }
     }
 

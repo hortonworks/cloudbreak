@@ -175,7 +175,7 @@ public class StackPollerProvider {
     }
 
     public AttemptMaker<Void> updateUserDefinedTags(Long envId, List<FlowIdentifier> flowIdentifiers) {
-        return batchFlowPoller(envId, flowIdentifiers, "Update user defined tags on stack");
+        return batchFlowPoller(envId, flowIdentifiers, "Modify user defined tags on stack");
     }
 
     private AttemptMaker<Void> batchFlowPoller(Long envId, List<FlowIdentifier> flowIdentifiers, String flowName) {

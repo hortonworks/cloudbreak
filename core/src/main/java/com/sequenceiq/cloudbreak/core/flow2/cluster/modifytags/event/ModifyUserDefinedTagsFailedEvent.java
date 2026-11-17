@@ -24,4 +24,12 @@ public class ModifyUserDefinedTagsFailedEvent extends StackFailureEvent {
     public String getFailedPhase() {
         return failedPhase;
     }
+
+    @Override
+    public String toString() {
+        return "ModifyUserDefinedTagsFailedEvent{" +
+                "failedPhase='" + failedPhase + '\'' +
+                ", exception=" + getException() +
+                "} " + super.toString();
+    }
 }

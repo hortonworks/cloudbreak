@@ -23,7 +23,7 @@ import com.sequenceiq.redbeams.flow.redbeams.stack.modify.tags.event.ModifyUserD
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
 /**
- * Updates the user-defined tags of the DB stack on an environment, both on the cloud resources
+ * Updates or deletes the user-defined tags of the DB stack on an environment, both on the cloud resources
  * and in the database.
  *
  * <p>Cloud resources are updated first. If that step fails, the database is left
@@ -49,7 +49,7 @@ public class ModifyUserDefinedTagsActions {
         return new AbstractModifyUserDefinedTagsAction<>(ModifyUserDefinedTagsEvent.class) {
             @Override
             protected void doExecute(RedbeamsContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Update user defined tags for external database's cloud resources {}", payload);
+                LOGGER.debug("Modify user defined tags for external database's cloud resources {}", payload);
                 DBStack stack = context.getDBStack();
                 stackUpdater.updateStatus(stack.getId(), DetailedDBStackStatus.MODIFY_USER_DEFINED_TAGS_IN_PROGRESS);
                 ModifyUserDefinedTagsCloudResourcesHandlerEvent modifyUserDefinedTagsCloudResourcesEvent =
@@ -65,7 +65,7 @@ public class ModifyUserDefinedTagsActions {
         return new AbstractModifyUserDefinedTagsAction<>(ModifyUserDefinedTagsEvent.class) {
             @Override
             protected void doExecute(RedbeamsContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Update user defined tags for external database {}", payload);
+                LOGGER.debug("Modify user defined tags for external database {}", payload);
                 ModifyUserDefinedTagsStackHandlerEvent modifyUserDefinedTagsStackEvent =
                         new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(), payload.getUserDefinedTags(), payload.getTagsToRemove());
                 sendEvent(context, modifyUserDefinedTagsStackEvent);
@@ -78,7 +78,7 @@ public class ModifyUserDefinedTagsActions {
         return new AbstractModifyUserDefinedTagsAction<>(ModifyUserDefinedTagsEvent.class) {
             @Override
             protected void doExecute(RedbeamsContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Update user defined tags for external database finished successfully {}", payload);
+                LOGGER.debug("Modify user defined tags for external database finished successfully {}", payload);
                 DBStack stack = context.getDBStack();
                 stackUpdater.updateStatus(stack.getId(), DetailedDBStackStatus.MODIFY_USER_DEFINED_TAGS_COMPLETED);
                 String selector = ModifyUserDefinedTagsStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.event();
@@ -95,7 +95,7 @@ public class ModifyUserDefinedTagsActions {
 
             @Override
             protected void doExecute(RedbeamsContext context, ModifyUserDefinedTagsFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Update user defined tags for external database failed {}", payload);
+                LOGGER.error("Modify user defined tags for external database failed {}", payload);
                 DBStack stack = context.getDBStack();
                 String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
                 stackUpdater.updateStatus(stack.getId(), DetailedDBStackStatus.MODIFY_USER_DEFINED_TAGS_FAILED, errorReason);

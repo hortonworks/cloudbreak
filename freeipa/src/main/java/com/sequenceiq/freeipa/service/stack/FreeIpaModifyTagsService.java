@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.gcp.tag.CloudPlatformTagKeyNormalizerProvider;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.tag.UserDefinedTagValidator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -109,6 +110,11 @@ public class FreeIpaModifyTagsService {
             flowManager.notify(startEvent, modifyUserDefinedTagsEvent);
             LOGGER.info("Started modify user defined tags flow");
             return operation;
+        } catch (FlowsAlreadyRunningException e) {
+            LOGGER.info("Couldn't start modify FreeIPA user defined tags flow because another flow is running", e);
+            operationService.failOperation(stack.getAccountId(), operation.getOperationId(),
+                    "Couldn't start modify FreeIPA user defined tags flow: " + e.getMessage());
+            throw e;
         } catch (Exception e) {
             LOGGER.error("Couldn't start modify FreeIPA user defined tags flow", e);
             return operationService.failOperation(stack.getAccountId(), operation.getOperationId(),

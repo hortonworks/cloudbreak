@@ -15,8 +15,11 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
+import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
+import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationSupport;
+import com.sequenceiq.environment.environment.poller.FlowRunningConflictDetector;
 import com.sequenceiq.environment.environment.poller.FreeIpaPollerProvider;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -155,7 +158,7 @@ public class FreeIpaPollerService {
     }
 
     private void waitForUserDefinedTagsOperation(Long envId, String envCrn, Supplier<OperationStatus> trigger, String operation) {
-        OperationStatus status = trigger.get();
+        OperationStatus status = triggerUserDefinedTagsOperation(trigger, operation);
         if (status.getStatus() != OperationState.COMPLETED) {
             try {
                 Polling.stopAfterAttempt(modifyUserDefinedTagsAttempt)
@@ -165,8 +168,48 @@ public class FreeIpaPollerService {
             } catch (PollerStoppedException e) {
                 LOGGER.warn("FreeIPA user defined tags {} timed out or error happened.", operation, e);
                 throw new FreeIpaOperationFailedException(
-                        "FreeIPA user defined tags " + operation + " timed out or error happened: " + e.getMessage());
+                        "FreeIPA user defined tags " + operation + " timed out or error happened: " + e.getMessage(), e);
+            } catch (UserBreakException e) {
+                LOGGER.warn("FreeIPA user defined tags {} failed.", operation, e);
+                throw new FreeIpaOperationFailedException(
+                        "FreeIPA user defined tags " + operation + " failed: " + e.getMessage(), e);
             }
+        }
+    }
+
+    /**
+     * Retries the trigger while FreeIPA refuses to start the operation because a conflicting one is still running. FreeIPA signals this either
+     * with HTTP 409 when a flow is already running, or with a {@link OperationState#REJECTED} operation when the operation acceptor finds another
+     * unfinished user defined tags operation.
+     */
+    private OperationStatus triggerUserDefinedTagsOperation(Supplier<OperationStatus> trigger, String operation) {
+        try {
+            return Polling.stopAfterAttempt(modifyUserDefinedTagsAttempt)
+                    .stopIfException(true)
+                    .waitPeriodly(modifyUserDefinedTagsSleeptime, TimeUnit.SECONDS)
+                    .run(() -> {
+                        try {
+                            OperationStatus status = trigger.get();
+                            if (status.getStatus() == OperationState.REJECTED) {
+                                LOGGER.info("FreeIPA rejected user defined tags {} because of a conflicting operation, retrying later: {}",
+                                        operation, status.getError());
+                                return AttemptResults.justContinue();
+                            }
+                            return AttemptResults.finishWith(status);
+                        } catch (FreeIpaOperationFailedException e) {
+                            if (FlowRunningConflictDetector.isFlowRunningConflict(e)) {
+                                LOGGER.info("Another flow is running on FreeIPA, retrying user defined tags {} later", operation);
+                                return AttemptResults.justContinue();
+                            }
+                            return AttemptResults.breakFor(e);
+                        }
+                    });
+        } catch (PollerStoppedException e) {
+            LOGGER.warn("Starting FreeIPA user defined tags {} timed out.", operation, e);
+            throw new FreeIpaOperationFailedException("Starting FreeIPA user defined tags " + operation + " timed out: " + e.getMessage(), e);
+        } catch (UserBreakException e) {
+            LOGGER.warn("Starting FreeIPA user defined tags {} failed.", operation, e);
+            throw new FreeIpaOperationFailedException("Starting FreeIPA user defined tags " + operation + " failed: " + e.getMessage(), e);
         }
     }
 

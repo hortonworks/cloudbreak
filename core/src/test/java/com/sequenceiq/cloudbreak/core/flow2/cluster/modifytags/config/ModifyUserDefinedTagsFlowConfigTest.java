@@ -83,6 +83,12 @@ class ModifyUserDefinedTagsFlowConfigTest {
         assertEquals(HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT, configurationEdge.getFailureHandled());
     }
 
+    @Test
+    @DisplayName("Flow should be retryable from the failure handled event")
+    void testRetryableEventIsFailureHandledEvent() {
+        assertEquals(HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT, new ModifyUserDefinedTagsFlowConfig().getRetryableEvent());
+    }
+
     private static void assertDefaultFailureEventForAllTransitions(List<? extends AbstractFlowConfiguration.Transition<?, ?>> transitions) {
         for (int i = 0; i < transitions.size(); i++) {
             AbstractFlowConfiguration.Transition<?, ?> transition = transitions.get(i);

@@ -2,6 +2,7 @@ package com.sequenceiq.environment.experience.liftie;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,7 +10,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Optional;
+
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,14 +26,12 @@ class LiftieConnectorServiceDistributeTagsTest extends LiftieConnectorServiceTes
 
     private static final Map<String, String> TAGS = Map.of("key1", "value1", "key2", "value2");
 
-    @SuppressWarnings("unchecked")
     private void setupMocks() {
-        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint()).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
+        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint(ENV_CRN)).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
         when(getMockClient().target(LIFTIE_TAGS_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
         when(getMockInvocationBuilderProvider().createInvocationBuilderForInternalActor(getMockWebTarget())).thenReturn(getMockInvocationBuilder());
         when(getMockRetryableWebTarget().put(getMockInvocationBuilder(), TAGS)).thenReturn(getMockResponse());
-        when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), Void.class))
-                .thenReturn((Optional) Optional.of("placeholder"));
+        when(getMockResponse().getStatusInfo()).thenReturn(Response.Status.NO_CONTENT);
     }
 
     @Test
@@ -41,7 +41,7 @@ class LiftieConnectorServiceDistributeTagsTest extends LiftieConnectorServiceTes
 
         getUnderTest().distributeEnvironmentTags(null, ENV_CRN, TAGS);
 
-        verify(getMockLiftiePathProvider(), times(ONCE)).getPathToEnvironmentTagsEndpoint();
+        verify(getMockLiftiePathProvider(), times(ONCE)).getPathToEnvironmentTagsEndpoint(ENV_CRN);
     }
 
     @Test
@@ -65,13 +65,13 @@ class LiftieConnectorServiceDistributeTagsTest extends LiftieConnectorServiceTes
     }
 
     @Test
-    @DisplayName("When the Liftie response cannot be resolved, then an operation failure exception is thrown")
-    void testWhenResponseReaderReturnsEmptyThenExperienceOperationFailedExceptionIsThrown() {
-        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint()).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
+    @DisplayName("When Liftie responds with an unsuccessful status, then an operation failure exception is thrown")
+    void testWhenResponseIsUnsuccessfulThenExperienceOperationFailedExceptionIsThrown() {
+        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint(ENV_CRN)).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
         when(getMockClient().target(LIFTIE_TAGS_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
         when(getMockInvocationBuilderProvider().createInvocationBuilderForInternalActor(getMockWebTarget())).thenReturn(getMockInvocationBuilder());
         when(getMockRetryableWebTarget().put(getMockInvocationBuilder(), TAGS)).thenReturn(getMockResponse());
-        when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), Void.class)).thenReturn(Optional.empty());
+        when(getMockResponse().getStatusInfo()).thenReturn(Response.Status.BAD_REQUEST);
 
         assertThrows(ExperienceOperationFailedException.class,
                 () -> getUnderTest().distributeEnvironmentTags(null, ENV_CRN, TAGS));
@@ -80,7 +80,7 @@ class LiftieConnectorServiceDistributeTagsTest extends LiftieConnectorServiceTes
     @Test
     @DisplayName("When the Liftie tag distribution call fails, then its error is wrapped in an operation failure exception")
     void testWhenEnvironmentTagDistributionCallThrowsThenExperienceOperationFailedExceptionIsThrown() {
-        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint()).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
+        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint(ENV_CRN)).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
         when(getMockClient().target(LIFTIE_TAGS_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
         when(getMockInvocationBuilderProvider().createInvocationBuilderForInternalActor(getMockWebTarget())).thenReturn(getMockInvocationBuilder());
         when(getMockRetryableWebTarget().put(getMockInvocationBuilder(), TAGS)).thenThrow(new RuntimeException("connection refused"));
@@ -114,7 +114,7 @@ class LiftieConnectorServiceDistributeTagsTest extends LiftieConnectorServiceTes
 
         assertDoesNotThrow(() -> getUnderTest().distributeEnvironmentTags(null, ENV_CRN, TAGS));
 
-        verify(getMockLiftiePathProvider(), never()).getPathToEnvironmentTagsEndpoint();
+        verify(getMockLiftiePathProvider(), never()).getPathToEnvironmentTagsEndpoint(any());
         verifyNoInteractions(getMockClient(), getMockRetryableWebTarget());
     }
 }

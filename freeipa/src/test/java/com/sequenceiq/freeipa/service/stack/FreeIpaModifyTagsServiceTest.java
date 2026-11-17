@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.freeipa.flow.stack.modify.tags.event.ModifyUserDefinedTagsStateSelectors.MODIFY_USER_DEFINED_TAGS_FREEIPA_START_EVENT;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -17,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -73,5 +76,31 @@ class FreeIpaModifyTagsServiceTest {
 
         underTest.startUserDefinedTagsModificationOperation(environmentCrn, accountId, userDefinedTags);
         verify(flowManager).notify(eq(MODIFY_USER_DEFINED_TAGS_FREEIPA_START_EVENT.event()), any(ModifyUserDefinedTagsEvent.class));
+    }
+
+    @Test
+    void testModifyUserDefinedTagsFailsOperationAndRethrowsWhenFlowIsAlreadyRunning() {
+        String operationId = "operationId";
+        String accountId = "accountId";
+        String environmentCrn = "crn:cdp:environments:us-west-1:cloudera2:environment:f5e1a52e-54df-4f77-aa46-25252b879ecd";
+        Stack stack = new Stack();
+        stack.setEnvironmentCrn(environmentCrn);
+        stack.setAccountId(accountId);
+        FlowsAlreadyRunningException flowsAlreadyRunningException = new FlowsAlreadyRunningException("Another flow is running");
+
+        when(stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId)).thenReturn(stack);
+        when(operationService.startOperation(accountId, OperationType.MODIFY_USER_DEFINED_TAGS, Set.of(environmentCrn), Collections.emptySet()))
+                .thenReturn(operation);
+        when(operation.getOperationId()).thenReturn(operationId);
+        when(operation.getStatus()).thenReturn(OperationState.RUNNING);
+        when(flowManager.notify(eq(MODIFY_USER_DEFINED_TAGS_FREEIPA_START_EVENT.event()), any(ModifyUserDefinedTagsEvent.class)))
+                .thenThrow(flowsAlreadyRunningException);
+
+        FlowsAlreadyRunningException thrown = assertThrows(FlowsAlreadyRunningException.class,
+                () -> underTest.startUserDefinedTagsModificationOperation(environmentCrn, accountId, Map.of("custom", "value")));
+
+        assertSame(flowsAlreadyRunningException, thrown);
+        verify(operationService).failOperation(accountId, operationId,
+                "Couldn't start modify FreeIPA user defined tags flow: Another flow is running");
     }
 }

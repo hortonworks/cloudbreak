@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service.database;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,11 +24,27 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
+import com.sequenceiq.redbeams.api.model.common.Status;
 
 @Service
 public class RedbeamsPollerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsPollerService.class);
+
+    private static final Set<Status> SKIPPED_STATES = EnumSet.of(
+            Status.CREATE_FAILED,
+            Status.START_FAILED,
+            Status.STOP_REQUESTED,
+            Status.STOP_IN_PROGRESS,
+            Status.STOP_FAILED,
+            Status.STOPPED,
+            Status.PRE_DELETE_IN_PROGRESS,
+            Status.DELETE_REQUESTED,
+            Status.DELETE_IN_PROGRESS,
+            Status.DELETE_FAILED,
+            Status.DELETE_COMPLETED,
+            Status.DELETED_ON_PROVIDER_SIDE
+    );
 
     private final DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
@@ -65,22 +82,21 @@ public class RedbeamsPollerService {
     private void doModifyUserDefinedTagsOnDatabases(Long envId, String envCrn, Map<String, String> tags, Set<String> tagKeys) {
         DatabaseServerV4Responses databaseServerV4Responses = databaseServerV4Endpoint.list(envCrn);
         List<String> dbCrns = databaseServerV4Responses.getResponses().stream()
+                .filter(db -> !SKIPPED_STATES.contains(db.getStatus()))
                 .map(DatabaseServerV4Response::getCrn)
                 .toList();
-        if (tags != null) {
-            LOGGER.info("User defined tags will be updated on databases: {}", dbCrns);
-        } else {
-            LOGGER.info("User defined tag keys will be deleted on databases: {}", dbCrns);
-        }
+        String operation = tags != null ? "update" : "deletion";
+        LOGGER.info("User defined tags {} will be applied on databases: {}", operation, dbCrns);
 
         AttemptMaker<List<FlowIdentifier>> attemptMaker = tags != null
                 ? redbeamsPollerProvider.userDefinedTagsUpdatePoller(dbCrns, envId, tags)
                 : redbeamsPollerProvider.userDefinedTagsDeletePoller(dbCrns, envId, tagKeys);
-        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsModificationOnDatabases(dbCrns, attemptMaker);
-        awaitUserDefinedTagsModificationCompletion(flowIdentifiers, envId);
+        List<FlowIdentifier> flowIdentifiers = triggerUserDefinedTagsModificationOnDatabases(dbCrns, attemptMaker, operation);
+        awaitUserDefinedTagsModificationCompletion(flowIdentifiers, envId, operation);
     }
 
-    private List<FlowIdentifier> triggerUserDefinedTagsModificationOnDatabases(List<String> dbCrns, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
+    private List<FlowIdentifier> triggerUserDefinedTagsModificationOnDatabases(List<String> dbCrns, AttemptMaker<List<FlowIdentifier>> attemptMaker,
+            String operation) {
         if (CollectionUtils.isNotEmpty(dbCrns)) {
             try {
                 return Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
@@ -88,17 +104,19 @@ public class RedbeamsPollerService {
                         .waitPeriodly(sleepTime, TimeUnit.SECONDS)
                         .run(attemptMaker);
             } catch (PollerStoppedException e) {
-                LOGGER.warn("DB stack user defined tags updating timed out");
-                throw new StackOperationFailedException("DB stack user defined tags updating timed out", e);
+                String message = "Starting database user defined tags " + operation + " timed out";
+                LOGGER.warn(message, e);
+                throw new StackOperationFailedException(message, e);
             } catch (UserBreakException e) {
-                LOGGER.error("DB stack user defined tags updating aborted with error", e);
-                throw new StackOperationFailedException("DB stack user defined tags updating aborted with error", e);
+                String message = "Starting database user defined tags " + operation + " aborted with error";
+                LOGGER.error(message, e);
+                throw new StackOperationFailedException(message, e);
             }
         }
         return Collections.emptyList();
     }
 
-    private void awaitUserDefinedTagsModificationCompletion(List<FlowIdentifier> flowIdentifiers, Long envId) {
+    private void awaitUserDefinedTagsModificationCompletion(List<FlowIdentifier> flowIdentifiers, Long envId, String operation) {
         if (CollectionUtils.isNotEmpty(flowIdentifiers)) {
             try {
                 Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
@@ -106,11 +124,11 @@ public class RedbeamsPollerService {
                         .waitPeriodly(sleepTime, TimeUnit.SECONDS)
                         .run(redbeamsPollerProvider.userDefinedTagsFlowsCompletionPoller(flowIdentifiers, envId));
             } catch (PollerStoppedException e) {
-                String message = String.format("Update user defined tags on DB stack timed out or error happened: %s", e.getMessage());
+                String message = String.format("Database user defined tags %s timed out or error happened: %s", operation, e.getMessage());
                 LOGGER.warn(message, e);
                 throw new CloudbreakServiceException(message);
             } catch (UserBreakException e) {
-                String message = String.format("Update user defined tags on DB stack aborted with error: %s", e.getMessage());
+                String message = String.format("Database user defined tags %s aborted with error: %s", operation, e.getMessage());
                 LOGGER.error(message, e);
                 throw new CloudbreakServiceException(message);
             }

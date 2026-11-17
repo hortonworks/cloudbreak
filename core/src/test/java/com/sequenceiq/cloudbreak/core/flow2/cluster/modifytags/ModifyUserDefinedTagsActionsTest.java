@@ -5,6 +5,10 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.Modi
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsStateSelectors.HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsStateSelectors.MODIFY_USER_DEFINED_TAGS_STACK_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsStateSelectors.MODIFY_USER_DEFINED_TAGS_START_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_USER_DEFINED_TAGS_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPDATE_USER_DEFINED_TAGS_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPDATE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,6 +115,8 @@ class ModifyUserDefinedTagsActionsTest {
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.USER_DEFINED_TAGS_UPDATE_IN_PROGRESS));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(STACK_UPDATE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES.name()),
+                eq(STACK_UPDATE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES), any());
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         String selector = EventSelectorUtil.selector(ModifyUserDefinedTagsCloudResourcesHandlerEvent.class);
@@ -158,12 +165,46 @@ class ModifyUserDefinedTagsActionsTest {
                 (AbstractModifyUserDefinedTagsAction<ModifyUserDefinedTagsFailedEvent>) underTest.failedAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.USER_DEFINED_TAGS_UPDATE_FAILED), eq("error"));
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.USER_DEFINED_TAGS_UPDATE_FAILED),
+                eq("Updating user defined tags failed: error"));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(STACK_UPDATE_USER_DEFINED_TAGS_FAILED.name()),
+                eq(STACK_UPDATE_USER_DEFINED_TAGS_FAILED), any());
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         String selector = HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT.event();
         assertEquals(selector, captor.getValue());
         assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+    }
+
+    @Test
+    void testModifyCloudResourcesActionFiresDeleteEventWhenTagsAreRemoved() throws Exception {
+        ModifyUserDefinedTagsEvent event =
+                new ModifyUserDefinedTagsEvent(MODIFY_USER_DEFINED_TAGS_START_EVENT.event(), STACK_ID, Map.of(), Set.of("custom"));
+        when(stack.getId()).thenReturn(STACK_ID);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+        AbstractModifyUserDefinedTagsAction<ModifyUserDefinedTagsEvent> action =
+                (AbstractModifyUserDefinedTagsAction<ModifyUserDefinedTagsEvent>) underTest.modifyCloudResourcesAction();
+        initActionPrivateFields(action);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(STACK_DELETE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES.name()),
+                eq(STACK_DELETE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES), any());
+        assertEquals(Boolean.TRUE, variables.get("TAGS_DELETION"));
+    }
+
+    @Test
+    void testFailedActionReportsDeletionWhenTagsWereRemoved() throws Exception {
+        variables.put("TAGS_DELETION", true);
+        ModifyUserDefinedTagsFailedEvent event = new ModifyUserDefinedTagsFailedEvent(STACK_ID, "failedPhase", new CloudbreakException("error"));
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+        when(stack.getId()).thenReturn(STACK_ID);
+        AbstractModifyUserDefinedTagsAction<ModifyUserDefinedTagsFailedEvent> action =
+                (AbstractModifyUserDefinedTagsAction<ModifyUserDefinedTagsFailedEvent>) underTest.failedAction();
+        initActionPrivateFields(action);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.USER_DEFINED_TAGS_UPDATE_FAILED),
+                eq("Deleting user defined tags failed: error"));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(STACK_DELETE_USER_DEFINED_TAGS_FAILED.name()),
+                eq(STACK_DELETE_USER_DEFINED_TAGS_FAILED), any());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

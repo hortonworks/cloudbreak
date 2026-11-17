@@ -21,9 +21,11 @@ import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConf
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.ModifyUserDefinedTagsState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class ModifyUserDefinedTagsFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ModifyUserDefinedTagsState, ModifyUserDefinedTagsStateSelectors> {
+public class ModifyUserDefinedTagsFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ModifyUserDefinedTagsState, ModifyUserDefinedTagsStateSelectors>
+        implements RetryableFlowConfiguration<ModifyUserDefinedTagsStateSelectors> {
 
     private static final List<AbstractFlowConfiguration.Transition<ModifyUserDefinedTagsState, ModifyUserDefinedTagsStateSelectors>> TRANSITIONS =
             new AbstractFlowConfiguration.Transition.Builder<ModifyUserDefinedTagsState, ModifyUserDefinedTagsStateSelectors>()
@@ -79,5 +81,10 @@ public class ModifyUserDefinedTagsFlowConfig extends StackStatusFinalizerAbstrac
     @Override
     public String getDisplayName() {
         return "Modify user defined tags on stack";
+    }
+
+    @Override
+    public ModifyUserDefinedTagsStateSelectors getRetryableEvent() {
+        return HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT;
     }
 }

@@ -39,7 +39,7 @@ public class RedbeamsPollerProvider {
     public AttemptMaker<Void> userDefinedTagsFlowsCompletionPoller(List<FlowIdentifier> flowIdentifiers, Long envId) {
         List<FlowIdentifier> remaining = new ArrayList<>(flowIdentifiers);
         return () -> {
-            LOGGER.info("Checking completion of user defined tags update on {} redbeams flows for environment with ID {}",
+            LOGGER.info("Checking completion of user defined tags modification on {} redbeams flows for environment with ID {}",
                     remaining.size(), envId);
             List<FlowIdentifier> stillRunning = new ArrayList<>();
             for (FlowIdentifier flowIdentifier : remaining) {
@@ -67,7 +67,7 @@ public class RedbeamsPollerProvider {
     }
 
     public AttemptResult<Void> updateUserDefinedTags(Long envId, FlowIdentifier flowIdentifier) {
-        return flowPoller(envId, flowIdentifier, "Update user defined tags on DB stack");
+        return flowPoller(envId, flowIdentifier, "Modify user defined tags on DB stack");
     }
 
     private AttemptResult<Void> flowPoller(Long envId, FlowIdentifier flowIdentifier, String flowName) {

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -27,8 +28,9 @@ import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 /**
- * Updates the user-defined tags of the FreeIPA stack on an environment, both on the cloud resources
- * and in the database.
+ * Updates or deletes the user-defined tags of the FreeIPA stack on an environment, both on the cloud resources
+ * and in the database. Deletion is selected by a non-empty {@code tagsToRemove}; it is kept in the flow variables so
+ * the later states and the failure state report delete-specific status reasons.
  *
  * <p>Cloud resources are updated first. If that step fails, the database is left
  * unchanged and the exception is propagated to the caller, failing the flow.
@@ -45,6 +47,8 @@ public class ModifyUserDefinedTagsActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyUserDefinedTagsActions.class);
 
+    private static final String TAGS_DELETION = "TAGS_DELETION";
+
     @Inject
     private StackUpdater stackUpdater;
 
@@ -56,9 +60,10 @@ public class ModifyUserDefinedTagsActions {
         return new AbstractModifyUserDefinedTagsAction<>(ModifyUserDefinedTagsEvent.class) {
             @Override
             protected void doExecute(StackContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Update user defined tags for FreeIPA's cloud resources {}", payload);
+                LOGGER.debug("Modify user defined tags for FreeIPA's cloud resources {}", payload);
+                variables.put(TAGS_DELETION, !payload.getTagsToRemove().isEmpty());
                 stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.UPDATE_IN_PROGRESS,
-                        "Starting to update user defined tags on cloud resources of FreeIPA: " + context.getStack().getName());
+                        "Starting to " + operation(variables) + " user defined tags on cloud resources of FreeIPA: " + context.getStack().getName());
                 setOperationId(variables, payload.getOperationId());
                 ModifyUserDefinedTagsCloudResourcesHandlerEvent modifyUserDefinedTagsCloudResourcesEvent =
                         new ModifyUserDefinedTagsCloudResourcesHandlerEvent(payload.getResourceId(), payload.getOperationId(),
@@ -73,9 +78,9 @@ public class ModifyUserDefinedTagsActions {
         return new AbstractModifyUserDefinedTagsAction<>(ModifyUserDefinedTagsEvent.class) {
             @Override
             protected void doExecute(StackContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Update user defined tags for FreeIPA {}", payload);
+                LOGGER.debug("Modify user defined tags for FreeIPA {}", payload);
                 stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.UPDATE_IN_PROGRESS,
-                        "Starting to update user defined tags on FreeIPA stack: " + context.getStack().getName());
+                        "Starting to " + operation(variables) + " user defined tags on FreeIPA stack: " + context.getStack().getName());
                 setOperationId(variables, payload.getOperationId());
                 ModifyUserDefinedTagsStackHandlerEvent modifyUserDefinedTagsStackEvent =
                         new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(), payload.getOperationId(),
@@ -90,10 +95,10 @@ public class ModifyUserDefinedTagsActions {
         return new AbstractModifyUserDefinedTagsAction<>(ModifyUserDefinedTagsEvent.class) {
             @Override
             protected void doExecute(StackContext context, ModifyUserDefinedTagsEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Update user defined tags for FreeIPA finished successfully {}", payload);
+                LOGGER.debug("Modify user defined tags for FreeIPA finished successfully {}", payload);
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.UPDATE_COMPLETE,
-                        "Update user defined tags finished for FreeIPA: " + stack.getName());
+                        StringUtils.capitalize(operation(variables)) + " user defined tags finished for FreeIPA: " + stack.getName());
                 SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
                 operationService.completeOperation(stack.getAccountId(), payload.getOperationId(), Set.of(successDetails), Set.of());
                 String selector = ModifyUserDefinedTagsStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.event();
@@ -111,15 +116,20 @@ public class ModifyUserDefinedTagsActions {
 
             @Override
             protected void doExecute(StackContext context, ModifyUserDefinedTagsFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Update user defined tags for FreeIPA failed {}", payload);
+                LOGGER.error("Modify user defined tags for FreeIPA failed {}", payload);
                 Stack stack = context.getStack();
-                String message = String.format("Update user defined tags failed for FreeIPA: %s at phase: %s", stack.getName(), payload.getFailedPhase());
+                String operation = StringUtils.capitalize(operation(variables));
+                String message = String.format("%s user defined tags failed for FreeIPA: %s at phase: %s", operation, stack.getName(), payload.getFailedPhase());
                 String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.UPDATE_FAILED, errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(), List.of());
-                enableStatusChecker(stack, "Update user defined tags failed for FreeIPA.");
+                enableStatusChecker(stack, operation + " user defined tags failed for FreeIPA.");
                 sendEvent(context, HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.event(), payload);
             }
         };
+    }
+
+    private static String operation(Map<Object, Object> variables) {
+        return Boolean.TRUE.equals(variables.get(TAGS_DELETION)) ? "delete" : "update";
     }
 }

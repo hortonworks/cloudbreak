@@ -1,10 +1,12 @@
 package com.sequenceiq.environment.environment.service.database;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +29,7 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
+import com.sequenceiq.redbeams.api.model.common.Status;
 
 @ExtendWith(MockitoExtension.class)
 class RedbeamsPollerServiceTest {
@@ -111,7 +114,7 @@ class RedbeamsPollerServiceTest {
         StackOperationFailedException exception = assertThrows(StackOperationFailedException.class,
                 () -> underTest.modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS, null));
 
-        assertEquals("DB stack user defined tags updating timed out", exception.getMessage());
+        assertEquals("Starting database user defined tags update timed out", exception.getMessage());
     }
 
     @Test
@@ -132,7 +135,7 @@ class RedbeamsPollerServiceTest {
         StackOperationFailedException exception = assertThrows(StackOperationFailedException.class,
                 () -> underTest.modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, TAGS, null));
 
-        assertEquals("DB stack user defined tags updating timed out", exception.getMessage());
+        assertEquals("Starting database user defined tags update timed out", exception.getMessage());
     }
 
     @Test
@@ -156,6 +159,58 @@ class RedbeamsPollerServiceTest {
         verify(databaseServerV4Endpoint).list(ENV_CRN);
         verify(redbeamsPollerProvider).userDefinedTagsDeletePoller(List.of(DB_CRN), ENV_ID, TAG_KEYS);
         verify(redbeamsPollerProvider).userDefinedTagsFlowsCompletionPoller(List.of(expectedFlow), ENV_ID);
+    }
+
+    @Test
+    void testDeleteUserDefinedTagsSkipsStoppedFailedAndDeletingDatabases() {
+        setPollingConfig(5, 1);
+
+        DatabaseServerV4Response availableDb = databaseServer(DB_CRN, Status.AVAILABLE);
+        DatabaseServerV4Response updateFailedDb = databaseServer("updateFailedDbCrn", Status.UPDATE_FAILED);
+        DatabaseServerV4Responses responses = new DatabaseServerV4Responses(new LinkedHashSet<>(List.of(
+                availableDb,
+                updateFailedDb,
+                databaseServer("stoppedDbCrn", Status.STOPPED),
+                databaseServer("createFailedDbCrn", Status.CREATE_FAILED),
+                databaseServer("deletingDbCrn", Status.DELETE_IN_PROGRESS),
+                databaseServer("deletedOnProviderDbCrn", Status.DELETED_ON_PROVIDER_SIDE))));
+
+        FlowIdentifier expectedFlow = new FlowIdentifier(FlowType.FLOW, "flow-id-1");
+        List<String> expectedDbCrns = List.of(DB_CRN, "updateFailedDbCrn");
+        when(databaseServerV4Endpoint.list(ENV_CRN)).thenReturn(responses);
+        when(redbeamsPollerProvider.userDefinedTagsDeletePoller(expectedDbCrns, ENV_ID, TAG_KEYS))
+                .thenReturn(() -> AttemptResults.finishWith(List.of(expectedFlow)));
+        when(redbeamsPollerProvider.userDefinedTagsFlowsCompletionPoller(List.of(expectedFlow), ENV_ID))
+                .thenReturn(() -> AttemptResults.finishWith(null));
+
+        underTest.modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, null, TAG_KEYS);
+
+        verify(redbeamsPollerProvider).userDefinedTagsDeletePoller(expectedDbCrns, ENV_ID, TAG_KEYS);
+    }
+
+    @Test
+    void testDeleteUserDefinedTagsFailsWithDeleteSpecificMessage() {
+        setPollingConfig(5, 1);
+
+        DatabaseServerV4Responses responses = new DatabaseServerV4Responses(Set.of(databaseServer(DB_CRN, Status.AVAILABLE)));
+        FlowIdentifier expectedFlow = new FlowIdentifier(FlowType.FLOW, "flow-id-1");
+        when(databaseServerV4Endpoint.list(ENV_CRN)).thenReturn(responses);
+        when(redbeamsPollerProvider.userDefinedTagsDeletePoller(List.of(DB_CRN), ENV_ID, TAG_KEYS))
+                .thenReturn(() -> AttemptResults.finishWith(List.of(expectedFlow)));
+        when(redbeamsPollerProvider.userDefinedTagsFlowsCompletionPoller(List.of(expectedFlow), ENV_ID))
+                .thenReturn(() -> AttemptResults.breakFor("Modify user defined tags on DB stack failed."));
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.modifyUserDefinedTagsOnDatabases(ENV_ID, ENV_CRN, null, TAG_KEYS));
+
+        assertThat(exception.getMessage()).startsWith("Database user defined tags deletion");
+    }
+
+    private DatabaseServerV4Response databaseServer(String crn, Status status) {
+        DatabaseServerV4Response databaseServer = new DatabaseServerV4Response();
+        databaseServer.setCrn(crn);
+        databaseServer.setStatus(status);
+        return databaseServer;
     }
 
     private void setPollingConfig(int maxTime, int sleepTime) {

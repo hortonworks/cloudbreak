@@ -216,7 +216,7 @@ class StackPollerServiceTest {
     void getUpdatableStacksFiltersOutAllSkippedStates() {
         Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
         for (Status skipped : List.of(
-                Status.CREATE_FAILED, Status.STOPPED, Status.STOP_IN_PROGRESS,
+                Status.CREATE_FAILED, Status.STOPPED, Status.STOP_IN_PROGRESS, Status.STOP_FAILED,
                 Status.DELETE_IN_PROGRESS, Status.DELETE_COMPLETED, Status.DELETE_FAILED)) {
             responsesSet.add(createNamedStackViewV4Response("stack-" + skipped.name(), skipped));
         }
@@ -260,10 +260,6 @@ class StackPollerServiceTest {
         StackViewV4Responses responses = new StackViewV4Responses();
         responses.setResponses(null);
         when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(responses);
-
-        // getUpdatableStacks calls getResponses().stream() directly, so null responses cause NPE
-        // In practice, the endpoint always returns a non-null collection, but the empty-responses case should be safe
-        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses());
 
         List<String> result = underTest.getUpdatableStacks(ENVIRONMENT_CRN, StackViewV4Response::getName);
 
@@ -393,7 +389,7 @@ class StackPollerServiceTest {
         CloudbreakServiceException ex = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.modifyUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, StackType.DATALAKE, userDefinedTags, null));
 
-        assertThat(ex.getMessage()).contains("Update user defined tags on stack timed out or error happened");
+        assertThat(ex.getMessage()).contains("Stack user defined tags update timed out or error happened");
     }
 
     @Test
@@ -423,6 +419,52 @@ class StackPollerServiceTest {
         verify(stackPollerProvider).updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows);
     }
 
+    @Test
+    void deleteUserDefinedTagsSkipsStoppedAndDeletingStacks() {
+        Set<String> tagKeys = Set.of("custom");
+        StackViewV4Response availableStack = createAvailableStackViewV4Response(STACK_CRN_1);
+        availableStack.setStackType("WORKLOAD");
+        StackViewV4Response stoppedStack = createAvailableStackViewV4Response(STACK_CRN_2);
+        stoppedStack.setStackType("WORKLOAD");
+        stoppedStack.setStatus(Status.STOPPED);
+        StackViewV4Response deletingCluster = createStackViewV4ResponseWithStatus(Status.DELETE_IN_PROGRESS);
+        deletingCluster.setCrn("stackCrn3");
+        deletingCluster.setStackType("WORKLOAD");
+        StackViewV4Response datalake = createAvailableStackViewV4Response("stackCrn4");
+        datalake.setStackType("DATALAKE");
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>(List.of(availableStack, stoppedStack, deletingCluster, datalake));
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<FlowIdentifier> expectedFlows = List.of(new FlowIdentifier(FlowType.FLOW, "flow-1"));
+        when(stackPollerProvider.userDefinedTagsDeletePoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, tagKeys))
+                .thenReturn(() -> AttemptResults.finishWith(expectedFlows));
+        when(stackPollerProvider.updateUserDefinedTags(ENVIRONMENT_ID, expectedFlows))
+                .thenReturn(() -> AttemptResults.finishWith(null));
+
+        underTest.modifyUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, StackType.WORKLOAD, null, tagKeys);
+
+        verify(stackPollerProvider).userDefinedTagsDeletePoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, tagKeys);
+    }
+
+    @Test
+    void deleteUserDefinedTagsThrowsDeleteSpecificMessageWhenCompletionPollerTimesOut() {
+        Set<String> tagKeys = Set.of("custom");
+        StackViewV4Response stackView1 = createAvailableStackViewV4Response(STACK_CRN_1);
+        stackView1.setStackType("DATALAKE");
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(Set.of(stackView1)));
+
+        FlowIdentifier expectedFlow = new FlowIdentifier(FlowType.FLOW, "flow-1");
+        when(stackPollerProvider.userDefinedTagsDeletePoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, tagKeys))
+                .thenReturn(() -> AttemptResults.finishWith(List.of(expectedFlow)));
+        when(stackPollerProvider.updateUserDefinedTags(ENVIRONMENT_ID, List.of(expectedFlow)))
+                .thenReturn(AttemptResults::justContinue);
+
+        CloudbreakServiceException ex = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.modifyUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, StackType.DATALAKE, null, tagKeys));
+
+        assertThat(ex.getMessage()).contains("Stack user defined tags deletion timed out or error happened");
+    }
+
     // ---- helpers ----
 
     private StackViewV4Response createStackViewV4ResponseWithStatus(Status status) {
@@ -435,6 +477,7 @@ class StackPollerServiceTest {
 
     private StackViewV4Response createAvailableStackViewV4Response(String stackCrn) {
         StackViewV4Response stack = createStackViewV4ResponseWithStatus(Status.AVAILABLE);
+        stack.setStatus(Status.AVAILABLE);
         stack.setCrn(stackCrn);
         return stack;
     }

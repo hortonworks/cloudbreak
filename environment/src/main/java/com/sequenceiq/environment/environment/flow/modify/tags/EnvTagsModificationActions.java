@@ -13,7 +13,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -50,20 +49,7 @@ public class EnvTagsModificationActions {
                         ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_STARTED,
                         EnvTagsModificationState.ENVIRONMENT_TAGS_MODIFICATION_START_STATE);
                 String nextEvent = START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.event();
-                Long resourceId = payload.getResourceId();
-                String resourceName = payload.getResourceName();
-                String resourceCrn = payload.getResourceCrn();
-                Map<String, String> tags = payload.getUserDefinedTags();
-                Set<String> tagsToRemove = payload.getTagsToRemove();
-                EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
-                        .withSelector(nextEvent)
-                        .withResourceId(resourceId)
-                        .withResourceName(resourceName)
-                        .withResourceCrn(resourceCrn)
-                        .withUserDefinedTags(tags)
-                        .withTagsToRemove(tagsToRemove)
-                        .build();
-                sendEvent(context, nextEvent, event);
+                sendEvent(context, nextEvent, EnvTagsModificationSupport.nextEvent(payload, nextEvent));
             }
 
             @Override
@@ -87,20 +73,7 @@ public class EnvTagsModificationActions {
                         ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_STARTED,
                         EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FREEIPA_STATE);
                 String nextEvent = MODIFY_USER_DEFINED_TAGS_ON_FREEIPA_EVENT.event();
-                Long resourceId = payload.getResourceId();
-                String resourceName = payload.getResourceName();
-                String resourceCrn = payload.getResourceCrn();
-                Map<String, String> tags = payload.getUserDefinedTags();
-                Set<String> tagsToRemove = payload.getTagsToRemove();
-                EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
-                        .withSelector(nextEvent)
-                        .withResourceId(resourceId)
-                        .withResourceName(resourceName)
-                        .withResourceCrn(resourceCrn)
-                        .withUserDefinedTags(tags)
-                        .withTagsToRemove(tagsToRemove)
-                        .build();
-                sendEvent(context, nextEvent, event);
+                sendEvent(context, nextEvent, EnvTagsModificationSupport.nextEvent(payload, nextEvent));
             }
 
             @Override
@@ -128,20 +101,7 @@ public class EnvTagsModificationActions {
                         ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_STARTED,
                         EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_DATALAKE_STATE);
                 String nextEvent = MODIFY_USER_DEFINED_TAGS_ON_DATALAKE_EVENT.event();
-                Long resourceId = payload.getResourceId();
-                String resourceName = payload.getResourceName();
-                String resourceCrn = payload.getResourceCrn();
-                Map<String, String> tags = payload.getUserDefinedTags();
-                Set<String> tagsToRemove = payload.getTagsToRemove();
-                EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
-                        .withSelector(nextEvent)
-                        .withResourceId(resourceId)
-                        .withResourceName(resourceName)
-                        .withResourceCrn(resourceCrn)
-                        .withUserDefinedTags(tags)
-                        .withTagsToRemove(tagsToRemove)
-                        .build();
-                sendEvent(context, nextEvent, event);
+                sendEvent(context, nextEvent, EnvTagsModificationSupport.nextEvent(payload, nextEvent));
             }
 
             @Override
@@ -170,20 +130,7 @@ public class EnvTagsModificationActions {
                         ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_STARTED,
                         EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_DATAHUBS_STATE);
                 String nextEvent = MODIFY_USER_DEFINED_TAGS_ON_DATAHUBS_EVENT.event();
-                Long resourceId = payload.getResourceId();
-                String resourceName = payload.getResourceName();
-                String resourceCrn = payload.getResourceCrn();
-                Map<String, String> tags = payload.getUserDefinedTags();
-                Set<String> tagsToRemove = payload.getTagsToRemove();
-                EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
-                        .withSelector(nextEvent)
-                        .withResourceId(resourceId)
-                        .withResourceName(resourceName)
-                        .withResourceCrn(resourceCrn)
-                        .withUserDefinedTags(tags)
-                        .withTagsToRemove(tagsToRemove)
-                        .build();
-                sendEvent(context, nextEvent, event);
+                sendEvent(context, nextEvent, EnvTagsModificationSupport.nextEvent(payload, nextEvent));
             }
 
             @Override
@@ -212,20 +159,7 @@ public class EnvTagsModificationActions {
                         ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_STARTED,
                         EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_REDBEAMS_STATE);
                 String nextEvent = MODIFY_USER_DEFINED_TAGS_ON_REDBEAMS_EVENT.event();
-                Long resourceId = payload.getResourceId();
-                String resourceName = payload.getResourceName();
-                String resourceCrn = payload.getResourceCrn();
-                Map<String, String> tags = payload.getUserDefinedTags();
-                Set<String> tagsToRemove = payload.getTagsToRemove();
-                EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
-                        .withSelector(nextEvent)
-                        .withResourceId(resourceId)
-                        .withResourceName(resourceName)
-                        .withResourceCrn(resourceCrn)
-                        .withUserDefinedTags(tags)
-                        .withTagsToRemove(tagsToRemove)
-                        .build();
-                sendEvent(context, nextEvent, event);
+                sendEvent(context, nextEvent, EnvTagsModificationSupport.nextEvent(payload, nextEvent));
             }
 
             @Override
@@ -254,20 +188,7 @@ public class EnvTagsModificationActions {
                         ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_EXPERIENCES_STARTED,
                         EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_EXPERIENCES_STATE);
                 String nextEvent = MODIFY_USER_DEFINED_TAGS_ON_EXPERIENCES_EVENT.event();
-                Long resourceId = payload.getResourceId();
-                String resourceName = payload.getResourceName();
-                String resourceCrn = payload.getResourceCrn();
-                Map<String, String> tags = payload.getUserDefinedTags();
-                Set<String> tagsToRemove = payload.getTagsToRemove();
-                EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
-                        .withSelector(nextEvent)
-                        .withResourceId(resourceId)
-                        .withResourceName(resourceName)
-                        .withResourceCrn(resourceCrn)
-                        .withUserDefinedTags(tags)
-                        .withTagsToRemove(tagsToRemove)
-                        .build();
-                sendEvent(context, nextEvent, event);
+                sendEvent(context, nextEvent, EnvTagsModificationSupport.nextEvent(payload, nextEvent));
             }
 
             @Override
@@ -290,20 +211,7 @@ public class EnvTagsModificationActions {
                         ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FINISHED,
                         EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FINISHED_STATE);
                 String nextEvent = FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT.event();
-                Long resourceId = payload.getResourceId();
-                String resourceName = payload.getResourceName();
-                String resourceCrn = payload.getResourceCrn();
-                Map<String, String> tags = payload.getUserDefinedTags();
-                Set<String> tagsToRemove = payload.getTagsToRemove();
-                EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
-                        .withSelector(nextEvent)
-                        .withResourceId(resourceId)
-                        .withResourceName(resourceName)
-                        .withResourceCrn(resourceCrn)
-                        .withUserDefinedTags(tags)
-                        .withTagsToRemove(tagsToRemove)
-                        .build();
-                sendEvent(context, nextEvent, event);
+                sendEvent(context, nextEvent, EnvTagsModificationSupport.nextEvent(payload, nextEvent));
             }
         };
     }
@@ -317,12 +225,17 @@ public class EnvTagsModificationActions {
                 LOGGER.error("Modifying user defined tags failed: {}", payload);
                 environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.AVAILABLE,
                         ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FAILED, List.of(payload.getEnvironmentStatus(),
-                                payload.getException().getMessage()), EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FAILED_STATE);
-                Long resourceId = payload.getResourceId();
-                String resourceName = payload.getResourceName();
-                String resourceCrn = payload.getResourceCrn();
+                                failureDetails(payload.getEnvironmentStatus())), EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FAILED_STATE);
                 sendEvent(context, HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT.event(), payload);
             }
         };
+    }
+
+    /**
+     * Customer-facing failure details. The exception text is internal and only logged; the customer is pointed at the failed step instead.
+     */
+    private static String failureDetails(EnvironmentStatus failedStatus) {
+        return failedStatus.getResponseStatus().getDescription()
+                + ". Check the events of the affected resources for details, then retry the operation.";
     }
 }

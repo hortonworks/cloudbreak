@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -123,6 +124,21 @@ class ModifyUserDefinedTagsActionsTest {
     }
 
     @Test
+    void testModifyCloudResourcesActionReportsDeletionWhenTagsAreRemoved() throws Exception {
+        ModifyUserDefinedTagsEvent event = new ModifyUserDefinedTagsEvent(MODIFY_USER_DEFINED_TAGS_FREEIPA_START_EVENT.event(), STACK_ID,
+                "Cloud resources", Map.of(), Set.of("custom"));
+        when(stack.getName()).thenReturn("stack-1");
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+        AbstractModifyUserDefinedTagsAction<ModifyUserDefinedTagsEvent> action =
+                (AbstractModifyUserDefinedTagsAction<ModifyUserDefinedTagsEvent>) underTest.modifyCloudResourcesAction();
+        initActionPrivateFields(action);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.UPDATE_IN_PROGRESS,
+                "Starting to delete user defined tags on cloud resources of FreeIPA: stack-1");
+        assertEquals(Boolean.TRUE, variables.get("TAGS_DELETION"));
+    }
+
+    @Test
     void testModifyStackAction() throws Exception {
         ModifyUserDefinedTagsEvent event = new ModifyUserDefinedTagsEvent(MODIFY_USER_DEFINED_TAGS_FREEIPA_STACK_EVENT.event(), STACK_ID,
                 "Stack", USER_DEFINED_TAGS);
@@ -182,6 +198,25 @@ class ModifyUserDefinedTagsActionsTest {
         String selector = HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.event();
         assertEquals(selector, captor.getValue());
         assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+    }
+
+    @Test
+    void testFailedActionReportsDeletionWhenTagsWereRemoved() throws Exception {
+        ModifyUserDefinedTagsFailedEvent event = new ModifyUserDefinedTagsFailedEvent(STACK_ID, "failedPhase", new CloudbreakException("error"),
+                FailureType.ERROR);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getName()).thenReturn("stack-1");
+        AbstractModifyUserDefinedTagsAction<ModifyUserDefinedTagsFailedEvent> action =
+                (AbstractModifyUserDefinedTagsAction<ModifyUserDefinedTagsFailedEvent>) underTest.failedAction();
+        initActionPrivateFields(action);
+        ReflectionTestUtils.setField(action, "jobService", mock(FreeipaJobService.class), FreeipaJobService.class);
+        variables.put(OPERATION_ID, "test-op");
+        variables.put("TAGS_DELETION", Boolean.TRUE);
+        doReturn("test-account").when(stack).getAccountId();
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+        verify(operationService).failOperation(eq("test-account"), eq("test-op"),
+                eq("Delete user defined tags failed for FreeIPA: stack-1 at phase: failedPhase"), any(), any());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

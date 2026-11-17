@@ -86,9 +86,6 @@ class EnvTagsModificationActionsTest {
     private EnvironmentStatusUpdateService environmentStatusUpdateService;
 
     @Mock
-    private EnvTagsModificationEvent payload;
-
-    @Mock
     private CommonContext context;
 
     @Captor
@@ -222,9 +219,10 @@ class EnvTagsModificationActionsTest {
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(selectorCaptor.capture(), eventCaptor.capture());
-        environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.AVAILABLE,
-                ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FAILED, List.of("USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED",
-                        errorMessage), EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FAILED_STATE);
+        verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(context, event, EnvironmentStatus.AVAILABLE,
+                ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FAILED, List.of(EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED,
+                        "Failed to modify user defined tags on FreeIPA. Check the events of the affected resources for details, then retry the operation."),
+                EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FAILED_STATE);
 
         assertEquals(HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT.event(), selectorCaptor.getValue());
         assertEquals(ENV_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "resourceId"));

@@ -3,14 +3,16 @@ package com.sequenceiq.environment.experience.liftie;
 import static com.sequenceiq.environment.experience.api.CommonExperienceApi.TAG_KEY_QUERY_PARAM;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.Set;
+
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,14 +27,12 @@ class LiftieConnectorServiceDeleteTagsTest extends LiftieConnectorServiceTestBas
 
     private static final Set<String> TAG_KEYS = Set.of("key1", "key2");
 
-    @SuppressWarnings("unchecked")
     private void setupMocks() {
-        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint()).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
+        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint(ENV_CRN)).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
         when(getMockClient().target(LIFTIE_TAGS_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
         when(getMockInvocationBuilderProvider().createInvocationBuilderForInternalActor(getMockWebTarget())).thenReturn(getMockInvocationBuilder());
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(getMockResponse());
-        when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), Void.class))
-                .thenReturn((Optional) Optional.of("placeholder"));
+        when(getMockResponse().getStatusInfo()).thenReturn(Response.Status.NO_CONTENT);
     }
 
     @Test
@@ -42,7 +42,7 @@ class LiftieConnectorServiceDeleteTagsTest extends LiftieConnectorServiceTestBas
 
         getUnderTest().deleteEnvironmentTags(null, ENV_CRN, TAG_KEYS);
 
-        verify(getMockLiftiePathProvider(), times(ONCE)).getPathToEnvironmentTagsEndpoint();
+        verify(getMockLiftiePathProvider(), times(ONCE)).getPathToEnvironmentTagsEndpoint(ENV_CRN);
     }
 
     @Test
@@ -77,13 +77,13 @@ class LiftieConnectorServiceDeleteTagsTest extends LiftieConnectorServiceTestBas
     }
 
     @Test
-    @DisplayName("When the Liftie response cannot be resolved, then an operation failure exception is thrown")
-    void testWhenResponseReaderReturnsEmptyThenExperienceOperationFailedExceptionIsThrown() {
-        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint()).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
+    @DisplayName("When Liftie responds with an unsuccessful status, then an operation failure exception is thrown")
+    void testWhenResponseIsUnsuccessfulThenExperienceOperationFailedExceptionIsThrown() {
+        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint(ENV_CRN)).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
         when(getMockClient().target(LIFTIE_TAGS_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
         when(getMockInvocationBuilderProvider().createInvocationBuilderForInternalActor(getMockWebTarget())).thenReturn(getMockInvocationBuilder());
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(getMockResponse());
-        when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), Void.class)).thenReturn(Optional.empty());
+        when(getMockResponse().getStatusInfo()).thenReturn(Response.Status.BAD_REQUEST);
 
         assertThrows(ExperienceOperationFailedException.class,
                 () -> getUnderTest().deleteEnvironmentTags(null, ENV_CRN, TAG_KEYS));
@@ -92,7 +92,7 @@ class LiftieConnectorServiceDeleteTagsTest extends LiftieConnectorServiceTestBas
     @Test
     @DisplayName("When the Liftie tag deletion call fails, then its error is wrapped in an operation failure exception")
     void testWhenEnvironmentTagDeletionCallThrowsThenExperienceOperationFailedExceptionIsThrown() {
-        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint()).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
+        when(getMockLiftiePathProvider().getPathToEnvironmentTagsEndpoint(ENV_CRN)).thenReturn(LIFTIE_TAGS_ENDPOINT_PATH);
         when(getMockClient().target(LIFTIE_TAGS_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
         when(getMockInvocationBuilderProvider().createInvocationBuilderForInternalActor(getMockWebTarget())).thenReturn(getMockInvocationBuilder());
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenThrow(new RuntimeException("connection refused"));
@@ -116,7 +116,7 @@ class LiftieConnectorServiceDeleteTagsTest extends LiftieConnectorServiceTestBas
 
         assertDoesNotThrow(() -> getUnderTest().deleteEnvironmentTags(null, ENV_CRN, TAG_KEYS));
 
-        verify(getMockLiftiePathProvider(), never()).getPathToEnvironmentTagsEndpoint();
+        verify(getMockLiftiePathProvider(), never()).getPathToEnvironmentTagsEndpoint(any());
         verifyNoInteractions(getMockClient(), getMockRetryableWebTarget());
     }
 
@@ -125,7 +125,7 @@ class LiftieConnectorServiceDeleteTagsTest extends LiftieConnectorServiceTestBas
     void testWhenNoTagKeysAreGivenThenDeletionIsSkipped() {
         assertDoesNotThrow(() -> getUnderTest().deleteEnvironmentTags(null, ENV_CRN, Set.of()));
 
-        verify(getMockLiftiePathProvider(), never()).getPathToEnvironmentTagsEndpoint();
+        verify(getMockLiftiePathProvider(), never()).getPathToEnvironmentTagsEndpoint(any());
         verifyNoInteractions(getMockClient(), getMockRetryableWebTarget());
     }
 }

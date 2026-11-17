@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.experience.config.ExperiencePathConfig;
+import com.sequenceiq.environment.experience.config.ExperiencePathPlaceholders;
 
 @Component
 public class LiftiePathProvider {
@@ -34,13 +35,14 @@ public class LiftiePathProvider {
     }
 
     public String getPathToPolicyEndpoint(String provider) {
-        String path = (basePath + policyPath).replace(pathConfig.getToReplace().get("cloudProvider"), provider);
+        String path = (basePath + policyPath).replace(pathConfig.getToReplace().get(ExperiencePathPlaceholders.CLOUD_PROVIDER.getPlaceholder()), provider);
         LOGGER.info("Path has created to liftie for policy fetching: {}", path);
         return path;
     }
 
-    public String getPathToEnvironmentTagsEndpoint() {
-        String path = basePath + environmentTagsPath;
+    public String getPathToEnvironmentTagsEndpoint(String environmentCrn) {
+        String path = (basePath + environmentTagsPath).replace(pathConfig.getToReplace().get(ExperiencePathPlaceholders.ENVIRONMENT_CRN.getPlaceholder()),
+                environmentCrn);
         LOGGER.info("Path has created to liftie for environment tags propagation: {}", path);
         return path;
     }

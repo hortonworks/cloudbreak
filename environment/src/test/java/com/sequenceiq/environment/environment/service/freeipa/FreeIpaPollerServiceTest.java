@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -180,7 +183,7 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testWaitForModifyUserDefinedTags() {
         Map<String, String> userDefinedTags = Map.of("custom", "value");
-        OperationStatus status = new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, OperationState.REQUESTED, null, null, null, 0, null);
+        OperationStatus status = tagsOperationStatus(OperationState.REQUESTED);
         when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(status);
         when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenReturn(AttemptResults.justFinish());
 
@@ -192,7 +195,7 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testWaitForModifyUserDefinedTagsAlreadyCompleted() {
         Map<String, String> userDefinedTags = Map.of("custom", "value");
-        OperationStatus status = new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, OperationState.COMPLETED, null, null, null, 0, null);
+        OperationStatus status = tagsOperationStatus(OperationState.COMPLETED);
         when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(status);
 
         underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, userDefinedTags, null);
@@ -204,7 +207,7 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testWaitForModifyUserDefinedTagsFailed() {
         Map<String, String> userDefinedTags = Map.of("custom", "value");
-        OperationStatus status = new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, OperationState.REQUESTED, null, null, null, 0, null);
+        OperationStatus status = tagsOperationStatus(OperationState.REQUESTED);
         when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(status);
         when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenThrow(new RuntimeException("error"));
 
@@ -218,13 +221,88 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testWaitForDeleteUserDefinedTags() {
         Set<String> tagKeys = Set.of("custom");
-        OperationStatus status = new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, OperationState.REQUESTED, null, null, null, 0, null);
+        OperationStatus status = tagsOperationStatus(OperationState.REQUESTED);
         when(freeIpaService.triggerUserDefinedTagsDelete(ENV_CRN, tagKeys)).thenReturn(status);
         when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenReturn(AttemptResults.justFinish());
 
         underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, Map.of(), tagKeys);
 
         verify(freeIpaService).triggerUserDefinedTagsDelete(ENV_CRN, tagKeys);
+    }
+
+    @Test
+    void testWaitForDeleteUserDefinedTagsRetriesTriggerWhileAnotherFlowIsRunning() {
+        ReflectionTestUtils.setField(underTest, "modifyUserDefinedTagsAttempt", 2);
+        Set<String> tagKeys = Set.of("custom");
+        OperationStatus status = tagsOperationStatus(OperationState.REQUESTED);
+        when(freeIpaService.triggerUserDefinedTagsDelete(ENV_CRN, tagKeys))
+                .thenThrow(new FreeIpaOperationFailedException("conflict", new WebApplicationException(Response.status(Response.Status.CONFLICT).build())))
+                .thenReturn(status);
+        when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenReturn(AttemptResults.justFinish());
+
+        underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, Map.of(), tagKeys);
+
+        verify(freeIpaService, times(2)).triggerUserDefinedTagsDelete(ENV_CRN, tagKeys);
+        verify(freeipaPollerProvider).modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123");
+    }
+
+    @Test
+    void testWaitForDeleteUserDefinedTagsRetriesTriggerWhenOperationIsRejected() {
+        ReflectionTestUtils.setField(underTest, "modifyUserDefinedTagsAttempt", 2);
+        Set<String> tagKeys = Set.of("custom");
+        when(freeIpaService.triggerUserDefinedTagsDelete(ENV_CRN, tagKeys))
+                .thenReturn(tagsOperationStatus(OperationState.REJECTED))
+                .thenReturn(tagsOperationStatus(OperationState.REQUESTED));
+        when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenReturn(AttemptResults.justFinish());
+
+        underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, Map.of(), tagKeys);
+
+        verify(freeIpaService, times(2)).triggerUserDefinedTagsDelete(ENV_CRN, tagKeys);
+        verify(freeipaPollerProvider).modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123");
+    }
+
+    @Test
+    void testWaitForDeleteUserDefinedTagsFailsWhenOperationStaysRejected() {
+        Set<String> tagKeys = Set.of("custom");
+        when(freeIpaService.triggerUserDefinedTagsDelete(ENV_CRN, tagKeys)).thenReturn(tagsOperationStatus(OperationState.REJECTED));
+
+        assertThatThrownBy(() -> underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, Map.of(), tagKeys))
+                .hasMessageContaining("Starting FreeIPA user defined tags deletion timed out")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+
+        verify(freeipaPollerProvider, never()).modifyUserDefinedTagsPoller(any(), any(), any());
+    }
+
+    @Test
+    void testWaitForModifyUserDefinedTagsFailsWhenPollerBreaks() {
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(tagsOperationStatus(OperationState.REQUESTED));
+        when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123"))
+                .thenReturn(AttemptResults.breakFor("FreeIPA modify user defined tags operation request was rejected."));
+
+        assertThatThrownBy(() -> underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, userDefinedTags, null))
+                .hasMessageContaining("FreeIPA user defined tags update failed")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+    }
+
+    @Test
+    void testWaitForDeleteUserDefinedTagsDoesNotRetryTriggerOnOtherFailure() {
+        ReflectionTestUtils.setField(underTest, "modifyUserDefinedTagsAttempt", 2);
+        Set<String> tagKeys = Set.of("custom");
+        when(freeIpaService.triggerUserDefinedTagsDelete(ENV_CRN, tagKeys))
+                .thenThrow(new FreeIpaOperationFailedException("bad request",
+                        new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build())));
+
+        assertThatThrownBy(() -> underTest.waitForUserDefinedTagsModification(ENV_ID, ENV_CRN, Map.of(), tagKeys))
+                .hasMessageContaining("Starting FreeIPA user defined tags deletion failed")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+
+        verify(freeIpaService).triggerUserDefinedTagsDelete(ENV_CRN, tagKeys);
+        verify(freeipaPollerProvider, never()).modifyUserDefinedTagsPoller(any(), any(), any());
+    }
+
+    private static OperationStatus tagsOperationStatus(OperationState state) {
+        return new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, state, null, null, null, 0, null);
     }
 
     private static SyncOperationStatus createStatus(SynchronizationStatus syncStatus, String error) {
