@@ -27,8 +27,7 @@ public class EnableEncryptionProfileOnFreeIpaHandler extends ExceptionCatcherEve
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<EnableEncryptionProfileEvent> event) {
-        return new EnableEncryptionProfileFailedEvent(event.getData().getResourceId(), event.getData().getResourceName(),
-                event.getData().getResourceCrn(), e);
+        return EnableEncryptionProfileFailedEvent.from(event.getData(), e);
     }
 
     @Override
@@ -47,8 +46,7 @@ public class EnableEncryptionProfileOnFreeIpaHandler extends ExceptionCatcherEve
                     .build();
 
         } catch (Exception e) {
-            return new EnableEncryptionProfileFailedEvent(payload.getResourceId(), payload.getResourceName(),
-                    payload.getResourceCrn(), e);
+            return EnableEncryptionProfileFailedEvent.from(payload, e);
         }
     }
 }

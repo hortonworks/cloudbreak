@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.environment.flow.encryptionprofile.even
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.SET_ENCRYPTION_PROFILE_EVENT;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors.VALIDATE_ENABLE_ENCRYPTION_PROFILE_HANDLER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,6 +54,7 @@ class ValidateEnableEncryptionProfileHandlerTest {
         Selectable response = underTest.defaultFailureEvent(1L, new Exception("failed"), new Event<>(event));
         assertEquals(FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT.selector(), response.getSelector());
         assertEquals("failed", response.getException().getMessage());
+        assertFalse(((EnableEncryptionProfileFailedEvent) response).isEncryptionProfileApplied());
     }
 
     @Test
@@ -75,5 +77,6 @@ class ValidateEnableEncryptionProfileHandlerTest {
         assertEquals(FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT.name(), selectable.selector());
         assertEquals("failed", selectable.getException().getMessage());
         assertEquals(event.getResourceCrn(), ((EnableEncryptionProfileFailedEvent) selectable).getResourceCrn());
+        assertFalse(((EnableEncryptionProfileFailedEvent) selectable).isEncryptionProfileApplied());
     }
 }

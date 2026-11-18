@@ -130,7 +130,53 @@ class EnableEncryptionProfileActionsTest {
         AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent> failedAction =
                 (AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent>) underTest.failedAction();
         EnableEncryptionProfileFailedEvent enableEncryptionProfileFailedEvent =
-                new EnableEncryptionProfileFailedEvent(1L, "envName", "envCrn", new NotFoundException("404"));
+                new EnableEncryptionProfileFailedEvent(1L, "envName", "envCrn", new NotFoundException("404"), true);
+
+        initActionPrivateFields(failedAction);
+
+        Event event = mock(Event.class);
+        when(reactorEventFactory.createEvent(anyMap(), any())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(failedAction).doExecute(context, enableEncryptionProfileFailedEvent, Map.of());
+
+        verify(environmentStatusUpdateService, times(1)).updateFailedEnvironmentStatusAndNotify(context,
+                enableEncryptionProfileFailedEvent,
+                EnvironmentStatus.ENABLE_ENCRYPTION_PROFILE_FAILED,
+                ResourceEvent.ENABLE_ENCRYPTION_PROFILE_FAILED,
+                List.of("404"),
+                EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE);
+        verify(eventBus)
+                .notify(eq(EnableEncryptionProfileStateSelectors.HANDLED_FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT.selector()), eq(event));
+    }
+
+    @Test
+    public void testFailedActionWithoutExceptionMessage() throws Exception {
+        AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent> failedAction =
+                (AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent>) underTest.failedAction();
+        EnableEncryptionProfileFailedEvent enableEncryptionProfileFailedEvent =
+                new EnableEncryptionProfileFailedEvent(1L, "envName", "envCrn", new RuntimeException(), true);
+
+        initActionPrivateFields(failedAction);
+
+        Event event = mock(Event.class);
+        when(reactorEventFactory.createEvent(anyMap(), any())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(failedAction).doExecute(context, enableEncryptionProfileFailedEvent, Map.of());
+
+        verify(environmentStatusUpdateService, times(1)).updateFailedEnvironmentStatusAndNotify(context,
+                enableEncryptionProfileFailedEvent,
+                EnvironmentStatus.ENABLE_ENCRYPTION_PROFILE_FAILED,
+                ResourceEvent.ENABLE_ENCRYPTION_PROFILE_FAILED,
+                List.of("Unknown error"),
+                EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE);
+    }
+
+    @Test
+    public void testFailedActionKeepsAvailableWhenProfileNotApplied() throws Exception {
+        AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent> failedAction =
+                (AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent>) underTest.failedAction();
+        EnableEncryptionProfileFailedEvent enableEncryptionProfileFailedEvent =
+                new EnableEncryptionProfileFailedEvent(1L, "envName", "envCrn", new NotFoundException("404"), false);
 
         initActionPrivateFields(failedAction);
 
@@ -147,28 +193,6 @@ class EnableEncryptionProfileActionsTest {
                 EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE);
         verify(eventBus)
                 .notify(eq(EnableEncryptionProfileStateSelectors.HANDLED_FAILED_ENABLE_ENCRYPTION_PROFILE_EVENT.selector()), eq(event));
-    }
-
-    @Test
-    public void testFailedActionWithoutExceptionMessage() throws Exception {
-        AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent> failedAction =
-                (AbstractEnableEncryptionProfileActions<EnableEncryptionProfileFailedEvent>) underTest.failedAction();
-        EnableEncryptionProfileFailedEvent enableEncryptionProfileFailedEvent =
-                new EnableEncryptionProfileFailedEvent(1L, "envName", "envCrn", new RuntimeException());
-
-        initActionPrivateFields(failedAction);
-
-        Event event = mock(Event.class);
-        when(reactorEventFactory.createEvent(anyMap(), any())).thenReturn(event);
-
-        new AbstractActionTestSupport<>(failedAction).doExecute(context, enableEncryptionProfileFailedEvent, Map.of());
-
-        verify(environmentStatusUpdateService, times(1)).updateFailedEnvironmentStatusAndNotify(context,
-                enableEncryptionProfileFailedEvent,
-                EnvironmentStatus.AVAILABLE,
-                ResourceEvent.ENABLE_ENCRYPTION_PROFILE_FAILED,
-                List.of("Unknown error"),
-                EnabledEncryptionProfileState.ENABLE_ENCRYPTION_PROFILE_FAILED_STATE);
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

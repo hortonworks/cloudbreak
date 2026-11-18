@@ -207,7 +207,7 @@ class DisableEncryptionProfileActionsTest {
 
         verify(environmentStatusUpdateService, times(1)).updateFailedEnvironmentStatusAndNotify(context,
                 disableEncryptionProfileFailedEvent,
-                EnvironmentStatus.AVAILABLE,
+                EnvironmentStatus.DISABLE_ENCRYPTION_PROFILE_FAILED,
                 ResourceEvent.DISABLE_ENCRYPTION_PROFILE_FAILED,
                 List.of("404"),
                 DisableEncryptionProfileState.DISABLE_ENCRYPTION_PROFILE_FAILED_STATE);
@@ -231,7 +231,7 @@ class DisableEncryptionProfileActionsTest {
 
         verify(environmentStatusUpdateService, times(1)).updateFailedEnvironmentStatusAndNotify(context,
                 disableEncryptionProfileFailedEvent,
-                EnvironmentStatus.AVAILABLE,
+                EnvironmentStatus.DISABLE_ENCRYPTION_PROFILE_FAILED,
                 ResourceEvent.DISABLE_ENCRYPTION_PROFILE_FAILED,
                 List.of("Unknown error"),
                 DisableEncryptionProfileState.DISABLE_ENCRYPTION_PROFILE_FAILED_STATE);

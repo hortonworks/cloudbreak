@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISABLE_ENCRYPTION_P
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISABLE_ENCRYPTION_PROFILE_FINISHED_WITH_SKIPPED_CLUSTERS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISABLE_ENCRYPTION_PROFILE_STARTED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.DISABLE_ENCRYPTION_PROFILE_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.DisableEncryptionProfileState.DISABLE_ENCRYPTION_PROFILE_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.encryptionprofile.DisableEncryptionProfileState.DISABLE_ENCRYPTION_PROFILE_FINISHED_STATE;
@@ -119,7 +120,7 @@ public class DisableEncryptionProfileActions {
                         .updateFailedEnvironmentStatusAndNotify(
                                 context,
                                 payload,
-                                AVAILABLE,
+                                DISABLE_ENCRYPTION_PROFILE_FAILED,
                                 ResourceEvent.DISABLE_ENCRYPTION_PROFILE_FAILED,
                                 List.of(reason),
                                 DISABLE_ENCRYPTION_PROFILE_FAILED_STATE);

@@ -186,7 +186,8 @@ public enum EnvironmentStatus {
 
     ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS("Enable encryption profile in progress"),
     ENABLE_ENCRYPTION_PROFILE_FAILED("Enable encryption profile failed"),
-    DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS("Disable encryption profile in progress");
+    DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS("Disable encryption profile in progress"),
+    DISABLE_ENCRYPTION_PROFILE_FAILED("Disable encryption profile failed");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(
             AVAILABLE,

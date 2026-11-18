@@ -27,8 +27,7 @@ public class ValidateEnableEncryptionProfileHandler extends ExceptionCatcherEven
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<EnableEncryptionProfileEvent> event) {
-        return new EnableEncryptionProfileFailedEvent(event.getData().getResourceId(), event.getData().getResourceName(),
-                event.getData().getResourceCrn(), e);
+        return EnableEncryptionProfileFailedEvent.validationFailed(event.getData(), e);
     }
 
     @Override
@@ -47,8 +46,7 @@ public class ValidateEnableEncryptionProfileHandler extends ExceptionCatcherEven
                     .build();
 
         } catch (Exception e) {
-            return new EnableEncryptionProfileFailedEvent(payload.getResourceId(), payload.getResourceName(),
-                    payload.getResourceCrn(), e);
+            return EnableEncryptionProfileFailedEvent.validationFailed(payload, e);
         }
     }
 }

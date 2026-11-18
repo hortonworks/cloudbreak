@@ -1,5 +1,8 @@
 package com.sequenceiq.environment.encryptionprofile.service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -46,9 +49,10 @@ public class EncryptionProfileFlowService {
     }
 
     private FlowIdentifier enableEncryptionProfile(EnvironmentDto environmentDto, EncryptionProfile encryptionProfile) {
-        if (environmentDto.getStatus() != EnvironmentStatus.AVAILABLE) {
-            throw new BadRequestException(String.format("Environment '%s' needs to be in AVAILABLE state to enable encryption profile. Current status: %s",
-                    environmentDto.getName(), environmentDto.getStatus()));
+        if (!environmentDto.getStatus().isEncryptionProfileEnableAllowed()) {
+            throw new BadRequestException(String.format("Environment '%s' needs to be in one of the following states to enable encryption profile: %s. "
+                    + "Current status: %s", environmentDto.getName(), allowedStatesText(EnvironmentStatus.ENCRYPTION_PROFILE_ENABLEABLE_STATES),
+                    environmentDto.getStatus()));
         }
         encryptionProfileValidator.validate(environmentDto.getResourceCrn());
         return reactorFlowManager.triggerEnableEncryptionProfile(environmentDto.getId(), environmentDto.getName(), environmentDto.getResourceCrn(),
@@ -59,10 +63,15 @@ public class EncryptionProfileFlowService {
         encryptionProfileValidator.validateDisable();
         EnvironmentDto environmentDto = getEnvironmentByNameOrCrn(envNameOrCrn);
         if (!environmentDto.getStatus().isEncryptionProfileDisableAllowed()) {
-            throw new BadRequestException(String.format("Environment '%s' needs to be in AVAILABLE or UPDATE_FAILED state to disable encryption profile. "
-                    + "Current status: %s", environmentDto.getName(), environmentDto.getStatus()));
+            throw new BadRequestException(String.format("Environment '%s' needs to be in one of the following states to disable encryption profile: %s. "
+                    + "Current status: %s", environmentDto.getName(), allowedStatesText(EnvironmentStatus.ENCRYPTION_PROFILE_DISABLEABLE_STATES),
+                    environmentDto.getStatus()));
         }
         return reactorFlowManager.triggerDisableEncryptionProfile(environmentDto.getId(), environmentDto.getName(), environmentDto.getResourceCrn());
+    }
+
+    private static String allowedStatesText(Set<EnvironmentStatus> states) {
+        return states.stream().map(Enum::name).sorted().collect(Collectors.joining(", "));
     }
 
     private EnvironmentDto getEnvironmentByNameOrCrn(NameOrCrn nameOrCrn) {

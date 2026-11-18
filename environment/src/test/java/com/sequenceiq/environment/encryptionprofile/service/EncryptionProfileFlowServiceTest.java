@@ -107,8 +107,50 @@ public class EncryptionProfileFlowServiceTest {
         BadRequestException ex = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.enableEncryptionProfileByName(NameOrCrn.ofName("envName"), ENCRYPTION_PROFILE_NAME)));
 
-        assertEquals("Environment 'envName' needs to be in AVAILABLE state to enable encryption profile. "
+        assertEquals("Environment 'envName' needs to be in one of the following states to enable encryption profile: "
+                + "AVAILABLE, DISABLE_ENCRYPTION_PROFILE_FAILED, ENABLE_ENCRYPTION_PROFILE_FAILED. "
                 + "Current status: ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS", ex.getMessage());
+        verify(encryptionProfileValidator, never()).validate(any());
+        verify(reactorFlowManager, never()).triggerEnableEncryptionProfile(anyLong(), any(), any(), any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EnvironmentStatus.class, names = {"AVAILABLE", "ENABLE_ENCRYPTION_PROFILE_FAILED", "DISABLE_ENCRYPTION_PROFILE_FAILED"})
+    void testeEnableEncryptionProfileInAllowedStatus(EnvironmentStatus status) {
+        EnvironmentDto environmentDto = envDto();
+        environmentDto.setStatus(status);
+        EncryptionProfile encryptionProfile = new EncryptionProfile();
+        encryptionProfile.setName(ENCRYPTION_PROFILE_NAME);
+        encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
+
+        when(environmentService.getByNameAndAccountId(eq("envName"), any())).thenReturn(environmentDto);
+        when(encryptionProfileService.getByNameAndAccountId(eq(ENCRYPTION_PROFILE_NAME), any())).thenReturn(encryptionProfile);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.enableEncryptionProfileByName(
+                NameOrCrn.ofName("envName"), ENCRYPTION_PROFILE_NAME));
+
+        verify(encryptionProfileValidator).validate(environmentDto.getResourceCrn());
+        verify(reactorFlowManager).triggerEnableEncryptionProfile(eq(environmentDto.getId()), eq(environmentDto.getName()), eq(environmentDto.getResourceCrn()),
+                any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EnvironmentStatus.class, names = {"UPDATE_FAILED", "ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS", "DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS",
+            "ENV_STOPPED"})
+    void testEnableEncryptionProfileWhenEnvironmentStatusIsNotAllowed(EnvironmentStatus status) {
+        EnvironmentDto environmentDto = envDto();
+        environmentDto.setStatus(status);
+        EncryptionProfile encryptionProfile = new EncryptionProfile();
+        encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
+
+        when(environmentService.getByNameAndAccountId(eq("envName"), any())).thenReturn(environmentDto);
+        when(encryptionProfileService.getByNameAndAccountId(eq(ENCRYPTION_PROFILE_NAME), any())).thenReturn(encryptionProfile);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.enableEncryptionProfileByName(NameOrCrn.ofName("envName"), ENCRYPTION_PROFILE_NAME)));
+
+        assertEquals("Environment 'envName' needs to be in one of the following states to enable encryption profile: "
+                + "AVAILABLE, DISABLE_ENCRYPTION_PROFILE_FAILED, ENABLE_ENCRYPTION_PROFILE_FAILED. Current status: " + status, ex.getMessage());
         verify(encryptionProfileValidator, never()).validate(any());
         verify(reactorFlowManager, never()).triggerEnableEncryptionProfile(anyLong(), any(), any(), any());
     }
@@ -148,7 +190,7 @@ public class EncryptionProfileFlowServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = EnvironmentStatus.class, names = {"AVAILABLE", "UPDATE_FAILED"})
+    @EnumSource(value = EnvironmentStatus.class, names = {"AVAILABLE", "UPDATE_FAILED", "ENABLE_ENCRYPTION_PROFILE_FAILED", "DISABLE_ENCRYPTION_PROFILE_FAILED"})
     void testeDisableEncryptionProfileByNameInAllowedStatus(EnvironmentStatus status) {
         EnvironmentDto environmentDto = envDto();
         environmentDto.setStatus(status);
@@ -163,7 +205,7 @@ public class EncryptionProfileFlowServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = EnvironmentStatus.class, names = {"ENV_STOPPED", "STOP_DATAHUB_STARTED", "DISABLE_ENCRYPTION_PROFILE_IN_PROGRESS",
-            "ENABLE_ENCRYPTION_PROFILE_FAILED"})
+            "ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS"})
     void testDisableEncryptionProfileWhenEnvironmentStatusIsNotAllowed(EnvironmentStatus status) {
         EnvironmentDto environmentDto = envDto();
         environmentDto.setStatus(status);
@@ -173,8 +215,8 @@ public class EncryptionProfileFlowServiceTest {
         BadRequestException ex = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.disableEncryptionProfile(NameOrCrn.ofName("envName"))));
 
-        assertEquals("Environment 'envName' needs to be in AVAILABLE or UPDATE_FAILED state to disable encryption profile. Current status: " + status,
-                ex.getMessage());
+        assertEquals("Environment 'envName' needs to be in one of the following states to disable encryption profile: "
+                + "AVAILABLE, DISABLE_ENCRYPTION_PROFILE_FAILED, ENABLE_ENCRYPTION_PROFILE_FAILED, UPDATE_FAILED. Current status: " + status, ex.getMessage());
         verify(reactorFlowManager, never()).triggerDisableEncryptionProfile(anyLong(), any(), any());
     }
 

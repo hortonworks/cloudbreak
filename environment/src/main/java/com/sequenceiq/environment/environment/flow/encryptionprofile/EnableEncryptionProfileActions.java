@@ -112,12 +112,15 @@ public class EnableEncryptionProfileActions {
             @Override
             protected void doExecute(CommonContext context, EnableEncryptionProfileFailedEvent payload, Map<Object, Object> variables) {
                 String reason = getFailureReason(payload.getException());
-                LOGGER.error("Failed to enable encryption profile: {}", reason, payload.getException());
+                EnvironmentStatus failureStatus = payload.isEncryptionProfileApplied()
+                        ? EnvironmentStatus.ENABLE_ENCRYPTION_PROFILE_FAILED
+                        : EnvironmentStatus.AVAILABLE;
+                LOGGER.error("Failed to enable encryption profile, setting environment status to {}: {}", failureStatus, reason, payload.getException());
                 environmentStatusUpdateService
                         .updateFailedEnvironmentStatusAndNotify(
                                 context,
                                 payload,
-                                EnvironmentStatus.AVAILABLE,
+                                failureStatus,
                                 ResourceEvent.ENABLE_ENCRYPTION_PROFILE_FAILED,
                                 List.of(reason),
                                 ENABLE_ENCRYPTION_PROFILE_FAILED_STATE);
