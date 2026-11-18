@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.salt;
 
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.SaltMinimumAuthVersionConstants.APPLIED_MINIMUM_AUTH_VERSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -94,7 +95,7 @@ class SaltMinimumAuthVersionServiceTest {
 
         underTest.saveAppliedMinimumAuthVersion(stack, gatewayConfigs, params);
 
-        assertThat(storedAttributes()).containsEntry(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, 3)
+        assertThat(storedAttributes()).containsEntry(APPLIED_MINIMUM_AUTH_VERSION, 3)
                 .containsEntry(ComponentType.SALT_STATE.name(), "zip");
     }
 
@@ -124,13 +125,13 @@ class SaltMinimumAuthVersionServiceTest {
 
         assertThat(params.getSaltMasterMinimumAuthVersion()).isEqualTo(2);
         assertThat(params.isSaltMasterRestartNeeded()).isTrue();
-        assertThat(storedAttributes()).containsEntry(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, 2)
+        assertThat(storedAttributes()).containsEntry(APPLIED_MINIMUM_AUTH_VERSION, 2)
                 .containsEntry(ComponentType.SALT_STATE.name(), "zip");
     }
 
     @Test
     void unchangedValueNeedsNoRestartAndNoWrite() {
-        saltStateComponent(Map.of(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, 2));
+        saltStateComponent(Map.of(APPLIED_MINIMUM_AUTH_VERSION, 2));
         instances(NEW_SALT, NEW_SALT, OLD_SALT);
         BootstrapParams params = new BootstrapParams();
 
@@ -145,7 +146,7 @@ class SaltMinimumAuthVersionServiceTest {
 
     @Test
     void lastOldMinionGoneRestoresEnforcementAndForgetsTheOldValueUntilTheRestartSucceeds() {
-        saltStateComponent(Map.of(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, 2));
+        saltStateComponent(Map.of(APPLIED_MINIMUM_AUTH_VERSION, 2));
         instances(NEW_SALT, NEW_SALT, NEW_SALT);
         BootstrapParams params = new BootstrapParams();
 
@@ -154,17 +155,17 @@ class SaltMinimumAuthVersionServiceTest {
 
         assertThat(params.getSaltMasterMinimumAuthVersion()).isEqualTo(3);
         assertThat(params.isSaltMasterRestartNeeded()).isTrue();
-        assertThat(storedAttributes()).containsEntry(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, "unknown");
+        assertThat(storedAttributes()).containsEntry(APPLIED_MINIMUM_AUTH_VERSION, "unknown");
 
         underTest.saveAppliedMinimumAuthVersion(stack, gatewayConfigs, params);
 
-        assertThat(storedAttributes()).containsEntry(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, 3);
+        assertThat(storedAttributes()).containsEntry(APPLIED_MINIMUM_AUTH_VERSION, 3);
         verify(clusterComponentConfigProvider, times(2)).store(any(ClusterComponent.class));
     }
 
     @Test
     void failedRestartKeepsTheValueUnknownSoTheNextBootstrapRestartsAgain() {
-        saltStateComponent(Map.of(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, 2));
+        saltStateComponent(Map.of(APPLIED_MINIMUM_AUTH_VERSION, 2));
         instances(NEW_SALT, NEW_SALT, NEW_SALT);
         underTest.configureBootstrapParams(stack, gateways(NEW_SALT, NEW_SALT), new BootstrapParams());
         BootstrapParams retryParams = new BootstrapParams();
@@ -173,6 +174,22 @@ class SaltMinimumAuthVersionServiceTest {
 
         assertThat(retryParams.getSaltMasterMinimumAuthVersion()).isEqualTo(3);
         assertThat(retryParams.isSaltMasterRestartNeeded()).isTrue();
+    }
+
+    @Test
+    void existingOrchestratorEndpointWithNoAppliedValueRequiresAMasterRestart() {
+        saltStateComponent(Map.of(ComponentType.SALT_STATE.name(), "zip"));
+        Orchestrator orchestrator = new Orchestrator();
+        orchestrator.setApiEndpoint("10.0.0.1:9443");
+        when(stack.getOrchestrator()).thenReturn(orchestrator);
+        instances(NEW_SALT, OLD_SALT);
+        BootstrapParams params = new BootstrapParams();
+
+        underTest.configureBootstrapParams(stack, gateways(NEW_SALT), params);
+
+        assertThat(params.getSaltMasterMinimumAuthVersion()).isEqualTo(2);
+        assertThat(params.isSaltMasterRestartNeeded()).isTrue();
+        verify(clusterComponentConfigProvider, never()).store(any(ClusterComponent.class));
     }
 
     @Test
@@ -241,12 +258,12 @@ class SaltMinimumAuthVersionServiceTest {
         underTest.configureBootstrapParams(stack, gatewayConfigs, params);
         underTest.saveAppliedMinimumAuthVersion(stack, gatewayConfigs, params);
 
-        assertThat(storedAttributes()).containsEntry(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, 3);
+        assertThat(storedAttributes()).containsEntry(APPLIED_MINIMUM_AUTH_VERSION, 3);
     }
 
     @Test
     void unreachableGatewayKeepsTheAppliedValueUnknownUntilABootstrapReachesEveryGateway() {
-        saltStateComponent(Map.of(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, 2));
+        saltStateComponent(Map.of(APPLIED_MINIMUM_AUTH_VERSION, 2));
         instances(NEW_SALT, NEW_SALT, NEW_SALT);
         gatewayInstances("10.0.0.1", "10.0.0.2");
         List<GatewayConfig> reachableGatewayConfigs = List.of(gateway("10.0.0.1"));
@@ -257,7 +274,7 @@ class SaltMinimumAuthVersionServiceTest {
 
         assertThat(params.getSaltMasterMinimumAuthVersion()).isEqualTo(3);
         assertThat(params.isSaltMasterRestartNeeded()).isTrue();
-        assertThat(storedAttributes()).containsEntry(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, "unknown");
+        assertThat(storedAttributes()).containsEntry(APPLIED_MINIMUM_AUTH_VERSION, "unknown");
         verify(clusterComponentConfigProvider, times(1)).store(any(ClusterComponent.class));
 
         List<GatewayConfig> everyGatewayConfig = List.of(gateway("10.0.0.1"), gateway("10.0.0.2"));
@@ -268,7 +285,7 @@ class SaltMinimumAuthVersionServiceTest {
 
         assertThat(nextParams.getSaltMasterMinimumAuthVersion()).isEqualTo(3);
         assertThat(nextParams.isSaltMasterRestartNeeded()).isTrue();
-        assertThat(storedAttributes()).containsEntry(SaltMinimumAuthVersionService.APPLIED_MINIMUM_AUTH_VERSION, 3);
+        assertThat(storedAttributes()).containsEntry(APPLIED_MINIMUM_AUTH_VERSION, 3);
         verify(clusterComponentConfigProvider, times(2)).store(any(ClusterComponent.class));
     }
 

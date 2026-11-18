@@ -420,6 +420,56 @@ class SaltOrchestratorTest {
     }
 
     @Test
+    void bootstrapNewNodesUploadsDropInOnceAndStopsAllMastersBeforeRunningWhenNewGatewayRestarts() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        Node newGateway = secondaryGatewayNode();
+        Set<Node> allNodes = withNode(targets, workerNode("10.0.0.4"));
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(2, true);
+        when(saltStateService.stopMastersToRestart(eq(saltConnector), any())).thenReturn(SaltMastersStopResult.withMastersNotStopped(Set.of()));
+        Callable<Boolean> saltBootstrapRun = saltBootstrapRun();
+
+        saltOrchestrator.bootstrapNewNodes(allGatewayConfigs, Set.of(newGateway), allNodes, null, bootstrapParams, exitCriteriaModel, false);
+
+        assertThat(captureMinimumAuthVersionUploads())
+                .singleElement()
+                .satisfies(upload -> assertMinimumAuthVersionUpload(upload, Set.of("10.0.0.1", "10.0.0.2"), "minimum_auth_version: 2"));
+        InOrder inOrder = inOrder(saltRunner, saltStateService, saltBootstrapFactory, saltBootstrapRun);
+        inOrder.verify(saltRunner).runnerWithConfiguredErrorCount(argThat(bootstrap -> isUploadOf(bootstrap, "minimum_auth_version.conf")),
+                any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        for (String keyFile : List.of("master.pem", "master.pub", "minion_master.pub", "master_sign.pem", "master_sign.pub")) {
+            inOrder.verify(saltRunner).runnerWithConfiguredErrorCount(argThat(bootstrap -> isUploadOf(bootstrap, keyFile)),
+                    any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        }
+        inOrder.verify(saltStateService).stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+        inOrder.verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, allNodes, allNodes, bootstrapParams);
+        inOrder.verify(saltBootstrapRun).call();
+    }
+
+    @Test
+    void bootstrapNewNodesStopsEverySaltMasterOnceWhenRestartAllAndSaltMasterRestartNeeded() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        Node newGateway = secondaryGatewayNode();
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(3, true);
+        when(saltStateService.stopMastersToRestart(eq(saltConnector), any())).thenReturn(SaltMastersStopResult.withMastersNotStopped(Set.of()));
+
+        saltOrchestrator.bootstrapNewNodes(allGatewayConfigs, Set.of(newGateway), targets, null, bootstrapParams, exitCriteriaModel, true);
+
+        verify(saltStateService).stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+        verify(saltStateService, never()).stopMasters(any(), any());
+    }
+
+    @Test
+    void bootstrapNewNodesStopsOnlyTheNewGatewayWhenRestartAllWithoutSaltMasterRestart() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        Node newGateway = secondaryGatewayNode();
+
+        saltOrchestrator.bootstrapNewNodes(allGatewayConfigs, Set.of(newGateway), targets, null, new BootstrapParams(), exitCriteriaModel, true);
+
+        verify(saltStateService).stopMasters(saltConnector, Set.of("10.0.0.2"));
+        verify(saltStateService, never()).stopMastersToRestart(any(), any());
+    }
+
+    @Test
     void firstBootstrapWritesMinimumAuthVersionWithoutStoppingNewMasters() throws Exception {
         List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
         BootstrapParams bootstrapParams = minimumAuthVersionParams(3, false);
@@ -447,6 +497,32 @@ class SaltOrchestratorTest {
         verify(saltStateService).stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
         verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, targets, targets, bootstrapParams);
         assertFalse(bootstrapParams.isRestartNeeded());
+    }
+
+    @Test
+    void bootstrapStopsEverySaltMasterOnceWhenRestartAllAndSaltMasterRestartNeeded() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        BootstrapParams bootstrapParams = minimumAuthVersionParams(2, true);
+        when(saltStateService.stopMastersToRestart(eq(saltConnector), any())).thenReturn(SaltMastersStopResult.withMastersNotStopped(Set.of()));
+
+        saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel, true);
+
+        assertTrue(bootstrapParams.isRestartNeeded());
+        verify(saltStateService).stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+        verify(saltStateService, never()).stopMasters(any(), any());
+        verify(saltBootstrapFactory).of(saltConnector, saltConnectors, allGatewayConfigs, targets, targets, bootstrapParams);
+    }
+
+    @Test
+    void bootstrapStopsEverySaltMasterWhenRestartAllWithoutSaltMasterRestart() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig, secondaryGatewayConfig());
+        BootstrapParams bootstrapParams = new BootstrapParams();
+
+        saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel, true);
+
+        assertTrue(bootstrapParams.isRestartNeeded());
+        verify(saltStateService).stopMasters(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+        verify(saltStateService, never()).stopMastersToRestart(any(), any());
     }
 
     @Test
@@ -500,6 +576,10 @@ class SaltOrchestratorTest {
                 .withInstanceId("instanceid2")
                 .withPrimary(false)
                 .build();
+    }
+
+    private Node secondaryGatewayNode() {
+        return targets.stream().filter(node -> "10.0.0.2".equals(node.getPrivateIp())).findFirst().orElseThrow();
     }
 
     private Node workerNode(String privateIp) {

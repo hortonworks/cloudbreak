@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.SaltMinimumAuthVersionConstants.APPLIED_MINIMUM_AUTH_VERSION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
@@ -140,6 +141,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
         Map<String, String> parameters = buildCloudStackParameters(stack.getCloudPlatform(), stack.getEnvironmentCrn());
         parameters.putAll(stackParameterService.findAllByStackId(stack.getId()).stream()
+                .filter(parameter -> !APPLIED_MINIMUM_AUTH_VERSION.equals(parameter.getParamKey()))
                 .collect(Collectors.toMap(StackParameter::getParamKey, StackParameter::getParamValue)));
         List<CloudLoadBalancer> loadBalancer = loadBalancerToCloudLoadBalancerConverter.convertLoadBalancer(stack.getId(), new HashSet<>(instanceGroups));
 

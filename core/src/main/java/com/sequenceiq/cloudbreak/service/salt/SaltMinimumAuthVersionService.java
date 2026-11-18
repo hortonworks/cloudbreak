@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.salt;
 
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.SaltMinimumAuthVersionConstants.APPLIED_MINIMUM_AUTH_VERSION;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.SaltMinimumAuthVersionConstants.UNKNOWN_MINIMUM_AUTH_VERSION;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +37,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 @Service
 public class SaltMinimumAuthVersionService {
 
-    static final String APPLIED_MINIMUM_AUTH_VERSION = "SALT_MASTER_MINIMUM_AUTH_VERSION";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltMinimumAuthVersionService.class);
-
-    private static final String UNKNOWN_MINIMUM_AUTH_VERSION = "unknown";
 
     @Inject
     private SaltMinimumAuthVersionCalculator saltMinimumAuthVersionCalculator;
@@ -77,7 +76,7 @@ public class SaltMinimumAuthVersionService {
                 LOGGER.info("Salt masters run with minimum_auth_version {}", params.getSaltMasterMinimumAuthVersion());
                 updateSaltStateAttributes(stack, attributes -> attributes.put(APPLIED_MINIMUM_AUTH_VERSION, params.getSaltMasterMinimumAuthVersion()));
             } else {
-                LOGGER.info("Salt masters of the unreachable gateways {} were not restarted with minimum_auth_version {}, "
+                LOGGER.warn("Salt masters of the unreachable gateways {} were not restarted with minimum_auth_version {}, "
                         + "every salt master will be restarted at the next bootstrap again", gatewaysLeftOut, params.getSaltMasterMinimumAuthVersion());
             }
         }

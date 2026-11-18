@@ -414,12 +414,35 @@ class SaltStateServiceTest {
         assertSame(stopRequestFailure, exception.getCause());
     }
 
+    @Test
+    void stopMastersToRestartTreatsMissingResponsesAsNotStopped() {
+        GenericResponses responses = stopResponses(HttpStatus.OK.value());
+        responses.setResponses(List.of(responses.getResponses().iterator().next()));
+        when(saltConnector.action(any())).thenReturn(responses);
+
+        SaltMastersStopResult result = underTest.stopMastersToRestart(saltConnector, Set.of("10.0.0.1", "10.0.0.2"));
+
+        assertEquals(Set.of("10.0.0.2"), result.mastersNotStopped());
+        assertThrows(CloudbreakOrchestratorFailedException.class, result::failIfAnyMasterWasNotStopped);
+    }
+
+    @Test
+    void stopMastersToRestartTreatsAnEmptyResponseAsNotStopped() {
+        when(saltConnector.action(any())).thenReturn(new GenericResponses());
+        Set<String> masters = Set.of("10.0.0.1", "10.0.0.2");
+
+        SaltMastersStopResult result = underTest.stopMastersToRestart(saltConnector, masters);
+
+        assertEquals(masters, result.mastersNotStopped());
+        assertThrows(CloudbreakOrchestratorFailedException.class, result::failIfAnyMasterWasNotStopped);
+    }
+
     private GenericResponses stopResponses(int secondaryMasterStatusCode) {
         GenericResponse primaryResponse = new GenericResponse();
-        primaryResponse.setAddress("10.0.0.1");
+        primaryResponse.setAddress("10.0.0.1:9443");
         primaryResponse.setStatusCode(HttpStatus.OK.value());
         GenericResponse secondaryResponse = new GenericResponse();
-        secondaryResponse.setAddress("10.0.0.2");
+        secondaryResponse.setAddress("10.0.0.2:9443");
         secondaryResponse.setStatusCode(secondaryMasterStatusCode);
         GenericResponses responses = new GenericResponses();
         responses.setResponses(List.of(primaryResponse, secondaryResponse));

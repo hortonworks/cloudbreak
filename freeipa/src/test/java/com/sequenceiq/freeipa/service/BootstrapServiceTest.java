@@ -611,6 +611,8 @@ class BootstrapServiceTest {
         BootstrapParams bootstrapParams = capturedBootstrapParams(gatewayConfigs);
         assertNull(bootstrapParams.getSaltMasterMinimumAuthVersion());
         assertFalse(bootstrapParams.isSaltMasterRestartNeeded());
+        verify(instanceMetaDataService).findNotTerminatedForStack(STACK_ID);
+        verify(stackParameterService, never()).setStackParameter(anyLong(), anyString(), anyString());
     }
 
     @Test
@@ -623,32 +625,22 @@ class BootstrapServiceTest {
         BootstrapParams bootstrapParams = capturedBootstrapParams(gatewayConfigs);
         assertEquals(2, bootstrapParams.getSaltMasterMinimumAuthVersion());
         assertTrue(bootstrapParams.isSaltMasterRestartNeeded());
+        verify(instanceMetaDataService).findNotTerminatedForStack(STACK_ID);
     }
 
     @Test
-    void replicaAddedDuringTheBootstrapLeavesSaltMasterConfigAlone() throws Exception {
-        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID))
-                .thenReturn(replicas("replica1", "replica2"), replicas("replica1", "replica2", "replica3"));
+    void wholeStackBootstrapReadsReplicaMembershipOnlyOnceAndSavesTheAppliedValue() throws Exception {
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(replicas("replica1", "replica2"));
         List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25", "3006.25"));
 
         underTest.bootstrap(STACK_ID);
 
-        BootstrapParams bootstrapParams = capturedBootstrapParams(gatewayConfigs);
-        assertNull(bootstrapParams.getSaltMasterMinimumAuthVersion());
-        assertFalse(bootstrapParams.isSaltMasterRestartNeeded());
-    }
-
-    @Test
-    void replicaAddedAfterParamsWereConfiguredPreventsSavingTheAppliedValue() throws Exception {
-        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID))
-                .thenReturn(replicas("replica1", "replica2"), replicas("replica1", "replica2"), replicas("replica1", "replica2", "replica3"));
-        List<GatewayConfig> gatewayConfigs = freeIpaWithSaltVersions("3006.25", List.of("3006.25", "3006.25"));
-
-        underTest.bootstrap(STACK_ID);
-
-        assertEquals(3, capturedBootstrapParams(gatewayConfigs).getSaltMasterMinimumAuthVersion());
+        BootstrapParams params = capturedBootstrapParams(gatewayConfigs);
+        assertEquals(3, params.getSaltMasterMinimumAuthVersion());
+        assertTrue(params.isSaltMasterRestartNeeded());
+        verify(instanceMetaDataService).findNotTerminatedForStack(STACK_ID);
         verify(stackParameterService).setStackParameter(STACK_ID, "SALT_MASTER_MINIMUM_AUTH_VERSION", "unknown");
-        verify(stackParameterService, never()).setStackParameter(STACK_ID, "SALT_MASTER_MINIMUM_AUTH_VERSION", "3");
+        verify(stackParameterService).setStackParameter(STACK_ID, "SALT_MASTER_MINIMUM_AUTH_VERSION", "3");
     }
 
     private StackParameter appliedMinimumAuthVersion(String value) {

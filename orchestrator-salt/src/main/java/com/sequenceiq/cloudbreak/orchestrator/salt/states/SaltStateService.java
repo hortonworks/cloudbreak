@@ -381,18 +381,21 @@ public class SaltStateService {
     public SaltMastersStopResult stopMastersToRestart(SaltConnector sc, Set<String> privateIPs) {
         LOGGER.info("Stop salt masters to restart them: {}", privateIPs);
         try {
-            return SaltMastersStopResult.withMastersNotStopped(getMastersNotStopped(stopMasters(sc, privateIPs)));
+            return SaltMastersStopResult.withMastersNotStopped(getMastersNotStopped(privateIPs, stopMasters(sc, privateIPs)));
         } catch (RuntimeException e) {
             LOGGER.warn("The request to stop salt masters {} failed, it is unknown which of them were stopped", privateIPs, e);
             return SaltMastersStopResult.stopRequestFailed(privateIPs, e);
         }
     }
 
-    private Set<String> getMastersNotStopped(GenericResponses responses) {
-        Set<String> mastersNotStopped = responses.getResponses().stream()
-                .filter(response -> response.getStatusCode() != HttpStatus.OK.value())
+    private Set<String> getMastersNotStopped(Set<String> requestedMasters, GenericResponses responses) {
+        Set<String> stoppedMasters = responses.getResponses().stream()
+                .filter(response -> response.getStatusCode() == HttpStatus.OK.value())
                 .map(GenericResponse::getAddress)
+                .map(address -> address.split(":")[0])
                 .collect(Collectors.toSet());
+        Set<String> mastersNotStopped = new HashSet<>(requestedMasters);
+        mastersNotStopped.removeAll(stoppedMasters);
         if (!mastersNotStopped.isEmpty()) {
             LOGGER.warn("Failed to stop salt masters {}: {}", mastersNotStopped, responses.getResponses());
         }

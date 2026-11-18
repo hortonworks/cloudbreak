@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -61,6 +62,7 @@ import com.sequenceiq.freeipa.entity.Network;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
+import com.sequenceiq.freeipa.entity.StackParameter;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -175,12 +177,21 @@ public class StackToCloudStackConverterTest {
         when(environment.getGcp()).thenReturn(gcp);
         when(gcp.getGcpResourceEncryptionParameters()).thenReturn(gcpResourceEncryptionParameters);
         when(gcpResourceEncryptionParameters.getEncryptionKey()).thenReturn("encryptionKey");
+        StackParameter saltAuthVersion = new StackParameter();
+        saltAuthVersion.setParamKey("SALT_MASTER_MINIMUM_AUTH_VERSION");
+        saltAuthVersion.setParamValue("2");
+        StackParameter cloudParameter = new StackParameter();
+        cloudParameter.setParamKey("cloudParameter");
+        cloudParameter.setParamValue("cloudValue");
+        when(stackParameterService.findAllByStackId(TEST_STACK_ID)).thenReturn(List.of(saltAuthVersion, cloudParameter));
 
         CloudStack cloudStack = underTest.convert(stack);
 
         assertEquals(new HashSet<>(az), cloudStack.getGroups().get(0).getNetwork().getAvailabilityZones());
         assertEquals("gp2", cloudStack.getGroups().get(0).getRootVolumeType());
         assertEquals("encryptionKey", cloudStack.getParameters().get(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY));
+        assertEquals("cloudValue", cloudStack.getParameters().get("cloudParameter"));
+        assertFalse(cloudStack.getParameters().containsKey("SALT_MASTER_MINIMUM_AUTH_VERSION"));
     }
 
     @Test
