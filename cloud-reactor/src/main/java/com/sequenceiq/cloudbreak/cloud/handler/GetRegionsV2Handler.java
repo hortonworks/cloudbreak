@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 public class GetRegionsV2Handler implements CloudPlatformEventHandler<GetPlatformRegionsRequestV2> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetRegionsV2Handler.class);
 
+    private static final String FAILED_TO_GET_REGIONS_MESSAGE = "Failed to get regions from the cloud provider.";
+
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -45,7 +47,7 @@ public class GetRegionsV2Handler implements CloudPlatformEventHandler<GetPlatfor
             LOGGER.debug("Query platform regions types finished.");
         } catch (Exception e) {
             LOGGER.warn("Could not get regions from the cloud provider due to:", e);
-            request.getResult().onNext(new GetPlatformRegionsResultV2(e.getMessage(), e, request.getResourceId()));
+            request.getResult().onNext(new GetPlatformRegionsResultV2(FAILED_TO_GET_REGIONS_MESSAGE, e, request.getResourceId()));
         }
     }
 }

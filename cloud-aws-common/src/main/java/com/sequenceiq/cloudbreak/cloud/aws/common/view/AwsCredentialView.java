@@ -129,11 +129,19 @@ public class AwsCredentialView {
     }
 
     public Map<String, String> getKeyBased() {
-        return (Map<String, String>) cloudCredential.getParameter(AWS, Map.class).get(KEY_BASED);
+        Map<String, Object> awsParameters = getAwsParameters();
+        if (awsParameters == null) {
+            return null;
+        }
+        return (Map<String, String>) awsParameters.get(KEY_BASED);
     }
 
     public Map<String, String> getRoleBased() {
-        return (Map<String, String>) cloudCredential.getParameter(AWS, Map.class).get(ROLE_BASED);
+        Map<String, Object> awsParameters = getAwsParameters();
+        if (awsParameters == null) {
+            return null;
+        }
+        return (Map<String, String>) awsParameters.get(ROLE_BASED);
     }
 
     public String getCredentialCrn() {
@@ -145,7 +153,18 @@ public class AwsCredentialView {
     }
 
     public String getDefaultRegion() {
-        return (String) cloudCredential.getParameter(AWS, Map.class).get(DEFAULT_REGION_KEY);
+        Map<String, Object> awsParameters = getAwsParameters();
+        if (awsParameters == null) {
+            return null;
+        }
+        return (String) awsParameters.get(DEFAULT_REGION_KEY);
+    }
+
+    private Map<String, Object> getAwsParameters() {
+        if (!cloudCredential.hasParameter(AWS)) {
+            return null;
+        }
+        return cloudCredential.getParameter(AWS, Map.class);
     }
 
     public boolean isSkipOrgPolicyDecisions() {

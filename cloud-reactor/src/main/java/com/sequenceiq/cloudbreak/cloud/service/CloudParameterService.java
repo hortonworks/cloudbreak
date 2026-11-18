@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetCdpPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDefaultPlatformDatabaseCapabilityRequest;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsRequest
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendtaionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
@@ -78,6 +80,9 @@ public class CloudParameterService {
     private static final String AWS_AUTH_ERROR_MESSAGE = "not authorized to perform";
 
     private static final String AZURE_AUTH_ERROR_MESSAGE = "does not have authorization to perform action";
+
+    private static final String GOOGLE_JSON_RESPONSE_EXCEPTION =
+            "com.google.api.client.googleapis.json.GoogleJsonResponseException";
 
     @Inject
     private EventBus eventBus;
@@ -276,8 +281,15 @@ public class CloudParameterService {
 
     private RuntimeException createExceptionBasedOnErrorType(CloudPlatformResult result, String responseName) {
         Exception errorDetails = result.getErrorDetails();
-        String errorMessage = String.format("Failed to get %s for the cloud provider: %s. %s",
-                responseName, result.getStatusReason(), getCauseMessages(errorDetails));
+        String causeMessages = getCauseMessages(errorDetails);
+        String statusReason = result.getStatusReason();
+        String errorMessage;
+        if (causeMessages.isEmpty()) {
+            errorMessage = String.format("Failed to get %s for the cloud provider: %s", responseName, statusReason);
+        } else {
+            String reasonWithPeriod = statusReason != null && statusReason.endsWith(".") ? statusReason : statusReason + ".";
+            errorMessage = String.format("Failed to get %s for the cloud provider: %s %s", responseName, reasonWithPeriod, causeMessages);
+        }
         if (errorDetails instanceof ProviderAuthenticationFailedException
                 || (errorDetails.getMessage() != null && errorDetails.getMessage().contains(AWS_AUTH_ERROR_MESSAGE))
                 || (errorDetails.getMessage() != null && errorDetails.getMessage().contains(AZURE_AUTH_ERROR_MESSAGE))) {
@@ -288,14 +300,53 @@ public class CloudParameterService {
     }
 
     private String getCauseMessages(Exception e) {
-        if (e != null) {
-            StringBuilder messageBuilder = new StringBuilder();
-            messageBuilder.append("Causes: [").append(e.getMessage());
-            if (e.getCause() != null) {
-                messageBuilder.append("], [").append(e.getCause().getMessage());
-            }
-            return messageBuilder.append("].").toString();
+        if (!shouldExposeCauseMessage(e)) {
+            return "";
         }
-        return "";
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append("Causes: [").append(resolveCauseMessage(e));
+        if (e.getCause() != null) {
+            messageBuilder.append("], [").append(resolveCauseMessage(e.getCause()));
+        }
+        return messageBuilder.append("].").toString();
+    }
+
+    private String resolveCauseMessage(Throwable throwable) {
+        if (throwable == null) {
+            return null;
+        }
+        String message = throwable.getMessage();
+        if (message != null) {
+            return message;
+        }
+        if (GOOGLE_JSON_RESPONSE_EXCEPTION.equals(throwable.getClass().getName())) {
+            return resolveGoogleJsonResponseMessage(throwable);
+        }
+        return message;
+    }
+
+    private String resolveGoogleJsonResponseMessage(Throwable throwable) {
+        try {
+            Object details = throwable.getClass().getMethod("getDetails").invoke(throwable);
+            if (details != null) {
+                Object detailMessage = details.getClass().getMethod("getMessage").invoke(details);
+                if (detailMessage != null) {
+                    return detailMessage.toString();
+                }
+            }
+        } catch (ReflectiveOperationException reflectiveException) {
+            LOGGER.debug("Failed to read message from GoogleJsonResponseException", reflectiveException);
+        }
+        return throwable.getMessage();
+    }
+
+    private boolean shouldExposeCauseMessage(Exception e) {
+        if (e == null) {
+            return false;
+        }
+        return e instanceof CloudConnectorException
+                || e instanceof ProviderAuthenticationFailedException
+                || e instanceof CredentialVerificationException
+                || GOOGLE_JSON_RESPONSE_EXCEPTION.equals(e.getClass().getName());
     }
 }
