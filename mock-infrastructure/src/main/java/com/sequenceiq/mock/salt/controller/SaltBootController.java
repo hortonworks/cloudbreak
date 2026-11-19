@@ -2,8 +2,10 @@ package com.sequenceiq.mock.salt.controller;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
@@ -22,8 +24,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintRequest;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
 import com.sequenceiq.mock.salt.SaltStoreService;
 import com.sequenceiq.mock.service.HostNameService;
 
@@ -78,8 +82,20 @@ public class SaltBootController {
     public GenericResponses saltActionDistribute(@PathVariable("mock_uuid") String mockUuid, @RequestBody SaltAction saltAction) {
         saltStoreService.setSaltAction(mockUuid, saltAction);
         GenericResponses genericResponses = new GenericResponses();
-        genericResponses.setResponses(new ArrayList<>());
+        Stream<String> masterAddresses = Optional.ofNullable(saltAction.getMasters()).orElse(List.of()).stream().map(SaltMaster::getAddress);
+        Stream<String> minionAddresses = Optional.ofNullable(saltAction.getMinions()).orElse(List.of()).stream().map(Minion::getAddress);
+        genericResponses.setResponses(Stream.concat(masterAddresses, minionAddresses)
+                .distinct()
+                .map(this::successfulActionResponse)
+                .toList());
         return genericResponses;
+    }
+
+    private GenericResponse successfulActionResponse(String address) {
+        GenericResponse response = new GenericResponse();
+        response.setAddress(address);
+        response.setStatusCode(HttpStatus.OK.value());
+        return response;
     }
 
     @PostMapping(value = "salt/minion/fingerprint/distribute")
