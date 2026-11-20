@@ -20,5 +20,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzScalingTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.database.RedbeamsDatabaseInstanceTypeFallbackE2ETest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxLightDutyProLifecycleTest
-      # Temporarily disabled Enterprise Pro tests until the CM/IDBroker fix lands
-      # - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxEnterpriseProLifecycleTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.sdxpro.SdxEnterpriseProLifecycleTest
