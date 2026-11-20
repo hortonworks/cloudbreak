@@ -82,6 +82,18 @@ public class FlowServiceTest {
 
     private static final String INTERMEDIATE_STATE = "INTERMEDIATE_STATE";
 
+    private static final String CLUSTER_SYNC_STATE = "CLUSTER_SYNC_STATE";
+
+    private static final String CLUSTER_SYNC_FAILED_STATE = "CLUSTER_SYNC_FAILED_STATE";
+
+    private static final String CLUSTER_SYNC_ERROR_EVENT = "CLUSTERSYNCRESULT_ERROR";
+
+    private static final String READ_TIMED_OUT = "Read timed out";
+
+    private static final String LATEST_FLOW_ID = "LATEST_FLOW_ID";
+
+    private static final String OLDER_FLOW_ID = "OLDER_FLOW_ID";
+
     @Mock
     private FlowLogDBService flowLogDBService;
 
@@ -833,6 +845,192 @@ public class FlowServiceTest {
         assertNull(flowCheckResponse.getContent().get(0).getEndTime());
     }
 
+    @Test
+    void testGetFlowStateFailedClusterSyncFlowSetsFailedStateAndReason() {
+        setUpFlow(FLOW_ID, failedClusterSyncFlowLogs(FLOW_ID));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+
+        assertTrue(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertEquals(CLUSTER_SYNC_STATE, flowCheckResponse.getFailedState());
+        assertEquals(READ_TIMED_OUT, flowCheckResponse.getReason());
+    }
+
+    @Test
+    void testGetFlowChainStateFailedClusterSyncFlowSetsFailedStateAndReason() {
+        setUpFlowChain(flowChainLog(), false, failedClusterSyncFlowLogs(FLOW_ID));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
+
+        assertTrue(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertEquals(CLUSTER_SYNC_STATE, flowCheckResponse.getFailedState());
+        assertEquals(READ_TIMED_OUT, flowCheckResponse.getReason());
+    }
+
+    @Test
+    void testGetFlowChainStateSafeFailedClusterSyncFlowSetsFailedStateAndReason() {
+        setUpFlowChain(flowChainLog(), false, failedClusterSyncFlowLogs(FLOW_ID));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowChainStateSafe(List.of(STACK_ID), FLOW_CHAIN_ID);
+
+        assertTrue(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertEquals(CLUSTER_SYNC_STATE, flowCheckResponse.getFailedState());
+        assertEquals(READ_TIMED_OUT, flowCheckResponse.getReason());
+    }
+
+    @Test
+    void testGetFlowChainsByChainIdsFailedClusterSyncFlowSetsFailedStateAndReason() {
+        setUpFlowChains(flowChainLog(), false, failedClusterSyncFlowLogs(FLOW_ID));
+
+        Page<FlowCheckResponse> flowCheckResponses = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
+
+        FlowCheckResponse flowCheckResponse = flowCheckResponses.getContent().get(0);
+        assertTrue(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertEquals(CLUSTER_SYNC_STATE, flowCheckResponse.getFailedState());
+        assertEquals(READ_TIMED_OUT, flowCheckResponse.getReason());
+    }
+
+    @Test
+    void testFailedStateIsNullForSuccessfullyFinishedFlow() {
+        setUpCompletedFlow();
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+
+        assertFalse(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertNull(flowCheckResponse.getFailedState());
+    }
+
+    @Test
+    void testFailedStateIsNullForSuccessfullyFinishedFlowChain() {
+        setUpCompletedFlowChain();
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
+
+        assertFalse(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertNull(flowCheckResponse.getFailedState());
+    }
+
+    @Test
+    void testFailedStateIsNullForRunningFlow() {
+        setUpRunningFlow();
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertNull(flowCheckResponse.getFailedState());
+    }
+
+    @Test
+    void testFailedStateIsNullForRunningFlowChain() {
+        setUpRunningFlowChain();
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
+
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertNull(flowCheckResponse.getFailedState());
+    }
+
+    @Test
+    void testFailedStateIsNullWhenFailedFlowIsRestartedAndRunning() {
+        List<FlowLogWithoutPayload> flowLogs = new ArrayList<>();
+        flowLogs.add(failureTestFlowLog(FLOW_ID, CLUSTER_SYNC_STATE, NEXT_EVENT, 6, StateStatus.PENDING, false, null));
+        flowLogs.addAll(failedClusterSyncFlowLogs(FLOW_ID));
+        setUpFlow(FLOW_ID, flowLogs);
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertFalse(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertNull(flowCheckResponse.getFailedState());
+    }
+
+    @Test
+    void testFailedStateIsNullWhenFlowWasCancelled() {
+        setUpFlow(FLOW_ID, List.of(
+                failureTestFlowLog(FLOW_ID, FlowConstants.CANCELLED_STATE, NO_NEXT_EVENT, 2, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(FLOW_ID, CLUSTER_SYNC_STATE, NEXT_EVENT, 1, StateStatus.SUCCESSFUL, true, null)));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+
+        assertTrue(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertNull(flowCheckResponse.getFailedState());
+    }
+
+    @Test
+    void testFailedStateIsNullWhenNoLogIsMarkedFailed() {
+        setUpFlow(FLOW_ID, List.of(
+                failureTestFlowLog(FLOW_ID, FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 4, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(FLOW_ID, CLUSTER_SYNC_FAILED_STATE, FAIL_HANDLED_NEXT_EVENT, 3, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(FLOW_ID, CLUSTER_SYNC_STATE, NEXT_EVENT, 2, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(FLOW_ID, FlowConstants.INIT_STATE, NEXT_EVENT, 1, StateStatus.SUCCESSFUL, true, null)));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+
+        assertTrue(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertNull(flowCheckResponse.getFailedState());
+    }
+
+    @Test
+    void testFailedStateIsSetWhenFlowWasClosedOnErrorWithoutFinishedLog() {
+        setUpFlow(FLOW_ID, List.of(
+                failureTestFlowLog(FLOW_ID, CLUSTER_SYNC_STATE, CLUSTER_SYNC_ERROR_EVENT, 3, StateStatus.FAILED, true, READ_TIMED_OUT),
+                failureTestFlowLog(FLOW_ID, INTERMEDIATE_STATE, NEXT_EVENT, 2, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(FLOW_ID, FlowConstants.INIT_STATE, NEXT_EVENT, 1, StateStatus.SUCCESSFUL, true, null)));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+
+        assertTrue(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertEquals(CLUSTER_SYNC_STATE, flowCheckResponse.getFailedState());
+        assertEquals(READ_TIMED_OUT, flowCheckResponse.getReason());
+    }
+
+    @Test
+    void testFailedStateIsNullWhenFailedFlowHasOnlyFinalStateLogs() {
+        setUpFlow(FLOW_ID, List.of(
+                failureTestFlowLog(FLOW_ID, FlowConstants.CANCELLED_STATE, NO_NEXT_EVENT, 1, StateStatus.SUCCESSFUL, true, null)));
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
+
+        assertTrue(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertNull(flowCheckResponse.getFailedState());
+    }
+
+    @Test
+    void testFailedStateOfFlowChainConsidersOnlyLogsOfTheLatestFlow() {
+        List<FlowLogWithoutPayload> flowLogs = List.of(
+                failureTestFlowLog(LATEST_FLOW_ID, FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 8, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(LATEST_FLOW_ID, CLUSTER_SYNC_FAILED_STATE, FAIL_HANDLED_NEXT_EVENT, 7, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(LATEST_FLOW_ID, INTERMEDIATE_STATE, NEXT_EVENT, 6, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(LATEST_FLOW_ID, FlowConstants.INIT_STATE, NEXT_EVENT, 5, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(OLDER_FLOW_ID, FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 4, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(OLDER_FLOW_ID, "OLDER_FAILED_HANDLED_STATE", FAIL_HANDLED_NEXT_EVENT, 3, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(OLDER_FLOW_ID, "OLDER_FAILED_STATE", CLUSTER_SYNC_ERROR_EVENT, 2, StateStatus.FAILED, true, null),
+                failureTestFlowLog(OLDER_FLOW_ID, FlowConstants.INIT_STATE, NEXT_EVENT, 1, StateStatus.SUCCESSFUL, true, "Older reason"));
+        setUpFlowChain(flowChainLog(), false, flowLogs);
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
+
+        assertTrue(flowCheckResponse.getLatestFlowFinalizedAndFailed());
+        assertNull(flowCheckResponse.getFailedState());
+        assertNull(flowCheckResponse.getReason());
+    }
+
+    @Test
+    void testFailedStateOfFlowChainPrefersFailedLogOfTheLatestFlowOverOlderFlows() {
+        List<FlowLogWithoutPayload> flowLogs = new ArrayList<>(failedClusterSyncFlowLogs(LATEST_FLOW_ID, 5));
+        flowLogs.addAll(List.of(
+                failureTestFlowLog(OLDER_FLOW_ID, FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, 4, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(OLDER_FLOW_ID, "OLDER_FAILED_HANDLED_STATE", FAIL_HANDLED_NEXT_EVENT, 3, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(OLDER_FLOW_ID, "OLDER_FAILED_STATE", CLUSTER_SYNC_ERROR_EVENT, 2, StateStatus.FAILED, true, null),
+                failureTestFlowLog(OLDER_FLOW_ID, FlowConstants.INIT_STATE, NEXT_EVENT, 1, StateStatus.SUCCESSFUL, true, "Older reason")));
+        setUpFlowChain(flowChainLog(), false, flowLogs);
+
+        FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
+
+        assertEquals(CLUSTER_SYNC_STATE, flowCheckResponse.getFailedState());
+        assertEquals(READ_TIMED_OUT, flowCheckResponse.getReason());
+    }
+
     private void setUpRunningFlow() {
         setUpFlow(false);
     }
@@ -953,6 +1151,37 @@ public class FlowServiceTest {
         lenient().when(flowLog.getEndTime()).thenReturn(endTime);
         lenient().when(flowLog.getResourceId()).thenReturn(STACK_ID);
         lenient().when(flowLog.getFlowType()).thenReturn(ClassValue.ofUnknown("a.b.c.CreateDataHubFlowConfig"));
+        return flowLog;
+    }
+
+    private List<FlowLogWithoutPayload> failedClusterSyncFlowLogs(String flowId) {
+        return failedClusterSyncFlowLogs(flowId, 4);
+    }
+
+    /**
+     * Flow logs (created desc) of a ClusterSync flow that failed with a timeout: the failing step is marked FAILED without a reason, the reason
+     * is stored on the first (INIT) log.
+     */
+    private List<FlowLogWithoutPayload> failedClusterSyncFlowLogs(String flowId, long newestCreated) {
+        return List.of(
+                failureTestFlowLog(flowId, FlowConstants.FINISHED_STATE, NO_NEXT_EVENT, newestCreated, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(flowId, CLUSTER_SYNC_FAILED_STATE, FAIL_HANDLED_NEXT_EVENT, newestCreated - 1, StateStatus.SUCCESSFUL, true, null),
+                failureTestFlowLog(flowId, CLUSTER_SYNC_STATE, CLUSTER_SYNC_ERROR_EVENT, newestCreated - 2, StateStatus.FAILED, true, null),
+                failureTestFlowLog(flowId, FlowConstants.INIT_STATE, NEXT_EVENT, newestCreated - 3, StateStatus.SUCCESSFUL, true, READ_TIMED_OUT));
+    }
+
+    private FlowLogWithoutPayload failureTestFlowLog(String flowId, String currentState, String nextEvent, long created, StateStatus stateStatus,
+            boolean finalized, String reason) {
+        FlowLogWithoutPayload flowLog = mock(FlowLogWithoutPayload.class);
+        lenient().when(flowLog.getFlowId()).thenReturn(flowId);
+        lenient().when(flowLog.getCurrentState()).thenReturn(currentState);
+        lenient().when(flowLog.getNextEvent()).thenReturn(nextEvent);
+        lenient().when(flowLog.getCreated()).thenReturn(created);
+        lenient().when(flowLog.getStateStatus()).thenReturn(stateStatus);
+        lenient().when(flowLog.getFinalized()).thenReturn(finalized);
+        lenient().when(flowLog.getReason()).thenReturn(reason);
+        lenient().when(flowLog.getFlowChainId()).thenReturn(FLOW_CHAIN_ID);
+        lenient().when(flowLog.getResourceId()).thenReturn(STACK_ID);
         return flowLog;
     }
 

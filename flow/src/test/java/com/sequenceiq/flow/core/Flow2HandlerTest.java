@@ -21,6 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -359,6 +360,40 @@ class Flow2HandlerTest {
         FlowEventContext flowEventContext = flowEventContextCaptor.getValue();
         assertEquals(FLOW_ID, flowEventContext.getFlowId());
         assertNull(flowEventContext.getFlowTriggerUserCrn());
+    }
+
+    @Test
+    void testExistingFlowFailurePayloadExceptionMessageIsRecordedAsFlowLogReason() {
+        FlowLog lastFlowLog = mock(FlowLog.class);
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(lastFlowLog.getNextEvent()).willReturn("KEY");
+        given(runningFlows.get(anyString())).willReturn(flow);
+        given(flow.getCurrentState()).willReturn(flowState);
+        given(flow.getFlowId()).willReturn(FLOW_ID);
+        given(flow.sendEvent(any(FlowEventContext.class))).willReturn(true);
+        given(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).willReturn(Optional.of(lastFlowLog));
+        given(failHandledEvents.contains("KEY")).willReturn(false);
+        SocketTimeoutException exception = new SocketTimeoutException("Read timed out");
+        Payload failurePayload = new Payload() {
+            @Override
+            public Long getResourceId() {
+                return 1L;
+            }
+
+            @Override
+            public Exception getException() {
+                return exception;
+            }
+        };
+        Map<String, Object> headers = new HashMap<>();
+        headers.put(FlowConstants.FLOW_ID, FLOW_ID);
+        Event<Payload> failureEvent = new Event<>(new Event.Headers(headers), failurePayload);
+        failureEvent.setKey("KEY");
+
+        underTest.accept(failureEvent);
+
+        verify(flowLogService).updateLastFlowLogStatus(lastFlowLog, false, "Read timed out");
+        verify(flowLogService).save(any(FlowEventContext.class), anyMap(), nullable(Class.class), eq(flowState));
     }
 
     @Test

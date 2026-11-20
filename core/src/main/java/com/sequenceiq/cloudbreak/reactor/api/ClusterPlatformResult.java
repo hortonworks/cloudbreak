@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -47,6 +48,16 @@ public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> im
     }
 
     public Exception getErrorDetails() {
+        return errorDetails;
+    }
+
+    /**
+     * Exposes {@link #errorDetails} through {@link com.sequenceiq.cloudbreak.common.event.Payload#getException()} so the flow engine records
+     * it as the flow log reason. Ignored for JSON, because {@code errorDetails} already carries the same exception in the payload.
+     */
+    @JsonIgnore
+    @Override
+    public Exception getException() {
         return errorDetails;
     }
 

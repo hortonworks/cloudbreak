@@ -177,6 +177,7 @@ public class FlowService {
             setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
             setStateEventFlowTypeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs, FlowConstants.FLOW_CHAIN, chainId);
             flowCheckResponse.setReason(getLatestFlowReason(relatedFlowLogs));
+            setFailedStateOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
         }
@@ -212,6 +213,7 @@ public class FlowService {
             flowCheckResponse.setHasActiveFlow(!completed(FlowConstants.FLOW_CHAIN, chainId, relatedChains, relatedFlowLogs));
             flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
             flowCheckResponse.setReason(getLatestFlowReason(relatedFlowLogs));
+            setFailedStateOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
         } else {
             flowCheckResponse.setHasActiveFlow(Boolean.FALSE);
         }
@@ -235,6 +237,7 @@ public class FlowService {
         flowCheckResponse.setHasActiveFlow(!completed(FlowConstants.FLOW, flowId, List.of(), allByFlowIdOrderByCreatedDesc));
         flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(allByFlowIdOrderByCreatedDesc, failHandledEvents));
         flowCheckResponse.setReason(getLatestFlowReason(allByFlowIdOrderByCreatedDesc));
+        setFailedStateOnFlowCheckResponse(flowCheckResponse, allByFlowIdOrderByCreatedDesc);
         setStateEventFlowTypeOnFlowCheckResponse(flowCheckResponse, allByFlowIdOrderByCreatedDesc, FlowConstants.FLOW, flowId);
         return flowCheckResponse;
     }
@@ -349,13 +352,32 @@ public class FlowService {
     }
 
     private String getLatestFlowReason(List<FlowLogWithoutPayload> flowLogs) {
-        String latestFlowLogId = flowLogs.stream().map(FlowLogWithoutPayload::getFlowId).findFirst().orElse(null);
-        return flowLogs.stream()
-                .filter(flogLog -> flogLog.getFlowId().equals(latestFlowLogId))
+        return getLatestFlowLogs(flowLogs).stream()
                 .filter(flowLog -> StringUtils.isNotBlank(flowLog.getReason()))
                 .findFirst()
                 .map(FlowLogWithoutPayload::getReason)
                 .orElse(null);
+    }
+
+    private void setFailedStateOnFlowCheckResponse(FlowCheckResponse flowCheckResponse, List<FlowLogWithoutPayload> flowLogs) {
+        if (Boolean.TRUE.equals(flowCheckResponse.getLatestFlowFinalizedAndFailed())) {
+            flowCheckResponse.setFailedState(getLatestFlowFailedState(flowLogs));
+        }
+    }
+
+    private String getLatestFlowFailedState(List<FlowLogWithoutPayload> flowLogs) {
+        return getLatestFlowLogs(flowLogs).stream()
+                .filter(flowLog -> StateStatus.FAILED.equals(flowLog.getStateStatus()))
+                .findFirst()
+                .map(FlowLogWithoutPayload::getCurrentState)
+                .orElse(null);
+    }
+
+    private List<FlowLogWithoutPayload> getLatestFlowLogs(List<FlowLogWithoutPayload> flowLogs) {
+        String latestFlowLogId = flowLogs.stream().map(FlowLogWithoutPayload::getFlowId).findFirst().orElse(null);
+        return flowLogs.stream()
+                .filter(flowLog -> flowLog.getFlowId().equals(latestFlowLogId))
+                .toList();
     }
 
     private void setStateEventFlowTypeOnFlowCheckResponse(FlowCheckResponse flowCheckResponse, List<FlowLogWithoutPayload> relatedFlowLogs,
@@ -473,6 +495,7 @@ public class FlowService {
         flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
         setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
         flowCheckResponse.setReason(getLatestFlowReason(relatedFlowLogs));
+        setFailedStateOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
         return flowCheckResponse;
     }
 }

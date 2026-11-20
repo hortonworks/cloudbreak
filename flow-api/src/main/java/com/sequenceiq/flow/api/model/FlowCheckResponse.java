@@ -23,6 +23,8 @@ public class FlowCheckResponse {
 
     private String reason;
 
+    private String failedState;
+
     public String getFlowId() {
         return flowId;
     }
@@ -95,6 +97,14 @@ public class FlowCheckResponse {
         this.reason = reason;
     }
 
+    public String getFailedState() {
+        return failedState;
+    }
+
+    public void setFailedState(String failedState) {
+        this.failedState = failedState;
+    }
+
     public String toString() {
         return "FlowCheckResponse{" +
                 "flowId='" + flowId + '\'' +
@@ -106,6 +116,7 @@ public class FlowCheckResponse {
                 ", nextEvent=" + nextEvent + '\'' +
                 ", flowType=" + flowType + '\'' +
                 ", reason=" + reason + '\'' +
+                ", failedState=" + failedState + '\'' +
                 '}';
     }
 }
