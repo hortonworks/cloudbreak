@@ -34,7 +34,7 @@ shared by core and datalake): `RuntimeVersions.patched()` is every supported ver
 which is what `DefaultClusterTemplateCache` feeds this loader (the blueprint loader uses the same
 list). Such a version with no on-disk `defaults/clustertemplates/<version>/` directory is an overlay;
 everything else is served from disk.
-The whole model is gated by `cb.runtimes.overlay.enabled` (default `false`): when off,
+The whole model is gated by `cb.runtimes.overlay.enabled` (`true` in `service-common-config.yml`): when off,
 `DefaultClusterTemplateCache` skips overlay materialization entirely. The frozen base is `cb.runtimes.base`
 (7.3.3, in `service-common-config.yml`) — but only re-point it at a
 version whose full on-disk `defaults/clustertemplates/<base>/` dir already ships.

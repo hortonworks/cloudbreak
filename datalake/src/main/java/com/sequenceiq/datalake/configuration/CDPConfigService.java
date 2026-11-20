@@ -73,15 +73,15 @@ public class CDPConfigService {
     private static final String ARM64_MIN_RUNTIME_VERSION = "7.3.1";
 
     // Defines what is the default runtime version (UI / API)
-    @Value("${datalake.runtimes.default}")
+    @Value("${cb.runtimes.default:}")
     private String defaultRuntime;
 
     // Defines what versions shall be advertised for the UI, if it is empty then it shall be the same as supported versions
-    @Value("${datalake.runtimes.advertised}")
+    @Value("${cb.runtimes.advertised:}")
     private Set<String> advertisedRuntimes;
 
     // Defines what versions are actually supported
-    @Value("${datalake.runtimes.supported}")
+    @Value("${cb.runtimes.supported:}")
     private Set<String> supportedRuntimes;
 
     // Kill-switch for the runtime base+overlay model: when false, only full on-disk duty dirs are loaded

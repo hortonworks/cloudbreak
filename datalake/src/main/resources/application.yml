@@ -176,13 +176,6 @@ datalake:
       schema: public
       cert.file: database.crt
       ssl: false
-  # Deployment-level overrides of the canonical runtime policy in service-common's service-common-config.yml
-  # (`cb.runtimes.*`). Each key defaults to the canonical value, so nothing needs to be listed twice; the
-  # DATALAKE_RUNTIMES_* environment variables that per-region deployments already set keep overriding it.
-  runtimes:
-    default: "${cb.runtimes.default:}"
-    advertised: "${cb.runtimes.advertised:}"
-    supported: "${cb.runtimes.supported:}"
   supported:
     externaldb.sslenforcement.platform: GCP,AWS,AZURE,MOCK
     raz:

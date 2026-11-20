@@ -24,8 +24,8 @@ The engine replaces that with **one frozen base version plus sparse overlays**:
   just list the version.
 
 Versions **≤ 7.3.3** stay as frozen full directories; the engine never touches them. The whole model
-sits behind a kill-switch, `cb.runtimes.overlay.enabled` (default `false`), so it can be turned off in
-production without a code rollback.
+sits behind a kill-switch, `cb.runtimes.overlay.enabled` (`true` in `service-common-config.yml`), so it
+can be turned off in production without a code rollback.
 
 ### The three template trees
 

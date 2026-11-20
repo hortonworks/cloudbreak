@@ -31,12 +31,11 @@ nested duties (e.g. `..._with_profiler/...`), which are not loaded from disk tod
 
 ## Which versions are overlays
 
-Driven by `datalake.runtimes.supported`, which defaults to the canonical `cb.runtimes.supported` list in
-`service-common-config.yml` (`service-common`) — the same single list core reads, so a new version is listed
-**once** for both modules. The `datalake.runtimes.*` keys survive only as the per-deployment override
-channel (`DATALAKE_RUNTIMES_SUPPORTED` and friends); do not list versions in them. A supported version
+Driven by the canonical `cb.runtimes.supported` list in `service-common-config.yml` (`service-common`) — the
+same single list core reads, so a new version is listed **once** for both modules. Deployments override it
+through `CB_RUNTIMES_SUPPORTED`. A supported version
 newer than the base with no on-disk `duties/<version>/` directory is an overlay. The whole model is
-gated by `cb.runtimes.overlay.enabled` (default `false`): when off, `CDPConfigService` skips overlay
+gated by `cb.runtimes.overlay.enabled` (`true` in `service-common-config.yml`): when off, `CDPConfigService` skips overlay
 materialization entirely. The frozen base is `cb.runtimes.base`
 (7.3.3, in `service-common-config.yml`) — but only re-point it at a
 version whose full on-disk `duties/<base>/` dir already ships.

@@ -47,19 +47,18 @@ grep -n -A8 'runtimes:' service-common/src/main/resources/service-common-config.
 
 ### 1.1 Register `<NEW_CR>` as an overlay version (always required)
 
-The whole overlay model ships behind a kill-switch that is **off by default**: set
-`cb.runtimes.overlay.enabled: true` in `service-common/src/main/resources/service-common-config.yml` — otherwise the
+The whole overlay model sits behind a kill-switch, `cb.runtimes.overlay.enabled`, which is **already on**
+(`true` in `service-common/src/main/resources/service-common-config.yml`) — nothing to flip. If it is off, the
 loaders never run and `<NEW_CR>` will not materialize regardless of the list below. (The switch exists so
-the model can be disabled in production without a code rollback; leave it off only when reverting.)
+the model can be disabled in production without a code rollback; turn it off only when reverting.)
 
 **There is one canonical list, in one file, read by both core and datalake**:
 `service-common/src/main/resources/service-common-config.yml` under `cb.runtimes:`.
 
 - **Append `<NEW_CR>` to `supported`.** This one list drives the **duty** overlays
   (`CDPConfigService`), the **blueprint** and **cluster-template** overlays via
-  `RuntimeVersions.patched()` (= supported versions above the base), and — chaining through
-  `datalake.runtimes.supported` — the datalake versions offered in the UI, which fall back to
-  `supported` when `datalake.runtimes.advertised` (chained to `cb.runtimes.advertised`) is left blank.
+  `RuntimeVersions.patched()` (= supported versions above the base), and the datalake versions offered
+  in the UI, which fall back to `supported` when `cb.runtimes.advertised` is left blank.
 - **Set `latest: "<NEW_CR>"`.** Mandatory, and deliberately **not** derived from `supported` — see the
   UI-invisibility gotcha. Same for `default`, which stays put: promoting it is Phase 2.
 - **`advertised` is a pin, not a list to maintain** — leave it blank. Set it only
@@ -71,11 +70,6 @@ the model can be disabled in production without a code rollback; leave it off on
 and `ServiceCommonConfig` (`service-common/.../conf/ServiceCommonConfig.java`) loads the file — both from the classpath and,
 overridably, from `${cb.etc.config.dir}/service-common-config.yml`, which is how an operator or a k8s ConfigMap
 narrows the policy per environment without a code change.
-
-Datalake still reads `datalake.runtimes.{supported,advertised,default}`, but those keys only **chain**
-to the canonical values (`supported: "${cb.runtimes.supported:}"`) so that the `DATALAKE_RUNTIMES_*`
-environment variables per-region deployments already set keep overriding them. **Never list a version
-there** — the chaining is a compatibility channel, not a second policy.
 
 The frozen base version is `cb.runtimes.base` (7.3.3, in `service-common-config.yml`; all overlay loaders
 read it). Only re-point it at a version whose **full** on-disk
@@ -178,13 +172,13 @@ Then load **cb-testing** (coverage gates + authorization-compliance) and **cb-ji
   it is **not optional**, and it is not derived from `supported` on purpose: blank means "use the default
   image catalog", which `stage` and `prod` rely on. If the runtime materializes but the UI shows nothing,
   check `latest` first — including a `CB_RUNTIMES_LATEST` pin in the k8s config.
-- **A pin overrides the whole environment, not just the jar.** `latest` arrives as `CB_RUNTIMES_*` and
-  the datalake lists as `DATALAKE_RUNTIMES_*` in deployed environments (gov narrows `supported`
+- **A pin overrides the whole environment, not just the jar.** `latest` and the datalake lists arrive as
+  `CB_RUNTIMES_*` in deployed environments (gov narrows `supported`
   deliberately). An env that pins those will not see a new version until that config is updated too —
   the jar edit alone is not enough there.
-- **Kill-switch off by default:** `cb.runtimes.overlay.enabled` defaults to `false`, so the loaders are
-  dormant until you flip it to `true` in `service-common-config.yml`. List a version but leave the switch off
-  and nothing materializes — no error, just an empty overlay.
+- **Kill-switch:** `cb.runtimes.overlay.enabled` is `true` in `service-common-config.yml`, but the code
+  falls back to `false` when the key is missing, and a `CB_RUNTIMES_OVERLAY_ENABLED=false` pin turns it off.
+  With the switch off a listed version materializes nothing — no error, just an empty overlay.
 - **Base drift fails loud:** editing a base 7.3.3 file that an overlay patches makes that patch's
   guarding `test` op throw at startup. That's the safety net working — re-anchor the patch.
 - **Don't author version strings** in overlay files — injection owns `name` / `description` /

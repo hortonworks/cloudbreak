@@ -2,7 +2,13 @@ package com.sequenceiq.cloudbreak.common.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.EncodedResource;
+
+import com.sequenceiq.cloudbreak.spring.YamlPropertySourceFactory;
 
 class RuntimeVersionsTest {
 
@@ -119,5 +125,16 @@ class RuntimeVersionsTest {
     @Test
     void overlayIsDisabledByDefault() {
         assertThat(underTest.overlayEnabled()).isFalse();
+    }
+
+    @Test
+    void theShippedPolicyPinsLatestExplicitlyBecauseItIsNeverDerived() throws IOException {
+        // A blank latest means "fall back to the default image catalog" (stage and prod rely on that), so the
+        // shipped policy has to name the version rather than leave it to be derived from the supported list.
+        String file = "service-common-config.yml";
+        Object latest = new YamlPropertySourceFactory().createPropertySource(file, new EncodedResource(new ClassPathResource(file)))
+                .getProperty("cb.runtimes.latest");
+
+        assertThat(latest).asString().isNotBlank();
     }
 }

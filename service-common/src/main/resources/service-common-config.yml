@@ -19,7 +19,7 @@
 # This policy lives in its own file - rather than in common-config.yml - so that a deployment can
 # override the whole policy, and nothing else, by mounting a single file under cb.etc.config.dir.
 # Individual deployments still override any of these through the environment
-# (CB_RUNTIMES_LATEST, DATALAKE_RUNTIMES_SUPPORTED, ...) or by mounting a service-common-config.yml under
+# (CB_RUNTIMES_LATEST, CB_RUNTIMES_SUPPORTED, ...) or by mounting a service-common-config.yml under
 # cb.etc.config.dir; both take precedence over the values below.
 cb:
   runtimes:

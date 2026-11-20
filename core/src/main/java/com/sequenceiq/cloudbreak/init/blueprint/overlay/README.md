@@ -49,7 +49,7 @@ fields).
 Derived from the canonical `cb.runtimes.supported` list in `service-common-config.yml` (`service-common`,
 shared by core and datalake): `RuntimeVersions.patched()` is every supported version above the base,
 which is what `DefaultBlueprintCache` feeds this loader (the cluster-template loader uses the same
-list). The whole model is gated by `cb.runtimes.overlay.enabled` (default `false`): when off,
+list). The whole model is gated by `cb.runtimes.overlay.enabled` (`true` in `service-common-config.yml`): when off,
 `DefaultBlueprintCache` skips overlay materialization entirely. The frozen base is `cb.runtimes.base`
 (7.3.3, in `service-common-config.yml`) — but only re-point it at a
 version whose full on-disk `defaults/blueprints/<base>/` dir and YAML block already ship.

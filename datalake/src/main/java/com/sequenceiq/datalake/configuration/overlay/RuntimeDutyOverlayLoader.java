@@ -28,8 +28,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
  * Materializes the Data Lake "duties" templates for runtime versions that ship as sparse
  * <em>overlays</em> on top of a frozen base version, instead of a full copy of every duty file.
  *
- * <p>The set of runtime versions comes from {@code datalake.runtimes.supported}, which defaults to the canonical
- * {@code cb.runtimes.supported} list in the shared {@code service-common-config.yml} — the very same list core reads —
+ * <p>The set of runtime versions comes from the canonical {@code cb.runtimes.supported} list in the shared
+ * {@code service-common-config.yml} — the very same list core reads —
  * and not from the overlay tree, so a version that changes nothing structurally is introduced purely by adding
  * it to that list. A version is treated as an overlay when it is supported, is newer than the base, and has
  * <em>no</em> on-disk full duty directory ({@code duties/<version>/}); everything else is served from disk
@@ -71,7 +71,7 @@ public class RuntimeDutyOverlayLoader {
      * Materializes the duty templates for every supported runtime version that is an overlay (newer than
      * the base and without an on-disk full duty directory).
      *
-     * @param supportedRuntimes the supported runtime versions (from {@code datalake.runtimes.supported});
+     * @param supportedRuntimes the supported runtime versions (from {@code cb.runtimes.supported});
      *                          an empty set yields no overlays, since overlay versions must be enumerated
      * @return the materialized duties keyed by {@link CDPConfigKey}; values are raw JSON strings
      */
