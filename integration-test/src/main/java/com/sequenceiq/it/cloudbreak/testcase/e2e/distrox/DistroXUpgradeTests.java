@@ -68,6 +68,9 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     @Inject
     private StackAssertion stackAssertion;
 
+    @Inject
+    private AwsNativeMigrationOnSharedEnvironment awsNativeMigration;
+
     @Override
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
@@ -81,7 +84,9 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
             given = "there is a running Cloudbreak, and an environment with Data Lake and two DistroX clusters in available state, " +
                     "one cluster created with default catalog and one cluster created with production catalog disk are encrypted",
             when = "upgrade called on all DistroX clusters",
-            then = "All DistroX upgrade should be successful, the clusters should be up and running, disks are encrypted too")
+            then = "All DistroX upgrade should be successful, the clusters should be up and running, disks are encrypted too. " +
+                    "On AWS an additional DistroX created with the legacy AWS (CloudFormation) variant is migrated to AWS_NATIVE " +
+                    "by the replace VMs upgrade and can be scaled and deleted afterwards")
     public void testDistroXUpgradesWithEncryptedDisks(TestContext testContext) {
         boolean govCloud = testContext.getCloudProvider().getGovCloud();
         String currentVersion = commonClusterManagerProperties.getRuntimeVersion();
@@ -90,6 +95,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         String firstDhName = resourcePropertyProvider().getName();
         String secondDhName = resourcePropertyProvider().getName();
         String thirdDhName = resourcePropertyProvider().getName();
+        boolean migrateAwsVariantOnSharedEnv = awsNativeMigration.isApplicable(testContext);
         Pair<String, String> patchUpgradePair = testUpgradeCandidateProvider.getPatchUpgradeSourceAndCandidate(testContext);
 
         encryptedTestUtil.createEnvironment(testContext);
@@ -98,10 +104,11 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         encryptedTestUtil.assertEnvironmentAndFreeipa(testContext, null);
         createDatalake(testContext, currentVersion);
         encryptedTestUtil.assertDatalake(testContext, null);
-        createDataHubs(testContext, currentUpgradeRuntimeVersion, firstDhName, secondDhName, thirdDhName, patchUpgradePair.getLeft());
+        createDataHubs(testContext, currentUpgradeRuntimeVersion, firstDhName, secondDhName, thirdDhName, migrateAwsVariantOnSharedEnv,
+                patchUpgradePair.getLeft());
         encryptedTestUtil.assertDatahubWithName(testContext, null, firstDhName);
         encryptedTestUtil.assertDatahubWithName(testContext, null, secondDhName);
-        upgradeAndAssertUpgrade(testContext, firstDhName, secondDhName, thirdDhName, patchUpgradePair.getRight());
+        upgradeAndAssertUpgrade(testContext, firstDhName, secondDhName, thirdDhName, migrateAwsVariantOnSharedEnv, patchUpgradePair.getRight());
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -156,9 +163,13 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .validate();
     }
 
-    private void upgradeAndAssertUpgrade(TestContext testContext, String firstDhName, String secondDhName, String thirdDhName, String targetImage) {
+    private void upgradeAndAssertUpgrade(TestContext testContext, String firstDhName, String secondDhName, String thirdDhName,
+            boolean migrateAwsVariantOnSharedEnv, String targetImage) {
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
         String targetRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyTargetVersion();
+        if (migrateAwsVariantOnSharedEnv) {
+            awsNativeMigration.triggerMigrationUpgrade(testContext, targetRuntimeVersion);
+        }
         testContext
                 .given(DistroXUpgradeTestDto.class)
                 .withRuntime(targetRuntimeVersion)
@@ -189,10 +200,13 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE, key(thirdDhName))
                 .awaitForHealthyInstances()
                 .validate();
+        if (migrateAwsVariantOnSharedEnv) {
+            awsNativeMigration.assertMigrationThenScaleAndDelete(testContext);
+        }
     }
 
     private void createDataHubs(TestContext testContext, String currentUpgradeRuntimeVersion, String firstDhName, String secondDhName, String thirdDhName,
-            String patchUpgradeSourceImage) {
+            boolean migrateAwsVariantOnSharedEnv, String patchUpgradeSourceImage) {
         String thirdPartyCatalogName = resourcePropertyProvider().getName();
         String imageName = resourcePropertyProvider().getName();
         String currentRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().
@@ -203,6 +217,11 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .withoutCleanup()
                 .withName(thirdPartyCatalogName)
                 .when(imageCatalogTestClient.createIfNotExistV4());
+
+        if (migrateAwsVariantOnSharedEnv) {
+            // created before the default image settings are switched to the patch upgrade source image below
+            awsNativeMigration.createLegacyAwsVariantDataHub(testContext, currentUpgradeRuntimeVersion);
+        }
 
         testContext
                 .given(firstDhName, DistroXTestDto.class)
@@ -239,6 +258,9 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE, key(thirdDhName))
                 .awaitForHealthyInstances()
                 .validate();
+        if (migrateAwsVariantOnSharedEnv) {
+            awsNativeMigration.awaitLegacyAwsVariantDataHub(testContext);
+        }
     }
 
     private void createDatalake(TestContext testContext, String currentRuntimeVersion) {
