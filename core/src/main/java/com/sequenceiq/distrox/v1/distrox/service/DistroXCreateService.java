@@ -12,16 +12,20 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.controller.StackCreatorService;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.maintenancewindow.DataHubMaintenanceWindowScheduleService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
 import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
@@ -30,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.ReservedTagValidatorService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -38,6 +43,7 @@ import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceWindowScheduleRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAzureRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
@@ -49,6 +55,7 @@ import com.sequenceiq.distrox.v1.distrox.fedramp.FedRampModificationService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
+import com.sequenceiq.maintenance.api.v1.schedule.validation.MaintenanceWindowValidationMessages;
 
 @Service
 public class DistroXCreateService {
@@ -97,18 +104,81 @@ public class DistroXCreateService {
     @Inject
     private SeLinuxValidationService seLinuxValidationService;
 
+    @Inject
+    private StackCreatorService stackCreatorService;
+
+    @Inject
+    private ObjectProvider<DataHubMaintenanceWindowScheduleService> dataHubMaintenanceWindowScheduleService;
+
+    @Inject
+    private StackService stackService;
+
     public StackV4Response create(DistroXV1Request request, boolean internalRequest) {
         Workspace workspace = workspaceService.getForCurrentUser();
-        validate(request, internalRequest);
+        DataHubMaintenanceWindowScheduleService scheduleService = dataHubMaintenanceWindowScheduleService.getIfAvailable();
+        validate(request, internalRequest, scheduleService);
         fedRampModificationService.prepare(request, workspace.getTenant().getName());
-        return stackOperations.post(
-                workspace.getId(),
-                restRequestThreadLocalService.getCloudbreakUser(),
-                stackRequestConverter.convert(request),
-                true);
+        StackV4Request stackRequest = stackRequestConverter.convert(request);
+        DistroXMaintenanceWindowScheduleRequest schedule = request.getMaintenanceWindowSchedule();
+        String scheduleResourceCrn = schedule == null ? null : presetDataHubCrn(stackRequest);
+        boolean scheduleCreated = false;
+        try {
+            // Create the schedule before the stack (consistent with the Data Lake / FreeIPA create). The maintenance
+            // service runs the full schedule validation here (occurrence/gap rules the API-level @AssertTrue cannot
+            // check), so an invalid schedule fails as a clean 400 with no Data Hub created. The internal create only
+            // checks the CRN format/account (not the stack row), so pre-persist creation is safe. validate() has
+            // already guaranteed the schedule service is available when a schedule is present.
+            if (schedule != null) {
+                scheduleService.createScheduleIfPresent(scheduleResourceCrn, schedule);
+                scheduleCreated = true;
+            }
+            return stackOperations.post(
+                    workspace.getId(),
+                    restRequestThreadLocalService.getCloudbreakUser(),
+                    stackRequest,
+                    true);
+        } catch (RuntimeException e) {
+            rollbackMaintenanceScheduleQuietly(scheduleService, scheduleResourceCrn, scheduleCreated);
+            throw e;
+        }
     }
 
-    private void validate(DistroXV1Request request, boolean internalRequest) {
+    /**
+     * Pre-generates the Data Hub resource CRN and sets it on the request so the maintenance schedule and the stack to be
+     * created share identity: {@link StackCreatorService} honors a pre-set {@code resourceCrn} (and assigns the owner role
+     * for it) instead of generating its own. Reuses {@link StackCreatorService#createDataHubCrn} to keep a single source
+     * of the descriptor/account generation.
+     */
+    private String presetDataHubCrn(StackV4Request stackRequest) {
+        String resourceCrn = stackCreatorService.createDataHubCrn(ThreadBasedUserCrnProvider.getAccountId());
+        stackRequest.setResourceCrn(resourceCrn);
+        return resourceCrn;
+    }
+
+    /**
+     * Best-effort rollback of the pre-created schedule on the Data Hub creation error path. Clears the schedule only when
+     * {@code post} failed <b>before</b> the stack was committed (no stack row for the CRN); if the stack is already
+     * committed - it persisted and then the provisioning trigger threw - the Data Hub exists, so its schedule is kept
+     * rather than orphaning a live resource. This relies on the committed stack sharing {@code resourceCrn} (see
+     * {@link #presetDataHubCrn}). Never throws: any failure here (including the existence lookup) is logged and swallowed
+     * so the original creation error is the exception surfaced to the caller.
+     */
+    private void rollbackMaintenanceScheduleQuietly(
+            DataHubMaintenanceWindowScheduleService scheduleService, String resourceCrn, boolean scheduleCreated) {
+        if (!scheduleCreated || scheduleService == null) {
+            return;
+        }
+        try {
+            if (stackService.getByCrnOrElseNull(resourceCrn) == null) {
+                scheduleService.clearScheduleQuietly(resourceCrn);
+            }
+        } catch (RuntimeException rollbackError) {
+            LOGGER.warn("Failed to roll back maintenance window schedule for {} after Data Hub creation failure; "
+                    + "leaving it in place", resourceCrn, rollbackError);
+        }
+    }
+
+    private void validate(DistroXV1Request request, boolean internalRequest, DataHubMaintenanceWindowScheduleService scheduleService) {
         if (!internalRequest) {
             Optional.of(request).map(DistroXV1Request::getTags).ifPresent(tagRequest -> {
                 reservedTagValidatorService.validateInternalTags(tagRequest.getApplication());
@@ -127,6 +197,19 @@ public class DistroXCreateService {
         }
         validateLoadBalancerSku(request.getAzure());
         validateSeLinuxEntitlement(request);
+        validateMaintenanceWindowSchedule(request, scheduleService);
+    }
+
+    private void validateMaintenanceWindowSchedule(DistroXV1Request request, DataHubMaintenanceWindowScheduleService scheduleService) {
+        if (request.getMaintenanceWindowSchedule() == null) {
+            return;
+        }
+        if (scheduleService == null) {
+            throw new BadRequestException(MaintenanceWindowValidationMessages.NOT_CONFIGURED_VALIDATION_ERROR);
+        }
+        if (!entitlementService.isMaintenanceWindowEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            throw new BadRequestException(MaintenanceWindowValidationMessages.NOT_ENTITLED_VALIDATION_ERROR);
+        }
     }
 
     private void validateEnvironment(DistroXV1Request request, DetailedEnvironmentResponse environment) {

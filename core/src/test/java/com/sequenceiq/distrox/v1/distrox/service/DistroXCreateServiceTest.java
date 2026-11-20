@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -30,25 +31,32 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.verification.VerificationMode;
+import org.springframework.beans.factory.ObjectProvider;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.controller.StackCreatorService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.maintenancewindow.DataHubMaintenanceWindowScheduleService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperationValidationView;
 import com.sequenceiq.cloudbreak.sdx.common.model.DistroXOperations;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -58,6 +66,7 @@ import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceWindowScheduleRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAzureRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
@@ -73,6 +82,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
+import com.sequenceiq.maintenance.api.v1.schedule.validation.MaintenanceWindowValidationMessages;
 
 @ExtendWith(MockitoExtension.class)
 class DistroXCreateServiceTest {
@@ -128,6 +138,18 @@ class DistroXCreateServiceTest {
     @Mock
     private SeLinuxValidationService seLinuxValidationService;
 
+    @Mock
+    private StackCreatorService stackCreatorService;
+
+    @Mock
+    private ObjectProvider<DataHubMaintenanceWindowScheduleService> dataHubMaintenanceWindowScheduleService;
+
+    @Mock
+    private DataHubMaintenanceWindowScheduleService dataHubMaintenanceWindowScheduleBean;
+
+    @Mock
+    private StackService stackService;
+
     @InjectMocks
     private DistroXCreateService underTest;
 
@@ -140,6 +162,181 @@ class DistroXCreateServiceTest {
         workspace.setTenant(tenant);
         lenient().when(imageOsService.isSupported(any())).thenReturn(true);
         lenient().when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        lenient().when(dataHubMaintenanceWindowScheduleService.getIfAvailable()).thenReturn(null);
+    }
+
+    @Test
+    void rejectsMaintenanceWindowScheduleWhenMaintenanceServiceNotConfigured() {
+        DistroXV1Request request = new DistroXV1Request();
+        request.setEnvironmentName(ENV_NAME);
+        DistroXMaintenanceWindowScheduleRequest schedule = new DistroXMaintenanceWindowScheduleRequest();
+        schedule.setRecurrenceKind("WEEKLY");
+        schedule.setDurationMinutes(60);
+        schedule.setStartLocalTime("09:00");
+        schedule.setDayOfWeek("MONDAY");
+        request.setMaintenanceWindowSchedule(schedule);
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn(CRN);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(Status.AVAILABLE);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        DistroXOperationValidationView createOp = new DistroXOperationValidationView();
+        createOp.setOperation(DistroXOperations.CREATE);
+        createOp.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(CRN)).thenReturn(List.of(createOp));
+
+        BadRequestException err = assertThrows(BadRequestException.class,
+                () -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)));
+
+        assertEquals(MaintenanceWindowValidationMessages.NOT_CONFIGURED_VALIDATION_ERROR, err.getMessage());
+        verify(stackOperations, never()).post(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    void createsMaintenanceScheduleBeforePost() {
+        String scheduleCrn = "crn:cdp:datahub:us-west-1:acc:cluster:dh-1";
+        DistroXV1Request request = requestWithScheduleAndAvailableEnv();
+        when(stackCreatorService.createDataHubCrn(any())).thenReturn(scheduleCrn);
+        when(dataHubMaintenanceWindowScheduleService.getIfAvailable()).thenReturn(dataHubMaintenanceWindowScheduleBean);
+        when(entitlementService.isMaintenanceWindowEnabled(any())).thenReturn(true);
+        when(stackOperations.post(any(), any(), any(), anyBoolean())).thenReturn(new StackV4Response());
+
+        doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST));
+
+        // Created before the stack so an invalid schedule fails as a clean 400 with no Data Hub created.
+        InOrder inOrder = inOrder(dataHubMaintenanceWindowScheduleBean, stackOperations);
+        inOrder.verify(dataHubMaintenanceWindowScheduleBean).createScheduleIfPresent(eq(scheduleCrn), any());
+        inOrder.verify(stackOperations).post(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    void rollsBackMaintenanceScheduleWhenPostFailsBeforeStackIsCommitted() {
+        String scheduleCrn = "crn:cdp:datahub:us-west-1:acc:cluster:dh-1";
+        DistroXV1Request request = requestWithScheduleAndAvailableEnv();
+        when(stackCreatorService.createDataHubCrn(any())).thenReturn(scheduleCrn);
+        when(dataHubMaintenanceWindowScheduleService.getIfAvailable()).thenReturn(dataHubMaintenanceWindowScheduleBean);
+        when(entitlementService.isMaintenanceWindowEnabled(any())).thenReturn(true);
+        when(stackOperations.post(any(), any(), any(), anyBoolean())).thenThrow(new RuntimeException("post failed"));
+        // No stack row for the CRN => post failed before committing => safe to roll the schedule back.
+        when(stackService.getByCrnOrElseNull(scheduleCrn)).thenReturn(null);
+
+        assertThrows(RuntimeException.class, () -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)));
+
+        verify(dataHubMaintenanceWindowScheduleBean).createScheduleIfPresent(eq(scheduleCrn), any());
+        verify(dataHubMaintenanceWindowScheduleBean).clearScheduleQuietly(scheduleCrn);
+    }
+
+    @Test
+    void surfacesOriginalPostErrorWhenRollbackExistenceLookupThrows() {
+        String scheduleCrn = "crn:cdp:datahub:us-west-1:acc:cluster:dh-1";
+        DistroXV1Request request = requestWithScheduleAndAvailableEnv();
+        when(stackCreatorService.createDataHubCrn(any())).thenReturn(scheduleCrn);
+        when(dataHubMaintenanceWindowScheduleService.getIfAvailable()).thenReturn(dataHubMaintenanceWindowScheduleBean);
+        when(entitlementService.isMaintenanceWindowEnabled(any())).thenReturn(true);
+        when(stackOperations.post(any(), any(), any(), anyBoolean())).thenThrow(new RuntimeException("post failed"));
+        // The rollback's existence check blows up; it must not mask the real post() failure.
+        when(stackService.getByCrnOrElseNull(scheduleCrn)).thenThrow(new RuntimeException("db down"));
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)));
+
+        assertEquals("post failed", thrown.getMessage());
+        verify(dataHubMaintenanceWindowScheduleBean, never()).clearScheduleQuietly(any());
+    }
+
+    @Test
+    void keepsMaintenanceScheduleWhenPostFailsAfterStackIsCommitted() {
+        String scheduleCrn = "crn:cdp:datahub:us-west-1:acc:cluster:dh-1";
+        DistroXV1Request request = requestWithScheduleAndAvailableEnv();
+        when(stackCreatorService.createDataHubCrn(any())).thenReturn(scheduleCrn);
+        when(dataHubMaintenanceWindowScheduleService.getIfAvailable()).thenReturn(dataHubMaintenanceWindowScheduleBean);
+        when(entitlementService.isMaintenanceWindowEnabled(any())).thenReturn(true);
+        when(stackOperations.post(any(), any(), any(), anyBoolean())).thenThrow(new RuntimeException("trigger failed after commit"));
+        // Stack row exists => post committed the stack, then failed => the Data Hub exists, so keep its schedule.
+        when(stackService.getByCrnOrElseNull(scheduleCrn)).thenReturn(new Stack());
+
+        assertThrows(RuntimeException.class, () -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)));
+
+        verify(dataHubMaintenanceWindowScheduleBean).createScheduleIfPresent(eq(scheduleCrn), any());
+        verify(dataHubMaintenanceWindowScheduleBean, never()).clearScheduleQuietly(any());
+    }
+
+    @Test
+    void rejectsMaintenanceWindowScheduleWhenAccountNotEntitled() {
+        DistroXV1Request request = new DistroXV1Request();
+        request.setEnvironmentName(ENV_NAME);
+        DistroXMaintenanceWindowScheduleRequest schedule = new DistroXMaintenanceWindowScheduleRequest();
+        schedule.setRecurrenceKind("WEEKLY");
+        schedule.setDurationMinutes(60);
+        schedule.setStartLocalTime("09:00");
+        schedule.setDayOfWeek("MONDAY");
+        request.setMaintenanceWindowSchedule(schedule);
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn(CRN);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(Status.AVAILABLE);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        DistroXOperationValidationView createOp = new DistroXOperationValidationView();
+        createOp.setOperation(DistroXOperations.CREATE);
+        createOp.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(CRN)).thenReturn(List.of(createOp));
+        when(dataHubMaintenanceWindowScheduleService.getIfAvailable()).thenReturn(dataHubMaintenanceWindowScheduleBean);
+        when(entitlementService.isMaintenanceWindowEnabled(any())).thenReturn(false);
+
+        BadRequestException err = assertThrows(BadRequestException.class,
+                () -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)));
+
+        assertEquals(MaintenanceWindowValidationMessages.NOT_ENTITLED_VALIDATION_ERROR, err.getMessage());
+        verify(stackOperations, never()).post(any(), any(), any(), anyBoolean());
+        verify(dataHubMaintenanceWindowScheduleBean, never()).createScheduleIfPresent(any(), any());
+    }
+
+    @Test
+    void failsWithoutCreatingDataHubWhenScheduleIsInvalid() {
+        String scheduleCrn = "crn:cdp:datahub:us-west-1:acc:cluster:dh-1";
+        DistroXV1Request request = requestWithScheduleAndAvailableEnv();
+        when(stackCreatorService.createDataHubCrn(any())).thenReturn(scheduleCrn);
+        when(dataHubMaintenanceWindowScheduleService.getIfAvailable()).thenReturn(dataHubMaintenanceWindowScheduleBean);
+        when(entitlementService.isMaintenanceWindowEnabled(any())).thenReturn(true);
+        doThrow(new BadRequestException("schedule must have at least one occurrence in the next 90 days"))
+                .when(dataHubMaintenanceWindowScheduleBean).createScheduleIfPresent(eq(scheduleCrn), any());
+
+        // Schedule validation runs before the stack is created, so an invalid schedule aborts with no Data Hub.
+        assertThrows(BadRequestException.class, () -> doAs(ACTOR, () -> underTest.create(request, NOT_INTERNAL_REQUEST)));
+
+        verify(stackOperations, never()).post(any(), any(), any(), anyBoolean());
+        verify(dataHubMaintenanceWindowScheduleBean, never()).clearScheduleQuietly(any());
+    }
+
+    private DistroXV1Request requestWithScheduleAndAvailableEnv() {
+        DistroXV1Request request = new DistroXV1Request();
+        request.setEnvironmentName(ENV_NAME);
+        DistroXMaintenanceWindowScheduleRequest schedule = new DistroXMaintenanceWindowScheduleRequest();
+        schedule.setRecurrenceKind("WEEKLY");
+        schedule.setDurationMinutes(60);
+        schedule.setStartLocalTime("09:00");
+        schedule.setDayOfWeek("MONDAY");
+        request.setMaintenanceWindowSchedule(schedule);
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(AVAILABLE);
+        envResponse.setCrn(CRN);
+        when(environmentClientService.getByName(ENV_NAME)).thenReturn(envResponse);
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(Status.AVAILABLE);
+        when(freeipaClientService.getByEnvironmentCrn(CRN)).thenReturn(freeipa);
+        DistroXOperationValidationView createOp = new DistroXOperationValidationView();
+        createOp.setOperation(DistroXOperations.CREATE);
+        createOp.setAllowed(true);
+        when(platformAwareSdxConnector.validateDistroxOperations(CRN)).thenReturn(List.of(createOp));
+        when(stackRequestConverter.convert(request)).thenReturn(new StackV4Request());
+        return request;
     }
 
     @Test

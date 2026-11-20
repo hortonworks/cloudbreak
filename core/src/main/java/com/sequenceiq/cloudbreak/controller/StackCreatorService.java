@@ -505,10 +505,15 @@ public class StackCreatorService {
 
     private String getCrnForCreation(Optional<String> externalCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return externalCrn.orElseGet(() -> createCRN(accountId));
+        return externalCrn.orElseGet(() -> createDataHubCrn(accountId));
     }
 
-    private String createCRN(String accountId) {
+    /**
+     * Generates a fresh Data Hub resource CRN for the given account. Exposed so callers that must know the CRN before the
+     * stack is created (e.g. pre-setting {@code resourceCrn} on the request so a sibling resource shares its identity) use
+     * the same descriptor/account generation as {@link #createStack} rather than duplicating it.
+     */
+    public String createDataHubCrn(String accountId) {
         return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.DATAHUB, accountId);
     }
 

@@ -76,6 +76,10 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
     @Schema(description = ModelDescriptions.StackModelDescription.SECURITY)
     private SecurityV1Request security;
 
+    @Valid
+    @Schema(description = "Optional maintenance window schedule for this Data Hub")
+    private DistroXMaintenanceWindowScheduleRequest maintenanceWindowSchedule;
+
     public String getEnvironmentName() {
         return environmentName;
     }
@@ -230,6 +234,14 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     public void setSecurity(SecurityV1Request security) {
         this.security = security;
+    }
+
+    public DistroXMaintenanceWindowScheduleRequest getMaintenanceWindowSchedule() {
+        return maintenanceWindowSchedule;
+    }
+
+    public void setMaintenanceWindowSchedule(DistroXMaintenanceWindowScheduleRequest maintenanceWindowSchedule) {
+        this.maintenanceWindowSchedule = maintenanceWindowSchedule;
     }
 
     @JsonIgnore

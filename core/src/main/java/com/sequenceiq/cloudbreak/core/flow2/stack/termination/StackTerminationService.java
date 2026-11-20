@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.maintenancewindow.DataHubMaintenanceWindowScheduleService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -46,9 +48,13 @@ public class StackTerminationService {
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
+    @Inject
+    private ObjectProvider<DataHubMaintenanceWindowScheduleService> dataHubMaintenanceWindowScheduleService;
+
     public void finishStackTermination(StackView stack, boolean forced, TerminateStackResult payload) {
         LOGGER.debug("Terminate stack result: {}", payload);
         clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.CLUSTER_DELETE_COMPLETED);
+        clearMaintenanceScheduleQuietly(stack);
         terminationService.finalizeTermination(stack.getId(), forced);
         flowMessageService.fireEventAndLog(stack.getId(), DELETE_COMPLETED.name(), STACK_DELETE_COMPLETED);
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
@@ -67,6 +73,7 @@ public class StackTerminationService {
             LOGGER.debug("Error during stack termination flow: ", errorDetails);
         } else {
             clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_DELETE_COMPLETED);
+            clearMaintenanceScheduleQuietly(stack);
             terminationService.finalizeTermination(stackId, true);
             stackUpdateMessage = "Stack was force terminated.";
             status = DetailedStackStatus.DELETE_COMPLETED;
@@ -79,5 +86,16 @@ public class StackTerminationService {
 
     public void deleteDnsEntry(Stack stack) {
         clusterPublicEndpointManagementService.terminate(stack);
+    }
+
+    /**
+     * Clears the maintenance window schedule for a Data Hub being terminated. Only Data Hub (WORKLOAD) stacks have a
+     * {@code DATAHUB}-scoped schedule, so other stack types are skipped. Swallows failures so a maintenance-service
+     * problem never fails an otherwise-complete termination.
+     */
+    private void clearMaintenanceScheduleQuietly(StackView stack) {
+        if (stack.isDatahub()) {
+            dataHubMaintenanceWindowScheduleService.ifAvailable(service -> service.clearScheduleQuietly(stack.getResourceCrn()));
+        }
     }
 }
