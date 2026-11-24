@@ -12,7 +12,7 @@
 {%- do salt.log.debug("log_temp_directory " ~ temp_directory) %}
 {%- do salt.log.debug("log_running_postgres_version " ~ running_postgres_version) %}
 
-  {%- if new_postgres_version | int in [11, 14, 17] %}
+{%- if new_postgres_version | int in [11, 14, 17] %}
 install_target_postgres_version:
   module.run:
     - name: state.sls
@@ -36,6 +36,7 @@ install_target_postgres_version:
 {{ temp_directory }}/pgsql-{{ original_postgres_version }}:
   file.copy:
     - source: {{ original_postgres_binaries }}
+    - force: True
     - user: postgres
     - group: postgres
 
