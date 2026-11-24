@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure.ParameterCheck.HAS_THESE_PARAMETERS;
 import static java.util.function.Predicate.not;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,12 +18,15 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.cloudera.api.swagger.model.ApiParcel;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -41,8 +45,13 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public class DistroXUpgradeTests extends AbstractMockTest {
+
+    private static final String SOURCE_RUNTIME_IMAGE = "73f5db23-293d-4934-b124-1d5361375480";
+
+    private static final String NEXT_RUNTIME_IMAGE = "aaa778fc-7f17-4535-9021-515351df3691";
 
     private static final String SALT_3006_10_IMAGE_ID = "c1d2e3f4-3006-4a10-9b10-5a17a0000010";
 
@@ -81,7 +90,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
         String targetRuntimeVersion = getNextRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion(false));
         testContext
                 .given(imageSettings, DistroXImageTestDto.class)
-                .withImageId("73f5db23-293d-4934-b124-1d5361375480")
+                .withImageId(SOURCE_RUNTIME_IMAGE)
                 .withImageCatalog(upgradeImageCatalogName)
                 .given(distroXName, DistroXTestDto.class)
                 .withImageSettings(imageSettings)
@@ -118,7 +127,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
         String distroXName = resourcePropertyProvider().getName();
         testContext
                 .given(imageSettings, DistroXImageTestDto.class)
-                .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
+                .withImageId(NEXT_RUNTIME_IMAGE)
                 .withImageCatalog(upgradeImageCatalogName)
                 .given(distroXName, DistroXTestDto.class)
                 .withImageSettings(imageSettings)
@@ -141,6 +150,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
                     entity.setOsUpgradeByUpgradeSets(osUpgradeByUpgradeSets);
                     return entity;
                 })
+                .then(this::reportInstalledCmBuild)
                 .when(distroXTestClient.osUpgradeByUpgradeSets())
                 .await(STACK_AVAILABLE, key(distroXName))
                 .awaitForHealthyInstances()
@@ -177,6 +187,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
                     entity.setOsUpgradeByUpgradeSets(gatewayFirstUpgradeSets(entity.getResponse()));
                     return entity;
                 })
+                .then(this::reportInstalledCmBuild)
                 .when(distroXTestClient.osUpgradeByUpgradeSets())
                 .await(STACK_AVAILABLE, key(distroXName))
                 .awaitForHealthyInstances()
@@ -196,7 +207,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
         String distroXName = resourcePropertyProvider().getName();
         testContext
                 .given(imageSettings, DistroXImageTestDto.class)
-                .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
+                .withImageId(NEXT_RUNTIME_IMAGE)
                 .withImageCatalog(upgradeImageCatalogName)
                 .given(distroXName, DistroXTestDto.class)
                 .withImageSettings(imageSettings)
@@ -217,6 +228,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
                 .withRuntime(null)
                 .withReplaceVms(DistroXUpgradeReplaceVms.ENABLED)
                 .given(distroXName, DistroXTestDto.class)
+                .then(this::reportInstalledCmBuild)
                 .resetCalls()
                 .when(distroXTestClient.upgrade())
                 .await(STACK_AVAILABLE, key(distroXName))
@@ -225,6 +237,79 @@ public class DistroXUpgradeTests extends AbstractMockTest {
                 .mockSpi().addInstances().post().bodyCheck(s -> verifyGroup(s, Map.of("compute", 100)), 1).verify()
                 .mockSpi().addInstances().post().bodyCheck(s -> verifyGroup(s, Map.of("compute", 4)), 1).verify()
                 .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(given = "Cloudbreak records the target image while CM still has the source CDH parcel active",
+            when = "an ordered OS upgrade requests the recorded image",
+            then = "validation fails before any VM is replaced")
+    public void testOrderedOsUpgradeRejectsStaleRuntime(MockedTestContext testContext) {
+        String catalog = resourcePropertyProvider().getName();
+        createImageCatalogForOsUpgrade(testContext, catalog);
+        String cluster = resourcePropertyProvider().getName();
+        String sourceImage = "sourceImage";
+        DistroXTestDto dataHub = testContext.given(sourceImage, DistroXImageTestDto.class)
+                .withImageId(SOURCE_RUNTIME_IMAGE)
+                .withImageCatalog(catalog)
+                .given(cluster, DistroXTestDto.class)
+                .withImageSettings(sourceImage)
+                .when(distroXTestClient.create(), key(cluster))
+                .enableVerification()
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .when((tc, entity, client) -> {
+                    StackImageChangeV4Request change = new StackImageChangeV4Request();
+                    change.setImageId(NEXT_RUNTIME_IMAGE);
+                    change.setImageCatalogName(catalog);
+                    entity.setFlow("Record target image", client.getInternalClient(tc).stackV4Endpoint()
+                            .changeImageInternal(client.getWorkspaceId(), entity.getName(), change, tc.getActingUserCrn().toString()));
+                    return entity;
+                })
+                .awaitForFlow()
+                .when(distroXTestClient.get());
+        assertThat(dataHub.getResponse().getImage().getId()).isEqualTo(NEXT_RUNTIME_IMAGE);
+        String sourceRuntime = commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion(false);
+        assertThat(dataHub.mockCm().readParcels(dataHub.getName()).getItems())
+                .filteredOn(parcel -> "CDH".equals(parcel.getProduct()) && "ACTIVATED".equals(parcel.getStage()))
+                .extracting(ApiParcel::getVersion).singleElement().asString().startsWith(sourceRuntime + "-");
+        Set<String> originalInstances = instanceIds(dataHub.getResponse());
+        assertThat(originalInstances).isNotEmpty();
+
+        dataHub.resetCalls()
+                .when((tc, entity, client) -> {
+                    OrderedOSUpgradeSetRequest upgrade = new OrderedOSUpgradeSetRequest();
+                    upgrade.setImageId(NEXT_RUNTIME_IMAGE);
+                    upgrade.setOrderedOsUpgradeSets(List.of(new OrderedOSUpgradeSet(0, originalInstances)));
+                    entity.setFlow("Ordered OS upgrade", client.getInternalClient(tc).stackV4Endpoint()
+                            .upgradeOsByUpgradeSetsInternal(client.getWorkspaceId(), entity.getCrn(), upgrade));
+                    return entity;
+                })
+                .awaitForFlowFail()
+                .when(distroXTestClient.get())
+                .then((tc, entity, client) -> {
+                    assertThat(entity.getResponse().getStatusReason())
+                            .contains("target parcels are not active", "CDH " + getNextRuntimeVersion(sourceRuntime) + "-");
+                    assertThat(instanceIds(entity.getResponse())).isEqualTo(originalInstances);
+                    return entity;
+                })
+                .mockSpi().addInstances().post().times(0).verify()
+                .validate();
+    }
+
+    private Set<String> instanceIds(StackV4Response stack) {
+        return stack.getInstanceGroups().stream().flatMap(group -> group.getMetadata().stream())
+                .map(InstanceMetaDataV4Response::getInstanceId)
+                .collect(Collectors.toSet());
+    }
+
+    private DistroXTestDto reportInstalledCmBuild(TestContext testContext, DistroXTestDto entity, CloudbreakClient client) {
+        DistroXUpgradeV1Request request = new DistroXUpgradeV1Request();
+        request.setLockComponents(true);
+        request.setReplaceVms(DistroXUpgradeReplaceVms.ENABLED);
+        request.setDryRun(true);
+        ImageComponentVersions installed = client.getDefaultClient(testContext).distroXUpgradeV1Endpoint()
+                .upgradeClusterByName(entity.getName(), request).current().getComponentVersions();
+        return entity.mockCm().setCmVersion(installed.getCm() + "-" + installed.getCmGBN());
     }
 
     private static boolean verifyGroup(String s, Map<String, Integer> groupSizeMap) {

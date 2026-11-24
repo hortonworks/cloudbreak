@@ -24,6 +24,8 @@ public class CmServerQueryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmServerQueryService.class);
 
+    private static final String CM_SERVER_PACKAGE = "cloudera-manager-server";
+
     @Inject
     private ClusterApiConnectors apiConnectors;
 
@@ -65,6 +67,20 @@ public class CmServerQueryService {
             return Optional.of(version);
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.warn("Encountered error during reading CM version info", e);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<String> queryCmServerVersion(StackDto stack) {
+        try {
+            Map<String, List<PackageInfo>> packagesByHost = cmVersionQueryService.queryCmPackageInfo(stack);
+            cmVersionQueryService.checkCmPackageInfoConsistency(packagesByHost, stack.getId());
+            return stack.getPrimaryGatewayFQDN().map(packagesByHost::get).orElse(List.of()).stream()
+                    .filter(pkg -> CM_SERVER_PACKAGE.equals(pkg.getName()) && !pkg.isInvalid())
+                    .map(PackageInfo::getFullVersionPrettyPrinted)
+                    .findFirst();
+        } catch (CloudbreakOrchestratorFailedException e) {
+            LOGGER.warn("Could not read the installed CM server package version", e);
             return Optional.empty();
         }
     }

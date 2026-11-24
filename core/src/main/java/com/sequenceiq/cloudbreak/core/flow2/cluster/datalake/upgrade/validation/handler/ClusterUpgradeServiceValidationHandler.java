@@ -15,11 +15,11 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinishedEvent;
-import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.LockedComponentsValidator;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidationRequest;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidator;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -34,6 +34,9 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
     private StackDtoService stackDtoService;
 
     @Inject
+    private LockedComponentsValidator lockedComponentsValidator;
+
+    @Inject
     private List<ServiceUpgradeValidator> serviceUpgradeValidators;
 
     @Inject
@@ -45,8 +48,9 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
         LOGGER.debug("Accepting Cluster upgrade service validation event. {}", request);
         Long stackId = request.getResourceId();
         ClusterUpgradeProperties clusterUpgradeProperties = clusterUpgradePropertiesResolver.resolve(request);
+        ServiceUpgradeValidationRequest validationRequest = new ServiceUpgradeValidationRequest(stackDtoService.getById(stackId), clusterUpgradeProperties);
+        lockedComponentsValidator.validate(validationRequest);
         try {
-            ServiceUpgradeValidationRequest validationRequest = createValidationRequest(clusterUpgradeProperties, stackId);
             LOGGER.debug("Running the following upgrade validations: {}", serviceUpgradeValidators);
             serviceUpgradeValidators.forEach(validator -> validator.validate(validationRequest));
             return new ClusterUpgradeValidationFinishedEvent(stackId, clusterUpgradeProperties.getTargetImageId(), clusterUpgradeProperties);
@@ -59,13 +63,6 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
         }
     }
 
-    private ServiceUpgradeValidationRequest createValidationRequest(ClusterUpgradeProperties clusterUpgradeProperties, Long stackId) {
-        StackDto stack = stackDtoService.getById(stackId);
-        return new ServiceUpgradeValidationRequest(stack, clusterUpgradeProperties.isLockComponents(), clusterUpgradeProperties.isRollingUpgradeEnabled(),
-                // TODO CB-33421: Remove upgradeImageInfo field once callers and in-flight flow events no longer use it.
-                null, clusterUpgradeProperties, clusterUpgradeProperties.isReplaceVms());
-    }
-
     @Override
     public String selector() {
         return VALIDATE_SERVICES_EVENT.selector();
@@ -73,7 +70,7 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeServiceValidationEvent> event) {
-        LOGGER.error("Cluster upgrade service validation was unsuccessful due to an unexpected error", e);
+        LOGGER.warn("Cluster upgrade service validation failed", e);
         return new ClusterUpgradeValidationFailureEvent(resourceId, e);
     }
 }
