@@ -107,6 +107,7 @@ import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerParcelActivationTim
 import com.sequenceiq.cloudbreak.cm.model.ClouderaManagerClientConfigDeployRequest;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
+import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerApiExceptionUtil;
 import com.sequenceiq.cloudbreak.cm.util.TransientCmCommandFailureClassifier;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -338,7 +339,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void throwScalingException(Map<String, InstanceMetaData> upscaleInstancesMap, Exception e) throws ScalingException {
-        throw new ScalingException("Failed to upscale", e,
+        // The message becomes the UPSCALE_FAILED status reason: keep CM's error in it, not only in the log.
+        String cause = e instanceof ApiException apiException ? ClouderaManagerApiExceptionUtil.extractMessage(apiException) : e.getMessage();
+        String message = cause == null || cause.isBlank() ? "Failed to upscale" : "Failed to upscale: " + cause;
+        throw new ScalingException(message, e,
                 upscaleInstancesMap.values().stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toSet()));
     }
 

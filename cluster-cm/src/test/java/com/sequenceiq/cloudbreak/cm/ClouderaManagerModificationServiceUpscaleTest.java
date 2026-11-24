@@ -36,6 +36,7 @@ import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerParcelActivationTimeoutException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -65,7 +66,7 @@ class ClouderaManagerModificationServiceUpscaleTest extends ClouderaManagerModif
         CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.upscaleCluster(Map.of(hostGroup,
                 new LinkedHashSet<>(instanceMetaDataList))));
 
-        assertEquals("Failed to upscale", exception.getMessage());
+        assertEquals("Failed to upscale: Failed to get hosts", exception.getMessage());
         assertThat(exception).hasCauseReference(apiException);
     }
 
@@ -217,6 +218,24 @@ class ClouderaManagerModificationServiceUpscaleTest extends ClouderaManagerModif
 
         verify(clouderaManagerRoleRefreshService, never()).refreshClusterRoles(any(ApiClient.class), any(Stack.class));
         verify(clouderaManagerApiFactory, never()).getBatchResourceApi(any(ApiClient.class));
+    }
+
+    @Test
+    void upscaleClusterParcelActivationTimeoutKeepsTheCauseInTheMessage() throws Exception {
+        setUpListClusterHosts();
+        setUpReadHosts(true);
+
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("upscaled");
+        ClouderaManagerParcelActivationTimeoutException timeout =
+                new ClouderaManagerParcelActivationTimeoutException("Timeout while Cloudera Manager activate parcels.");
+        org.mockito.Mockito.doThrow(timeout).when(clouderaManagerClientConfigDeployService).deployClientConfig(any());
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(instanceMetaData)))));
+
+        assertEquals("Failed to upscale: Timeout while Cloudera Manager activate parcels.", exception.getMessage());
+        assertThat(exception).hasCauseReference(timeout);
     }
 
     @Test
@@ -598,7 +617,7 @@ class ClouderaManagerModificationServiceUpscaleTest extends ClouderaManagerModif
         CloudbreakException exception = assertThrows(CloudbreakException.class,
                 () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd())))));
 
-        assertEquals("Failed to upscale", exception.getMessage());
+        assertEquals("Failed to upscale: some other bad request error", exception.getMessage());
         assertThat(exception).hasCauseReference(otherBadRequestException);
         verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
     }
@@ -615,7 +634,7 @@ class ClouderaManagerModificationServiceUpscaleTest extends ClouderaManagerModif
         CloudbreakException exception = assertThrows(CloudbreakException.class,
                 () -> underTest.upscaleCluster(Map.of(hostGroup, new LinkedHashSet<>(List.of(getUpscaledImd())))));
 
-        assertEquals("Failed to upscale", exception.getMessage());
+        assertEquals("Failed to upscale: internal server error", exception.getMessage());
         assertThat(exception).hasCauseReference(serverErrorException);
         verify(clouderaManagerPollingServiceProvider, never()).startPollingCmApplyHostTemplate(any(), any(), any());
     }
