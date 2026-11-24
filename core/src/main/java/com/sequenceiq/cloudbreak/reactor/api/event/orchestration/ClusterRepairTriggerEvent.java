@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -26,6 +27,8 @@ public class ClusterRepairTriggerEvent extends StackEvent {
     private final String triggeredStackVariant;
 
     private final boolean rollingRestartEnabled;
+
+    private Set<String> instancesToRetainVolumes = Set.of();
 
     public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType, boolean restartServices,
             String triggeredStackVariant) {
@@ -68,6 +71,14 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.upgrade = triggeredStackVariant != null;
         this.triggeredStackVariant = triggeredStackVariant;
         this.rollingRestartEnabled = rollingRestartEnabled;
+    }
+
+    public Set<String> getInstancesToRetainVolumes() {
+        return instancesToRetainVolumes;
+    }
+
+    public void setInstancesToRetainVolumes(Set<String> instancesToRetainVolumes) {
+        this.instancesToRetainVolumes = Set.copyOf(instancesToRetainVolumes);
     }
 
     public Map<String, List<String>> getFailedNodesMap() {

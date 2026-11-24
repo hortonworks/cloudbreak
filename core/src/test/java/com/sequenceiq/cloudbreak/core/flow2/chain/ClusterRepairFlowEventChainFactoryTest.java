@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.chain.util.RepairServiceRestartDecider;
 import com.sequenceiq.cloudbreak.core.flow2.chain.util.RepairServiceRestartPolicy;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.RepairBatchSizeService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.AwsRepairSecurityGroupValidationTriggerService;
@@ -151,6 +153,9 @@ class ClusterRepairFlowEventChainFactoryTest {
     private ClusterView clusterView;
 
     @Mock
+    private ClusterRepairService clusterRepairService;
+
+    @Mock
     private RepairBatchSizeService repairBatchSizeService;
 
     @Mock
@@ -174,6 +179,22 @@ class ClusterRepairFlowEventChainFactoryTest {
         setupViews();
         lenient().when(repairServiceRestartDecider.restartPolicyFor(any(), any()))
                 .thenAnswer(invocation -> restartAsRequestedBy(invocation.getArgument(0)));
+    }
+
+    @Test
+    void retainsVolumesForTheOrderedSetWhenItsRepairStarts() {
+        Stack stack = getStack();
+        setupHostGroup(InstanceGroupType.GATEWAY);
+        ClusterRepairTriggerEvent repair = new TriggerEventBuilder(stack).withFailedPrimaryGateway().build();
+        Set<String> instanceIds = Set.of("i-gateway");
+        repair.setInstancesToRetainVolumes(instanceIds);
+        InstanceMetaData gateway = new InstanceMetaData();
+        when(instanceMetaDataService.findAllViewByStackIdAndInstanceId(stack.getId(), instanceIds)).thenReturn(List.of(gateway));
+
+        String persistedRepair = TypedJsonUtil.writeValueAsStringSilent(repair);
+        underTest.createFlowTriggerEventQueue(TypedJsonUtil.readValueUnchecked(persistedRepair, ClusterRepairTriggerEvent.class));
+
+        verify(clusterRepairService).markVolumesToNonDeletable(stackView, List.of(gateway));
     }
 
     @Test

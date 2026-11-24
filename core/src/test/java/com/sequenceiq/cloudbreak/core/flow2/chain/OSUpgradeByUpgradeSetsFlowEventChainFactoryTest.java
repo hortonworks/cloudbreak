@@ -2,40 +2,39 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.LockedComponentsValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OSUpgradeByUpgradeSetsTriggerEvent;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OrderedOsUpgradeRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.domain.FlowChainLog;
 
 @ExtendWith(MockitoExtension.class)
 public class OSUpgradeByUpgradeSetsFlowEventChainFactoryTest {
@@ -49,14 +48,12 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactoryTest {
     @Mock
     private StackDtoService stackDtoService;
 
-    @Mock
-    private ClusterRepairService clusterRepairService;
-
     @InjectMocks
     private OSUpgradeByUpgradeSetsFlowEventChainFactory underTest;
 
-    @Test
-    public void testCreateFlowTriggerEventQueue() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testCreateFlowTriggerEventQueue(boolean dataHub) {
         ArrayList<OrderedOSUpgradeSet> upgradeSets = new ArrayList<>();
         upgradeSets.add(new OrderedOSUpgradeSet(0, Set.of("i-1", "i-3", "i-5")));
         upgradeSets.add(new OrderedOSUpgradeSet(1, Set.of("i-2", "i-4")));
@@ -96,18 +93,29 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactoryTest {
         when(instanceMetaDataService.findAllViewByStackIdAndInstanceId(1L, Set.of("i-6")))
                 .thenReturn(List.of(instanceMetaData6));
         StackView stackView = mock(StackView.class);
+        when(stackView.isDatahub()).thenReturn(dataHub);
         when(stackDtoService.getStackViewById(1L)).thenReturn(stackView);
 
         FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(new OSUpgradeByUpgradeSetsTriggerEvent(1L, "AWS",
                 new ImageChangeDto(1L, "imageId"), upgradeSets));
 
+        if (dataHub) {
+            LockedComponentsValidationTriggerEvent validation = (LockedComponentsValidationTriggerEvent) eventQueue.getQueue().remove();
+            assertThat(validation.getImageId()).isEqualTo("imageId");
+            assertThat(validation.isLockComponents()).isTrue();
+            assertThat(validation.isReplaceVms()).isTrue();
+        }
         assertEquals(4, eventQueue.getQueue().size());
 
         StackImageUpdateTriggerEvent firstFlow = (StackImageUpdateTriggerEvent) eventQueue.getQueue().poll();
         assertEquals("imageId", firstFlow.getNewImageId());
         assertEquals(1L, firstFlow.getResourceId());
 
-        ClusterRepairTriggerEvent secondFlow = (ClusterRepairTriggerEvent) eventQueue.getQueue().poll();
+        String persistedRepairs = TypedJsonUtil.writeValueAsStringSilent(eventQueue.getQueue());
+        Queue<Selectable> restoredRepairs = new FlowChainLog(null, "chain", null, persistedRepairs, null, null).getChainAsQueue();
+        assertThat(restoredRepairs).hasSize(3).allSatisfy(repair -> assertThat(repair).isExactlyInstanceOf(OrderedOsUpgradeRepairTriggerEvent.class));
+
+        ClusterRepairTriggerEvent secondFlow = (ClusterRepairTriggerEvent) restoredRepairs.remove();
         assertEquals("CLUSTER_REPAIR_TRIGGER_EVENT", secondFlow.getSelector());
         assertEquals(ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE, secondFlow.getRepairType());
         Map<String, List<String>> hostGroupsWithHostNames = secondFlow.getFailedNodesMap();
@@ -115,7 +123,7 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactoryTest {
         assertThat(hostGroupsWithHostNames.get("master")).containsExactlyInAnyOrder("host1");
         assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host3", "host5");
 
-        ClusterRepairTriggerEvent thirdFlow = (ClusterRepairTriggerEvent) eventQueue.getQueue().poll();
+        ClusterRepairTriggerEvent thirdFlow = (ClusterRepairTriggerEvent) restoredRepairs.remove();
         assertEquals("CLUSTER_REPAIR_TRIGGER_EVENT", thirdFlow.getSelector());
         assertEquals(ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE, thirdFlow.getRepairType());
         hostGroupsWithHostNames = thirdFlow.getFailedNodesMap();
@@ -124,17 +132,15 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactoryTest {
         assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host4");
 
 
-        ClusterRepairTriggerEvent fourthFlow = (ClusterRepairTriggerEvent) eventQueue.getQueue().poll();
+        ClusterRepairTriggerEvent fourthFlow = (ClusterRepairTriggerEvent) restoredRepairs.remove();
         assertEquals("CLUSTER_REPAIR_TRIGGER_EVENT", fourthFlow.getSelector());
         assertEquals(ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE, fourthFlow.getRepairType());
         hostGroupsWithHostNames = fourthFlow.getFailedNodesMap();
         assertThat(hostGroupsWithHostNames).containsOnlyKeys("worker");
         assertThat(hostGroupsWithHostNames.get("worker")).containsExactlyInAnyOrder("host6");
 
-        ArgumentCaptor<List<InstanceMetadataView>> instanceIdsToRepair = ArgumentCaptor.forClass(List.class);
-        verify(clusterRepairService, times(3)).markVolumesToNonDeletable(eq(stackView), instanceIdsToRepair.capture());
-        List<List<InstanceMetadataView>> instanceIdsToRepairAllValues = instanceIdsToRepair.getAllValues();
-        List<InstanceMetadataView> instanceMetadataViews = instanceIdsToRepairAllValues.stream().flatMap(Collection::stream).collect(Collectors.toList());
-        assertThat(instanceMetadataViews).extracting("instanceId").containsExactlyInAnyOrder("i-1", "i-2", "i-3", "i-4", "i-5", "i-6");
+        assertThat(secondFlow.getInstancesToRetainVolumes()).containsExactlyInAnyOrder("i-1", "i-3", "i-5");
+        assertThat(thirdFlow.getInstancesToRetainVolumes()).containsExactlyInAnyOrder("i-2", "i-4");
+        assertThat(fourthFlow.getInstancesToRetainVolumes()).containsExactly("i-6");
     }
 }

@@ -3,9 +3,12 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.RESOLVE_CLUSTER_UPGRADE_PROPERTIES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.CLUSTER_UPGRADE_PROPERTIES_RESOLVED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -28,12 +31,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.LockedComponentsValidationTriggerEvent;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeProperties;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesResolver;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePropertiesTestUtils;
@@ -41,12 +50,23 @@ import com.sequenceiq.cloudbreak.service.upgrade.ComponentVersionComparator;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeComponents;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.VersionComparisonContextFactory;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.LockedComponentsValidator;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ServiceUpgradeValidationRequest;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterUpgradePropertiesResolveHandlerTest {
 
     @Mock
     private ClusterUpgradePropertiesResolver resolver;
+
+    @Mock
+    private LockedComponentsValidator lockedComponentsValidator;
+
+    @Mock
+    private StackDtoService stackDtoService;
+
+    @Mock
+    private StackDto stack;
 
     @Mock
     private EventBus eventBus;
@@ -85,6 +105,29 @@ class ClusterUpgradePropertiesResolveHandlerTest {
         } else {
             verifyNoInteractions(upgradePermissionProvider);
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void orderedUpgradeFinishesOnlyWhenLockedComponentsAreConfirmed(boolean componentsMatch) throws Exception {
+        ImageChangeDto target = new ImageChangeDto(1L, "target", "catalog", "url");
+        LockedComponentsValidationTriggerEvent trigger = new LockedComponentsValidationTriggerEvent(1L, null, target);
+        ClusterUpgradeValidationTriggerEvent request = JsonUtil.readValue(JsonUtil.writeValueAsString(trigger), ClusterUpgradeValidationTriggerEvent.class);
+        assertThat(request).isInstanceOf(LockedComponentsValidationTriggerEvent.class);
+        assertThat(request.getImageChangeDto().getImageCatalogName()).isEqualTo("catalog");
+        ClusterUpgradeProperties properties = ClusterUpgradePropertiesTestUtils.withFlags(true, false, true);
+        when(resolver.resolve(request)).thenReturn(properties);
+        when(stackDtoService.getById(1L)).thenReturn(stack);
+        ServiceUpgradeValidationRequest validation = new ServiceUpgradeValidationRequest(stack, properties);
+        if (!componentsMatch) {
+            doThrow(new UpgradeValidationFailedException("CDH is not active")).when(lockedComponentsValidator).validateOrderedOsUpgrade(validation);
+        }
+
+        underTest.accept(new Event<>(request));
+
+        verify(lockedComponentsValidator).validateOrderedOsUpgrade(validation);
+        ClusterUpgradeValidationStateSelectors selector = componentsMatch ? FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT : FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
+        verify(eventBus).notify(eq(selector.event()), any(Event.class));
     }
 
     @Test
