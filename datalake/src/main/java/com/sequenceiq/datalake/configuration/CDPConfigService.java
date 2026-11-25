@@ -260,7 +260,7 @@ public class CDPConfigService {
             boolean defaultRuntimeCalculated = calculatedDefault.map(r -> r.equals(runtimeVersion)).orElse(false);
             int runtimeComparison = comparator.compare(() -> runtimeVersion, () -> ARM64_MIN_RUNTIME_VERSION);
 
-            if (!armEnabled || runtimeComparison < 0) {
+            if (!armEnabled || runtimeComparison < 0 || !hasArmTemplate(cloudPlatform, runtimeVersion)) {
                 AdvertisedRuntime x86Runtime = new AdvertisedRuntime();
                 x86Runtime.setRuntimeVersion(runtimeVersion);
                 x86Runtime.setArchitecture(Architecture.X86_64);
@@ -279,5 +279,11 @@ public class CDPConfigService {
 
         LOGGER.debug("Advertised runtime versions for Data Lake: {}", calculatedAdvertisedRuntimes);
         return calculatedAdvertisedRuntimes;
+    }
+
+    private boolean hasArmTemplate(String cloudPlatform, String runtimeVersion) {
+        return cdpStackRequests.keySet().stream()
+                .filter(filterByCloudPlatformIfPresent(cloudPlatform))
+                .anyMatch(key -> Architecture.ARM64 == key.getArchitecture() && runtimeVersion.equals(key.getRuntimeVersion()));
     }
 }
