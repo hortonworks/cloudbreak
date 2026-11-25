@@ -33,6 +33,7 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.state.State;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -51,7 +52,9 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -62,7 +65,9 @@ class EnvironmentVerticalScaleActionsTest {
 
     private static final String ENVIRONMENT_NAME = "environmentName";
 
-    private static final String ENVIRONMENT_CRN = "environmentCrn";
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:testAccount:environment:testEnvId";
+
+    private static final String ACCOUNT_ID = "testAccount";
 
     private static final String FLOW_ID = "flowId";
 
@@ -112,6 +117,9 @@ class EnvironmentVerticalScaleActionsTest {
     @Mock
     private FreeIpaService freeIpaService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private EnvironmentVerticalScaleActions underTest;
 
@@ -128,6 +136,7 @@ class EnvironmentVerticalScaleActionsTest {
         when(stateMachine.getState()).thenReturn(state);
         lenient().when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
         lenient().when(freeIpaService.describe(any())).thenReturn(Optional.empty());
+        lenient().when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(false);
     }
 
     @Test
@@ -157,6 +166,87 @@ class EnvironmentVerticalScaleActionsTest {
         verify(environmentStatusUpdateService).notifyOnly(any(), any(),
                 eq(ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED), any());
         assertThat(variables).containsEntry("IS_ROLLING_SCALE", true);
+        verifySentEvent(VERTICAL_SCALING_FREEIPA_VALIDATION_HANDLER.selector());
+    }
+
+    @Test
+    void validationEntitledNonStoppedRoutesToRolling() {
+        when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(true);
+        setPayload(nonRollingRequest());
+
+        executeAction(underTest::verticalScaleValidationAction);
+
+        verify(environmentStatusUpdateService, never()).updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any());
+        verify(environmentStatusUpdateService).notifyOnly(any(), any(),
+                eq(ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED), any());
+        assertThat(variables).containsEntry("IS_ROLLING_SCALE", true);
+        verifySentEvent(VERTICAL_SCALING_FREEIPA_VALIDATION_HANDLER.selector());
+    }
+
+    @Test
+    void validationStoppedFreeIpaForcesNonRolling() {
+        DescribeFreeIpaResponse stoppedResponse = new DescribeFreeIpaResponse();
+        stoppedResponse.setStatus(Status.STOPPED);
+        when(freeIpaService.describe(any())).thenReturn(Optional.of(stoppedResponse));
+        setPayload(rollingRequest());
+        EnvironmentDto environmentDto = mock(EnvironmentDto.class);
+        when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any()))
+                .thenReturn(environmentDto);
+
+        executeAction(underTest::verticalScaleValidationAction);
+
+        verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(any(), any(),
+                eq(EnvironmentStatus.VERTICAL_SCALE_VALIDATION_IN_PROGRESS),
+                eq(ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED),
+                any());
+        assertThat(variables).containsEntry("IS_ROLLING_SCALE", false);
+        verifySentEvent(VERTICAL_SCALING_FREEIPA_VALIDATION_HANDLER.selector());
+        verify(entitlementService, never()).isFreeIpaRollingVerticalScaleEnabled(any());
+    }
+
+    @Test
+    void validationStoppedFreeIpaSucceedsEvenWhenEntitlementServiceThrows() {
+        lenient().when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID))
+                .thenThrow(new RuntimeException("UMS unavailable"));
+        DescribeFreeIpaResponse stoppedResponse = new DescribeFreeIpaResponse();
+        stoppedResponse.setStatus(Status.STOPPED);
+        when(freeIpaService.describe(any())).thenReturn(Optional.of(stoppedResponse));
+        setPayload(rollingRequest());
+        EnvironmentDto environmentDto = mock(EnvironmentDto.class);
+        when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any()))
+                .thenReturn(environmentDto);
+
+        executeAction(underTest::verticalScaleValidationAction);
+
+        verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(any(), any(),
+                eq(EnvironmentStatus.VERTICAL_SCALE_VALIDATION_IN_PROGRESS),
+                eq(ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED),
+                any());
+        assertThat(variables).containsEntry("IS_ROLLING_SCALE", false);
+        verifySentEvent(VERTICAL_SCALING_FREEIPA_VALIDATION_HANDLER.selector());
+        verify(entitlementService, never()).isFreeIpaRollingVerticalScaleEnabled(any());
+    }
+
+    @Test
+    void validationCloudFormationForcesNonRolling() {
+        when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(true);
+        DescribeFreeIpaResponse cfResponse = new DescribeFreeIpaResponse();
+        cfResponse.setStatus(Status.AVAILABLE);
+        cfResponse.setCloudPlatform("AWS");
+        cfResponse.setVariant("AWS");
+        when(freeIpaService.describe(any())).thenReturn(Optional.of(cfResponse));
+        setPayload(nonRollingRequest());
+        EnvironmentDto environmentDto = mock(EnvironmentDto.class);
+        when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any()))
+                .thenReturn(environmentDto);
+
+        executeAction(underTest::verticalScaleValidationAction);
+
+        verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(any(), any(),
+                eq(EnvironmentStatus.VERTICAL_SCALE_VALIDATION_IN_PROGRESS),
+                eq(ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED),
+                any());
+        assertThat(variables).containsEntry("IS_ROLLING_SCALE", false);
         verifySentEvent(VERTICAL_SCALING_FREEIPA_VALIDATION_HANDLER.selector());
     }
 
@@ -192,8 +282,7 @@ class EnvironmentVerticalScaleActionsTest {
     }
 
     @Test
-    void finishedNonRollingGoesToEnvStopped() {
-        variables.put("IS_ROLLING_SCALE", false);
+    void finishedNonRollingSetsEnvStopped() {
         setPayload(nonRollingRequest());
         EnvironmentDto environmentDto = mock(EnvironmentDto.class);
         when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any(), any()))
@@ -219,10 +308,10 @@ class EnvironmentVerticalScaleActionsTest {
 
         executeAction(underTest::finishedAction);
 
-        verify(environmentStatusUpdateService, never()).updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any(), any());
         verify(environmentStatusUpdateService).notifyOnly(any(), any(),
                 eq(ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_FINISHED),
                 any(), any());
+        verify(environmentStatusUpdateService, never()).updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any(), any());
         verify(metricService).incrementMetricCounter(eq(MetricType.ENV_VERTICAL_SCALE_FINISHED), any(EnvironmentDto.class));
         verifySentEvent(FINALIZE_VERTICAL_SCALING_FREEIPA_EVENT.event());
     }

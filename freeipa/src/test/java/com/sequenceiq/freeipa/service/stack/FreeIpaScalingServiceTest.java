@@ -3,16 +3,18 @@ package com.sequenceiq.freeipa.service.stack;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType.HA;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType.NON_HA;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType.TWO_NODE_BASED;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +35,8 @@ import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityInfo;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
@@ -47,9 +51,11 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rollingvscale.event.FreeIpaRollingVerticalScaleChainTriggerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScalingTriggerEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -109,6 +115,7 @@ class FreeIpaScalingServiceTest {
         VerticalScaleRequest request = createVerticalScaleRequest();
 
         when(stack.getId()).thenReturn(1L);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.AVAILABLE));
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
         when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
@@ -291,17 +298,20 @@ class FreeIpaScalingServiceTest {
     }
 
     @Test
-    public void testRollingVerticalScaleEntitlementDisabledThrowsBadRequest() {
+    public void testVerticalScaleWithOneByOneWithoutRollingEntitlementThrowsBadRequest() {
         when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(false);
-
+        Stack stack = mock(Stack.class);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.AVAILABLE));
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
         VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ONE_BY_ONE.name());
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.rollingVerticalScale(ACCOUNT_ID, ENV_CRN, request));
+                () -> underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request));
 
-        assertTrue(exception.getMessage().contains("not enabled"));
-        verify(stackService, org.mockito.Mockito.never())
-                .getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString());
+        assertEquals("Rolling vertical scale for FreeIPA is not enabled for this account.", exception.getMessage());
+        verify(validationService, never()).validateStackForVerticalUpscale(any(), any());
+        verify(flowManager, never()).notify(anyString(), any());
     }
 
     @Test
@@ -310,6 +320,7 @@ class FreeIpaScalingServiceTest {
         when(stack.getId()).thenReturn(1L);
         when(stack.getResourceCrn()).thenReturn("crn");
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.AVAILABLE));
         when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(true);
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
         doNothing().when(validationService).validateStackForRollingVerticalScale(any(), any());
@@ -330,27 +341,201 @@ class FreeIpaScalingServiceTest {
     }
 
     @Test
-    public void testRollingVerticalScaleEntitlementEnabledFiresChainTrigger() {
-        Stack stack = mock(Stack.class);
-        when(stack.getId()).thenReturn(1L);
-        when(stack.getResourceCrn()).thenReturn("crn");
-        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(true);
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
-        doNothing().when(validationService).validateStackForRollingVerticalScale(any(), any());
-        when(operationService.startOperation(ACCOUNT_ID, OperationType.VERTICAL_SCALE, List.of(ENV_CRN), List.of()))
-                .thenReturn(createOperation(true));
+    public void testVerticalScaleWithAllAtOnceAndRollingEntitlementRoutesToRollingPath() {
+        Stack stack = mockStackForRollingVerticalScale(Status.AVAILABLE);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, POLLABLE_ID);
         when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
-
         VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE.name());
 
-        VerticalScaleResponse result = underTest.rollingVerticalScale(ACCOUNT_ID, ENV_CRN, request);
+        VerticalScaleResponse result = underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
 
         assertEquals(flowIdentifier, result.getFlowIdentifier());
         assertEquals(OPERATION_ID, result.getOperationId());
         verify(flowManager).notify(eq(FlowChainTriggers.FREEIPA_ROLLING_VERTICAL_SCALE_CHAIN_TRIGGER_EVENT),
                 any(FreeIpaRollingVerticalScaleChainTriggerEvent.class));
+        verify(validationService).validateStackForRollingVerticalScale(stack, request);
+        verify(validationService, never()).validateStackForVerticalUpscale(any(), any());
+    }
+
+    @Test
+    public void testVerticalScaleWithAllAtOnceWithoutRollingEntitlementRoutesToExistingPath() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.AVAILABLE));
+        when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(false);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE.name());
+
+        VerticalScaleResponse result = underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        verify(validationService).validateStackForVerticalUpscale(stack, request);
+        verify(flowManager).notify(eq(STACK_VERTICALSCALE_EVENT.event()), any(FreeIpaVerticalScalingTriggerEvent.class));
+        verify(validationService, never()).validateStackForRollingVerticalScale(any(), any());
+    }
+
+    @Test
+    public void testVerticalScaleWithRollingEntitlementButStoppedFreeIpaRoutesToExistingPath() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.STOPPED));
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE.name());
+
+        VerticalScaleResponse result = underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        verify(flowManager).notify(eq(STACK_VERTICALSCALE_EVENT.event()), any(FreeIpaVerticalScalingTriggerEvent.class));
+        verify(validationService, never()).validateStackForRollingVerticalScale(any(), any());
+        verify(validationService).validateStackForVerticalUpscale(stack, request);
+        verify(entitlementService, never()).isFreeIpaRollingVerticalScaleEnabled(any());
+    }
+
+    @Test
+    public void testVerticalScaleWithOneByOneStoppedEntitledRoutesToExistingPath() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.STOPPED));
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ONE_BY_ONE.name());
+
+        VerticalScaleResponse result = underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        verify(validationService).validateStackForVerticalUpscale(stack, request);
+        verify(flowManager).notify(eq(STACK_VERTICALSCALE_EVENT.event()), any(FreeIpaVerticalScalingTriggerEvent.class));
+        verify(validationService, never()).validateStackForRollingVerticalScale(any(), any());
+        verify(entitlementService, never()).isFreeIpaRollingVerticalScaleEnabled(any());
+    }
+
+    @Test
+    public void testVerticalScaleOneByOneOnAwsCloudFormationThrowsBadRequest() {
+        Stack stack = mock(Stack.class);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.AVAILABLE));
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getPlatformvariant()).thenReturn("AWS");
+        when(stack.getName()).thenReturn("freeipa-cf-stack");
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ONE_BY_ONE.name());
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request));
+
+        assertThat(exception.getMessage()).contains("not supported for FreeIPA 'freeipa-cf-stack' on AWS CloudFormation");
+        verify(validationService, never()).validateStackForRollingVerticalScale(any(), any());
+        verify(flowManager, never()).notify(anyString(), any());
+    }
+
+    @Test
+    public void testVerticalScaleOneByOneOnStoppedAwsCloudFormationRoutesToExistingFlow() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.STOPPED));
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getPlatformvariant()).thenReturn("AWS");
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ONE_BY_ONE.name());
+
+        VerticalScaleResponse result = underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        verify(validationService).validateStackForVerticalUpscale(stack, request);
+        verify(flowManager).notify(eq(STACK_VERTICALSCALE_EVENT.event()), any(FreeIpaVerticalScalingTriggerEvent.class));
+        verify(validationService, never()).validateStackForRollingVerticalScale(any(), any());
+        verify(entitlementService, never()).isFreeIpaRollingVerticalScaleEnabled(any());
+    }
+
+    @Test
+    public void testVerticalScaleEntitledAllAtOnceOnAwsCloudFormationRoutesToExistingFlow() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.AVAILABLE));
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stack.getPlatformvariant()).thenReturn("AWS");
+        when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE.name());
+
+        VerticalScaleResponse result = underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        verify(flowManager).notify(eq(STACK_VERTICALSCALE_EVENT.event()), any(FreeIpaVerticalScalingTriggerEvent.class));
+        verify(validationService, never()).validateStackForRollingVerticalScale(any(), any());
+        verify(validationService).validateStackForVerticalUpscale(stack, request);
+    }
+
+    @Test
+    public void testVerticalScaleStoppedFreeIpaDoesNotCallEntitlementService() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.STOPPED));
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE.name());
+
+        VerticalScaleResponse result = underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        verify(flowManager).notify(eq(STACK_VERTICALSCALE_EVENT.event()), any(FreeIpaVerticalScalingTriggerEvent.class));
+        verify(validationService, never()).validateStackForRollingVerticalScale(any(), any());
+        verify(entitlementService, never()).isFreeIpaRollingVerticalScaleEnabled(any());
+    }
+
+    @Test
+    public void testVerticalScaleStoppedFreeIpaSucceedsEvenWhenEntitlementServiceThrows() {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.STOPPED));
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        lenient().when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID))
+                .thenThrow(new RuntimeException("UMS unavailable"));
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE.name());
+
+        VerticalScaleResponse result = underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        verify(flowManager).notify(eq(STACK_VERTICALSCALE_EVENT.event()), any(FreeIpaVerticalScalingTriggerEvent.class));
+        verify(validationService, never()).validateStackForRollingVerticalScale(any(), any());
+    }
+
+    private Stack mockStackForRollingVerticalScale(Status status) {
+        Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getResourceCrn()).thenReturn("crn");
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(status));
+        when(entitlementService.isFreeIpaRollingVerticalScaleEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(operationService.startOperation(ACCOUNT_ID, OperationType.VERTICAL_SCALE, List.of(ENV_CRN), List.of()))
+                .thenReturn(createOperation(true));
+        return stack;
+    }
+
+    private StackStatus createStackStatus(Status status) {
+        DetailedStackStatus detailedStackStatus = Status.STOPPED == status ? DetailedStackStatus.STOPPED : DetailedStackStatus.AVAILABLE;
+        return new StackStatus(null, status, "", detailedStackStatus);
     }
 
     private Set<InstanceMetaData> createValidImSet() {

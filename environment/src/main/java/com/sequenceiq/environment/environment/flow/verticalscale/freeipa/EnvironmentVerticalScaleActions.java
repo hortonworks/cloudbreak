@@ -16,6 +16,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -27,6 +30,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.CommonContext;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
@@ -49,11 +53,15 @@ public class EnvironmentVerticalScaleActions {
 
     private final FreeIpaService freeIpaService;
 
+    private final EntitlementService entitlementService;
+
     public EnvironmentVerticalScaleActions(EnvironmentStatusUpdateService environmentStatusUpdateService,
-            EnvironmentMetricService metricService, FreeIpaService freeIpaService) {
+            EnvironmentMetricService metricService, FreeIpaService freeIpaService,
+            EntitlementService entitlementService) {
         this.environmentStatusUpdateService = environmentStatusUpdateService;
         this.metricService = metricService;
         this.freeIpaService = freeIpaService;
+        this.entitlementService = entitlementService;
     }
 
     @Bean(name = "VERTICAL_SCALING_FREEIPA_VALIDATION_STATE")
@@ -61,10 +69,20 @@ public class EnvironmentVerticalScaleActions {
         return new AbstractEnvironmentVerticalScaleAction<>(EnvironmentVerticalScaleEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvironmentVerticalScaleEvent payload, Map<Object, Object> variables) {
-                boolean rolling = isRollingVerticalScale(payload.getFreeIPAVerticalScaleRequest());
+                String accountId = Crn.safeFromString(payload.getResourceCrn()).getAccountId();
+                VerticalScaleRequest scaleRequest = payload.getFreeIPAVerticalScaleRequest();
+                boolean oneByOne = scaleRequest.getOrchestratorType() != null
+                        && OrchestratorType.ONE_BY_ONE == OrchestratorType.valueOf(scaleRequest.getOrchestratorType().toUpperCase(Locale.ROOT));
+                Optional<DescribeFreeIpaResponse> describeFreeIpaResponse = freeIpaService.describe(payload.getResourceCrn());
+                boolean freeIpaStopped = describeFreeIpaResponse.map(d -> Status.STOPPED.equals(d.getStatus())).orElse(false);
+                boolean entitled = !freeIpaStopped && entitlementService.isFreeIpaRollingVerticalScaleEnabled(accountId);
+                boolean cloudFormation = describeFreeIpaResponse.map(d ->
+                        CloudConstants.AWS.equals(d.getCloudPlatform()) && CloudConstants.AWS.equals(d.getVariant())
+                ).orElse(false);
+                boolean rolling = !freeIpaStopped && !cloudFormation && (oneByOne || entitled);
                 variables.put(IS_ROLLING_SCALE, rolling);
-                LOGGER.info("FreeIPA vertical scale is rolling: {}, environment status changes {}be skipped during the flow",
-                        rolling, rolling ? "will " : "will not ");
+                LOGGER.info("FreeIPA vertical scale routing: oneByOne={}, entitled={}, freeIpaStopped={}, cloudFormation={}, rolling={}",
+                        oneByOne, entitled, freeIpaStopped, cloudFormation, rolling);
                 if (rolling) {
                     environmentStatusUpdateService.notifyOnly(context, payload,
                             ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED,
@@ -139,13 +157,14 @@ public class EnvironmentVerticalScaleActions {
                 boolean rolling = (boolean) variables.getOrDefault(IS_ROLLING_SCALE, false);
                 EnvironmentDto environmentDto;
                 if (rolling) {
+                    LOGGER.info("FreeIPA rolling vertical scale finished, environment status unchanged");
                     environmentDto = environmentStatusUpdateService.notifyOnly(context, payload,
                             ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_FINISHED,
                             List.of(groupBeingScaled, previousInstanceType, targetInstanceType),
                             EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FINISHED_STATE);
                 } else {
-                    environmentDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
-                            EnvironmentStatus.ENV_STOPPED,
+                    LOGGER.info("FreeIPA non-rolling vertical scale finished, setting environment status to ENV_STOPPED");
+                    environmentDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.ENV_STOPPED,
                             ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_FINISHED,
                             List.of(groupBeingScaled, previousInstanceType, targetInstanceType),
                             EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FINISHED_STATE);
@@ -197,10 +216,6 @@ public class EnvironmentVerticalScaleActions {
                 }
             }
         };
-    }
-
-    private boolean isRollingVerticalScale(VerticalScaleRequest request) {
-        return OrchestratorType.ONE_BY_ONE == OrchestratorType.valueOf(request.getOrchestratorType().toUpperCase(Locale.ROOT));
     }
 
 }

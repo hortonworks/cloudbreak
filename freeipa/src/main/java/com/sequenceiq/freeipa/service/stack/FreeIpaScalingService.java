@@ -18,10 +18,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityInfo;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScaleRequestBase;
@@ -79,28 +81,43 @@ public class FreeIpaScalingService {
     }
 
     public VerticalScaleResponse verticalScale(String accountId, String environmentCrn, VerticalScaleRequest request) {
-        if (OrchestratorType.ONE_BY_ONE == OrchestratorType.valueOf(request.getOrchestratorType().toUpperCase(Locale.ROOT))) {
-            return rollingVerticalScale(accountId, environmentCrn, request);
+        boolean oneByOneRequested = request.getOrchestratorType() != null
+                && OrchestratorType.ONE_BY_ONE == OrchestratorType.valueOf(request.getOrchestratorType().toUpperCase(Locale.ROOT));
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
+        boolean stopped = Status.STOPPED.equals(stack.getStackStatus().getStatus());
+        boolean entitled = !stopped && entitlementService.isFreeIpaRollingVerticalScaleEnabled(accountId);
+        boolean cloudFormation = isAwsCloudFormation(stack);
+        if (!stopped && oneByOneRequested && cloudFormation) {
+            throw new BadRequestException(String.format(
+                    "Rolling (ONE_BY_ONE) vertical scale is not supported for FreeIPA '%s' on AWS CloudFormation. "
+                            + "To use the rolling path, migrate the deployment to AWS native first.",
+                    stack.getName()));
+        }
+        boolean rolling = !stopped && !cloudFormation && (oneByOneRequested || entitled);
+        LOGGER.info("FreeIPA vertical scale routing for stack={}: oneByOne={}, entitled={}, stopped={}, cloudFormation={}, rolling={}",
+                stack.getResourceCrn(), oneByOneRequested, entitled, stopped, cloudFormation, rolling);
+        if (rolling) {
+            return rollingVerticalScale(accountId, entitled, stack, request);
         } else {
-            Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
-            LOGGER.debug("{} request received for vertical scaling stack {}", request, stack.getResourceCrn());
             validationService.validateStackForVerticalUpscale(stack, request);
             return triggerVerticalScale(request, stack);
         }
     }
 
-    public VerticalScaleResponse rollingVerticalScale(String accountId, String environmentCrn, VerticalScaleRequest request) {
-        if (!entitlementService.isFreeIpaRollingVerticalScaleEnabled(accountId)) {
+    private boolean isAwsCloudFormation(Stack stack) {
+        return CloudConstants.AWS.equals(stack.getCloudPlatform()) && CloudConstants.AWS.equals(stack.getPlatformvariant());
+    }
+
+    private VerticalScaleResponse rollingVerticalScale(String accountId, boolean entitled, Stack stack, VerticalScaleRequest request) {
+        if (!entitled) {
             throw new BadRequestException("Rolling vertical scale for FreeIPA is not enabled for this account.");
         }
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
-        LOGGER.debug("{} request received for rolling vertical scaling stack {}", request, stack.getResourceCrn());
         validationService.validateStackForRollingVerticalScale(stack, request);
         Operation operation = startScalingOperation(accountId, stack.getEnvironmentCrn(), OperationType.VERTICAL_SCALE);
         try {
             FreeIpaVerticalScaleParameters scaleConfig = FreeIpaVerticalScaleParameters.fromRequest(request);
-            FreeIpaRollingVerticalScaleChainTriggerEvent event =
-                    new FreeIpaRollingVerticalScaleChainTriggerEvent(stack.getId(), scaleConfig, operation.getOperationId());
+            FreeIpaRollingVerticalScaleChainTriggerEvent event = new FreeIpaRollingVerticalScaleChainTriggerEvent(
+                    stack.getId(), scaleConfig, operation.getOperationId());
             LOGGER.info("Triggering rolling vertical scale chain for stack {}", stack.getId());
             FlowIdentifier flowIdentifier = flowManager.notify(FlowChainTriggers.FREEIPA_ROLLING_VERTICAL_SCALE_CHAIN_TRIGGER_EVENT, event);
             VerticalScaleResponse response = new VerticalScaleResponse();

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConst
 import static com.sequenceiq.common.model.Architecture.ALL_ARCHITECTURE;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -25,6 +26,8 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.api.type.OrchestratorType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
@@ -62,15 +65,18 @@ public class VerticalScalingValidatorService {
     private InstanceGroupAvailabilityZoneService availabilityZoneService;
 
     public void validateRequestForRollingScale(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
-        if (!stack.isAvailable()) {
+        if (OrchestratorType.ONE_BY_ONE.name().equalsIgnoreCase(verticalScaleV4Request.getOrchestratorType())
+                && stack.getNotDeletedInstanceMetaDataSet().size() < 2) {
             throw new BadRequestException(String.format(
-                    "FreeIPA '%s' must be running to perform rolling vertical scale. Current state does not allow this operation.",
+                    "Rolling (ONE_BY_ONE) vertical scale is reserved for multi-node FreeIPA deployments. "
+                            + "For single-node FreeIPA '%s', use ALL_AT_ONCE or upscale FreeIPA to HA first.",
                     stack.getName()));
         }
-        if (stack.getNotDeletedInstanceMetaDataSet().size() < 2) {
+        Status stackStatus = stack.getStackStatus().getStatus();
+        if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
-                    "Rolling vertical scale requires HA (2+ nodes). Use the standard vertical scale path for single-node FreeIPA '%s'.",
-                    stack.getName()));
+                    "FreeIPA '%s' must be running to perform rolling vertical scale. Current state is %s.",
+                    stack.getName(), stackStatus.name().toLowerCase(Locale.ROOT).replace('_', ' ')));
         }
         validateCommonVerticalScaleRules(stack, verticalScaleV4Request);
     }

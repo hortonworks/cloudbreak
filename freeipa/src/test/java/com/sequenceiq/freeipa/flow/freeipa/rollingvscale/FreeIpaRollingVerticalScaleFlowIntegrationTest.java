@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rollingvscale;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.AVAILABLE;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.VERTICAL_SCALE_IN_PROGRESS;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +49,8 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
@@ -57,6 +62,7 @@ import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -202,6 +208,14 @@ class FreeIpaRollingVerticalScaleFlowIntegrationTest extends AbstractFreeIpaFlow
     @MockitoBean
     private FreeipaJobService jobService;
 
+    private InstanceConnector instanceConnector;
+
+    private ResourceConnector resourceConnector;
+
+    private CloudConnector cloudConnector;
+
+    private InstanceMetaData instance;
+
     @BeforeEach
     public void setup() throws Exception {
         Template template = new Template();
@@ -211,8 +225,9 @@ class FreeIpaRollingVerticalScaleFlowIntegrationTest extends AbstractFreeIpaFlow
         ig.setGroupName("master");
         ig.setTemplate(template);
 
-        InstanceMetaData instance = new InstanceMetaData();
+        instance = new InstanceMetaData();
         instance.setInstanceId(INSTANCE_ID);
+        instance.setInstanceStatus(InstanceStatus.CREATED);
         instance.setDiscoveryFQDN("freeipa-0.example.com");
         instance.setInstanceGroup(ig);
         ig.setInstanceMetaData(Set.of(instance));
@@ -241,15 +256,16 @@ class FreeIpaRollingVerticalScaleFlowIntegrationTest extends AbstractFreeIpaFlow
         when(instanceMetaDataService.getByInstanceIds(eq(STACK_ID), any())).thenReturn(Set.of(instance));
 
         CloudConnector connector = mock(CloudConnector.class);
+        cloudConnector = connector;
         when(cloudPlatformConnectors.get(any())).thenReturn(connector);
         Authenticator authenticator = mock(Authenticator.class);
         when(connector.authentication()).thenReturn(authenticator);
         when(authenticator.authenticate(any(), any())).thenReturn(mock(AuthenticatedContext.class));
-        InstanceConnector instanceConnector = mock(InstanceConnector.class);
+        instanceConnector = mock(InstanceConnector.class);
         when(connector.instances()).thenReturn(instanceConnector);
         when(instanceConnector.stop(any(), any(), any())).thenReturn(List.of());
         when(instanceConnector.start(any(), any(), any())).thenReturn(List.of());
-        ResourceConnector resourceConnector = mock(ResourceConnector.class);
+        resourceConnector = mock(ResourceConnector.class);
         when(connector.resources()).thenReturn(resourceConnector);
         when(resourceConnector.update(any(), any(), any(), any(), any())).thenReturn(List.of());
 
@@ -273,11 +289,30 @@ class FreeIpaRollingVerticalScaleFlowIntegrationTest extends AbstractFreeIpaFlow
         verify(stackUpdater, atLeastOnce()).updateStackStatus(eq(STACK_ID), eq(VERTICAL_SCALE_IN_PROGRESS), anyString());
     }
 
+    @Test
+    public void testRollingVerticalScaleOnRunningFreeIpaStopsResizesAndStarts() throws Exception {
+        // the health check polls only stacks registered in the in-memory state store, as the running service does
+        InMemoryStateStore.putStack(STACK_ID, PollGroup.POLLABLE);
+        try {
+            FlowIdentifier flowIdentifier = triggerFlow();
+            letItFlow(flowIdentifier);
+        } finally {
+            InMemoryStateStore.deleteStack(STACK_ID);
+        }
+
+        assertTrue(flowRegister.getRunningFlowIds().isEmpty(), "Flow should have finished");
+        verify(instanceConnector).stop(any(), any(), any());
+        verify(resourceConnector).update(any(), any(), any(), any(), any());
+        verify(instanceConnector).start(any(), any(), any());
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(AVAILABLE), anyString());
+        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), eq(STOPPED), anyString());
+    }
+
     private FlowIdentifier triggerFlow() {
         FreeIpaVerticalScaleParameters scaleConfig =
                 new FreeIpaVerticalScaleParameters("master", "m5.2xlarge", "m5.xlarge", null);
         FreeIpaRollingVerticalScaleTriggerEvent event =
-                new FreeIpaRollingVerticalScaleTriggerEvent(STACK_ID, INSTANCE_ID, scaleConfig);
+                new FreeIpaRollingVerticalScaleTriggerEvent(STACK_ID, INSTANCE_ID, scaleConfig, true, null);
         return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> freeIpaFlowManager.notify(event.selector(), event));
     }
 

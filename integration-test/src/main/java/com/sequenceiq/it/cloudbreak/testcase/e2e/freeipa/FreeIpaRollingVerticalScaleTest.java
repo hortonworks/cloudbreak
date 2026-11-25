@@ -10,8 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -27,10 +30,15 @@ public class FreeIpaRollingVerticalScaleTest extends PreconditionSdxE2ETest {
 
     private static final String FREEIPA_VERTICAL_SCALE_KEY = "freeipaVerticalScaleKey";
 
+    private static final String FREEIPA_ROLLING_VERTICAL_SCALE_KEY = "freeipaRollingVerticalScaleKey";
+
     private static final int HA_FREEIPA_INSTANCE_COUNT = 2;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
 
     @Override
     protected int getFreeIpaInstanceCountByProvider(TestContext testContext) {
@@ -40,9 +48,11 @@ public class FreeIpaRollingVerticalScaleTest extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
             given = "there is an available environment with an HA FreeIPA (2 nodes)",
-            when = "a vertical scale request is sent with orchestratorType=ONE_BY_ONE",
-            then = "each FreeIPA instance is resized one by one without cluster downtime, " +
-                    "and the cluster returns to AVAILABLE with the new instance type on all nodes as confirmed by the cloud provider"
+            when = "the environment is stopped and a vertical scale request is sent, then the environment is started "
+                    + "and a vertical scale request back to the original instance type is sent with orchestratorType=ALL_AT_ONCE on an entitled account",
+            then = "the stopped FreeIPA is resized without being started and the environment stays stopped; "
+                    + "then each FreeIPA instance is resized one by one without cluster downtime (entitled ALL_AT_ONCE routes to rolling), "
+                    + "the environment ends AVAILABLE, and all nodes have the original instance type as confirmed by the cloud provider"
     )
     public void testFreeIpaRollingVerticalScale(TestContext testContext) {
         testContext
@@ -52,40 +62,73 @@ public class FreeIpaRollingVerticalScaleTest extends PreconditionSdxE2ETest {
                 .when(freeIpaTestClient.describe())
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances()
-                .useAlternativeServiceEndpointIfConfigured()
+                .validate();
+
+        VerticalScalingTestDto stoppedVerticalScale = testContext.get(FREEIPA_VERTICAL_SCALE_KEY);
+        String group = stoppedVerticalScale.getGroupName();
+        String targetInstanceType = stoppedVerticalScale.getInstanceType();
+        String originalInstanceType = getInstanceGroup(testContext.get(FreeIpaTestDto.class), group).getInstanceTemplate().getInstanceType();
+        if (originalInstanceType.equalsIgnoreCase(targetInstanceType)) {
+            throw new TestFailException(String.format("FreeIPA group '%s' is already on the target instance type '%s', the test can't verify the resize",
+                    group, originalInstanceType));
+        }
+        LOGGER.info("FreeIPA group '{}' starts on instance type '{}', the stopped vertical scale target is '{}'", group, originalInstanceType,
+                targetInstanceType);
+
+        testContext
+                .given(FREEIPA_ROLLING_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
+                    .withGroup(group)
+                    .withInstanceType(originalInstanceType)
+                // stopped environment: the FreeIPA is resized without being started, everything stays stopped
                 .given(EnvironmentTestDto.class)
-                .when(freeIpaTestClient.rollingVerticalScale(FREEIPA_VERTICAL_SCALE_KEY))
+                .when(environmentTestClient.stop())
+                .await(EnvironmentStatus.ENV_STOPPED)
+                .when(environmentTestClient.verticalScale(FREEIPA_VERTICAL_SCALE_KEY))
                 .awaitForFlow()
+                .await(EnvironmentStatus.ENV_STOPPED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .await(Status.STOPPED)
+                .then((tc, testDto, client) -> validateInstanceTypesOnProvider(tc, testDto, group, targetInstanceType))
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.start())
+                .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    validateInstanceTypesOnProvider(tc, testDto);
-                    return testDto;
-                })
+                // running environment: entitled ALL_AT_ONCE routes to rolling, resizes back to the original instance type
+                .useAlternativeServiceEndpointIfConfigured()
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.verticalScale(FREEIPA_ROLLING_VERTICAL_SCALE_KEY))
+                .awaitForFlow()
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .await(Status.AVAILABLE)
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> validateInstanceTypesOnProvider(tc, testDto, group, originalInstanceType))
                 .validate();
     }
 
-    private void validateInstanceTypesOnProvider(TestContext testContext, FreeIpaTestDto testDto) {
-        VerticalScalingTestDto verticalScalingTestDto = testContext.get(FREEIPA_VERTICAL_SCALE_KEY);
-        String expectedInstanceType = verticalScalingTestDto.getInstanceType();
-        String expectedGroup = verticalScalingTestDto.getGroupName();
+    private InstanceGroupResponse getInstanceGroup(FreeIpaTestDto testDto, String group) {
+        return testDto.getResponse().getInstanceGroups().stream()
+                .filter(ig -> ig.getName().equals(group))
+                .findFirst()
+                .orElseThrow(() -> new TestFailException("Instance group '" + group + "' not found in FreeIPA describe response"));
+    }
 
+    private FreeIpaTestDto validateInstanceTypesOnProvider(TestContext testContext, FreeIpaTestDto testDto, String expectedGroup,
+            String expectedInstanceType) {
         LOGGER.info("Validating on cloud provider that all instances in group '{}' have instance type '{}'",
                 expectedGroup, expectedInstanceType);
 
-        List<String> instanceIds = testDto.getResponse().getInstanceGroups().stream()
-                .filter(ig -> ig.getName().equals(expectedGroup))
-                .findFirst()
-                .orElseThrow(() -> new TestFailException(
-                        "Instance group '" + expectedGroup + "' not found in FreeIPA describe response"))
-                .getMetaData().stream()
+        List<String> instanceIds = getInstanceGroup(testDto, expectedGroup).getMetaData().stream()
                 .map(InstanceMetaDataResponse::getInstanceId)
                 .toList();
 
         if (instanceIds.isEmpty()) {
-            throw new TestFailException("No instances found in group '" + expectedGroup + "' after rolling vertical scale");
+            throw new TestFailException("No instances found in group '" + expectedGroup + "' after vertical scale");
         }
 
         List<String> actualTypes = testContext.getCloudProvider().getCloudFunctionality()
@@ -98,8 +141,9 @@ public class FreeIpaRollingVerticalScaleTest extends PreconditionSdxE2ETest {
 
         actualTypes.forEach(actualType ->
                 Assertions.assertThat(actualType.toLowerCase(Locale.ROOT))
-                        .withFailMessage("Rolling vertical scale did not update instance type on provider for group '%s': expected '%s' but found '%s'",
+                        .withFailMessage("Vertical scale did not update instance type on provider for group '%s': expected '%s' but found '%s'",
                                 expectedGroup, expectedInstanceType.toLowerCase(Locale.ROOT), actualType)
                         .isEqualTo(expectedInstanceType.toLowerCase(Locale.ROOT)));
+        return testDto;
     }
 }

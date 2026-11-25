@@ -62,7 +62,10 @@ public final class FreeIpaOperationDescriptions {
     public static final String INTERNAL_GET_OUTBOUND_TYPE_NO_ACTOR =
             "Get the outbound type of the FreeIPA stack by environment CRN using the internal actor";
     public static final String GET_RECOMMENDATION = "Get recommendation that advises cloud resources for FreeIPA based on the given credential CRN.";
-    public static final String VERTICAL_SCALE_BY_CRN = "Vertical scale by environment CRN.";
+    public static final String VERTICAL_SCALE_BY_CRN = "Vertical scale FreeIPA by environment CRN. "
+            + "If the account is entitled and FreeIPA is running (not stopped) and not on AWS CloudFormation, "
+            + "the resize proceeds as a rolling resize (one node at a time), even for ALL_AT_ONCE orchestrator type. "
+            + "Otherwise, all nodes are resized in parallel. ONE_BY_ONE is not supported on AWS CloudFormation.";
     public static final String ROOT_VOLUME_UPDATE_BY_CRN = "Root Volume update by environment CRN.";
     public static final String IMD_UPDATE = "Stacks' instances metadata update.";
     public static final String ROTATE_SECRETS_BY_CRN = "Rotate secrets by environment CRN.";

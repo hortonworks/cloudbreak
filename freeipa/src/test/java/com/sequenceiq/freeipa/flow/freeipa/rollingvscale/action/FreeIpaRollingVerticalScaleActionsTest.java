@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +45,7 @@ import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -377,7 +379,7 @@ class FreeIpaRollingVerticalScaleActionsTest {
                 (AbstractFreeIpaRollingVerticalScaleAction<RollingVerticalScaleHealthCheckResult>) action)
                 .doExecute(context, payload, variables);
 
-        verify(stackUpdater, org.mockito.Mockito.never()).updateStackStatus(any(Long.class), any(DetailedStackStatus.class), any(String.class));
+        verify(stackUpdater, never()).updateStackStatus(any(Long.class), any(DetailedStackStatus.class), any(String.class));
     }
 
     @Test
@@ -402,6 +404,49 @@ class FreeIpaRollingVerticalScaleActionsTest {
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), captor.capture());
         verify(eventBus).notify(eq("ROLLING_VERTICAL_SCALE_FAIL_HANDLED_EVENT"), any());
+    }
+
+    @Test
+    void testFinishedActionWhenRunningSetsInstanceCreatedAndStackAvailable() throws Exception {
+        Action<?, ?> action = underTest.finishedAction();
+        initActionPrivateFields(action);
+        StackContext context = createContext();
+        StackEvent payload = new RollingVerticalScaleHealthCheckResult(STACK_ID, true);
+        Map<Object, Object> variables = createVariablesWithInstanceId();
+        variables.put("FINAL_CHAIN", true);
+        Event<Object> event = mock(Event.class);
+        when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(
+                (AbstractFreeIpaRollingVerticalScaleAction<StackEvent>) action)
+                .doExecute(context, payload, variables);
+
+        verify(instanceMetaDataService).updateStatus(context.getStack(), List.of(INSTANCE_ID), InstanceStatus.CREATED);
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.AVAILABLE), eq("Rolling vertical scale completed successfully"));
+    }
+
+    @Test
+    void testDescribeActionChecksTypeForAvailableInstance() throws Exception {
+        verifyDescribeActionSendsDescribeRequest(createContext());
+    }
+
+    private void verifyDescribeActionSendsDescribeRequest(StackContext context) throws Exception {
+        Action<?, ?> action = underTest.describeAction();
+        initActionPrivateFields(action);
+        FreeIpaRollingVerticalScaleTriggerEvent payload =
+                new FreeIpaRollingVerticalScaleTriggerEvent(STACK_ID, INSTANCE_ID, createScaleConfig(), true, "op-id");
+        Map<Object, Object> variables = createVariablesWithInstanceId();
+        when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(mock(Event.class));
+
+        new AbstractActionTestSupport<>(
+                (AbstractFreeIpaRollingVerticalScaleAction<FreeIpaRollingVerticalScaleTriggerEvent>) action)
+                .doExecute(context, payload, variables);
+
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(reactorEventFactory).createEvent(anyMap(), captor.capture());
+        assertThat(captor.getValue()).isInstanceOf(RollingVerticalScaleDescribeRequest.class);
+        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.VERTICAL_SCALE_IN_PROGRESS,
+                "Rolling vertical scale: describing instance type for " + INSTANCE_ID);
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.chain;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,6 +30,9 @@ public class FreeIpaRollingVerticalScaleFlowEventChainFactory implements FlowEve
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaRollingVerticalScaleFlowEventChainFactory.class);
 
+    private static final Comparator<InstanceMetaData> SCALING_ORDER =
+            new PrimaryGatewayFirstThenSortByFqdnComparator().reversed();
+
     @Inject
     private StackService stackService;
 
@@ -53,10 +57,11 @@ public class FreeIpaRollingVerticalScaleFlowEventChainFactory implements FlowEve
         freeIpaVerticalScaleService.updateTemplateWithVerticalScaleInformation(event.getResourceId(), enrichedConfig);
 
         List<InstanceMetaData> instancesToScale = stack.getNotDeletedInstanceMetaDataSet().stream()
-                .sorted(new PrimaryGatewayFirstThenSortByFqdnComparator().reversed())
+                .sorted(SCALING_ORDER)
                 .toList();
 
-        LOGGER.info("Rolling vertical scale: {} instances queued for scaling to {}", instancesToScale.size(), targetInstanceType);
+        LOGGER.info("Rolling vertical scale: {} instances queued for scaling to {} in order {}",
+                instancesToScale.size(), targetInstanceType, instancesToScale.stream().map(InstanceMetaData::getInstanceId).toList());
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));

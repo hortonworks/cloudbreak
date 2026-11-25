@@ -136,8 +136,9 @@ public class FreeIpaModelDescriptions {
 
     public static class FreeIpaVerticalScalingModelDescriptions {
         public static final String ORCHESTRATOR = "Orchestrator strategy for vertical scaling operations. "
-                + "ONE_BY_ONE performs rolling scale on each instance sequentially. "
-                + "ALL_AT_ONCE scales all instances simultaneously (non-rolling).";
+                + "ONE_BY_ONE performs a rolling scale on each instance sequentially (requires the rolling-vertical-scale entitlement). "
+                + "ALL_AT_ONCE scales all instances at once; for entitled accounts with a running FreeIPA the rolling path is "
+                + "used regardless of this setting, so instances are still resized sequentially.";
         private FreeIpaVerticalScalingModelDescriptions() {
         }
     }

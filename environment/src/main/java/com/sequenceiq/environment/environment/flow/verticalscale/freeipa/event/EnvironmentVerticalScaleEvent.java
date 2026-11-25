@@ -28,6 +28,13 @@ public class EnvironmentVerticalScaleEvent extends BaseNamedFlowEvent {
         return freeIPAVerticalScaleRequest;
     }
 
+    @Override
+    public String toString() {
+        return "EnvironmentVerticalScaleEvent{"
+                + "freeIPAVerticalScaleRequest=" + freeIPAVerticalScaleRequest
+                + "} " + super.toString();
+    }
+
     public static Builder builder() {
         return new Builder();
     }

@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.stack;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,14 +20,21 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,6 +53,9 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.api.type.OrchestratorType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
@@ -54,6 +64,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceGroupAvailabilityZone;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
@@ -563,42 +574,70 @@ public class VerticalScalingValidatorServiceTest {
         return instanceGroup;
     }
 
-    @Test
-    public void testRollingScaleWhenStackIsNotAvailableShouldThrowBadRequest() {
-        when(stack.isAvailable()).thenReturn(false);
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"AVAILABLE", "STOPPED"})
+    public void testRollingScaleOneByOneOnSingleNodeShouldThrowBadRequestWhateverTheState(Status status) {
+        lenient().when(stack.getStackStatus()).thenReturn(createStackStatus(status));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(new InstanceMetaData()));
+        VerticalScaleRequest verticalScaleRequest = createRollingRequest(OrchestratorType.ONE_BY_ONE);
 
-        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateRequestForRollingScale(stack, verticalScaleRequest));
 
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateRequestForRollingScale(stack, verticalScaleRequest);
-        });
-
-        assertTrue(badRequestException.getMessage().contains("must be running"));
+        assertTrue(badRequestException.getMessage().contains("Rolling (ONE_BY_ONE) vertical scale is reserved for multi-node FreeIPA deployments"));
+        assertTrue(badRequestException.getMessage().contains("use ALL_AT_ONCE or upscale FreeIPA to HA first"));
     }
 
     @Test
-    public void testRollingScaleWhenTemplateNotSpecifiedShouldThrowBadRequest() {
-        when(stack.getCloudPlatform()).thenReturn(AWS);
+    public void testRollingScaleAllAtOnceOnSingleNodeShouldPassStateChecks() {
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.AVAILABLE));
         when(stack.isAvailable()).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn(AWS);
+        VerticalScaleRequest verticalScaleRequest = createRollingRequest(OrchestratorType.ALL_AT_ONCE);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateRequestForRollingScale(stack, verticalScaleRequest));
+
+        assertTrue(badRequestException.getMessage().contains("instance type"), badRequestException.getMessage());
+    }
+
+    @Test
+    public void testRollingScaleOneByOneOnHaShouldPassStateChecks() {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(new InstanceMetaData(), new InstanceMetaData()));
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.AVAILABLE));
+        when(stack.isAvailable()).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn(AWS);
+        VerticalScaleRequest verticalScaleRequest = createRollingRequest(OrchestratorType.ONE_BY_ONE);
 
-        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateRequestForRollingScale(stack, verticalScaleRequest));
 
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateRequestForRollingScale(stack, verticalScaleRequest);
-        });
+        assertTrue(badRequestException.getMessage().contains("instance type"), badRequestException.getMessage());
+    }
 
-        assertNotNull(badRequestException.getMessage());
-        assertTrue(badRequestException.getMessage().contains("instance type"));
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"STOPPED", "UPDATE_IN_PROGRESS", "VERTICAL_SCALE_FAILED", "STOP_IN_PROGRESS", "START_IN_PROGRESS",
+            "DELETE_IN_PROGRESS", "UNKNOWN", "UNHEALTHY", "UNREACHABLE"})
+    public void testRollingScaleWhenStackStateIsNotAllowedShouldThrowBadRequest(Status status) {
+        when(stack.getStackStatus()).thenReturn(createStackStatus(status));
+        when(stack.getName()).thenReturn("freeipa-name");
+        VerticalScaleRequest verticalScaleRequest = createRollingRequest(OrchestratorType.ALL_AT_ONCE);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateRequestForRollingScale(stack, verticalScaleRequest));
+
+        assertEquals(String.format("FreeIPA 'freeipa-name' must be running to perform rolling vertical scale. "
+                + "Current state is %s.", status.name().toLowerCase(Locale.ROOT).replace('_', ' ')), badRequestException.getMessage());
     }
 
     @Test
     public void testRollingScaleWhenStackIsAvailableShouldNotThrowForBasicPlatformCheck() {
         when(stack.getCloudPlatform()).thenReturn(AWS);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(Status.AVAILABLE));
         when(stack.isAvailable()).thenReturn(true);
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(new InstanceMetaData(), new InstanceMetaData()));
 
-        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+        VerticalScaleRequest verticalScaleRequest = createRollingRequest(OrchestratorType.ONE_BY_ONE);
 
         // Even though the template is null (which triggers a later check), the platform check passes.
         // We verify this by ensuring the thrown exception is about the template, not the platform.
@@ -607,6 +646,97 @@ public class VerticalScalingValidatorServiceTest {
         });
 
         assertFalse(badRequestException.getMessage().contains("not supported on AWS cloud platform"));
+    }
+
+    /**
+     * Acceptance criteria rows of CB-35287 (entitled account) that must pass the rolling validation.
+     * S4/S7/S8 (stopped) are excluded: stopped FreeIPA is routed to the existing vertical scale flow
+     * before reaching the rolling validator, so STOPPED is rejected if the validator is called directly.
+     */
+    static Stream<Arguments> acceptedRollingScaleScenarios() {
+        return Stream.of(
+                Arguments.of("S3 single node, ALL_AT_ONCE, running", 1, OrchestratorType.ALL_AT_ONCE, Status.AVAILABLE),
+                Arguments.of("S6 HA, ONE_BY_ONE, running", 2, OrchestratorType.ONE_BY_ONE, Status.AVAILABLE)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("acceptedRollingScaleScenarios")
+    public void testRollingScaleAcceptanceScenarioPassesValidation(String scenario, int nodeCount, OrchestratorType orchestratorType, Status status) {
+        mockValidRollingScaleStack(nodeCount, status);
+
+        underTest.validateRequestForRollingScale(stack, createValidRollingRequest(orchestratorType));
+
+        verify(verticalScaleInstanceProvider)
+                .validateInstanceTypeForVerticalScaling(anyString(), any(List.class), any(List.class), isNull(), anyMap(), any());
+    }
+
+    /**
+     * Acceptance criteria rows of CB-35287 (entitled account) that must be rejected by the rolling validation.
+     */
+    static Stream<Arguments> rejectedRollingScaleScenarios() {
+        return Stream.of(
+                Arguments.of("S1 single node, ONE_BY_ONE, running", Status.AVAILABLE),
+                Arguments.of("S2 single node, ONE_BY_ONE, stopped", Status.STOPPED)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("rejectedRollingScaleScenarios")
+    public void testRollingScaleAcceptanceScenarioIsRejected(String scenario, Status status) {
+        lenient().when(stack.getStackStatus()).thenReturn(createStackStatus(status));
+        when(stack.getName()).thenReturn("freeipa-name");
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(new InstanceMetaData()));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateRequestForRollingScale(stack, createValidRollingRequest(OrchestratorType.ONE_BY_ONE)));
+
+        assertEquals("Rolling (ONE_BY_ONE) vertical scale is reserved for multi-node FreeIPA deployments. "
+                + "For single-node FreeIPA 'freeipa-name', use ALL_AT_ONCE or upscale FreeIPA to HA first.", badRequestException.getMessage());
+        verify(verticalScaleInstanceProvider, never())
+                .validateInstanceTypeForVerticalScaling(anyString(), any(List.class), any(List.class), any(), anyMap(), any());
+    }
+
+    private void mockValidRollingScaleStack(int nodeCount, Status status) {
+        Set<InstanceMetaData> instances = new HashSet<>();
+        for (int i = 0; i < nodeCount; i++) {
+            instances.add(new InstanceMetaData());
+        }
+        lenient().when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instances);
+        when(stack.getStackStatus()).thenReturn(createStackStatus(status));
+        when(stack.isAvailable()).thenReturn(Status.AVAILABLE.equals(status));
+        when(stack.getCloudPlatform()).thenReturn(AWS);
+        when(stack.getEnvironmentCrn()).thenReturn("crn");
+        when(stack.getRegion()).thenReturn("eu");
+        when(stack.getAvailabilityZone()).thenReturn("eu1");
+        when(stack.getPlatformvariant()).thenReturn("awsvariant");
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup("master", "m5.xlarge")));
+        Credential credential = credential();
+        when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
+        when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential());
+        when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes("eu1",
+                vmType("m5.2xlarge", 1, 1,
+                        new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                        new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1))));
+    }
+
+    private VerticalScaleRequest createValidRollingRequest(OrchestratorType orchestratorType) {
+        VerticalScaleRequest verticalScaleRequest = createRollingRequest(orchestratorType);
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        instanceTemplateRequest.setInstanceType("m5.2xlarge");
+        verticalScaleRequest.setTemplate(instanceTemplateRequest);
+        verticalScaleRequest.setGroup("master");
+        return verticalScaleRequest;
+    }
+
+    private VerticalScaleRequest createRollingRequest(OrchestratorType orchestratorType) {
+        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+        verticalScaleRequest.setOrchestratorType(orchestratorType.name());
+        return verticalScaleRequest;
+    }
+
+    private StackStatus createStackStatus(Status status) {
+        return new StackStatus(stack, status, "", DetailedStackStatus.UNKNOWN);
     }
 
     private Credential credential() {

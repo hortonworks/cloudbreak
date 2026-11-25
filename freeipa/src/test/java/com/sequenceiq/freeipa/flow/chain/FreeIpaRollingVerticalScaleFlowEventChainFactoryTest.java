@@ -23,6 +23,7 @@ import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePaylo
 import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -161,11 +162,23 @@ class FreeIpaRollingVerticalScaleFlowEventChainFactoryTest {
     }
 
     private InstanceMetaData createInstance(String instanceId, String fqdn, InstanceMetadataType type) {
+        return createInstance(instanceId, fqdn, type, InstanceStatus.CREATED);
+    }
+
+    private InstanceMetaData createInstance(String instanceId, String fqdn, InstanceMetadataType type, InstanceStatus status) {
         InstanceMetaData instance = new InstanceMetaData();
         instance.setInstanceId(instanceId);
         instance.setDiscoveryFQDN(fqdn);
         instance.setInstanceMetadataType(type);
+        instance.setInstanceStatus(status);
         return instance;
+    }
+
+    private List<String> queuedInstanceIds(FreeIpaRollingVerticalScaleChainTriggerEvent chainEvent) {
+        return underTest.createFlowTriggerEventQueue(chainEvent).getQueue().stream()
+                .filter(FreeIpaRollingVerticalScaleTriggerEvent.class::isInstance)
+                .map(event -> ((FreeIpaRollingVerticalScaleTriggerEvent) event).getInstanceId())
+                .toList();
     }
 
     private void mockInstanceGroupWithType(String groupName, String instanceType) {
