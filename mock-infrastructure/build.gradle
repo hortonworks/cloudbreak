@@ -75,7 +75,7 @@ dependencies {
   implementation group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: "$jacksonVersion"
   implementation group:  'com.google.protobuf',          name: 'protobuf-java-util',             version: "$protobufVersion"
   implementation group:  'com.google.code.gson',         name: 'gson',                           version: "$gsonVersion"
-  implementation group:   'io.swagger',                  name: 'swagger-annotations',            version: '1.6.15'
+  implementation group:   'io.swagger',                  name: 'swagger-annotations',            version: '1.6.17'
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: "$apacheCommonsLangVersion"
   implementation group: 'org.postgresql',                name: 'postgresql',                     version: "$postgreSQLVersion"
   implementation group: 'org.apache.tomcat.embed',       name: 'tomcat-embed-core',              version: "$tomcatVersion"
