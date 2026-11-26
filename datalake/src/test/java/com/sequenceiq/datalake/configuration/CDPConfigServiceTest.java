@@ -413,6 +413,51 @@ class CDPConfigServiceTest {
         assertArrayEquals(expectedForRedhat9.toArray(), actualForRedhat9.toArray());
     }
 
+    @Test
+    void testAdvertisedRuntimesWithArmEnabledForPlatformWithoutArmTemplates() {
+        ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_732);
+
+        List<String> supportedVersions = List.of(RUNTIME_732, RUNTIME_731);
+        mockSupportedRuntimes(supportedVersions);
+        mockAdvertisedRuntimes(supportedVersions);
+
+        cdpConfigService.initCdpStackRequests();
+
+        List<AdvertisedRuntime> expectedForAws = List.of(
+                rt(RUNTIME_732, true, Architecture.ARM64),
+                rt(RUNTIME_732, true, Architecture.X86_64)
+        );
+        assertArrayEquals(expectedForAws.toArray(), cdpConfigService.getAdvertisedRuntimes("AWS", "redhat9", true).toArray());
+
+        List<AdvertisedRuntime> expectedForOthers = List.of(rt(RUNTIME_732, true, Architecture.X86_64));
+        for (String cloudPlatform : List.of("AZURE", "GCP", "YARN")) {
+            assertArrayEquals(expectedForOthers.toArray(), cdpConfigService.getAdvertisedRuntimes(cloudPlatform, "redhat9", true).toArray(),
+                    cloudPlatform);
+        }
+    }
+
+    @Test
+    void testAdvertisedRuntimesWithArmEnabledOnAwsForRuntimeWithoutArmTemplate() {
+        ReflectionTestUtils.setField(cdpConfigService, "defaultRuntime", RUNTIME_732);
+        ReflectionTestUtils.setField(cdpConfigService, "runtimeOverlayEnabled", true);
+        String runtime734 = "7.3.4";
+        when(runtimeDutyOverlayLoader.materializeOverlayDuties(any()))
+                .thenReturn(Map.of(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, runtime734, Architecture.X86_64), "{}"));
+
+        List<String> supportedVersions = List.of(runtime734, RUNTIME_732);
+        mockSupportedRuntimes(supportedVersions);
+        mockAdvertisedRuntimes(supportedVersions);
+
+        cdpConfigService.initCdpStackRequests();
+
+        List<AdvertisedRuntime> expected = List.of(
+                rt(runtime734, false, Architecture.X86_64),
+                rt(RUNTIME_732, true, Architecture.ARM64),
+                rt(RUNTIME_732, true, Architecture.X86_64)
+        );
+        assertArrayEquals(expected.toArray(), cdpConfigService.getAdvertisedRuntimes("AWS", "redhat9", true).toArray());
+    }
+
     private void mockAdvertisedRuntimes(List<String> advertisedVersions) {
         when(advertisedRuntimes.isEmpty()).thenReturn(false);
         when(advertisedRuntimes.contains(anyString())).thenAnswer(invocation -> {

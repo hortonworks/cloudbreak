@@ -109,6 +109,22 @@ public class SaltSyncServiceTest {
     }
 
     @Test
+    public void testCheckMinionsIfResultJsonEmpty() {
+        SaltConnector saltConnector = mock(SaltConnector.class);
+        when(saltConnector.getHostname()).thenReturn(HOST_1);
+        when(saltService.createSaltConnectorWithCustomTimeout(any(), anyInt(), anyInt(), anyInt())).thenReturn(saltConnector);
+        when(saltStateService.fileExists(any(), any())).thenReturn(Boolean.TRUE);
+        MinionStatusFromFileResponse response = new MinionStatusFromFileResponse();
+        response.setResult(List.of(Map.of(HOST_1, "")));
+        when(saltStateService.collectNodeStatusWithLimitedRetry(any(), any())).thenReturn(response);
+
+        Optional<Set<String>> failedMinions = underTest.checkSaltMinions(GW);
+
+        assertFalse(failedMinions.isPresent());
+        verify(saltStateService).collectNodeStatusWithLimitedRetry(any(), any());
+    }
+
+    @Test
     public void testCheckMinionsIfResultJsonOld() throws JsonProcessingException {
         SaltConnector saltConnector = mock(SaltConnector.class);
         when(saltConnector.getHostname()).thenReturn(HOST_1);
