@@ -15,6 +15,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -55,8 +56,12 @@ public class SaltSyncService {
                 Map<String, String> resultMap = response.getResult().iterator().next();
                 if (resultMap.containsKey(sc.getHostname())) {
                     String resultString = resultMap.get(sc.getHostname());
-                    if (isValid(resultString)) {
+                    if (StringUtils.isBlank(resultString)) {
+                        LOGGER.warn("Salt check json file is empty, salt status is unknown, skipping salt status check!");
+                    } else if (isValid(resultString)) {
                         return handleStatusJsonContent(resultString);
+                    } else {
+                        LOGGER.warn("Salt check json file is not valid JSON, salt status is unknown, skipping salt status check!");
                     }
                 } else {
                     LOGGER.error("Result map of salt sync call does not contain key for salt master host, " +
@@ -76,11 +81,14 @@ public class SaltSyncService {
             MinionStatusWithTimestamp minionResponse = readValue(resultString, MinionStatusWithTimestamp.class);
             Instant responseTimestamp = ofEpochSecond(minionResponse.getTimestamp());
             Instant now = Instant.now();
-            if (!responseTimestamp.isBefore(now.minus(TIMESTAMP_DIFFERENCE_THRESHOLD)) && !emptyIfNull(minionResponse.getDown()).isEmpty()) {
+            if (responseTimestamp.isBefore(now.minus(TIMESTAMP_DIFFERENCE_THRESHOLD))) {
+                LOGGER.warn("Salt check json file is older than {} (timestamp: {}), salt status is unknown, skipping salt status check!",
+                        TIMESTAMP_DIFFERENCE_THRESHOLD, responseTimestamp);
+            } else if (!emptyIfNull(minionResponse.getDown()).isEmpty()) {
                 return Optional.of(new HashSet<>(minionResponse.getDown()));
             }
         } catch (IOException e) {
-            LOGGER.debug("JSON format of salt status check file is not valid , skipping status check!");
+            LOGGER.warn("Salt check json file cannot be parsed, salt status is unknown, skipping salt status check!", e);
         }
         return Optional.empty();
     }
